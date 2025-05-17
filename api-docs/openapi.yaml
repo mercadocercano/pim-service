@@ -1,0 +1,342 @@
+openapi: 3.1.0
+info:
+  title: PIM API
+  description: API para el sistema de gestión de información de productos (PIM)
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor local de desarrollo
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT para autenticación
+    tenantId:
+      type: apiKey
+      in: header
+      name: X-Tenant-ID
+      description: ID del tenant para operaciones multi-tenant
+tags:
+  - name: Health
+    description: Endpoints de salud del sistema
+  - name: Categories
+    description: Endpoints para gestión de categorías
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Verificar el estado del sistema
+      description: Devuelve información sobre el estado de salud del sistema
+      responses:
+        200:
+          description: Estado del sistema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  database:
+                    type: string
+                    example: ok
+                  version:
+                    type: string
+                    example: 1.0.0
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2023-05-12T12:00:00Z"
+  /api/v1/categories:
+    get:
+      tags:
+        - Categories
+      summary: Obtener todas las categorías
+      description: Devuelve una lista de todas las categorías disponibles
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        200:
+          description: Lista de categorías
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+    post:
+      tags:
+        - Categories
+      summary: Crear una nueva categoría
+      description: Crea una nueva categoría en el sistema
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        201:
+          description: Categoría creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        400:
+          description: Datos de entrada inválidos
+  /api/v1/categories/{id}:
+    get:
+      tags:
+        - Categories
+      summary: Obtener una categoría por ID
+      description: Devuelve los detalles de una categoría específica
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Detalles de la categoría
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        404:
+          description: Categoría no encontrada
+    put:
+      tags:
+        - Categories
+      summary: Actualizar una categoría
+      description: Actualiza los datos de una categoría existente
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        200:
+          description: Categoría actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        400:
+          description: Datos de entrada inválidos
+        404:
+          description: Categoría no encontrada
+  /api/v1/categories/{id}/activate:
+    patch:
+      tags:
+        - Categories
+      summary: Activar una categoría
+      description: Activa una categoría previamente desactivada
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Categoría activada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        404:
+          description: Categoría no encontrada
+  /api/v1/categories/{id}/deactivate:
+    patch:
+      tags:
+        - Categories
+      summary: Desactivar una categoría
+      description: Desactiva una categoría activa
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Categoría desactivada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        404:
+          description: Categoría no encontrada
+  /api/v1/categories/{id}/move:
+    patch:
+      tags:
+        - Categories
+      summary: Mover una categoría
+      description: Mueve una categoría a un nuevo padre
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveCategoryRequest'
+      responses:
+        200:
+          description: Categoría movida exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        400:
+          description: Datos de entrada inválidos
+        404:
+          description: Categoría no encontrada
+  /api/v1/categories/tree:
+    get:
+      tags:
+        - Categories
+      summary: Obtener árbol de categorías
+      description: Obtiene todas las categorías en formato de árbol. Si se proporciona category_id, devuelve solo esa categoría y sus hijos.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: category_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: ID opcional de la categoría para obtener solo esa categoría y sus hijos
+      responses:
+        200:
+          description: Árbol de categorías
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        parent_id:
+          type: string
+          format: uuid
+        active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+    CreateCategoryRequest:
+      type: object
+      required:
+        - name
+        - tenant_id
+      properties:
+        tenant_id:
+          type: string
+          example: tenant-123
+        name:
+          type: string
+          example: Electrónica
+        description:
+          type: string
+          example: Productos electrónicos y dispositivos
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          example: null
+    UpdateCategoryRequest:
+      type: object
+      required:
+        - name
+        - tenant_id
+      properties:
+        tenant_id:
+          type: string
+          example: tenant-123
+        name:
+          type: string
+          example: Electrónica
+        description:
+          type: string
+          example: Productos electrónicos y dispositivos
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          example: null
+    MoveCategoryRequest:
+      type: object
+      required:
+        - tenant_id
+      properties:
+        tenant_id:
+          type: string
+          example: tenant-123
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          example: null 

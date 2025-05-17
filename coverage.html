@@ -1,0 +1,817 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>usecase: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">pim/src/category/application/usecase/change_category_status.go (100.0%)</option>
+				
+				<option value="file1">pim/src/category/application/usecase/create_category.go (90.9%)</option>
+				
+				<option value="file2">pim/src/category/application/usecase/move_category.go (100.0%)</option>
+				
+				<option value="file3">pim/src/category/application/usecase/update_category.go (100.0%)</option>
+				
+				<option value="file4">pim/src/category/domain/entity/category.go (42.1%)</option>
+				
+				<option value="file5">pim/src/category/domain/value_object/name.go (60.0%)</option>
+				
+				<option value="file6">pim/test/category/domain/entity/category_mother.go (62.5%)</option>
+				
+				<option value="file7">pim/test/category/infrastructure/persistence/repository/category_repository_mock.go (68.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package usecase
+
+import (
+        "context"
+
+        "pim/src/category/domain/entity"
+        "pim/src/category/domain/port"
+)
+
+// ChangeCategoryStatusUseCase implementa el caso de uso para cambiar el estado de una categoría
+type ChangeCategoryStatusUseCase struct {
+        categoryRepo port.CategoryRepository
+}
+
+// NewChangeCategoryStatusUseCase crea una nueva instancia del caso de uso
+func NewChangeCategoryStatusUseCase(repo port.CategoryRepository) *ChangeCategoryStatusUseCase <span class="cov8" title="1">{
+        return &amp;ChangeCategoryStatusUseCase{
+                categoryRepo: repo,
+        }
+}</span>
+
+// Activate activa una categoría existente
+func (uc *ChangeCategoryStatusUseCase) Activate(ctx context.Context, id string) (*entity.Category, error) <span class="cov8" title="1">{
+        // Buscar la categoría existente
+        category, err := uc.categoryRepo.FindByID(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, ErrCategoryNotFound
+        }</span>
+
+        // Activar la categoría solo si está inactiva
+        <span class="cov8" title="1">if !category.IsActive() </span><span class="cov8" title="1">{
+                category.Activate()
+
+                // Persistir los cambios
+                err = uc.categoryRepo.Update(ctx, category)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return category, nil</span>
+}
+
+// Deactivate desactiva una categoría existente
+func (uc *ChangeCategoryStatusUseCase) Deactivate(ctx context.Context, id string) (*entity.Category, error) <span class="cov8" title="1">{
+        // Buscar la categoría existente
+        category, err := uc.categoryRepo.FindByID(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, ErrCategoryNotFound
+        }</span>
+
+        // Desactivar la categoría solo si está activa
+        <span class="cov8" title="1">if category.IsActive() </span><span class="cov8" title="1">{
+                category.Deactivate()
+
+                // Persistir los cambios
+                err = uc.categoryRepo.Update(ctx, category)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return category, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package usecase
+
+import (
+        "context"
+
+        "pim/src/category/domain/entity"
+        "pim/src/category/domain/port"
+        "pim/src/category/domain/value_object"
+)
+
+// CreateCategoryUseCase implementa el caso de uso para crear una nueva categoría
+type CreateCategoryUseCase struct {
+        categoryRepo port.CategoryRepository
+}
+
+// NewCreateCategoryUseCase crea una nueva instancia del caso de uso
+func NewCreateCategoryUseCase(repo port.CategoryRepository) *CreateCategoryUseCase <span class="cov8" title="1">{
+        return &amp;CreateCategoryUseCase{
+                categoryRepo: repo,
+        }
+}</span>
+
+// Execute ejecuta el caso de uso para crear una categoría
+func (uc *CreateCategoryUseCase) Execute(ctx context.Context, nameStr, description, parentID string) (*entity.Category, error) <span class="cov8" title="1">{
+        // Validar el nombre usando el objeto de valor
+        name, err := value_object.NewName(nameStr)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        // Crear la entidad con los valores validados
+        <span class="cov8" title="1">category, err := entity.NewCategory(name.Value(), description, parentID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // Persistir la entidad
+        <span class="cov8" title="1">err = uc.categoryRepo.Create(ctx, category)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return category, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package usecase
+
+import (
+        "context"
+        "errors"
+        "time"
+
+        "pim/src/category/domain/entity"
+        "pim/src/category/domain/port"
+)
+
+// ErrInvalidMove error cuando el movimiento de la categoría no es válido
+var ErrInvalidMove = errors.New("movimiento de categoría inválido")
+
+// MoveCategoryUseCase implementa el caso de uso para mover una categoría a otro padre
+type MoveCategoryUseCase struct {
+        categoryRepo port.CategoryRepository
+}
+
+// NewMoveCategoryUseCase crea una nueva instancia del caso de uso
+func NewMoveCategoryUseCase(repo port.CategoryRepository) *MoveCategoryUseCase <span class="cov8" title="1">{
+        return &amp;MoveCategoryUseCase{
+                categoryRepo: repo,
+        }
+}</span>
+
+// Execute ejecuta el caso de uso para mover una categoría
+func (uc *MoveCategoryUseCase) Execute(ctx context.Context, id, newParentID string) (*entity.Category, error) <span class="cov8" title="1">{
+        // Buscar la categoría existente
+        category, err := uc.categoryRepo.FindByID(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, ErrCategoryNotFound
+        }</span>
+
+        // Validar que no se mueva a sí misma como su propio padre
+        <span class="cov8" title="1">if id == newParentID </span><span class="cov8" title="1">{
+                return nil, ErrInvalidMove
+        }</span>
+
+        // Si se proporciona un nuevo ID de padre, verificar que existe
+        <span class="cov8" title="1">if newParentID != "" </span><span class="cov8" title="1">{
+                _, err := uc.categoryRepo.FindByID(ctx, newParentID)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, errors.New("la categoría padre no existe")
+                }</span>
+
+                // Aquí en el futuro se podrían agregar validaciones adicionales:
+                // - Verificar ciclos en la jerarquía
+                // - Validar niveles máximos de profundidad
+                // - Verificar permisos para mover entre categorías
+        }
+
+        // Aplicar el cambio de parentId
+        <span class="cov8" title="1">if newParentID != "" </span><span class="cov8" title="1">{
+                var parentIDPtr = newParentID
+                category.ParentID = &amp;parentIDPtr
+        }</span> else<span class="cov8" title="1"> {
+                category.ParentID = nil
+        }</span>
+        <span class="cov8" title="1">category.UpdatedAt = time.Now()
+
+        // Persistir los cambios
+        err = uc.categoryRepo.Update(ctx, category)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return category, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package usecase
+
+import (
+        "context"
+        "errors"
+        "time"
+
+        "pim/src/category/domain/entity"
+        "pim/src/category/domain/port"
+        "pim/src/category/domain/value_object"
+)
+
+// ErrCategoryNotFound error cuando la categoría no se encuentra
+var ErrCategoryNotFound = errors.New("categoría no encontrada")
+
+// UpdateCategoryUseCase implementa el caso de uso para actualizar una categoría
+type UpdateCategoryUseCase struct {
+        categoryRepo port.CategoryRepository
+}
+
+// NewUpdateCategoryUseCase crea una nueva instancia del caso de uso
+func NewUpdateCategoryUseCase(repo port.CategoryRepository) *UpdateCategoryUseCase <span class="cov8" title="1">{
+        return &amp;UpdateCategoryUseCase{
+                categoryRepo: repo,
+        }
+}</span>
+
+// Execute ejecuta el caso de uso para actualizar una categoría
+func (uc *UpdateCategoryUseCase) Execute(ctx context.Context, id, nameStr, description, parentID string) (*entity.Category, error) <span class="cov8" title="1">{
+        // Buscar la categoría existente
+        category, err := uc.categoryRepo.FindByID(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, ErrCategoryNotFound
+        }</span>
+
+        // Validar el nombre usando el objeto de valor
+        <span class="cov8" title="1">name, err := value_object.NewName(nameStr)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        // Aplicar los cambios a la categoría
+        <span class="cov8" title="1">category.Name = name.Value()
+        category.Description = description
+        // No cambiamos el parentID, eso lo hace el caso de uso específico para mover categorías
+        category.UpdatedAt = time.Now()
+
+        // Persistir los cambios
+        err = uc.categoryRepo.Update(ctx, category)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return category, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package entity
+
+import (
+        "errors"
+        "time"
+
+        "github.com/google/uuid"
+)
+
+// ErrInvalidCategory representa errores relacionados con la validación de categorías
+var ErrInvalidCategory = errors.New("categoría inválida")
+
+// Category representa la entidad principal del dominio de categorías
+type Category struct {
+        ID          string
+        Name        string
+        Description string
+        ParentID    *string
+        Status      string
+        CreatedAt   time.Time
+        UpdatedAt   time.Time
+}
+
+// NewCategory crea una nueva instancia de Category con validaciones
+func NewCategory(name, description, parentID string) (*Category, error) <span class="cov8" title="1">{
+        if name == "" </span><span class="cov0" title="0">{
+                return nil, errors.New("el nombre de la categoría es obligatorio")
+        }</span>
+
+        <span class="cov8" title="1">now := time.Now()
+        return &amp;Category{
+                ID:          uuid.New().String(),
+                Name:        name,
+                Description: description,
+                ParentID:    &amp;parentID,
+                Status:      "active",
+                CreatedAt:   now,
+                UpdatedAt:   now,
+        }, nil</span>
+}
+
+// Update actualiza los campos de la categoría
+func (c *Category) Update(name, description, parentID string) error <span class="cov0" title="0">{
+        if name == "" </span><span class="cov0" title="0">{
+                return errors.New("el nombre de la categoría es obligatorio")
+        }</span>
+
+        <span class="cov0" title="0">c.Name = name
+        c.Description = description
+        if parentID != "" </span><span class="cov0" title="0">{
+                c.ParentID = &amp;parentID
+        }</span> else<span class="cov0" title="0"> {
+                c.ParentID = nil
+        }</span>
+        <span class="cov0" title="0">c.UpdatedAt = time.Now()
+        return nil</span>
+}
+
+// Activate establece la categoría como activa
+func (c *Category) Activate() <span class="cov8" title="1">{
+        c.Status = "active"
+        c.UpdatedAt = time.Now()
+}</span>
+
+// Deactivate establece la categoría como inactiva
+func (c *Category) Deactivate() <span class="cov8" title="1">{
+        c.Status = "inactive"
+        c.UpdatedAt = time.Now()
+}</span>
+
+// IsActive verifica si la categoría está activa
+func (c *Category) IsActive() bool <span class="cov8" title="1">{
+        return c.Status == "active"
+}</span>
+
+// HasParent verifica si la categoría tiene un padre
+func (c *Category) HasParent() bool <span class="cov0" title="0">{
+        return c.ParentID != nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package value_object
+
+import (
+        "errors"
+        "strings"
+)
+
+// ErrEmptyName error cuando el nombre está vacío
+var ErrEmptyName = errors.New("el nombre de la categoría es obligatorio")
+
+// ErrNameTooLong error cuando el nombre es demasiado largo
+var ErrNameTooLong = errors.New("el nombre de la categoría es demasiado largo")
+
+// Name representa el nombre de una categoría como objeto de valor
+type Name struct {
+        value string
+}
+
+// NewName crea un nuevo objeto de valor Name con validaciones
+func NewName(value string) (*Name, error) <span class="cov8" title="1">{
+        // Eliminar espacios en blanco al inicio y final
+        value = strings.TrimSpace(value)
+
+        if value == "" </span><span class="cov8" title="1">{
+                return nil, ErrEmptyName
+        }</span>
+
+        <span class="cov8" title="1">if len(value) &gt; 100 </span><span class="cov0" title="0">{
+                return nil, ErrNameTooLong
+        }</span>
+
+        <span class="cov8" title="1">return &amp;Name{value: value}, nil</span>
+}
+
+// Value devuelve el valor del nombre
+func (n *Name) Value() string <span class="cov8" title="1">{
+        return n.value
+}</span>
+
+// Equals compara dos nombres
+func (n *Name) Equals(other *Name) bool <span class="cov0" title="0">{
+        if other == nil </span><span class="cov0" title="0">{
+                return false
+        }</span>
+        <span class="cov0" title="0">return n.value == other.value</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package entity
+
+import (
+        "time"
+
+        "pim/src/category/domain/entity"
+
+        "github.com/google/uuid"
+)
+
+// CategoryMother implementa el patrón Object Mother para crear entities Category de prueba
+type CategoryMother struct{}
+
+// WithDefaults crea una categoría con valores por defecto
+func (CategoryMother) WithDefaults() *entity.Category <span class="cov8" title="1">{
+        now := time.Now()
+        return &amp;entity.Category{
+                ID:          uuid.New().String(),
+                Name:        "Categoría de prueba",
+                Description: "Descripción de prueba",
+                ParentID:    nil,
+                Status:      "active",
+                CreatedAt:   now,
+                UpdatedAt:   now,
+        }
+}</span>
+
+// WithID crea una categoría con un ID específico
+func (c CategoryMother) WithID(id string) *entity.Category <span class="cov8" title="1">{
+        category := c.WithDefaults()
+        category.ID = id
+        return category
+}</span>
+
+// WithName crea una categoría con un nombre específico
+func (c CategoryMother) WithName(name string) *entity.Category <span class="cov8" title="1">{
+        category := c.WithDefaults()
+        category.Name = name
+        return category
+}</span>
+
+// WithParent crea una categoría con un padre específico
+func (c CategoryMother) WithParent(parentID string) *entity.Category <span class="cov8" title="1">{
+        category := c.WithDefaults()
+        var parentIDPtr = parentID
+        category.ParentID = &amp;parentIDPtr
+        return category
+}</span>
+
+// Inactive crea una categoría inactiva
+func (c CategoryMother) Inactive() *entity.Category <span class="cov8" title="1">{
+        category := c.WithDefaults()
+        category.Status = "inactive"
+        return category
+}</span>
+
+// Complete crea una categoría con todos los parámetros especificados
+func (CategoryMother) Complete(id, name, description, parentID string, active bool) *entity.Category <span class="cov0" title="0">{
+        now := time.Now()
+        var parentIDPtr *string
+        if parentID != "" </span><span class="cov0" title="0">{
+                parentIDPtr = &amp;parentID
+        }</span>
+
+        <span class="cov0" title="0">status := "inactive"
+        if active </span><span class="cov0" title="0">{
+                status = "active"
+        }</span>
+
+        <span class="cov0" title="0">return &amp;entity.Category{
+                ID:          id,
+                Name:        name,
+                Description: description,
+                ParentID:    parentIDPtr,
+                Status:      status,
+                CreatedAt:   now,
+                UpdatedAt:   now,
+        }</span>
+}
+
+// Create retorna una nueva instancia de CategoryMother
+func Create() CategoryMother <span class="cov0" title="0">{
+        return CategoryMother{}
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package repository
+
+import (
+        "context"
+        "errors"
+        "sync"
+
+        "pim/src/category/domain/entity"
+)
+
+// Errores mock
+var (
+        ErrMockFailedOp   = errors.New("operación fallida (simulada)")
+        ErrMockNotFound   = errors.New("recurso no encontrado (simulado)")
+        ErrMockDuplicated = errors.New("recurso duplicado (simulado)")
+)
+
+// MockCategoryRepository implementa un repositorio en memoria para pruebas
+type MockCategoryRepository struct {
+        mu            sync.RWMutex
+        categories    map[string]*entity.Category
+        shouldFail    bool
+        failOnMethods map[string]bool
+        callHistory   map[string]int
+}
+
+// NewMockCategoryRepository crea una nueva instancia del mock
+func NewMockCategoryRepository() *MockCategoryRepository <span class="cov8" title="1">{
+        return &amp;MockCategoryRepository{
+                categories:    make(map[string]*entity.Category),
+                failOnMethods: make(map[string]bool),
+                callHistory:   make(map[string]int),
+        }
+}</span>
+
+// SetShouldFail configura si todas las operaciones deberían fallar
+func (r *MockCategoryRepository) SetShouldFail(shouldFail bool) <span class="cov0" title="0">{
+        r.mu.Lock()
+        defer r.mu.Unlock()
+        r.shouldFail = shouldFail
+}</span>
+
+// ShouldFailOn configura un método específico para que falle
+func (r *MockCategoryRepository) ShouldFailOn(method string) <span class="cov8" title="1">{
+        r.mu.Lock()
+        defer r.mu.Unlock()
+        r.failOnMethods[method] = true
+}</span>
+
+// ResetFailures limpia todas las configuraciones de fallo
+func (r *MockCategoryRepository) ResetFailures() <span class="cov8" title="1">{
+        r.mu.Lock()
+        defer r.mu.Unlock()
+        r.shouldFail = false
+        r.failOnMethods = make(map[string]bool)
+}</span>
+
+// ResetCallHistory reinicia los contadores de llamadas
+func (r *MockCategoryRepository) ResetCallHistory() <span class="cov8" title="1">{
+        r.mu.Lock()
+        defer r.mu.Unlock()
+        r.callHistory = make(map[string]int)
+}</span>
+
+// GetCallCount retorna el número de veces que se ha llamado a un método
+func (r *MockCategoryRepository) GetCallCount(method string) int <span class="cov8" title="1">{
+        r.mu.RLock()
+        defer r.mu.RUnlock()
+        return r.callHistory[method]
+}</span>
+
+// SetupCategories inicializa el repositorio con categorías predefinidas
+func (r *MockCategoryRepository) SetupCategories(categories []*entity.Category) <span class="cov8" title="1">{
+        r.mu.Lock()
+        defer r.mu.Unlock()
+        r.categories = make(map[string]*entity.Category)
+        for _, category := range categories </span><span class="cov8" title="1">{
+                // Clonar para evitar referencias compartidas
+                r.categories[category.ID] = &amp;entity.Category{
+                        ID:          category.ID,
+                        Name:        category.Name,
+                        Description: category.Description,
+                        ParentID:    category.ParentID,
+                        Status:      category.Status,
+                        CreatedAt:   category.CreatedAt,
+                        UpdatedAt:   category.UpdatedAt,
+                }
+        }</span>
+}
+
+// GetCategories retorna todas las categorías almacenadas
+func (r *MockCategoryRepository) GetCategories() []*entity.Category <span class="cov8" title="1">{
+        r.mu.RLock()
+        defer r.mu.RUnlock()
+
+        categories := make([]*entity.Category, 0, len(r.categories))
+        for _, category := range r.categories </span><span class="cov8" title="1">{
+                categories = append(categories, category)
+        }</span>
+        <span class="cov8" title="1">return categories</span>
+}
+
+// shouldMethodFail comprueba si un método debería fallar
+func (r *MockCategoryRepository) shouldMethodFail(method string) bool <span class="cov8" title="1">{
+        return r.shouldFail || r.failOnMethods[method]
+}</span>
+
+// incrementCallCount incrementa el contador de llamadas para un método
+func (r *MockCategoryRepository) incrementCallCount(method string) <span class="cov8" title="1">{
+        r.callHistory[method] = r.callHistory[method] + 1
+}</span>
+
+// Create implementa la interfaz del repositorio
+func (r *MockCategoryRepository) Create(_ context.Context, category *entity.Category) error <span class="cov8" title="1">{
+        r.mu.Lock()
+        defer r.mu.Unlock()
+
+        r.incrementCallCount("Create")
+
+        if r.shouldMethodFail("Create") </span><span class="cov8" title="1">{
+                return ErrMockFailedOp
+        }</span>
+
+        <span class="cov8" title="1">if _, exists := r.categories[category.ID]; exists </span><span class="cov0" title="0">{
+                return ErrMockDuplicated
+        }</span>
+
+        // Crear una copia para evitar referencia compartida
+        <span class="cov8" title="1">r.categories[category.ID] = &amp;entity.Category{
+                ID:          category.ID,
+                Name:        category.Name,
+                Description: category.Description,
+                ParentID:    category.ParentID,
+                Status:      category.Status,
+                CreatedAt:   category.CreatedAt,
+                UpdatedAt:   category.UpdatedAt,
+        }
+
+        return nil</span>
+}
+
+// FindByID implementa la interfaz del repositorio
+func (r *MockCategoryRepository) FindByID(_ context.Context, id string) (*entity.Category, error) <span class="cov8" title="1">{
+        r.mu.RLock()
+        defer r.mu.RUnlock()
+
+        r.incrementCallCount("FindByID")
+
+        if r.shouldMethodFail("FindByID") </span><span class="cov0" title="0">{
+                return nil, ErrMockFailedOp
+        }</span>
+
+        <span class="cov8" title="1">category, exists := r.categories[id]
+        if !exists </span><span class="cov8" title="1">{
+                return nil, ErrMockNotFound
+        }</span>
+
+        // Crear una copia para evitar referencia compartida
+        <span class="cov8" title="1">return &amp;entity.Category{
+                ID:          category.ID,
+                Name:        category.Name,
+                Description: category.Description,
+                ParentID:    category.ParentID,
+                Status:      category.Status,
+                CreatedAt:   category.CreatedAt,
+                UpdatedAt:   category.UpdatedAt,
+        }, nil</span>
+}
+
+// FindAll implementa la interfaz del repositorio
+func (r *MockCategoryRepository) FindAll(_ context.Context) ([]*entity.Category, error) <span class="cov0" title="0">{
+        r.mu.RLock()
+        defer r.mu.RUnlock()
+
+        r.incrementCallCount("FindAll")
+
+        if r.shouldMethodFail("FindAll") </span><span class="cov0" title="0">{
+                return nil, ErrMockFailedOp
+        }</span>
+
+        <span class="cov0" title="0">categories := make([]*entity.Category, 0, len(r.categories))
+        for _, category := range r.categories </span><span class="cov0" title="0">{
+                // Crear una copia para evitar referencia compartida
+                categories = append(categories, &amp;entity.Category{
+                        ID:          category.ID,
+                        Name:        category.Name,
+                        Description: category.Description,
+                        ParentID:    category.ParentID,
+                        Status:      category.Status,
+                        CreatedAt:   category.CreatedAt,
+                        UpdatedAt:   category.UpdatedAt,
+                })
+        }</span>
+
+        <span class="cov0" title="0">return categories, nil</span>
+}
+
+// Update implementa la interfaz del repositorio
+func (r *MockCategoryRepository) Update(_ context.Context, category *entity.Category) error <span class="cov8" title="1">{
+        r.mu.Lock()
+        defer r.mu.Unlock()
+
+        r.incrementCallCount("Update")
+
+        if r.shouldMethodFail("Update") </span><span class="cov8" title="1">{
+                return ErrMockFailedOp
+        }</span>
+
+        <span class="cov8" title="1">if _, exists := r.categories[category.ID]; !exists </span><span class="cov0" title="0">{
+                return ErrMockNotFound
+        }</span>
+
+        // Actualizar con una copia para evitar referencia compartida
+        <span class="cov8" title="1">r.categories[category.ID] = &amp;entity.Category{
+                ID:          category.ID,
+                Name:        category.Name,
+                Description: category.Description,
+                ParentID:    category.ParentID,
+                Status:      category.Status,
+                CreatedAt:   category.CreatedAt,
+                UpdatedAt:   category.UpdatedAt,
+        }
+
+        return nil</span>
+}
+
+// Delete implementa la interfaz del repositorio
+func (r *MockCategoryRepository) Delete(_ context.Context, id string) error <span class="cov0" title="0">{
+        r.mu.Lock()
+        defer r.mu.Unlock()
+
+        r.incrementCallCount("Delete")
+
+        if r.shouldMethodFail("Delete") </span><span class="cov0" title="0">{
+                return ErrMockFailedOp
+        }</span>
+
+        <span class="cov0" title="0">if _, exists := r.categories[id]; !exists </span><span class="cov0" title="0">{
+                return ErrMockNotFound
+        }</span>
+
+        <span class="cov0" title="0">delete(r.categories, id)
+
+        return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
