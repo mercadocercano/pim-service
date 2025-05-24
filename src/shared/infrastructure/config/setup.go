@@ -23,8 +23,8 @@ func DefaultSharedConfig() SharedConfig {
 		AlwaysTryDecompress:   true,
 		ForceGzipCompression:  false,
 		ForceGzipCheckSupport: true,
-		ForceGzipPaths:        []string{"/api/v1/products"},
-		GzipExcludedPaths:     []string{"/health", "/metrics", "/api-docs", "/api/v1/categories"},
+		ForceGzipPaths:        []string{"/pim/api/v1/products"},
+		GzipExcludedPaths:     []string{"/health", "/metrics", "/api-docs", "/pim/api/v1/categories"},
 	}
 }
 

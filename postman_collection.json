@@ -33,9 +33,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/categories",
+              "raw": "{{base_url}}/pim/api/v1/categories",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "categories"]
+              "path": ["pim", "api", "v1", "categories"]
             },
             "description": "Obtiene una lista de todas las categorías disponibles"
           }

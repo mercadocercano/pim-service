@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
 	categoryConfig "pim/src/category/infrastructure/config"
@@ -27,8 +28,25 @@ func main() {
 	// Configurar el router
 	router := gin.Default()
 
+	// Health check endpoint (público para verificación de servicios)
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "up",
+			"service": "pim",
+		})
+	})
+
 	// API v1 grupo de rutas
-	v1 := router.Group("/api/v1")
+	v1 := router.Group("/pim/api/v1")
+
+	// Health check endpoint en API v1
+	v1.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "up",
+			"service": "pim",
+			"version": "v1",
+		})
+	})
 
 	// Configurar módulos
 	categoryConfig.SetupCategoryModule(v1, db)

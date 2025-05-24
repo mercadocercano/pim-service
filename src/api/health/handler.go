@@ -54,4 +54,4 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
-} 
+}

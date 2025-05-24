@@ -51,7 +51,7 @@ paths:
                     type: string
                     format: date-time
                     example: "2023-05-12T12:00:00Z"
-  /api/v1/categories:
+  /pim/api/v1/categories:
     get:
       tags:
         - Categories

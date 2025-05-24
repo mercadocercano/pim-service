@@ -39,11 +39,11 @@ func main() {
 	dbUser := getEnv("POSTGRES_USER", "postgres")
 	dbPassword := getEnv("POSTGRES_PASSWORD", "postgres")
 	dbName := getEnv("POSTGRES_DB", "pim")
-	
+
 	// Crear string de conexión
 	connStr := "postgres://" + dbUser + ":" + dbPassword + "@" + dbHost + ":" + dbPort + "/" + dbName + "?sslmode=disable"
 	log.Printf("Intentando conectar a %s", connStr)
-	
+
 	// Conectar a la base de datos
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -59,13 +59,13 @@ func main() {
 	log.Println("Conexión a la base de datos establecida con éxito")
 
 	// API v1 grupo de rutas
-	v1 := router.Group("/api/v1")
+	v1 := router.Group("/pim/api/v1")
 
 	// Configurar el módulo API (health check y documentación)
 	apiCfg := apiConfig.DefaultAPIConfig()
 	apiCfg.DB = db
 	apiCfg.Version = "1.0.0"
-	apiConfig.SetupAPIModule(router, router.Group("/"), apiCfg)
+	apiConfig.SetupAPIModule(router, v1, apiCfg)
 
 	// Configurar módulos
 	categoryConfig.SetupCategoryModule(v1, db)
