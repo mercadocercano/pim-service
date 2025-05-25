@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // Driver de PostgreSQL
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // getEnv obtiene una variable de entorno o devuelve un valor por defecto
@@ -24,7 +25,24 @@ func getEnv(key, defaultValue string) string {
 
 func main() {
 	// Configurar el router con Gin
-	router := gin.Default()
+	router := gin.New()
+
+	// Agregar middlewares básicos necesarios
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
+	// Configurar Prometheus metrics si está habilitado
+	prometheusEnabled := os.Getenv("PROMETHEUS_ENABLED")
+	log.Printf("PROMETHEUS_ENABLED value: '%s'", prometheusEnabled)
+
+	if prometheusEnabled == "true" {
+		log.Println("Registering /metrics endpoint for PIM service")
+		// Endpoint de métricas usando la librería oficial de Prometheus
+		router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+		log.Println("/metrics endpoint registered successfully for PIM service")
+	} else {
+		log.Println("Prometheus metrics disabled for PIM service")
+	}
 
 	// Cargar plantillas HTML
 	router.LoadHTMLGlob("templates/*")

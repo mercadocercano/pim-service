@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -26,7 +27,24 @@ func main() {
 	defer db.Close()
 
 	// Configurar el router
-	router := gin.Default()
+	router := gin.New()
+
+	// Agregar middlewares básicos necesarios
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
+	// Configurar Prometheus metrics si está habilitado
+	prometheusEnabled := os.Getenv("PROMETHEUS_ENABLED")
+	log.Printf("PROMETHEUS_ENABLED value: '%s'", prometheusEnabled)
+
+	if prometheusEnabled == "true" {
+		log.Println("Registering /metrics endpoint for PIM service")
+		// Endpoint de métricas usando la librería oficial de Prometheus
+		router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+		log.Println("/metrics endpoint registered successfully for PIM service")
+	} else {
+		log.Println("Prometheus metrics disabled for PIM service")
+	}
 
 	// Health check endpoint (público para verificación de servicios)
 	router.GET("/health", func(c *gin.Context) {
