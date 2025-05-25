@@ -78,6 +78,7 @@ func (r *MockCategoryRepository) SetupCategories(categories []*entity.Category) 
 		// Clonar para evitar referencias compartidas
 		r.categories[category.ID] = &entity.Category{
 			ID:          category.ID,
+			TenantID:    category.TenantID,
 			Name:        category.Name,
 			Description: category.Description,
 			ParentID:    category.ParentID,
@@ -128,6 +129,7 @@ func (r *MockCategoryRepository) Create(_ context.Context, category *entity.Cate
 	// Crear una copia para evitar referencia compartida
 	r.categories[category.ID] = &entity.Category{
 		ID:          category.ID,
+		TenantID:    category.TenantID,
 		Name:        category.Name,
 		Description: category.Description,
 		ParentID:    category.ParentID,
@@ -139,8 +141,8 @@ func (r *MockCategoryRepository) Create(_ context.Context, category *entity.Cate
 	return nil
 }
 
-// FindByID implementa la interfaz del repositorio
-func (r *MockCategoryRepository) FindByID(_ context.Context, id string) (*entity.Category, error) {
+// FindByID implementa la interfaz del repositorio con tenantID
+func (r *MockCategoryRepository) FindByID(_ context.Context, id string, tenantID string) (*entity.Category, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -151,13 +153,14 @@ func (r *MockCategoryRepository) FindByID(_ context.Context, id string) (*entity
 	}
 
 	category, exists := r.categories[id]
-	if !exists {
+	if !exists || category.TenantID != tenantID {
 		return nil, ErrMockNotFound
 	}
 
 	// Crear una copia para evitar referencia compartida
 	return &entity.Category{
 		ID:          category.ID,
+		TenantID:    category.TenantID,
 		Name:        category.Name,
 		Description: category.Description,
 		ParentID:    category.ParentID,
@@ -167,8 +170,8 @@ func (r *MockCategoryRepository) FindByID(_ context.Context, id string) (*entity
 	}, nil
 }
 
-// FindAll implementa la interfaz del repositorio
-func (r *MockCategoryRepository) FindAll(_ context.Context) ([]*entity.Category, error) {
+// FindAll implementa la interfaz del repositorio con tenantID
+func (r *MockCategoryRepository) FindAll(_ context.Context, tenantID string) ([]*entity.Category, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -178,18 +181,21 @@ func (r *MockCategoryRepository) FindAll(_ context.Context) ([]*entity.Category,
 		return nil, ErrMockFailedOp
 	}
 
-	categories := make([]*entity.Category, 0, len(r.categories))
+	categories := make([]*entity.Category, 0)
 	for _, category := range r.categories {
-		// Crear una copia para evitar referencia compartida
-		categories = append(categories, &entity.Category{
-			ID:          category.ID,
-			Name:        category.Name,
-			Description: category.Description,
-			ParentID:    category.ParentID,
-			Status:      category.Status,
-			CreatedAt:   category.CreatedAt,
-			UpdatedAt:   category.UpdatedAt,
-		})
+		if category.TenantID == tenantID {
+			// Crear una copia para evitar referencia compartida
+			categories = append(categories, &entity.Category{
+				ID:          category.ID,
+				TenantID:    category.TenantID,
+				Name:        category.Name,
+				Description: category.Description,
+				ParentID:    category.ParentID,
+				Status:      category.Status,
+				CreatedAt:   category.CreatedAt,
+				UpdatedAt:   category.UpdatedAt,
+			})
+		}
 	}
 
 	return categories, nil
@@ -213,6 +219,7 @@ func (r *MockCategoryRepository) Update(_ context.Context, category *entity.Cate
 	// Actualizar con una copia para evitar referencia compartida
 	r.categories[category.ID] = &entity.Category{
 		ID:          category.ID,
+		TenantID:    category.TenantID,
 		Name:        category.Name,
 		Description: category.Description,
 		ParentID:    category.ParentID,
@@ -224,8 +231,8 @@ func (r *MockCategoryRepository) Update(_ context.Context, category *entity.Cate
 	return nil
 }
 
-// Delete implementa la interfaz del repositorio
-func (r *MockCategoryRepository) Delete(_ context.Context, id string) error {
+// Delete implementa la interfaz del repositorio con tenantID
+func (r *MockCategoryRepository) Delete(_ context.Context, id string, tenantID string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -235,7 +242,8 @@ func (r *MockCategoryRepository) Delete(_ context.Context, id string) error {
 		return ErrMockFailedOp
 	}
 
-	if _, exists := r.categories[id]; !exists {
+	category, exists := r.categories[id]
+	if !exists || category.TenantID != tenantID {
 		return ErrMockNotFound
 	}
 

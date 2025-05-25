@@ -16,6 +16,7 @@ func (CategoryMother) WithDefaults() *entity.Category {
 	now := time.Now()
 	return &entity.Category{
 		ID:          uuid.New().String(),
+		TenantID:    "tenant-123", // TenantID por defecto para tests
 		Name:        "Categoría de prueba",
 		Description: "Descripción de prueba",
 		ParentID:    nil,
@@ -29,6 +30,13 @@ func (CategoryMother) WithDefaults() *entity.Category {
 func (c CategoryMother) WithID(id string) *entity.Category {
 	category := c.WithDefaults()
 	category.ID = id
+	return category
+}
+
+// WithTenantID crea una categoría con un TenantID específico
+func (c CategoryMother) WithTenantID(tenantID string) *entity.Category {
+	category := c.WithDefaults()
+	category.TenantID = tenantID
 	return category
 }
 
@@ -55,7 +63,7 @@ func (c CategoryMother) Inactive() *entity.Category {
 }
 
 // Complete crea una categoría con todos los parámetros especificados
-func (CategoryMother) Complete(id, name, description, parentID string, active bool) *entity.Category {
+func (CategoryMother) Complete(id, tenantID, name, description, parentID string, active bool) *entity.Category {
 	now := time.Now()
 	var parentIDPtr *string
 	if parentID != "" {
@@ -69,6 +77,7 @@ func (CategoryMother) Complete(id, name, description, parentID string, active bo
 
 	return &entity.Category{
 		ID:          id,
+		TenantID:    tenantID,
 		Name:        name,
 		Description: description,
 		ParentID:    parentIDPtr,

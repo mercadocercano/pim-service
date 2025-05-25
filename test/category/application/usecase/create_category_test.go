@@ -21,16 +21,18 @@ func TestCreateCategoryUseCase_Execute(t *testing.T) {
 		// Arrange
 		mockRepo.ResetFailures()
 		mockRepo.ResetCallHistory()
+		tenantID := "tenant-123"
 		name := "Nueva Categoría"
 		description := "Descripción de prueba"
 		parentID := ""
 
 		// Act
-		category, err := createUseCase.Execute(ctx, name, description, parentID)
+		category, err := createUseCase.Execute(ctx, tenantID, name, description, &parentID)
 
 		// Assert
 		assert.NoError(t, err)
 		assert.NotNil(t, category)
+		assert.Equal(t, tenantID, category.TenantID)
 		assert.Equal(t, name, category.Name)
 		assert.Equal(t, description, category.Description)
 		assert.NotNil(t, category.ParentID)
@@ -49,12 +51,13 @@ func TestCreateCategoryUseCase_Execute(t *testing.T) {
 		// Arrange
 		mockRepo.ResetFailures()
 		mockRepo.ResetCallHistory()
+		tenantID := "tenant-123"
 		emptyName := ""
 		description := "Descripción de prueba"
 		parentID := ""
 
 		// Act
-		category, err := createUseCase.Execute(ctx, emptyName, description, parentID)
+		category, err := createUseCase.Execute(ctx, tenantID, emptyName, description, &parentID)
 
 		// Assert
 		assert.Error(t, err)
@@ -68,12 +71,13 @@ func TestCreateCategoryUseCase_Execute(t *testing.T) {
 		mockRepo.ResetFailures()
 		mockRepo.ResetCallHistory()
 		mockRepo.ShouldFailOn("Create")
+		tenantID := "tenant-123"
 		name := "Nueva Categoría"
 		description := "Descripción de prueba"
 		parentID := ""
 
 		// Act
-		category, err := createUseCase.Execute(ctx, name, description, parentID)
+		category, err := createUseCase.Execute(ctx, tenantID, name, description, &parentID)
 
 		// Assert
 		assert.Error(t, err)

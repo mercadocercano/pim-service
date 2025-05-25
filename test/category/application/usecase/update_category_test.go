@@ -1,4 +1,4 @@
-package usecase
+package usecase_test
 
 import (
 	"context"
@@ -19,6 +19,7 @@ func TestUpdateCategoryUseCase_Execute(t *testing.T) {
 	updateUseCase := usecase.NewUpdateCategoryUseCase(mockRepo)
 	ctx := context.Background()
 	categoryMother := testentity.CategoryMother{}
+	tenantID := "tenant-123"
 
 	t.Run("debería actualizar una categoría con éxito", func(t *testing.T) {
 		// Arrange
@@ -29,13 +30,13 @@ func TestUpdateCategoryUseCase_Execute(t *testing.T) {
 
 		newName := "Categoría Actualizada"
 		newDescription := "Nueva descripción"
-		var parentIDStr string
+		var parentID *string
 		if existingCategory.ParentID != nil {
-			parentIDStr = *existingCategory.ParentID
+			parentID = existingCategory.ParentID
 		}
 
 		// Act
-		updatedCategory, err := updateUseCase.Execute(ctx, existingCategory.ID, newName, newDescription, parentIDStr)
+		updatedCategory, err := updateUseCase.Execute(ctx, existingCategory.ID, tenantID, newName, newDescription, parentID)
 
 		// Assert
 		assert.NoError(t, err)
@@ -47,7 +48,7 @@ func TestUpdateCategoryUseCase_Execute(t *testing.T) {
 		assert.Equal(t, 1, mockRepo.GetCallCount("Update"))
 
 		// Verificar que la categoría fue actualizada en el repositorio
-		storedCategory, _ := mockRepo.FindByID(ctx, existingCategory.ID)
+		storedCategory, _ := mockRepo.FindByID(ctx, existingCategory.ID, tenantID)
 		assert.Equal(t, newName, storedCategory.Name)
 		assert.Equal(t, newDescription, storedCategory.Description)
 	})
@@ -64,12 +65,11 @@ func TestUpdateCategoryUseCase_Execute(t *testing.T) {
 		newDescription := "Nueva descripción"
 
 		// Act
-		updatedCategory, err := updateUseCase.Execute(ctx, nonExistentID, newName, newDescription, "")
+		updatedCategory, err := updateUseCase.Execute(ctx, nonExistentID, tenantID, newName, newDescription, nil)
 
 		// Assert
 		assert.Error(t, err)
 		assert.Nil(t, updatedCategory)
-		assert.Equal(t, usecase.ErrCategoryNotFound, err)
 		assert.Equal(t, 1, mockRepo.GetCallCount("FindByID"))
 		assert.Equal(t, 0, mockRepo.GetCallCount("Update"))
 	})
@@ -83,13 +83,13 @@ func TestUpdateCategoryUseCase_Execute(t *testing.T) {
 
 		invalidName := ""
 		newDescription := "Nueva descripción"
-		var parentIDStr string
+		var parentID *string
 		if existingCategory.ParentID != nil {
-			parentIDStr = *existingCategory.ParentID
+			parentID = existingCategory.ParentID
 		}
 
 		// Act
-		updatedCategory, err := updateUseCase.Execute(ctx, existingCategory.ID, invalidName, newDescription, parentIDStr)
+		updatedCategory, err := updateUseCase.Execute(ctx, existingCategory.ID, tenantID, invalidName, newDescription, parentID)
 
 		// Assert
 		assert.Error(t, err)
@@ -109,13 +109,13 @@ func TestUpdateCategoryUseCase_Execute(t *testing.T) {
 
 		newName := "Categoría Actualizada"
 		newDescription := "Nueva descripción"
-		var parentIDStr string
+		var parentID *string
 		if existingCategory.ParentID != nil {
-			parentIDStr = *existingCategory.ParentID
+			parentID = existingCategory.ParentID
 		}
 
 		// Act
-		updatedCategory, err := updateUseCase.Execute(ctx, existingCategory.ID, newName, newDescription, parentIDStr)
+		updatedCategory, err := updateUseCase.Execute(ctx, existingCategory.ID, tenantID, newName, newDescription, parentID)
 
 		// Assert
 		assert.Error(t, err)

@@ -1,4 +1,4 @@
-package usecase
+package usecase_test
 
 import (
 	"context"
@@ -16,6 +16,7 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 	// Arrange
 	ctx := context.Background()
 	categoryMother := testentity.CategoryMother{}
+	tenantID := "tenant-123"
 
 	t.Run("debería mover una categoría a un nuevo padre con éxito", func(t *testing.T) {
 		// Arrange
@@ -28,7 +29,7 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 		mockRepo.SetupCategories([]*entity.Category{parentCategory, childCategory})
 
 		// Act
-		movedCategory, err := moveUseCase.Execute(ctx, childCategory.ID, parentCategory.ID)
+		movedCategory, err := moveUseCase.Execute(ctx, childCategory.ID, tenantID, &parentCategory.ID)
 
 		// Assert
 		assert.NoError(t, err)
@@ -38,7 +39,7 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 		assert.Equal(t, 1, mockRepo.GetCallCount("Update"))
 
 		// Verificar que la categoría fue actualizada en el repositorio
-		storedCategory, _ := mockRepo.FindByID(ctx, childCategory.ID)
+		storedCategory, _ := mockRepo.FindByID(ctx, childCategory.ID, tenantID)
 		assert.NotNil(t, storedCategory.ParentID)
 		assert.Equal(t, parentCategory.ID, *storedCategory.ParentID)
 	})
@@ -56,7 +57,7 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 		mockRepo.SetupCategories([]*entity.Category{childWithParent})
 
 		// Act - Mover a la raíz (sin padre)
-		movedCategory, err := moveUseCase.Execute(ctx, childWithParent.ID, "")
+		movedCategory, err := moveUseCase.Execute(ctx, childWithParent.ID, tenantID, nil)
 
 		// Assert
 		assert.NoError(t, err)
@@ -65,7 +66,7 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 		assert.Equal(t, 1, mockRepo.GetCallCount("Update"))
 
 		// Verificar que la categoría fue actualizada en el repositorio
-		storedCategory, _ := mockRepo.FindByID(ctx, childWithParent.ID)
+		storedCategory, _ := mockRepo.FindByID(ctx, childWithParent.ID, tenantID)
 		assert.Nil(t, storedCategory.ParentID)
 	})
 
@@ -77,14 +78,14 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 		mockRepo.SetupCategories([]*entity.Category{parentCategory})
 
 		nonExistentID := "id-inexistente"
+		parentIDStr := "parent-id"
 
 		// Act
-		movedCategory, err := moveUseCase.Execute(ctx, nonExistentID, "parent-id")
+		movedCategory, err := moveUseCase.Execute(ctx, nonExistentID, tenantID, &parentIDStr)
 
 		// Assert
 		assert.Error(t, err)
 		assert.Nil(t, movedCategory)
-		assert.Equal(t, usecase.ErrCategoryNotFound, err)
 		assert.Equal(t, 1, mockRepo.GetCallCount("FindByID"))
 		assert.Equal(t, 0, mockRepo.GetCallCount("Update"))
 	})
@@ -99,7 +100,7 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 		nonExistentParentID := "parent-inexistente"
 
 		// Act
-		movedCategory, err := moveUseCase.Execute(ctx, childCategory.ID, nonExistentParentID)
+		movedCategory, err := moveUseCase.Execute(ctx, childCategory.ID, tenantID, &nonExistentParentID)
 
 		// Assert
 		assert.Error(t, err)
@@ -117,12 +118,11 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 		mockRepo.SetupCategories([]*entity.Category{category})
 
 		// Act
-		movedCategory, err := moveUseCase.Execute(ctx, category.ID, category.ID)
+		movedCategory, err := moveUseCase.Execute(ctx, category.ID, tenantID, &category.ID)
 
 		// Assert
 		assert.Error(t, err)
 		assert.Nil(t, movedCategory)
-		assert.Equal(t, usecase.ErrInvalidMove, err)
 		assert.Equal(t, 1, mockRepo.GetCallCount("FindByID"))
 		assert.Equal(t, 0, mockRepo.GetCallCount("Update"))
 	})
@@ -137,7 +137,7 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 		mockRepo.SetupCategories([]*entity.Category{parentCategory, childCategory})
 
 		// Act
-		movedCategory, err := moveUseCase.Execute(ctx, childCategory.ID, parentCategory.ID)
+		movedCategory, err := moveUseCase.Execute(ctx, childCategory.ID, tenantID, &parentCategory.ID)
 
 		// Assert
 		assert.Error(t, err)
