@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"pim/src/category/domain/entity"
+	"pim/src/shared/domain/criteria"
 )
 
 // CategoryRepository define el contrato para acceder a los datos de categorías
@@ -22,4 +23,11 @@ type CategoryRepository interface {
 
 	// Delete elimina una categoría por su ID y tenantID
 	Delete(ctx context.Context, id string, tenantID string) error
+}
+
+// CategoryCriteriaRepository extiende CategoryRepository con soporte para criteria
+type CategoryCriteriaRepository interface {
+	CategoryRepository
+	criteria.CriteriaRepository[entity.Category]
+	criteria.ListRepository[entity.Category]
 }

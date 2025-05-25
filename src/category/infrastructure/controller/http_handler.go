@@ -9,18 +9,21 @@ import (
 	"pim/src/category/application/request"
 	"pim/src/category/application/response"
 	"pim/src/category/application/usecase"
+	categoryCriteria "pim/src/category/infrastructure/criteria"
 
 	"github.com/gin-gonic/gin"
 )
 
 // CategoryHandler maneja las peticiones HTTP para categorías
 type CategoryHandler struct {
-	createUseCase          *usecase.CreateCategoryUseCase
-	updateUseCase          *usecase.UpdateCategoryUseCase
-	changeCategoryStatus   *usecase.ChangeCategoryStatusUseCase
-	moveCategoryUseCase    *usecase.MoveCategoryUseCase
-	getCategoriesUseCase   *usecase.GetCategoriesUseCase
-	getCategoryByIDUseCase *usecase.GetCategoryByIDUseCase
+	createUseCase                   *usecase.CreateCategoryUseCase
+	updateUseCase                   *usecase.UpdateCategoryUseCase
+	changeCategoryStatus            *usecase.ChangeCategoryStatusUseCase
+	moveCategoryUseCase             *usecase.MoveCategoryUseCase
+	getCategoriesUseCase            *usecase.GetCategoriesUseCase
+	getCategoryByIDUseCase          *usecase.GetCategoryByIDUseCase
+	listCategoriesByCriteriaUseCase *usecase.ListCategoriesByCriteriaUseCase
+	criteriaBuilder                 *categoryCriteria.CategoryCriteriaBuilder
 }
 
 // NewCategoryHandler crea una nueva instancia del manejador de categorías
@@ -31,14 +34,17 @@ func NewCategoryHandler(
 	moveCategoryUseCase *usecase.MoveCategoryUseCase,
 	getCategoriesUseCase *usecase.GetCategoriesUseCase,
 	getCategoryByIDUseCase *usecase.GetCategoryByIDUseCase,
+	listCategoriesByCriteriaUseCase *usecase.ListCategoriesByCriteriaUseCase,
 ) *CategoryHandler {
 	return &CategoryHandler{
-		createUseCase:          createUseCase,
-		updateUseCase:          updateUseCase,
-		changeCategoryStatus:   changeCategoryStatus,
-		moveCategoryUseCase:    moveCategoryUseCase,
-		getCategoriesUseCase:   getCategoriesUseCase,
-		getCategoryByIDUseCase: getCategoryByIDUseCase,
+		createUseCase:                   createUseCase,
+		updateUseCase:                   updateUseCase,
+		changeCategoryStatus:            changeCategoryStatus,
+		moveCategoryUseCase:             moveCategoryUseCase,
+		getCategoriesUseCase:            getCategoriesUseCase,
+		getCategoryByIDUseCase:          getCategoryByIDUseCase,
+		listCategoriesByCriteriaUseCase: listCategoriesByCriteriaUseCase,
+		criteriaBuilder:                 categoryCriteria.NewCategoryCriteriaBuilder(),
 	}
 }
 
@@ -47,7 +53,8 @@ func (h *CategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
 	categories := router.Group("/categories")
 	{
 		categories.POST("", h.Create)
-		categories.GET("", h.List)
+		categories.GET("", h.ListWithCriteria)
+		categories.GET("/simple", h.List)
 		categories.GET("/tree", h.ListTree)
 		categories.GET("/:id", h.GetByID)
 		categories.PUT("/:id", h.Update)
@@ -322,4 +329,52 @@ func (h *CategoryHandler) GetByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.FromEntity(category))
+}
+
+// ListWithCriteria maneja la solicitud para listar categorías con filtros y paginación
+func (h *CategoryHandler) ListWithCriteria(c *gin.Context) {
+	// Obtener el tenantID del header y agregarlo a los query parameters
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		return
+	}
+
+	// Agregar tenant_id a los query parameters para el filtrado
+	query := c.Request.URL.Query()
+	query.Set("tenant_id", tenantID)
+	c.Request.URL.RawQuery = query.Encode()
+
+	// Construir y validar criterios
+	criteria := h.criteriaBuilder.BuildValidated(c)
+
+	// Ejecutar el caso de uso
+	result, err := h.listCategoriesByCriteriaUseCase.Execute(c.Request.Context(), criteria)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Convertir las entidades a respuestas
+	var responseItems []*response.CategoryResponse
+	for _, category := range result.Items {
+		responseItems = append(responseItems, response.FromEntity(category))
+	}
+
+	// Crear respuesta con paginación
+	paginatedResponse := struct {
+		Items      []*response.CategoryResponse `json:"items"`
+		TotalCount int                          `json:"total_count"`
+		Page       int                          `json:"page"`
+		PageSize   int                          `json:"page_size"`
+		TotalPages int                          `json:"total_pages"`
+	}{
+		Items:      responseItems,
+		TotalCount: result.TotalCount,
+		Page:       result.Page,
+		PageSize:   result.PageSize,
+		TotalPages: result.TotalPages,
+	}
+
+	c.JSON(http.StatusOK, paginatedResponse)
 }

@@ -9,20 +9,86 @@ import (
 	"pim/src/category/domain/exception"
 	"pim/src/category/infrastructure/persistence/mapper"
 	"pim/src/category/infrastructure/persistence/model"
+	"pim/src/shared/domain/criteria"
+	sharedCriteria "pim/src/shared/infrastructure/criteria"
 )
 
 // CategoryPostgresRepository implementa el repositorio de categorías usando PostgreSQL
 type CategoryPostgresRepository struct {
-	db     *sql.DB
-	mapper *mapper.CategoryMapper
+	db        *sql.DB
+	mapper    *mapper.CategoryMapper
+	converter *sharedCriteria.SQLCriteriaConverter
+	*criteria.BaseListRepository[entity.Category]
 }
 
 // NewCategoryPostgresRepository crea una nueva instancia del repositorio
 func NewCategoryPostgresRepository(db *sql.DB) *CategoryPostgresRepository {
-	return &CategoryPostgresRepository{
-		db:     db,
-		mapper: mapper.NewCategoryMapper(),
+	repo := &CategoryPostgresRepository{
+		db:        db,
+		mapper:    mapper.NewCategoryMapper(),
+		converter: sharedCriteria.NewSQLCriteriaConverter(),
 	}
+
+	// Inicializar el repositorio base con criteria
+	repo.BaseListRepository = criteria.NewBaseListRepository[entity.Category](repo)
+
+	return repo
+}
+
+// SearchByCriteria implementa la búsqueda usando criteria
+func (r *CategoryPostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.Category, error) {
+	baseQuery := `
+		SELECT id, tenant_id, name, description, parent_id, status, created_at, updated_at
+		FROM categories
+	`
+
+	query, params := r.converter.ToSelectSQL(baseQuery, crit)
+
+	rows, err := r.db.QueryContext(ctx, query, params...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var categories []*model.Category
+	for rows.Next() {
+		var category model.Category
+		err := rows.Scan(
+			&category.ID,
+			&category.TenantID,
+			&category.Name,
+			&category.Description,
+			&category.ParentID,
+			&category.Status,
+			&category.CreatedAt,
+			&category.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		categories = append(categories, &category)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return r.mapper.ToEntityList(categories), nil
+}
+
+// CountByCriteria implementa el conteo usando criteria
+func (r *CategoryPostgresRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+	baseCountQuery := "SELECT COUNT(*) FROM categories"
+
+	query, params := r.converter.ToCountSQL(baseCountQuery, crit)
+
+	var count int
+	err := r.db.QueryRowContext(ctx, query, params...).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 // Create implementa la interfaz CategoryRepository creando una nueva categoría

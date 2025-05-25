@@ -37,7 +37,7 @@ func main() {
 	})
 
 	// API v1 grupo de rutas
-	v1 := router.Group("/pim/api/v1")
+	v1 := router.Group("/api/v1")
 
 	// Health check endpoint en API v1
 	v1.GET("/health", func(c *gin.Context) {

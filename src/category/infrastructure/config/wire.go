@@ -23,6 +23,7 @@ func SetupCategoryModule(router *gin.RouterGroup, db *sql.DB) {
 	moveCategoryUC := usecase.NewMoveCategoryUseCase(categoryRepo)
 	getCategoriesUC := usecase.NewGetCategoriesUseCase(categoryRepo)
 	getCategoryByIDUC := usecase.NewGetCategoryByIDUseCase(categoryRepo)
+	listCategoriesByCriteriaUC := usecase.NewListCategoriesByCriteriaUseCase(categoryRepo)
 
 	// Controlador HTTP
 	categoryHandler := controller.NewCategoryHandler(
@@ -32,19 +33,21 @@ func SetupCategoryModule(router *gin.RouterGroup, db *sql.DB) {
 		moveCategoryUC,
 		getCategoriesUC,
 		getCategoryByIDUC,
+		listCategoriesByCriteriaUC,
 	)
 
 	categoryHandler.RegisterRoutes(router)
 }
 
 // InitializeCategoryModule inicializa el módulo de categorías y retorna el controlador
-func InitializeCategoryModule(repo port.CategoryRepository) *controller.CategoryHandler {
+func InitializeCategoryModule(repo port.CategoryCriteriaRepository) *controller.CategoryHandler {
 	createUseCase := usecase.NewCreateCategoryUseCase(repo)
 	updateUseCase := usecase.NewUpdateCategoryUseCase(repo)
 	changeStatusUseCase := usecase.NewChangeCategoryStatusUseCase(repo)
 	moveUseCase := usecase.NewMoveCategoryUseCase(repo)
 	getCategoriesUseCase := usecase.NewGetCategoriesUseCase(repo)
 	getCategoryByIDUseCase := usecase.NewGetCategoryByIDUseCase(repo)
+	listCategoriesByCriteriaUseCase := usecase.NewListCategoriesByCriteriaUseCase(repo)
 
 	return controller.NewCategoryHandler(
 		createUseCase,
@@ -53,5 +56,6 @@ func InitializeCategoryModule(repo port.CategoryRepository) *controller.Category
 		moveUseCase,
 		getCategoriesUseCase,
 		getCategoryByIDUseCase,
+		listCategoriesByCriteriaUseCase,
 	)
 }

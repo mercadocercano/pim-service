@@ -59,7 +59,7 @@ func main() {
 	log.Println("Conexión a la base de datos establecida con éxito")
 
 	// API v1 grupo de rutas
-	v1 := router.Group("/pim/api/v1")
+	v1 := router.Group("/api/v1")
 
 	// Configurar el módulo API (health check y documentación)
 	apiCfg := apiConfig.DefaultAPIConfig()
