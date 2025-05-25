@@ -6,6 +6,7 @@ import (
 	"os"
 
 	apiConfig "pim/src/api/config"
+	brandConfig "pim/src/brand/infrastructure/config"
 	categoryConfig "pim/src/category/infrastructure/config"
 	sharedConfig "pim/src/shared/infrastructure/config"
 
@@ -87,6 +88,7 @@ func main() {
 
 	// Configurar módulos
 	categoryConfig.SetupCategoryModule(v1, db)
+	setupBrandModule(v1, db)
 
 	// Aquí se agregarían más módulos:
 	// - Productos
@@ -95,4 +97,33 @@ func main() {
 	// Iniciar el servidor
 	log.Println("Servidor iniciando en http://localhost:8080")
 	router.Run(":8080")
+}
+
+// setupBrandModule configura el módulo Brand
+func setupBrandModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Brand...")
+
+	// Crear configuración del módulo Brand
+	brandCfg := brandConfig.NewBrandModuleConfig(db)
+
+	// Obtener el controller
+	brandController := brandCfg.GetBrandController()
+
+	// Configurar rutas de Brand
+	brands := router.Group("/brands")
+	{
+		brands.POST("", brandController.CreateBrand)
+		brands.GET("", brandController.ListBrands)
+		brands.GET("/:id", brandController.GetBrand)
+		brands.PUT("/:id", brandController.UpdateBrand)
+		brands.DELETE("/:id", brandController.DeleteBrand)
+	}
+
+	log.Println("Módulo Brand configurado exitosamente")
+	log.Println("Rutas Brand disponibles:")
+	log.Println("  POST   /api/v1/brands")
+	log.Println("  GET    /api/v1/brands")
+	log.Println("  GET    /api/v1/brands/:id")
+	log.Println("  PUT    /api/v1/brands/:id")
+	log.Println("  DELETE /api/v1/brands/:id")
 }

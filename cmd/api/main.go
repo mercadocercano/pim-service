@@ -1,10 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
 
+	brandConfig "pim/src/brand/infrastructure/config"
 	categoryConfig "pim/src/category/infrastructure/config"
 
 	"github.com/gin-gonic/gin"
@@ -67,7 +69,8 @@ func main() {
 	})
 
 	// Configurar módulos
-	categoryConfig.SetupCategoryModule(v1, db)
+	setupCategoryModule(v1, db)
+	setupBrandModule(v1, db)
 
 	// Iniciar el servidor
 	port := os.Getenv("PORT")
@@ -77,4 +80,14 @@ func main() {
 	if err := router.Run(":" + port); err != nil {
 		log.Fatal("Error starting server:", err)
 	}
+}
+
+// setupCategoryModule configura las rutas del módulo de categorías
+func setupCategoryModule(v1 *gin.RouterGroup, db *sql.DB) {
+	categoryConfig.SetupCategoryModule(v1, db)
+}
+
+// setupBrandModule configura las rutas del módulo de marcas
+func setupBrandModule(v1 *gin.RouterGroup, db *sql.DB) {
+	brandConfig.SetupBrandModule(v1, db)
 }

@@ -119,6 +119,41 @@ components:
         type: string
         enum: ["true"]
 
+    # Parámetros específicos para marcas
+    BrandStatusParam:
+      name: status
+      in: query
+      description: Estado de la marca
+      required: false
+      schema:
+        type: string
+        enum: ["active", "inactive", "deleted"]
+    
+    BrandNameParam:
+      name: name
+      in: query
+      description: "Búsqueda por nombre (LIKE)"
+      required: false
+      schema:
+        type: string
+    
+    BrandDescriptionParam:
+      name: description
+      in: query
+      description: "Búsqueda por descripción (LIKE)"
+      required: false
+      schema:
+        type: string
+    
+    BrandActiveParam:
+      name: active
+      in: query
+      description: Solo marcas activas
+      required: false
+      schema:
+        type: string
+        enum: ["true"]
+
   schemas:
     # Respuesta genérica de listado
     ListResponse:
@@ -151,6 +186,17 @@ components:
               items:
                 $ref: '#/components/schemas/Category'
 
+    # Respuesta específica para marcas
+    BrandListResponse:
+      allOf:
+        - $ref: '#/components/schemas/ListResponse'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Brand'
+
     Category:
       type: object
       properties:
@@ -182,6 +228,45 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Category'
+
+    Brand:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la marca
+        tenant_id:
+          type: string
+          description: ID del tenant propietario
+        name:
+          type: string
+          description: Nombre de la marca
+        description:
+          type: string
+          description: Descripción de la marca
+        logo_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL del logo de la marca
+        website:
+          type: string
+          format: uri
+          nullable: true
+          description: Sitio web oficial de la marca
+        status:
+          type: string
+          enum: ["active", "inactive", "deleted"]
+          description: Estado de la marca
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación
+        updated_at:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
 
     CreateCategoryRequest:
       type: object
@@ -223,6 +308,54 @@ components:
           format: uuid
           nullable: true
 
+    CreateBrandRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Nombre de la marca
+        description:
+          type: string
+          maxLength: 1000
+          description: Descripción de la marca
+        logo_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL del logo de la marca
+        website:
+          type: string
+          format: uri
+          nullable: true
+          description: Sitio web oficial de la marca
+
+    UpdateBrandRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Nombre de la marca
+        description:
+          type: string
+          maxLength: 1000
+          description: Descripción de la marca
+        logo_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL del logo de la marca
+        website:
+          type: string
+          format: uri
+          nullable: true
+          description: Sitio web oficial de la marca
+
     HealthResponse:
       type: object
       properties:
@@ -252,6 +385,129 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+
+  /brands:
+    get:
+      summary: Listar marcas con filtros y paginación
+      tags: [Brands]
+      description: Obtiene una lista paginada de marcas con opciones de filtrado
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SortByParam'
+        - $ref: '#/components/parameters/SortDirParam'
+        - $ref: '#/components/parameters/BrandStatusParam'
+        - $ref: '#/components/parameters/BrandNameParam'
+        - $ref: '#/components/parameters/BrandDescriptionParam'
+        - $ref: '#/components/parameters/BrandActiveParam'
+      responses:
+        '200':
+          description: Lista paginada de marcas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandListResponse'
+        '400':
+          description: Parámetros de filtrado inválidos
+        '401':
+          description: No autorizado
+        '403':
+          description: Sin permisos para acceder a marcas
+
+    post:
+      summary: Crear nueva marca
+      tags: [Brands]
+      description: Crea una nueva marca en el sistema
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBrandRequest'
+      responses:
+        '201':
+          description: Marca creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '409':
+          description: Marca ya existe
+
+  /brands/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Obtener marca por ID
+      tags: [Brands]
+      description: Devuelve los detalles de una marca específica
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Detalles de la marca
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+        '404':
+          description: Marca no encontrada
+
+    put:
+      summary: Actualizar marca
+      tags: [Brands]
+      description: Actualiza los datos de una marca existente
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBrandRequest'
+      responses:
+        '200':
+          description: Marca actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+        '400':
+          description: Datos de entrada inválidos
+        '404':
+          description: Marca no encontrada
+
+    delete:
+      summary: Eliminar marca
+      tags: [Brands]
+      description: Elimina una marca del sistema (soft delete)
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '204':
+          description: Marca eliminada
+        '404':
+          description: Marca no encontrada
+        '409':
+          description: No se puede eliminar (tiene productos asociados)
 
   /categories:
     get:
@@ -497,5 +753,7 @@ paths:
 tags:
   - name: Health
     description: Endpoints de salud del sistema
+  - name: Brands
+    description: Gestión de marcas de productos
   - name: Categories
     description: Gestión de categorías de productos 
