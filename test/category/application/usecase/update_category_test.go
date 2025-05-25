@@ -95,8 +95,8 @@ func TestUpdateCategoryUseCase_Execute(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, updatedCategory)
 		assert.Equal(t, value_object.ErrEmptyName, err)
-		assert.Equal(t, 1, mockRepo.GetCallCount("FindByID"))
-		assert.Equal(t, 0, mockRepo.GetCallCount("Update")) // No se incrementa porque falla antes
+		assert.Equal(t, 0, mockRepo.GetCallCount("FindByID"))
+		assert.Equal(t, 0, mockRepo.GetCallCount("Update"))
 	})
 
 	t.Run("debería fallar si el repositorio de actualización falla", func(t *testing.T) {

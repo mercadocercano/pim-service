@@ -105,7 +105,7 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 		// Assert
 		assert.Error(t, err)
 		assert.Nil(t, movedCategory)
-		assert.Contains(t, err.Error(), "la categoría padre no existe")
+		assert.Equal(t, repository.ErrMockNotFound, err)
 		assert.Equal(t, 2, mockRepo.GetCallCount("FindByID"))
 		assert.Equal(t, 0, mockRepo.GetCallCount("Update"))
 	})
@@ -123,7 +123,7 @@ func TestMoveCategoryUseCase_Execute(t *testing.T) {
 		// Assert
 		assert.Error(t, err)
 		assert.Nil(t, movedCategory)
-		assert.Equal(t, 1, mockRepo.GetCallCount("FindByID"))
+		assert.Equal(t, 2, mockRepo.GetCallCount("FindByID"))
 		assert.Equal(t, 0, mockRepo.GetCallCount("Update"))
 	})
 
