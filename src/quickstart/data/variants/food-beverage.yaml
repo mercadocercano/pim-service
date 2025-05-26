@@ -1,23 +1,138 @@
 business_type: "food-beverage"
 variants:
-  # TODO: Implementar variantes para food-beverage
-  # Estructura de ejemplo:
-  # - id: "color-size"
-  #   name: "Color y Tamaño"
-  #   description: "Variante por color y tamaño del producto"
-  #   attributes:
-  #     - "color"
-  #     - "size"
-  #   combinations:
-  #     - color: "Rojo"
-  #       size: "S"
-  #       sku_suffix: "RED-S"
-  #     - color: "Rojo"
-  #       size: "M"
-  #       sku_suffix: "RED-M"
-  #     - color: "Azul"
-  #       size: "S"
-  #       sku_suffix: "BLU-S"
-  #     - color: "Azul"
-  #       size: "M"
-  #       sku_suffix: "BLU-M"
+  - id: "sabor-presentacion"
+    name: "Sabor y Presentación"
+    description: "Variante por sabor y tipo de presentación (ej: yogures, alfajores, snacks, jugos)"
+    attributes:
+      - "flavor"
+      - "package-type"
+    combinations:
+      - flavor: "Chocolate"
+        package-type: "Pack"
+        sku_suffix: "CHO-PCK"
+      - flavor: "Vainilla"
+        package-type: "Pack"
+        sku_suffix: "VAN-PCK"
+      - flavor: "Frutilla"
+        package-type: "Botella"
+        sku_suffix: "FRU-BOT"
+      - flavor: "Clásico"
+        package-type: "Bolsa"
+        sku_suffix: "CLA-BOL"
+      - flavor: "Limón"
+        package-type: "Lata"
+        sku_suffix: "LIM-LAT"
+
+  - id: "peso-empaque"
+    name: "Peso y Empaque"
+    description: "Variante por peso y tipo de empaque (ej: panificados, quesos, yerba, galletitas)"
+    attributes:
+      - "net-weight"
+      - "package-type"
+    combinations:
+      - net-weight: 150
+        package-type: "Bolsa"
+        sku_suffix: "150G-BOL"
+      - net-weight: 200
+        package-type: "Bolsa"
+        sku_suffix: "200G-BOL"
+      - net-weight: 600
+        package-type: "Bolsa"
+        sku_suffix: "600G-BOL"
+      - net-weight: 1000
+        package-type: "A granel"
+        sku_suffix: "1KG-GRL"
+      - net-weight: 300
+        package-type: "Pack"
+        sku_suffix: "300G-PCK"
+
+  - id: "envase-volumen"
+    name: "Tipo de Envase y Volumen"
+    description: "Variante por tipo de envase y volumen (ej: leche, agua, gaseosas, jugos, cervezas)"
+    attributes:
+      - "package-type"
+      - "net-volume"
+    combinations:
+      - package-type: "Botella"
+        net-volume: 500
+        sku_suffix: "BOT-500"
+      - package-type: "Botella"
+        net-volume: 1000
+        sku_suffix: "BOT-1L"
+      - package-type: "Botella"
+        net-volume: 1500
+        sku_suffix: "BOT-1.5L"
+      - package-type: "Botella"
+        net-volume: 2000
+        sku_suffix: "BOT-2L"
+      - package-type: "Lata"
+        net-volume: 473
+        sku_suffix: "LAT-473"
+      - package-type: "Tetra Brik"
+        net-volume: 1000
+        sku_suffix: "TET-1L"
+
+  - id: "tamano"
+    name: "Tamaño"
+    description: "Variante por tamaño (chico, mediano, grande) para productos con diferentes presentaciones"
+    attributes:
+      - "size"
+    combinations:
+      - size: "Chico"
+        sku_suffix: "CH"
+      - size: "Mediano"
+        sku_suffix: "MD"
+      - size: "Grande"
+        sku_suffix: "GR"
+
+  - id: "pack-cantidad"
+    name: "Pack por Cantidad"
+    description: "Variante por cantidad de unidades en el pack (ej: alfajores, yogures, snacks)"
+    attributes:
+      - "units-per-pack"
+    combinations:
+      - units-per-pack: 1
+        sku_suffix: "U1"
+      - units-per-pack: 2
+        sku_suffix: "U2"
+      - units-per-pack: 4
+        sku_suffix: "U4"
+      - units-per-pack: 6
+        sku_suffix: "U6"
+      - units-per-pack: 12
+        sku_suffix: "U12"
+
+  - id: "dietetico"
+    name: "Atributos Dietéticos"
+    description: "Variante por atributos dietéticos (sin TACC, light, orgánico, vegano, bajo en sodio)"
+    attributes:
+      - "gluten-free"
+      - "vegan"
+      - "organic"
+      - "low-sodium"
+    combinations:
+      - gluten-free: true
+        vegan: false
+        organic: false
+        low-sodium: false
+        sku_suffix: "SINTACC"
+      - gluten-free: false
+        vegan: true
+        organic: false
+        low-sodium: false
+        sku_suffix: "VEG"
+      - gluten-free: false
+        vegan: false
+        organic: true
+        low-sodium: false
+        sku_suffix: "ORG"
+      - gluten-free: false
+        vegan: false
+        organic: false
+        low-sodium: true
+        sku_suffix: "BAJOSOD"
+      - gluten-free: true
+        vegan: true
+        organic: false
+        low-sodium: false
+        sku_suffix: "SINTACC-VEG"

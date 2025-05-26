@@ -1,35 +1,384 @@
 business_type: "home-construction"
 attributes:
-  # TODO: Implementar atributos para home-construction
-  # Estructura de ejemplo:
-  # - id: "color"
-  #   name: "Color"
-  #   type: "select"
-  #   required: false
-  #   description: "Color del producto"
-  #   values:
-  #     - "Rojo"
-  #     - "Azul"
-  #     - "Verde"
-  #
-  # - id: "weight"
-  #   name: "Peso"
-  #   type: "number"
-  #   required: false
-  #   description: "Peso del producto en gramos"
-  #   unit: "g"
-  #   min_value: 0
-  #   max_value: 10000
-  #
-  # - id: "description"
-  #   name: "Descripción Detallada"
-  #   type: "text"
-  #   required: false
-  #   description: "Descripción detallada del producto"
-  #   placeholder: "Ingrese descripción..."
-  #
-  # - id: "premium"
-  #   name: "Producto Premium"
-  #   type: "boolean"
-  #   required: false
-  #   description: "Indica si es un producto premium"
+  - id: "color"
+    name: "Color"
+    type: "select"
+    required: false
+    description: "Color principal del producto"
+    values:
+      - "Blanco"
+      - "Negro"
+      - "Gris"
+      - "Gris Claro"
+      - "Gris Oscuro"
+      - "Beige"
+      - "Crema"
+      - "Marfil"
+      - "Marrón"
+      - "Marrón Claro"
+      - "Marrón Oscuro"
+      - "Roble"
+      - "Cedro"
+      - "Caoba"
+      - "Pino"
+      - "Rojo"
+      - "Rojo Ladrillo"
+      - "Azul"
+      - "Verde"
+      - "Amarillo"
+      - "Naranja"
+      - "Terracota"
+      - "Plateado"
+      - "Dorado"
+      - "Bronce"
+      - "Cobre"
+      - "Natural"
+      - "Transparente"
+      - "Multicolor"
+
+  - id: "material"
+    name: "Material"
+    type: "select"
+    required: false
+    description: "Material principal de fabricación"
+    values:
+      - "Acero"
+      - "Acero Inoxidable"
+      - "Hierro"
+      - "Hierro Fundido"
+      - "Aluminio"
+      - "Cobre"
+      - "Bronce"
+      - "Latón"
+      - "PVC"
+      - "Polipropileno"
+      - "Polietileno"
+      - "ABS"
+      - "Nylon"
+      - "Fibra de Vidrio"
+      - "Madera"
+      - "MDF"
+      - "Aglomerado"
+      - "Melamina"
+      - "Pino"
+      - "Eucalipto"
+      - "Roble"
+      - "Cedro"
+      - "Lapacho"
+      - "Hormigón"
+      - "Cemento"
+      - "Ladrillo"
+      - "Cerámica"
+      - "Porcelanato"
+      - "Mármol"
+      - "Granito"
+      - "Piedra Natural"
+      - "Vidrio"
+      - "Cristal"
+      - "Yeso"
+      - "Durlock"
+      - "Chapa"
+      - "Fibrocemento"
+      - "Caucho"
+      - "Goma"
+      - "Textil"
+      - "Cuero"
+
+  - id: "dimensions"
+    name: "Dimensiones"
+    type: "text"
+    required: false
+    description: "Dimensiones del producto (largo x ancho x alto)"
+    placeholder: "ej: 30cm x 20cm x 15cm"
+
+  - id: "weight"
+    name: "Peso"
+    type: "number"
+    required: false
+    description: "Peso del producto en kilogramos"
+    unit: "kg"
+    min_value: 0
+    max_value: 1000
+
+  - id: "capacity"
+    name: "Capacidad"
+    type: "number"
+    required: false
+    description: "Capacidad del producto en litros"
+    unit: "L"
+    min_value: 0
+    max_value: 10000
+
+  - id: "power"
+    name: "Potencia"
+    type: "number"
+    required: false
+    description: "Potencia eléctrica en watts"
+    unit: "W"
+    min_value: 0
+    max_value: 5000
+
+  - id: "voltage"
+    name: "Voltaje"
+    type: "select"
+    required: false
+    description: "Voltaje de funcionamiento"
+    values:
+      - "220V"
+      - "110V"
+      - "12V"
+      - "24V"
+      - "Sin alimentación"
+
+  - id: "room-type"
+    name: "Ambiente"
+    type: "select"
+    required: false
+    description: "Ambiente de uso recomendado"
+    values:
+      - "Living"
+      - "Comedor"
+      - "Cocina"
+      - "Dormitorio"
+      - "Baño"
+      - "Lavadero"
+      - "Balcón"
+      - "Terraza"
+      - "Jardín"
+      - "Patio"
+      - "Garage"
+      - "Sótano"
+      - "Oficina"
+      - "Playroom"
+      - "Vestidor"
+      - "Pasillo"
+      - "Escalera"
+      - "Todos los ambientes"
+
+  - id: "installation-type"
+    name: "Tipo de Instalación"
+    type: "select"
+    required: false
+    description: "Método de instalación del producto"
+    values:
+      - "Fácil instalación"
+      - "Instalación profesional"
+      - "Atornillado"
+      - "Adhesivo"
+      - "Empotrado"
+      - "Superficial"
+      - "Colgante"
+      - "Apoyo"
+      - "Encastrado"
+      - "No requiere instalación"
+
+  - id: "warranty"
+    name: "Garantía"
+    type: "select"
+    required: false
+    description: "Período de garantía del producto"
+    values:
+      - "Sin garantía"
+      - "6 meses"
+      - "1 año"
+      - "2 años"
+      - "3 años"
+      - "5 años"
+      - "10 años"
+      - "Garantía de por vida"
+
+  - id: "brand-origin"
+    name: "Origen de Marca"
+    type: "select"
+    required: false
+    description: "Origen de la marca del producto"
+    values:
+      - "Nacional"
+      - "Importado"
+      - "Fabricación Argentina"
+      - "Marca Propia"
+
+  - id: "finish"
+    name: "Acabado"
+    type: "select"
+    required: false
+    description: "Tipo de acabado o terminación"
+    values:
+      - "Brillante"
+      - "Mate"
+      - "Satinado"
+      - "Texturado"
+      - "Liso"
+      - "Rugoso"
+      - "Pulido"
+      - "Cepillado"
+      - "Oxidado"
+      - "Galvanizado"
+      - "Cromado"
+      - "Pintado"
+      - "Barnizado"
+      - "Laqueado"
+      - "Natural"
+
+  - id: "thickness"
+    name: "Espesor"
+    type: "number"
+    required: false
+    description: "Espesor del material en milímetros"
+    unit: "mm"
+    min_value: 0
+    max_value: 500
+
+  - id: "resistance-level"
+    name: "Nivel de Resistencia"
+    type: "select"
+    required: false
+    description: "Nivel de resistencia del producto"
+    values:
+      - "Uso doméstico liviano"
+      - "Uso doméstico intenso"
+      - "Uso comercial"
+      - "Uso industrial"
+      - "Alta resistencia"
+      - "Resistente al agua"
+      - "Resistente al calor"
+      - "Resistente a la humedad"
+      - "Antideslizante"
+
+  - id: "safety-certification"
+    name: "Certificación de Seguridad"
+    type: "select"
+    required: false
+    description: "Certificaciones de seguridad del producto"
+    values:
+      - "IRAM"
+      - "IEC"
+      - "CE"
+      - "ISO"
+      - "Sin certificación"
+
+  - id: "energy-efficiency"
+    name: "Eficiencia Energética"
+    type: "select"
+    required: false
+    description: "Clasificación de eficiencia energética"
+    values:
+      - "A+++"
+      - "A++"
+      - "A+"
+      - "A"
+      - "B"
+      - "C"
+      - "D"
+      - "E"
+      - "No aplica"
+
+  - id: "style"
+    name: "Estilo"
+    type: "select"
+    required: false
+    description: "Estilo decorativo del producto"
+    values:
+      - "Moderno"
+      - "Clásico"
+      - "Contemporáneo"
+      - "Vintage"
+      - "Industrial"
+      - "Rústico"
+      - "Minimalista"
+      - "Colonial"
+      - "Escandinavo"
+      - "Art Deco"
+      - "Tradicional"
+      - "Ecléctico"
+
+  - id: "usage-type"
+    name: "Tipo de Uso"
+    type: "select"
+    required: false
+    description: "Tipo de uso del producto"
+    values:
+      - "Decorativo"
+      - "Funcional"
+      - "Estructural"
+      - "Seguridad"
+      - "Iluminación"
+      - "Climatización"
+      - "Almacenamiento"
+      - "Limpieza"
+      - "Jardinería"
+
+  - id: "season-recommendation"
+    name: "Recomendación Estacional"
+    type: "select"
+    required: false
+    description: "Época del año recomendada para uso o instalación"
+    values:
+      - "Todo el año"
+      - "Primavera"
+      - "Verano"
+      - "Otoño"
+      - "Invierno"
+      - "Primavera-Verano"
+      - "Otoño-Invierno"
+
+  - id: "eco-friendly"
+    name: "Eco-Amigable"
+    type: "boolean"
+    required: false
+    description: "Producto fabricado con materiales sostenibles"
+
+  - id: "recyclable"
+    name: "Reciclable"
+    type: "boolean"
+    required: false
+    description: "Producto o empaque reciclable"
+
+  - id: "water-resistant"
+    name: "Resistente al Agua"
+    type: "boolean"
+    required: false
+    description: "Producto resistente al agua o impermeable"
+
+  - id: "fire-resistant"
+    name: "Ignífugo"
+    type: "boolean"
+    required: false
+    description: "Producto resistente al fuego"
+
+  - id: "uv-resistant"
+    name: "Resistente a UV"
+    type: "boolean"
+    required: false
+    description: "Producto resistente a los rayos ultravioleta"
+
+  - id: "anti-slip"
+    name: "Antideslizante"
+    type: "boolean"
+    required: false
+    description: "Producto con superficie antideslizante"
+
+  - id: "assembly-required"
+    name: "Requiere Armado"
+    type: "boolean"
+    required: false
+    description: "El producto requiere armado por parte del cliente"
+
+  - id: "professional-installation"
+    name: "Instalación Profesional"
+    type: "boolean"
+    required: false
+    description: "Requiere instalación por parte de un profesional"
+
+  - id: "tools-included"
+    name: "Incluye Herramientas"
+    type: "boolean"
+    required: false
+    description: "El producto incluye herramientas para su instalación"
+
+  - id: "care-instructions"
+    name: "Instrucciones de Cuidado"
+    type: "text"
+    required: false
+    description: "Instrucciones especiales de limpieza y mantenimiento"
+    placeholder: "ej: Limpiar con paño húmedo, no usar productos abrasivos"

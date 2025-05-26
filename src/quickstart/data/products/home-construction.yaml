@@ -1,33 +1,471 @@
 business_type: "home-construction"
 products:
-  # TODO: Implementar productos para home-construction
-  # Estructura de ejemplo:
-  # - id: "product-example-1"
-  #   name: "Producto de Ejemplo 1"
-  #   description: "Descripción del producto de ejemplo"
-  #   category: "main-category"
-  #   base_price: 9999
-  #   currency: "ARS"
-  #   sku: "PROD-001"
-  #   attributes:
-  #     color: "Rojo"
-  #     weight: 500
-  #     premium: true
-  #   variants:
-  #     - "color-size"
-  #   stock: 100
-  #
-  # - id: "product-example-2"
-  #   name: "Producto de Ejemplo 2"
-  #   description: "Otro producto de ejemplo"
-  #   category: "subcategory-1"
-  #   base_price: 15999
-  #   currency: "ARS"
-  #   sku: "PROD-002"
-  #   attributes:
-  #     color: "Azul"
-  #     weight: 750
-  #     premium: false
-  #   variants:
-  #     - "color-size"
-  #   stock: 50
+  # Materiales de Construcción
+  - id: "cemento-portland"
+    name: "Cemento Portland 50kg"
+    description: "Cemento Portland normal de alta calidad para construcción"
+    category: "cement"
+    base_price: 1299
+    currency: "ARS"
+    sku: "CEM-POR-001"
+    attributes:
+      material: "Cemento"
+      weight: 50
+      color: "Gris"
+      brand-origin: "Nacional"
+      warranty: "Sin garantía"
+      resistance-level: "Uso comercial"
+      care-instructions: "Mantener en lugar seco"
+    variants:
+      - "weight-packaging"
+    stock: 200
+
+  - id: "ladrillo-comun"
+    name: "Ladrillo Común"
+    description: "Ladrillo de arcilla cocida para mampostería general"
+    category: "clay-bricks"
+    base_price: 89
+    currency: "ARS"
+    sku: "LAD-COM-001"
+    attributes:
+      material: "Ladrillo"
+      color: "Rojo Ladrillo"
+      dimensions: "25cm x 12cm x 5cm"
+      weight: 2.8
+      brand-origin: "Nacional"
+      fire-resistant: true
+      warranty: "Sin garantía"
+      care-instructions: "Proteger de humedad excesiva antes del uso"
+    variants:
+      - "quantity-packaging"
+    stock: 5000
+
+  - id: "hierro-construccion-8mm"
+    name: "Hierro de Construcción 8mm x 12m"
+    description: "Barra de hierro de construcción ADN 420 de 8mm de diámetro"
+    category: "rebar"
+    base_price: 2999
+    currency: "ARS"
+    sku: "HIE-CON-001"
+    attributes:
+      material: "Acero"
+      color: "Natural"
+      dimensions: "8mm x 12m"
+      weight: 4.7
+      thickness: 8
+      brand-origin: "Nacional"
+      resistance-level: "Uso comercial"
+      warranty: "Sin garantía"
+    variants:
+      - "diameter-length"
+    stock: 150
+
+  # Herramientas
+  - id: "taladro-percutor"
+    name: "Taladro Percutor 650W"
+    description: "Taladro percutor eléctrico con mandril de 13mm"
+    category: "drills"
+    base_price: 24999
+    currency: "ARS"
+    sku: "TAL-PER-001"
+    attributes:
+      material: "ABS"
+      color: "Negro"
+      power: 650
+      voltage: "220V"
+      weight: 2.1
+      brand-origin: "Importado"
+      warranty: "1 año"
+      energy-efficiency: "No aplica"
+      tools-included: true
+      care-instructions: "Limpiar con paño seco, lubricar regularmente"
+    variants:
+      - "power-brand"
+    stock: 45
+
+  - id: "martillo-carpintero"
+    name: "Martillo de Carpintero 450g"
+    description: "Martillo con mango de fibra de vidrio y cabeza templada"
+    category: "hammers-mallets"
+    base_price: 3999
+    currency: "ARS"
+    sku: "MAR-CAR-001"
+    attributes:
+      material: "Acero"
+      color: "Natural"
+      weight: 0.45
+      dimensions: "32cm x 8cm x 3cm"
+      brand-origin: "Importado"
+      warranty: "2 años"
+      resistance-level: "Uso doméstico intenso"
+      care-instructions: "Mantener seco, verificar fijación del mango"
+    variants:
+      - "weight-handle"
+    stock: 80
+
+  - id: "amoladora-angular"
+    name: "Amoladora Angular 115mm 750W"
+    description: "Amoladora angular con disco de 115mm para corte y desbaste"
+    category: "grinders"
+    base_price: 18999
+    currency: "ARS"
+    sku: "AMO-ANG-001"
+    attributes:
+      material: "ABS"
+      color: "Azul"
+      power: 750
+      voltage: "220V"
+      weight: 1.8
+      dimensions: "28cm x 8cm x 15cm"
+      brand-origin: "Importado"
+      warranty: "1 año"
+      tools-included: false
+      safety-certification: "CE"
+      care-instructions: "Limpiar después de usar, cambiar carbones cuando sea necesario"
+    variants:
+      - "power-size"
+    stock: 35
+
+  # Plomería
+  - id: "inodoro-largo-ferrum"
+    name: "Inodoro Largo con Mochila"
+    description: "Inodoro de loza blanco con mochila y asiento incluido"
+    category: "toilets"
+    base_price: 35999
+    currency: "ARS"
+    sku: "INO-LAR-001"
+    attributes:
+      material: "Cerámica"
+      color: "Blanco"
+      dimensions: "70cm x 38cm x 75cm"
+      weight: 45
+      brand-origin: "Nacional"
+      warranty: "5 años"
+      installation-type: "Instalación profesional"
+      water-resistant: true
+      room-type: "Baño"
+      care-instructions: "Usar productos no abrasivos para limpieza"
+    variants:
+      - "color-style"
+    stock: 25
+
+  - id: "canilla-cocina-monocomando"
+    name: "Grifería de Cocina Monocomando"
+    description: "Canilla monocomando con caño alto giratorio"
+    category: "kitchen-faucets"
+    base_price: 12999
+    currency: "ARS"
+    sku: "CAN-COC-001"
+    attributes:
+      material: "Latón"
+      color: "Cromado"
+      finish: "Cromado"
+      weight: 1.2
+      brand-origin: "Nacional"
+      warranty: "3 años"
+      installation-type: "Fácil instalación"
+      water-resistant: true
+      room-type: "Cocina"
+      care-instructions: "Limpiar con paño húmedo, secar después del uso"
+    variants:
+      - "finish-style"
+    stock: 60
+
+  - id: "cano-pvc-110mm"
+    name: "Caño PVC 110mm x 3m"
+    description: "Caño de PVC para desagües cloacales de 110mm de diámetro"
+    category: "pvc-pipes"
+    base_price: 1899
+    currency: "ARS"
+    sku: "CAN-PVC-001"
+    attributes:
+      material: "PVC"
+      color: "Naranja"
+      dimensions: "110mm x 3m"
+      weight: 2.8
+      thickness: 3.2
+      brand-origin: "Nacional"
+      warranty: "10 años"
+      water-resistant: true
+      uv-resistant: false
+      care-instructions: "Almacenar en lugar seco y protegido del sol"
+    variants:
+      - "diameter-length"
+    stock: 120
+
+  # Electricidad
+  - id: "cable-unipolar-2.5mm"
+    name: "Cable Unipolar 2.5mm² x 100m"
+    description: "Cable unipolar de cobre para instalaciones domiciliarias"
+    category: "house-wiring"
+    base_price: 8999
+    currency: "ARS"
+    sku: "CAB-UNI-001"
+    attributes:
+      material: "Cobre"
+      color: "Azul"
+      dimensions: "2.5mm² x 100m"
+      weight: 2.1
+      voltage: "220V"
+      brand-origin: "Nacional"
+      warranty: "2 años"
+      fire-resistant: true
+      safety-certification: "IRAM"
+      care-instructions: "Proteger de humedad y roedores"
+    variants:
+      - "color-section"
+    stock: 75
+
+  - id: "toma-10a-cambre"
+    name: "Tomacorriente 10A con Tapa"
+    description: "Tomacorriente de 10A con tapa de seguridad"
+    category: "outlets"
+    base_price: 899
+    currency: "ARS"
+    sku: "TOM-10A-001"
+    attributes:
+      material: "ABS"
+      color: "Blanco"
+      voltage: "220V"
+      weight: 0.08
+      brand-origin: "Nacional"
+      warranty: "2 años"
+      installation-type: "Empotrado"
+      safety-certification: "IRAM"
+      care-instructions: "Limpiar con paño seco"
+    variants:
+      - "color-current"
+    stock: 200
+
+  - id: "lampara-led-9w"
+    name: "Lámpara LED 9W E27"
+    description: "Lámpara LED de 9W equivalente a 60W incandescente"
+    category: "led-bulbs"
+    base_price: 799
+    currency: "ARS"
+    sku: "LED-09W-001"
+    attributes:
+      material: "Aluminio"
+      color: "Blanco"
+      power: 9
+      voltage: "220V"
+      weight: 0.06
+      brand-origin: "Importado"
+      warranty: "2 años"
+      energy-efficiency: "A++"
+      usage-type: "Iluminación"
+      care-instructions: "No tocar con las manos húmedas"
+    variants:
+      - "power-temperature"
+    stock: 300
+
+  # Pisos y Revestimientos
+  - id: "ceramico-piso-45x45"
+    name: "Cerámico para Piso 45x45cm"
+    description: "Cerámico antideslizante para pisos interiores"
+    category: "floor-tiles"
+    base_price: 899
+    currency: "ARS"
+    sku: "CER-PIS-001"
+    attributes:
+      material: "Cerámica"
+      color: "Beige"
+      dimensions: "45cm x 45cm"
+      weight: 1.8
+      thickness: 8
+      finish: "Mate"
+      brand-origin: "Nacional"
+      warranty: "Sin garantía"
+      anti-slip: true
+      water-resistant: true
+      room-type: "Todos los ambientes"
+      care-instructions: "Limpiar con detergente neutro"
+    variants:
+      - "color-size"
+    stock: 400
+
+  - id: "porcelanato-60x60"
+    name: "Porcelanato Rectificado 60x60cm"
+    description: "Porcelanato esmaltado rectificado simil mármol"
+    category: "porcelain-tiles"
+    base_price: 2499
+    currency: "ARS"
+    sku: "POR-60X-001"
+    attributes:
+      material: "Porcelanato"
+      color: "Gris Claro"
+      dimensions: "60cm x 60cm"
+      weight: 2.5
+      thickness: 10
+      finish: "Brillante"
+      brand-origin: "Nacional"
+      warranty: "Sin garantía"
+      water-resistant: true
+      style: "Moderno"
+      room-type: "Todos los ambientes"
+      care-instructions: "Limpiar con productos específicos para porcelanato"
+    variants:
+      - "color-finish"
+    stock: 180
+
+  - id: "piso-laminado-roble"
+    name: "Piso Laminado Simil Roble 8mm"
+    description: "Piso laminado flotante con sistema click"
+    category: "laminate"
+    base_price: 1899
+    currency: "ARS"
+    sku: "PIS-LAM-001"
+    attributes:
+      material: "Laminado"
+      color: "Roble"
+      dimensions: "19.2cm x 128cm"
+      weight: 1.2
+      thickness: 8
+      finish: "Texturado"
+      brand-origin: "Importado"
+      warranty: "10 años"
+      installation-type: "Fácil instalación"
+      water-resistant: false
+      style: "Clásico"
+      room-type: "Living"
+      care-instructions: "No usar agua en exceso, aspirar regularmente"
+    variants:
+      - "color-thickness"
+    stock: 250
+
+  # Pinturas
+  - id: "latex-interior-blanco"
+    name: "Pintura Látex Interior Blanco 20L"
+    description: "Pintura látex acrílica para interiores de alta calidad"
+    category: "latex-paint"
+    base_price: 8999
+    currency: "ARS"
+    sku: "LAT-INT-001"
+    attributes:
+      material: "Acrílico"
+      color: "Blanco"
+      capacity: 20
+      weight: 24
+      finish: "Mate"
+      brand-origin: "Nacional"
+      warranty: "Sin garantía"
+      eco-friendly: true
+      room-type: "Todos los ambientes"
+      season-recommendation: "Todo el año"
+      care-instructions: "Agitar antes de usar, limpiar herramientas con agua"
+    variants:
+      - "color-finish"
+    stock: 85
+
+  - id: "esmalte-sintetico-negro"
+    name: "Esmalte Sintético Negro 1L"
+    description: "Esmalte sintético brillante para maderas y metales"
+    category: "enamel-paint"
+    base_price: 2999
+    currency: "ARS"
+    sku: "ESM-SIN-001"
+    attributes:
+      material: "Sintético"
+      color: "Negro"
+      capacity: 1
+      weight: 1.2
+      finish: "Brillante"
+      brand-origin: "Nacional"
+      warranty: "Sin garantía"
+      uv-resistant: true
+      usage-type: "Funcional"
+      care-instructions: "Usar en lugares ventilados, limpiar con aguarrás"
+    variants:
+      - "color-capacity"
+    stock: 120
+
+  # Muebles y Decoración
+  - id: "mesa-centro-moderna"
+    name: "Mesa de Centro Moderna"
+    description: "Mesa de centro de vidrio templado con base metálica"
+    category: "living-furniture"
+    base_price: 45999
+    currency: "ARS"
+    sku: "MES-CEN-001"
+    attributes:
+      material: "Vidrio"
+      color: "Transparente"
+      dimensions: "110cm x 60cm x 45cm"
+      weight: 25
+      style: "Moderno"
+      brand-origin: "Nacional"
+      warranty: "1 año"
+      assembly-required: true
+      room-type: "Living"
+      care-instructions: "Limpiar con productos específicos para vidrio"
+    variants:
+      - "size-style"
+    stock: 15
+
+  - id: "sofa-3-cuerpos"
+    name: "Sofá 3 Cuerpos Tapizado"
+    description: "Sofá de 3 cuerpos tapizado en tela con patas de madera"
+    category: "living-furniture"
+    base_price: 125999
+    currency: "ARS"
+    sku: "SOF-3CU-001"
+    attributes:
+      material: "Textil"
+      color: "Gris"
+      dimensions: "200cm x 85cm x 90cm"
+      weight: 65
+      style: "Contemporáneo"
+      brand-origin: "Nacional"
+      warranty: "2 años"
+      assembly-required: true
+      room-type: "Living"
+      care-instructions: "Aspirar regularmente, limpiar manchas con productos específicos"
+    variants:
+      - "color-fabric"
+    stock: 8
+
+  # Jardín
+  - id: "cortadora-cesped-electrica"
+    name: "Cortadora de Césped Eléctrica 1200W"
+    description: "Cortadora de césped eléctrica con bolsa recolectora"
+    category: "power-garden-tools"
+    base_price: 32999
+    currency: "ARS"
+    sku: "COR-CES-001"
+    attributes:
+      material: "ABS"
+      color: "Verde"
+      power: 1200
+      voltage: "220V"
+      weight: 12
+      capacity: 35
+      brand-origin: "Importado"
+      warranty: "1 año"
+      usage-type: "Jardinería"
+      season-recommendation: "Primavera-Verano"
+      care-instructions: "Limpiar después de cada uso, afilar cuchillas regularmente"
+    variants:
+      - "power-cutting-width"
+    stock: 20
+
+  - id: "manguera-jardin-25m"
+    name: "Manguera de Jardín 25m"
+    description: "Manguera flexible para riego con conectores incluidos"
+    category: "watering-systems"
+    base_price: 4999
+    currency: "ARS"
+    sku: "MAN-JAR-001"
+    attributes:
+      material: "PVC"
+      color: "Verde"
+      dimensions: "25m x 1/2 pulgada"
+      weight: 3.2
+      brand-origin: "Nacional"
+      warranty: "1 año"
+      water-resistant: true
+      uv-resistant: true
+      usage-type: "Jardinería"
+      care-instructions: "Drenar después del uso, proteger de heladas"
+    variants:
+      - "length-diameter"
+    stock: 95

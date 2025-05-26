@@ -1,0 +1,644 @@
+business_type: "polirubro"
+attributes:
+  # Atributos Generales (aplicables a múltiples categorías)
+  - id: "marca"
+    name: "Marca"
+    description: "Marca del producto"
+    type: "reference"
+    reference_to: "brands"
+    required: true
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+  
+  - id: "codigo-barra"
+    name: "Código de Barras"
+    description: "Código de barras del producto"
+    type: "string"
+    required: false
+    filterable: false
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "pais-origen"
+    name: "País de Origen"
+    description: "País de origen del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "peso-neto"
+    name: "Peso Neto"
+    description: "Peso neto del producto"
+    type: "number"
+    unit: "g"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "volumen"
+    name: "Volumen"
+    description: "Volumen del producto"
+    type: "number"
+    unit: "ml"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "unidades-por-pack"
+    name: "Unidades por Pack"
+    description: "Cantidad de unidades por pack"
+    type: "integer"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "color"
+    name: "Color"
+    description: "Color del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "material"
+    name: "Material"
+    description: "Material principal del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "dimensiones"
+    name: "Dimensiones"
+    description: "Dimensiones del producto (alto x ancho x profundidad)"
+    type: "string"
+    required: false
+    filterable: false
+    comparable: false
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "edad-recomendada"
+    name: "Edad Recomendada"
+    description: "Edad recomendada para el uso del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "fecha-vencimiento"
+    name: "Fecha de Vencimiento"
+    description: "Fecha de vencimiento del producto"
+    type: "date"
+    required: false
+    filterable: true
+    comparable: false
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "oferta"
+    name: "En Oferta"
+    description: "Indica si el producto está en oferta"
+    type: "boolean"
+    required: false
+    filterable: true
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  # Atributos para Alimentos y Bebidas
+  - id: "ingredientes"
+    name: "Ingredientes"
+    description: "Lista de ingredientes del producto"
+    type: "text"
+    required: false
+    filterable: false
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "informacion-nutricional"
+    name: "Información Nutricional"
+    description: "Información nutricional del producto"
+    type: "text"
+    required: false
+    filterable: false
+    comparable: false
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "calorias"
+    name: "Calorías"
+    description: "Contenido calórico por porción"
+    type: "number"
+    unit: "kcal"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "sin-tacc"
+    name: "Sin TACC"
+    description: "Producto libre de gluten"
+    type: "boolean"
+    required: false
+    filterable: true
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "tipo-leche"
+    name: "Tipo de Leche"
+    description: "Tipo de leche utilizada en el producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "tipo-yerba"
+    name: "Tipo de Yerba"
+    description: "Tipo o variedad de yerba mate"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "tipo-cafe"
+    name: "Tipo de Café"
+    description: "Tipo o variedad de café"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "tipo-te"
+    name: "Tipo de Té"
+    description: "Tipo o variedad de té"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "sabor"
+    name: "Sabor"
+    description: "Sabor del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "tipo-vino"
+    name: "Tipo de Vino"
+    description: "Tipo o variedad de vino"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "variedad-uva"
+    name: "Variedad de Uva"
+    description: "Variedad de uva utilizada en el vino"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "añejamiento"
+    name: "Añejamiento"
+    description: "Tiempo de añejamiento del vino"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "graduacion-alcoholica"
+    name: "Graduación Alcohólica"
+    description: "Graduación alcohólica de la bebida"
+    type: "number"
+    unit: "%"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "tipo-cerveza"
+    name: "Tipo de Cerveza"
+    description: "Tipo o estilo de cerveza"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  # Atributos para Limpieza e Higiene
+  - id: "tipo-producto-limpieza"
+    name: "Tipo de Producto de Limpieza"
+    description: "Tipo de producto de limpieza"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "fragancia"
+    name: "Fragancia"
+    description: "Aroma o fragancia del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "tipo-cabello"
+    name: "Tipo de Cabello"
+    description: "Tipo de cabello para el que está diseñado el producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "tipo-piel"
+    name: "Tipo de Piel"
+    description: "Tipo de piel para la que está diseñado el producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "hipoalergenico"
+    name: "Hipoalergénico"
+    description: "Producto hipoalergénico"
+    type: "boolean"
+    required: false
+    filterable: true
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "biodegradable"
+    name: "Biodegradable"
+    description: "Producto biodegradable"
+    type: "boolean"
+    required: false
+    filterable: true
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  # Atributos para Librería y Papelería
+  - id: "tipo-papel"
+    name: "Tipo de Papel"
+    description: "Tipo de papel utilizado"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "gramaje"
+    name: "Gramaje"
+    description: "Gramaje del papel"
+    type: "number"
+    unit: "g/m²"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "cantidad-hojas"
+    name: "Cantidad de Hojas"
+    description: "Número de hojas en el cuaderno o block"
+    type: "integer"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "tipo-punta"
+    name: "Tipo de Punta"
+    description: "Tipo de punta del lápiz o bolígrafo"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "grosor-trazo"
+    name: "Grosor de Trazo"
+    description: "Grosor del trazo del instrumento de escritura"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  # Atributos para Bazar y Hogar
+  - id: "capacidad"
+    name: "Capacidad"
+    description: "Capacidad del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "apto-microondas"
+    name: "Apto Microondas"
+    description: "Producto apto para microondas"
+    type: "boolean"
+    required: false
+    filterable: true
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "apto-lavavajillas"
+    name: "Apto Lavavajillas"
+    description: "Producto apto para lavavajillas"
+    type: "boolean"
+    required: false
+    filterable: true
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "apto-horno"
+    name: "Apto Horno"
+    description: "Producto apto para horno"
+    type: "boolean"
+    required: false
+    filterable: true
+    comparable: false
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "tipo-mate"
+    name: "Tipo de Mate"
+    description: "Tipo o estilo de mate"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "material-bombilla"
+    name: "Material de Bombilla"
+    description: "Material de la bombilla para mate"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "tipo-termo"
+    name: "Tipo de Termo"
+    description: "Tipo o estilo de termo"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "capacidad-termica"
+    name: "Capacidad Térmica"
+    description: "Capacidad térmica del termo en horas"
+    type: "number"
+    unit: "h"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  # Atributos para Tecnología y Electrónica
+  - id: "compatibilidad"
+    name: "Compatibilidad"
+    description: "Compatibilidad del producto con otros dispositivos"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "potencia"
+    name: "Potencia"
+    description: "Potencia del producto"
+    type: "number"
+    unit: "W"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "voltaje"
+    name: "Voltaje"
+    description: "Voltaje del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  - id: "duracion-bateria"
+    name: "Duración de Batería"
+    description: "Duración de la batería del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "capacidad-almacenamiento"
+    name: "Capacidad de Almacenamiento"
+    description: "Capacidad de almacenamiento del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "conexiones"
+    name: "Conexiones"
+    description: "Tipos de conexiones disponibles en el producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  # Atributos para Bebidas Alcohólicas
+  - id: "denominacion-origen"
+    name: "Denominación de Origen"
+    description: "Denominación de origen del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "cosecha"
+    name: "Cosecha"
+    description: "Año de cosecha del vino"
+    type: "integer"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "temperatura-servicio"
+    name: "Temperatura de Servicio"
+    description: "Temperatura recomendada para servir la bebida"
+    type: "string"
+    required: false
+    filterable: false
+    comparable: false
+    searchable: false
+    display_on_product_page: true
+    display_on_product_listing: false
+
+  # Atributos para Golosinas y Snacks
+  - id: "tipo-chocolate"
+    name: "Tipo de Chocolate"
+    description: "Tipo o variedad de chocolate"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "relleno"
+    name: "Relleno"
+    description: "Tipo de relleno del producto"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true
+
+  - id: "tipo-alfajor"
+    name: "Tipo de Alfajor"
+    description: "Tipo o variedad de alfajor"
+    type: "string"
+    required: false
+    filterable: true
+    comparable: true
+    searchable: true
+    display_on_product_page: true
+    display_on_product_listing: true 

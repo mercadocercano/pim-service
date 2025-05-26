@@ -1,16 +1,141 @@
 business_type: "health-pharmacy"
 categories:
-  # TODO: Implementar categorías para health-pharmacy
-  # Estructura de ejemplo:
-  # - id: "main-category"
-  #   name: "Categoría Principal"
-  #   description: "Descripción de la categoría"
-  #   parent_id: null
-  #   subcategories:
-  #     - id: "subcategory-1"
-  #       name: "Subcategoría 1"
-  #       description: "Descripción de subcategoría"
-  #       subcategories:
-  #         - id: "sub-subcategory-1"
-  #           name: "Sub-subcategoría 1"
-  #           description: "Descripción de sub-subcategoría"
+  - id: "medicamentos"
+    name: "Medicamentos"
+    description: "Productos farmacéuticos y medicamentos"
+    parent_id: null
+    subcategories:
+      - id: "medicamentos-venta-libre"
+        name: "Medicamentos de Venta Libre"
+        description: "Medicamentos que no requieren receta médica"
+        subcategories:
+          - id: "analgesicos"
+            name: "Analgésicos y Antiinflamatorios"
+            description: "Medicamentos para el dolor y la inflamación"
+          - id: "antigripales"
+            name: "Antigripales y Descongestivos"
+            description: "Medicamentos para resfríos y gripe"
+          - id: "digestivos"
+            name: "Digestivos y Antiácidos"
+            description: "Medicamentos para problemas digestivos"
+      - id: "medicamentos-receta"
+        name: "Medicamentos Bajo Receta"
+        description: "Medicamentos que requieren prescripción médica"
+        subcategories:
+          - id: "antibioticos"
+            name: "Antibióticos"
+            description: "Medicamentos antibióticos con receta"
+          - id: "cronicos"
+            name: "Medicamentos Crónicos"
+            description: "Medicamentos para tratamientos continuos"
+
+  - id: "cuidado-personal"
+    name: "Cuidado Personal"
+    description: "Productos para el cuidado e higiene personal"
+    parent_id: null
+    subcategories:
+      - id: "dermocosmetica"
+        name: "Dermocosmética"
+        description: "Productos dermatológicos y cosméticos"
+        subcategories:
+          - id: "facial"
+            name: "Cuidado Facial"
+            description: "Productos para el cuidado de la piel del rostro"
+          - id: "corporal"
+            name: "Cuidado Corporal"
+            description: "Productos para el cuidado de la piel del cuerpo"
+      - id: "higiene-personal"
+        name: "Higiene Personal"
+        description: "Productos de higiene diaria"
+        subcategories:
+          - id: "higiene-oral"
+            name: "Higiene Oral"
+            description: "Productos para el cuidado bucal"
+          - id: "higiene-intima"
+            name: "Higiene Íntima"
+            description: "Productos para la higiene íntima"
+      - id: "perfumes-cosmeticos"
+        name: "Perfumes y Cosméticos"
+        description: "Fragancias y productos de maquillaje"
+        subcategories:
+          - id: "fragancias"
+            name: "Fragancias"
+            description: "Perfumes, colonias y aguas de tocador"
+          - id: "maquillaje"
+            name: "Maquillaje"
+            description: "Productos de maquillaje y cosmética decorativa"
+          - id: "accesorios-cosmetica"
+            name: "Accesorios de Cosmética"
+            description: "Brochas, esponjas y accesorios de maquillaje"
+
+  - id: "mama-bebe"
+    name: "Mamá y Bebé"
+    description: "Productos para el cuidado materno e infantil"
+    parent_id: null
+    subcategories:
+      - id: "bebe"
+        name: "Cuidado del Bebé"
+        description: "Productos específicos para bebés"
+        subcategories:
+          - id: "panales"
+            name: "Pañales y Toallitas"
+            description: "Productos para la higiene del bebé"
+          - id: "alimentacion-bebe"
+            name: "Alimentación Infantil"
+            description: "Productos alimenticios para bebés"
+      - id: "maternidad"
+        name: "Maternidad"
+        description: "Productos para embarazo y lactancia"
+
+  - id: "ortopedia"
+    name: "Ortopedia y Rehabilitación"
+    description: "Productos ortopédicos y de rehabilitación"
+    parent_id: null
+    subcategories:
+      - id: "ortopedia-soporte"
+        name: "Soportes y Fajas"
+        description: "Productos de soporte ortopédico"
+      - id: "movilidad"
+        name: "Ayudas para Movilidad"
+        description: "Productos para asistencia en la movilidad"
+
+  - id: "suplementos"
+    name: "Suplementos y Vitaminas"
+    description: "Suplementos dietarios y vitaminas"
+    parent_id: null
+    subcategories:
+      - id: "vitaminas"
+        name: "Vitaminas y Minerales"
+        description: "Suplementos vitamínicos y minerales"
+      - id: "suplementos-deportivos"
+        name: "Suplementos Deportivos"
+        description: "Suplementos para deportistas"
+      - id: "suplementos-especificos"
+        name: "Suplementos Específicos"
+        description: "Suplementos para necesidades específicas"
+
+  - id: "equipamiento-medico"
+    name: "Equipamiento Médico"
+    description: "Equipos y dispositivos médicos"
+    parent_id: null
+    subcategories:
+      - id: "diagnostico"
+        name: "Diagnóstico y Medición"
+        description: "Equipos para diagnóstico y medición"
+        subcategories:
+          - id: "presion-arterial"
+            name: "Control de Presión"
+            description: "Dispositivos para medir la presión arterial"
+          - id: "glucometros"
+            name: "Control de Glucosa"
+            description: "Equipos para medir glucosa en sangre"
+      - id: "insumos-medicos"
+        name: "Insumos Médicos"
+        description: "Materiales y suministros médicos"
+        subcategories:
+          - id: "vendajes"
+            name: "Vendajes y Curaciones"
+            description: "Productos para el cuidado de heridas"
+          - id: "material-descartable"
+            name: "Material Descartable"
+            description: "Insumos médicos de un solo uso"

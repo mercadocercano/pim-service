@@ -91,188 +91,349 @@ variants:
         sku_suffix: "XL-5KG"
 
   - id: "color-only"
-    name: "Solo Color"
-    description: "Variante únicamente por color"
+    name: "Variante por Color"
+    description: "Variante que solo modifica el color del producto"
     attributes:
       - "color"
     combinations:
       - color: "Negro"
-        sku_suffix: "BLK"
+        sku_suffix: "NGR"
       - color: "Blanco"
-        sku_suffix: "WHT"
-      - color: "Gris"
-        sku_suffix: "GRY"
+        sku_suffix: "BLC"
       - color: "Rojo"
-        sku_suffix: "RED"
+        sku_suffix: "RJO"
       - color: "Azul"
-        sku_suffix: "BLU"
+        sku_suffix: "AZL"
       - color: "Verde"
-        sku_suffix: "GRN"
-      - color: "Amarillo"
-        sku_suffix: "YLW"
-      - color: "Rosa"
-        sku_suffix: "PNK"
-      - color: "Morado"
-        sku_suffix: "PRP"
-      - color: "Marrón"
-        sku_suffix: "BRN"
+        sku_suffix: "VRD"
 
   - id: "size-only"
-    name: "Solo Talla"
-    description: "Variante únicamente por talla"
+    name: "Variante por Tamaño"
+    description: "Variante que solo modifica el tamaño del producto"
     attributes:
-      - "size"
+      - "talle"
     combinations:
-      - size: "XS"
+      - talle: "XS"
         sku_suffix: "XS"
-      - size: "S"
+      - talle: "S"
         sku_suffix: "S"
-      - size: "M"
+      - talle: "M"
         sku_suffix: "M"
-      - size: "L"
+      - talle: "L"
         sku_suffix: "L"
-      - size: "XL"
+      - talle: "XL"
         sku_suffix: "XL"
-      - size: "XXL"
+      - talle: "XXL"
         sku_suffix: "XXL"
-      - size: "XXXL"
-        sku_suffix: "XXXL"
 
-  - id: "material-only"
-    name: "Solo Material"
-    description: "Variante únicamente por material"
+  - id: "color-size"
+    name: "Variante por Color y Tamaño"
+    description: "Variante que modifica tanto el color como el tamaño del producto"
     attributes:
-      - "material"
+      - "color"
+      - "talle"
     combinations:
-      - material: "Algodón"
-        sku_suffix: "COT"
-      - material: "Poliéster"
-        sku_suffix: "POL"
-      - material: "Lana"
-        sku_suffix: "WOL"
-      - material: "Cuero"
-        sku_suffix: "LTH"
-      - material: "Metal"
-        sku_suffix: "MTL"
-      - material: "Plástico"
-        sku_suffix: "PLS"
-      - material: "Madera"
-        sku_suffix: "WOD"
-      - material: "Vidrio"
-        sku_suffix: "GLS"
+      - color: "Negro"
+        talle: "S"
+        sku_suffix: "NGR-S"
+      - color: "Negro"
+        talle: "M"
+        sku_suffix: "NGR-M"
+      - color: "Negro"
+        talle: "L"
+        sku_suffix: "NGR-L"
+      - color: "Blanco"
+        talle: "S"
+        sku_suffix: "BLC-S"
+      - color: "Blanco"
+        talle: "M"
+        sku_suffix: "BLC-M"
+      - color: "Blanco"
+        talle: "L"
+        sku_suffix: "BLC-L"
+      - color: "Azul"
+        talle: "S"
+        sku_suffix: "AZL-S"
+      - color: "Azul"
+        talle: "M"
+        sku_suffix: "AZL-M"
+      - color: "Azul"
+        talle: "L"
+        sku_suffix: "AZL-L"
 
-  - id: "fragrance-texture"
-    name: "Fragancia y Textura"
-    description: "Variante por fragancia y textura (productos de belleza)"
+  - id: "calzado-argentino"
+    name: "Variante de Calzado Argentino"
+    description: "Variante específica para calzado con talles argentinos"
     attributes:
-      - "fragrance"
-      - "texture"
+      - "talle"
+      - "color"
     combinations:
-      - fragrance: "Floral"
-        texture: "Cremosa"
-        sku_suffix: "FLR-CRM"
-      - fragrance: "Floral"
-        texture: "Líquida"
-        sku_suffix: "FLR-LIQ"
-      - fragrance: "Frutal"
-        texture: "Cremosa"
-        sku_suffix: "FRT-CRM"
-      - fragrance: "Frutal"
-        texture: "Líquida"
-        sku_suffix: "FRT-LIQ"
-      - fragrance: "Cítrico"
-        texture: "Gel"
-        sku_suffix: "CIT-GEL"
-      - fragrance: "Cítrico"
-        texture: "Espuma"
-        sku_suffix: "CIT-FOM"
-      - fragrance: "Sin fragancia"
-        texture: "Cremosa"
-        sku_suffix: "UNS-CRM"
-      - fragrance: "Sin fragancia"
-        texture: "Líquida"
-        sku_suffix: "UNS-LIQ"
+      - talle: 36
+        color: "Negro"
+        sku_suffix: "36-NGR"
+      - talle: 37
+        color: "Negro"
+        sku_suffix: "37-NGR"
+      - talle: 38
+        color: "Negro"
+        sku_suffix: "38-NGR"
+      - talle: 39
+        color: "Negro"
+        sku_suffix: "39-NGR"
+      - talle: 40
+        color: "Negro"
+        sku_suffix: "40-NGR"
+      - talle: 41
+        color: "Negro"
+        sku_suffix: "41-NGR"
+      - talle: 42
+        color: "Negro"
+        sku_suffix: "42-NGR"
+      - talle: 43
+        color: "Negro"
+        sku_suffix: "43-NGR"
+      - talle: 44
+        color: "Negro"
+        sku_suffix: "44-NGR"
+      - talle: 36
+        color: "Blanco"
+        sku_suffix: "36-BLC"
+      - talle: 37
+        color: "Blanco"
+        sku_suffix: "37-BLC"
+      - talle: 38
+        color: "Blanco"
+        sku_suffix: "38-BLC"
+      - talle: 39
+        color: "Blanco"
+        sku_suffix: "39-BLC"
+      - talle: 40
+        color: "Blanco"
+        sku_suffix: "40-BLC"
+      - talle: 41
+        color: "Blanco"
+        sku_suffix: "41-BLC"
+      - talle: 42
+        color: "Blanco"
+        sku_suffix: "42-BLC"
+      - talle: 43
+        color: "Blanco"
+        sku_suffix: "43-BLC"
+      - talle: 44
+        color: "Blanco"
+        sku_suffix: "44-BLC"
 
-  - id: "gender-age"
-    name: "Género y Edad"
-    description: "Variante por género y grupo de edad"
+  - id: "termo-stanley"
+    name: "Variante de Termo Stanley"
+    description: "Variante por color y capacidad para termos Stanley"
     attributes:
-      - "gender"
-      - "age-group"
+      - "color"
+      - "capacidad"
     combinations:
-      - gender: "Masculino"
-        age-group: "Adultos (18-64 años)"
-        sku_suffix: "M-ADT"
-      - gender: "Femenino"
-        age-group: "Adultos (18-64 años)"
-        sku_suffix: "F-ADT"
-      - gender: "Niños"
-        age-group: "Niños (3-12 años)"
-        sku_suffix: "B-KID"
-      - gender: "Niñas"
-        age-group: "Niños (3-12 años)"
-        sku_suffix: "G-KID"
-      - gender: "Unisex"
-        age-group: "Adolescentes (13-17 años)"
-        sku_suffix: "U-TEN"
-      - gender: "Unisex"
-        age-group: "Adultos (18-64 años)"
-        sku_suffix: "U-ADT"
+      - color: "Verde"
+        capacidad: 1000
+        sku_suffix: "VRD-1L"
+      - color: "Negro"
+        capacidad: 1000
+        sku_suffix: "NGR-1L"
+      - color: "Azul"
+        capacidad: 1000
+        sku_suffix: "AZL-1L"
+      - color: "Rojo"
+        capacidad: 1000
+        sku_suffix: "RJO-1L"
+      - color: "Verde"
+        capacidad: 750
+        sku_suffix: "VRD-750"
+      - color: "Negro"
+        capacidad: 750
+        sku_suffix: "NGR-750"
+      - color: "Azul"
+        capacidad: 750
+        sku_suffix: "AZL-750"
+      - color: "Rojo"
+        capacidad: 750
+        sku_suffix: "RJO-750"
 
-  - id: "warranty-origin"
-    name: "Garantía y Origen"
-    description: "Variante por período de garantía y origen"
+  - id: "yerba-mate"
+    name: "Variante de Yerba Mate"
+    description: "Variante por tipo y peso para yerba mate"
     attributes:
-      - "warranty"
-      - "brand-origin"
+      - "tipo"
+      - "peso_contenido"
     combinations:
-      - warranty: "1 año"
-        brand-origin: "Nacional"
-        sku_suffix: "1Y-NAT"
-      - warranty: "1 año"
-        brand-origin: "Importado"
-        sku_suffix: "1Y-IMP"
-      - warranty: "2 años"
-        brand-origin: "Nacional"
-        sku_suffix: "2Y-NAT"
-      - warranty: "2 años"
-        brand-origin: "Importado"
-        sku_suffix: "2Y-IMP"
-      - warranty: "3 años"
-        brand-origin: "Nacional"
-        sku_suffix: "3Y-NAT"
-      - warranty: "3 años"
-        brand-origin: "Importado"
-        sku_suffix: "3Y-IMP"
+      - tipo: "Tradicional"
+        peso_contenido: 500
+        sku_suffix: "TRAD-500"
+      - tipo: "Tradicional"
+        peso_contenido: 1000
+        sku_suffix: "TRAD-1KG"
+      - tipo: "Suave"
+        peso_contenido: 500
+        sku_suffix: "SUAV-500"
+      - tipo: "Suave"
+        peso_contenido: 1000
+        sku_suffix: "SUAV-1KG"
+      - tipo: "Con Palo"
+        peso_contenido: 500
+        sku_suffix: "PALO-500"
+      - tipo: "Con Palo"
+        peso_contenido: 1000
+        sku_suffix: "PALO-1KG"
+      - tipo: "Despalada"
+        peso_contenido: 500
+        sku_suffix: "DESP-500"
+      - tipo: "Despalada"
+        peso_contenido: 1000
+        sku_suffix: "DESP-1KG"
 
-  - id: "season-gender"
-    name: "Temporada y Género"
-    description: "Variante por temporada y género"
+  - id: "alfajores"
+    name: "Variante de Alfajores"
+    description: "Variante por tipo y cantidad para alfajores"
     attributes:
-      - "season"
-      - "gender"
+      - "sabores"
+      - "contenido"
     combinations:
-      - season: "Primavera"
-        gender: "Masculino"
-        sku_suffix: "SPR-M"
-      - season: "Primavera"
-        gender: "Femenino"
-        sku_suffix: "SPR-F"
-      - season: "Verano"
-        gender: "Masculino"
-        sku_suffix: "SUM-M"
-      - season: "Verano"
-        gender: "Femenino"
-        sku_suffix: "SUM-F"
-      - season: "Otoño"
-        gender: "Masculino"
-        sku_suffix: "AUT-M"
-      - season: "Otoño"
-        gender: "Femenino"
-        sku_suffix: "AUT-F"
-      - season: "Invierno"
-        gender: "Masculino"
-        sku_suffix: "WIN-M"
-      - season: "Invierno"
-        gender: "Femenino"
-        sku_suffix: "WIN-F" 
+      - sabores: ["Chocolate Negro"]
+        contenido: 6
+        sku_suffix: "CHOC-6"
+      - sabores: ["Chocolate Negro"]
+        contenido: 12
+        sku_suffix: "CHOC-12"
+      - sabores: ["Chocolate Blanco"]
+        contenido: 6
+        sku_suffix: "BLAN-6"
+      - sabores: ["Chocolate Blanco"]
+        contenido: 12
+        sku_suffix: "BLAN-12"
+      - sabores: ["Dulce de Leche"]
+        contenido: 6
+        sku_suffix: "DDL-6"
+      - sabores: ["Dulce de Leche"]
+        contenido: 12
+        sku_suffix: "DDL-12"
+      - sabores: ["Chocolate Negro", "Chocolate Blanco", "Dulce de Leche"]
+        contenido: 6
+        sku_suffix: "MIX-6"
+      - sabores: ["Chocolate Negro", "Chocolate Blanco", "Dulce de Leche"]
+        contenido: 12
+        sku_suffix: "MIX-12"
+
+  - id: "milanesas"
+    name: "Variante de Milanesas Congeladas"
+    description: "Variante por tipo y cantidad para milanesas congeladas"
+    attributes:
+      - "tipo"
+      - "porciones"
+    combinations:
+      - tipo: "Carne"
+        porciones: 4
+        sku_suffix: "CARN-4"
+      - tipo: "Carne"
+        porciones: 8
+        sku_suffix: "CARN-8"
+      - tipo: "Pollo"
+        porciones: 4
+        sku_suffix: "POLL-4"
+      - tipo: "Pollo"
+        porciones: 8
+        sku_suffix: "POLL-8"
+      - tipo: "Vegetariano"
+        porciones: 4
+        sku_suffix: "VEG-4"
+      - tipo: "Vegetariano"
+        porciones: 8
+        sku_suffix: "VEG-8"
+
+  - id: "cafe-argentino"
+    name: "Variante de Café Argentino"
+    description: "Variante por tipo y peso para café argentino"
+    attributes:
+      - "tipo"
+      - "intensidad"
+      - "peso_contenido"
+    combinations:
+      - tipo: "Molido"
+        intensidad: "Suave"
+        peso_contenido: 250
+        sku_suffix: "MOL-SUA-250"
+      - tipo: "Molido"
+        intensidad: "Suave"
+        peso_contenido: 500
+        sku_suffix: "MOL-SUA-500"
+      - tipo: "Molido"
+        intensidad: "Media"
+        peso_contenido: 250
+        sku_suffix: "MOL-MED-250"
+      - tipo: "Molido"
+        intensidad: "Media"
+        peso_contenido: 500
+        sku_suffix: "MOL-MED-500"
+      - tipo: "Molido"
+        intensidad: "Fuerte"
+        peso_contenido: 250
+        sku_suffix: "MOL-FUE-250"
+      - tipo: "Molido"
+        intensidad: "Fuerte"
+        peso_contenido: 500
+        sku_suffix: "MOL-FUE-500"
+      - tipo: "En Grano"
+        intensidad: "Media"
+        peso_contenido: 250
+        sku_suffix: "GRA-MED-250"
+      - tipo: "En Grano"
+        intensidad: "Media"
+        peso_contenido: 500
+        sku_suffix: "GRA-MED-500"
+      - tipo: "En Grano"
+        intensidad: "Fuerte"
+        peso_contenido: 250
+        sku_suffix: "GRA-FUE-250"
+      - tipo: "En Grano"
+        intensidad: "Fuerte"
+        peso_contenido: 500
+        sku_suffix: "GRA-FUE-500"
+
+  - id: "gaseosas-argentinas"
+    name: "Variante de Gaseosas Argentinas"
+    description: "Variante por sabor y contenido para gaseosas"
+    attributes:
+      - "sabor"
+      - "contenido"
+    combinations:
+      - sabor: "Cola"
+        contenido: 500
+        sku_suffix: "COL-500"
+      - sabor: "Cola"
+        contenido: 1500
+        sku_suffix: "COL-1.5"
+      - sabor: "Cola"
+        contenido: 2250
+        sku_suffix: "COL-2.25"
+      - sabor: "Naranja"
+        contenido: 500
+        sku_suffix: "NAR-500"
+      - sabor: "Naranja"
+        contenido: 1500
+        sku_suffix: "NAR-1.5"
+      - sabor: "Naranja"
+        contenido: 2250
+        sku_suffix: "NAR-2.25"
+      - sabor: "Lima Limón"
+        contenido: 500
+        sku_suffix: "LIM-500"
+      - sabor: "Lima Limón"
+        contenido: 1500
+        sku_suffix: "LIM-1.5"
+      - sabor: "Lima Limón"
+        contenido: 2250
+        sku_suffix: "LIM-2.25"
+      - sabor: "Pomelo"
+        contenido: 500
+        sku_suffix: "POM-500"
+      - sabor: "Pomelo"
+        contenido: 1500
+        sku_suffix: "POM-1.5"
+      - sabor: "Pomelo"
+        contenido: 2250
+        sku_suffix: "POM-2.25" 

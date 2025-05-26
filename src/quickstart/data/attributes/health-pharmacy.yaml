@@ -1,35 +1,262 @@
 business_type: "health-pharmacy"
 attributes:
-  # TODO: Implementar atributos para health-pharmacy
-  # Estructura de ejemplo:
-  # - id: "color"
-  #   name: "Color"
-  #   type: "select"
-  #   required: false
-  #   description: "Color del producto"
-  #   values:
-  #     - "Rojo"
-  #     - "Azul"
-  #     - "Verde"
-  #
-  # - id: "weight"
-  #   name: "Peso"
-  #   type: "number"
-  #   required: false
-  #   description: "Peso del producto en gramos"
-  #   unit: "g"
-  #   min_value: 0
-  #   max_value: 10000
-  #
-  # - id: "description"
-  #   name: "Descripción Detallada"
-  #   type: "text"
-  #   required: false
-  #   description: "Descripción detallada del producto"
-  #   placeholder: "Ingrese descripción..."
-  #
-  # - id: "premium"
-  #   name: "Producto Premium"
-  #   type: "boolean"
-  #   required: false
-  #   description: "Indica si es un producto premium"
+  # Atributos Generales
+  - id: "laboratorio"
+    name: "Laboratorio"
+    description: "Laboratorio fabricante"
+    type: "text"
+    required: true
+    searchable: true
+    filterable: true
+
+  - id: "registro_sanitario"
+    name: "Registro Sanitario"
+    description: "Número de registro ANMAT"
+    type: "text"
+    required: true
+    searchable: true
+    filterable: true
+
+  # Atributos Específicos para Medicamentos
+  - id: "principio_activo"
+    name: "Principio Activo"
+    description: "Componente activo principal del medicamento"
+    type: "text"
+    required: true
+    searchable: true
+    filterable: true
+
+  - id: "concentracion"
+    name: "Concentración"
+    description: "Concentración del principio activo"
+    type: "text"
+    required: true
+    searchable: true
+    filterable: true
+
+  - id: "forma_farmaceutica"
+    name: "Forma Farmacéutica"
+    description: "Presentación del medicamento"
+    type: "select"
+    options:
+      - "Comprimidos"
+      - "Cápsulas"
+      - "Jarabe"
+      - "Gotas"
+      - "Crema"
+      - "Gel"
+      - "Inyectable"
+      - "Parches"
+      - "Óvulos"
+      - "Suspensión"
+    required: true
+    filterable: true
+
+  - id: "requiere_receta"
+    name: "Requiere Receta"
+    description: "Indica si el medicamento requiere receta médica"
+    type: "boolean"
+    required: true
+    filterable: true
+
+  - id: "condicion_venta"
+    name: "Condición de Venta"
+    description: "Condición de venta del medicamento"
+    type: "select"
+    options:
+      - "Venta Libre"
+      - "Bajo Receta"
+      - "Bajo Receta Archivada"
+      - "Bajo Receta y Decreto"
+    required: true
+    filterable: true
+
+  # Atributos de Almacenamiento
+  - id: "condicion_conservacion"
+    name: "Condición de Conservación"
+    description: "Condiciones requeridas para el almacenamiento"
+    type: "select"
+    options:
+      - "Temperatura Ambiente"
+      - "Refrigerado (2-8°C)"
+      - "Congelado"
+      - "Proteger de la Luz"
+    required: true
+    filterable: true
+
+  - id: "vencimiento"
+    name: "Vencimiento"
+    description: "Fecha de vencimiento del producto"
+    type: "date"
+    required: true
+    filterable: true
+
+  # Atributos de Presentación
+  - id: "presentacion"
+    name: "Presentación"
+    description: "Presentación comercial del producto"
+    type: "text"
+    required: true
+    searchable: true
+
+  - id: "contenido"
+    name: "Contenido"
+    description: "Cantidad de unidades o volumen del producto"
+    type: "text"
+    required: true
+    filterable: true
+
+  # Atributos de Seguridad y Uso
+  - id: "contraindicaciones"
+    name: "Contraindicaciones"
+    description: "Principales contraindicaciones del producto"
+    type: "text_area"
+    required: false
+
+  - id: "efectos_adversos"
+    name: "Efectos Adversos"
+    description: "Principales efectos adversos"
+    type: "text_area"
+    required: false
+
+  - id: "uso_pediatrico"
+    name: "Uso Pediátrico"
+    description: "Indica si es apto para uso pediátrico"
+    type: "boolean"
+    required: true
+    filterable: true
+
+  # Atributos Comerciales
+  - id: "codigo_barras"
+    name: "Código de Barras"
+    description: "Código de barras del producto"
+    type: "text"
+    required: true
+    searchable: true
+
+  - id: "codigo_interno"
+    name: "Código Interno"
+    description: "Código interno del producto"
+    type: "text"
+    required: true
+    searchable: true
+
+  - id: "cobertura_obra_social"
+    name: "Cobertura Obra Social"
+    description: "Indica si tiene cobertura de obra social"
+    type: "boolean"
+    required: true
+    filterable: true
+
+  - id: "porcentaje_descuento"
+    name: "Porcentaje de Descuento"
+    description: "Porcentaje de descuento aplicable"
+    type: "number"
+    required: false
+    filterable: true
+
+  # Atributos Específicos para Equipamiento Médico
+  - id: "garantia"
+    name: "Garantía"
+    description: "Período de garantía del equipo"
+    type: "text"
+    required: false
+
+  - id: "certificacion"
+    name: "Certificación"
+    description: "Certificaciones del equipo médico"
+    type: "text"
+    required: false
+    searchable: true
+
+  # Atributos para Productos de Cuidado Personal
+  - id: "tipo_piel"
+    name: "Tipo de Piel"
+    description: "Tipo de piel recomendado"
+    type: "select"
+    options:
+      - "Normal"
+      - "Seca"
+      - "Grasa"
+      - "Mixta"
+      - "Sensible"
+    required: false
+    filterable: true
+
+  - id: "hipoalergenico"
+    name: "Hipoalergénico"
+    description: "Indica si el producto es hipoalergénico"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  # Atributos para Perfumes y Cosméticos
+  - id: "tipo_fragancia"
+    name: "Tipo de Fragancia"
+    description: "Clasificación de la fragancia"
+    type: "select"
+    options:
+      - "Eau de Parfum"
+      - "Eau de Toilette"
+      - "Eau de Cologne"
+      - "Perfume"
+      - "Body Splash"
+    required: false
+    filterable: true
+
+  - id: "familia_olfativa"
+    name: "Familia Olfativa"
+    description: "Familia olfativa de la fragancia"
+    type: "select"
+    options:
+      - "Floral"
+      - "Oriental"
+      - "Amaderada"
+      - "Cítrica"
+      - "Aromática"
+      - "Fougère"
+    required: false
+    filterable: true
+
+  - id: "genero"
+    name: "Género"
+    description: "Género al que está dirigido el producto"
+    type: "select"
+    options:
+      - "Femenino"
+      - "Masculino"
+      - "Unisex"
+    required: false
+    filterable: true
+
+  - id: "volumen"
+    name: "Volumen"
+    description: "Volumen del producto en ml"
+    type: "number"
+    required: false
+    filterable: true
+
+  - id: "acabado"
+    name: "Acabado"
+    description: "Tipo de acabado del producto cosmético"
+    type: "select"
+    options:
+      - "Mate"
+      - "Satinado"
+      - "Brillante"
+      - "Metalizado"
+      - "Natural"
+    required: false
+    filterable: true
+
+  - id: "duracion"
+    name: "Duración"
+    description: "Duración aproximada del producto"
+    type: "select"
+    options:
+      - "Corta (2-4 horas)"
+      - "Media (4-6 horas)"
+      - "Larga (6-8 horas)"
+      - "Extra Larga (8+ horas)"
+    required: false
+    filterable: true

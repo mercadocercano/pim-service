@@ -380,4 +380,264 @@ products:
       water-resistant: true
     variants:
       - "color-only"
-    stock: 95 
+    stock: 95
+
+  - id: "mate-stanley-verde"
+    name: "Termo Stanley Classic 1L Verde + Mate Ready"
+    description: "Set de termo Stanley verde 1 litro de alta calidad con conservación de temperatura por 24hs y mate ready, ideal para tomar mate en cualquier lugar. Incluye bombilla y sistema de cebado automático."
+    category: "hogar-cocina"
+    base_price: 85000
+    currency: "ARS"
+    sku: "ST-CL-1L-MR-VER"
+    brand: "stanley"
+    attributes:
+      color: "Verde"
+      material: "Acero inoxidable"
+      capacidad: 1000
+      resistente_lavavajillas: true
+      garantia: "Garantía de por vida"
+      
+  - id: "yerba-rosamonte-1kg"
+    name: "Yerba Mate Rosamonte Tradicional 1kg"
+    description: "Yerba mate tradicional argentina elaborada en Misiones, con sabor intenso y marcado. Ideal para el mate diario."
+    category: "alimentos-bebidas"
+    base_price: 3500
+    currency: "ARS"
+    sku: "YM-RM-TRAD-1KG"
+    brand: "rosamonte"
+    attributes:
+      peso_contenido: 1000
+      tipo: "Tradicional"
+      origen: "Misiones, Argentina"
+      
+  - id: "alfajores-havanna-mixtos"
+    name: "Caja de Alfajores Havanna Mixtos x12"
+    description: "Caja de 12 alfajores Havanna surtidos, incluye alfajores de chocolate negro, blanco y dulce de leche. El clásico regalo argentino por excelencia."
+    category: "alimentos-bebidas"
+    base_price: 9800
+    currency: "ARS"
+    sku: "HV-ALF-MIX-12"
+    brand: "havanna"
+    attributes:
+      contenido: 12
+      peso_contenido: 600
+      sabores: ["Chocolate Negro", "Chocolate Blanco", "Dulce de Leche"]
+      
+  - id: "zapatillas-topper-tennis"
+    name: "Zapatillas Topper Tennis Classic Blancas"
+    description: "Zapatillas deportivas clásicas Topper para tenis, fabricadas en Argentina. Modelo icónico con suela de goma resistente y parte superior de cuero sintético."
+    category: "calzado-deportivo"
+    base_price: 26500
+    currency: "ARS"
+    sku: "TP-TEN-CL-BL"
+    brand: "topper"
+    attributes:
+      color: "Blanco"
+      material: "Cuero sintético"
+      talle: 42
+      genero: "Unisex"
+      
+  - id: "milanesas-granja-del-sol"
+    name: "Milanesas de Soja Granja del Sol x4"
+    description: "Pack de 4 milanesas de soja premium, listas para hornear o freír. Opción vegetariana rápida y sabrosa, muy popular en Argentina."
+    category: "alimentos-bebidas"
+    base_price: 2800
+    currency: "ARS"
+    sku: "GDS-MIL-SOJ-4"
+    brand: "granja-del-sol"
+    attributes:
+      peso_contenido: 330
+      porciones: 4
+      tipo: "Vegetariano"
+      tiempo_coccion: 8
+      
+  - id: "remera-narrow-lisa"
+    name: "Remera Narrow Básica Cuello Redondo"
+    description: "Remera básica de algodón peinado de alta calidad, confeccionada en Argentina. Ideal para uso diario, corte regular fit."
+    category: "ropa-masculina"
+    base_price: 12500
+    currency: "ARS"
+    sku: "NW-REM-BAS-AZ"
+    brand: "narrow"
+    attributes:
+      color: "Azul marino"
+      material: "100% Algodón"
+      talle: "M"
+      tipo_cuello: "Redondo"
+      
+  - id: "camisa-cardon-cuadros"
+    name: "Camisa Cardón Cuadros Manga Larga"
+    description: "Camisa de manga larga a cuadros estilo campestre, 100% algodón. Ideal para el día a día o salidas al campo. Confeccionada en Argentina."
+    category: "ropa-masculina"
+    base_price: 32000
+    currency: "ARS"
+    sku: "CD-CAM-CUA-ML"
+    brand: "cardón"
+    attributes:
+      color: "Azul y rojo"
+      material: "100% Algodón"
+      talle: "L"
+      tipo_manga: "Larga"
+      estampado: "Cuadros"
+      
+  - id: "vestido-rapsodia-floral"
+    name: "Vestido Rapsodia Bohemio Floral"
+    description: "Vestido largo estilo bohemio con estampado floral y detalles bordados a mano. Diseño exclusivo de Rapsodia, confeccionado en Argentina."
+    category: "ropa-femenina"
+    base_price: 45000
+    currency: "ARS"
+    sku: "RP-VST-BOH-FL"
+    brand: "rapsodia"
+    attributes:
+      color: "Multicolor"
+      material: "Viscosa"
+      talle: "M"
+      largo: "Largo"
+      estampado: "Floral"
+      temporada: "Primavera/Verano"
+      
+  - id: "gaseosa-manaos-cola"
+    name: "Gaseosa Manaos Cola 2.25L"
+    description: "Bebida gaseosa sabor cola de la marca argentina Manaos. Refrescante y accesible, ideal para acompañar comidas."
+    category: "alimentos-bebidas"
+    base_price: 1200
+    currency: "ARS"
+    sku: "MN-GAS-COL-225"
+    brand: "manaos"
+    attributes:
+      sabor: "Cola"
+      contenido: 2250
+      retornable: false
+      calorias: 220
+      
+  - id: "cafe-cabrales-molido"
+    name: "Café Cabrales Molido Torrado 500gr"
+    description: "Café molido torrado tradicional argentino, ideal para preparar en cafetera italiana o filtro. Aroma intenso y sabor equilibrado."
+    category: "alimentos-bebidas"
+    base_price: 3200
+    currency: "ARS"
+    sku: "CB-CAF-MOL-500"
+    brand: "cabrales"
+    attributes:
+      peso_contenido: 500
+      tipo: "Molido"
+      intensidad: "Media"
+      tueste: "Torrado"
+      
+  - id: "tv-noblex-smart"
+    name: "Smart TV Noblex 50\" 4K DK50X7550"
+    description: "Televisor Smart de 50 pulgadas con resolución 4K, sistema operativo VIDAA, HDR y múltiples conexiones. Fabricado en Argentina con garantía oficial."
+    category: "electrodomesticos"
+    base_price: 329000
+    currency: "ARS"
+    sku: "NX-TV-50-4K"
+    brand: "noblex"
+    attributes:
+      tamaño_pantalla: 50
+      resolucion: "4K Ultra HD"
+      tipo_pantalla: "LED"
+      smart_tv: true
+      conexiones: ["HDMI", "USB", "Bluetooth", "Wi-Fi"]
+      
+  - id: "aire-bgh-split"
+    name: "Aire Acondicionado BGH Split Silent Air 3200W Frío/Calor"
+    description: "Aire acondicionado Split BGH de 3200W con tecnología Inverter, bajo consumo energético y modo eco. Fabricado en Argentina."
+    category: "electrodomesticos"
+    base_price: 480000
+    currency: "ARS"
+    sku: "BGH-AA-3200-FC"
+    brand: "bgh"
+    attributes:
+      potencia_refrigeracion: 3200
+      tecnologia: "Inverter"
+      eficiencia_energetica: "A"
+      tipo: "Split"
+      refrigerante: "R410A"
+      superficie_recomendada: 30
+      
+  - id: "parrilla-peabody-electrica"
+    name: "Parrilla Eléctrica Peabody PE-AG2200"
+    description: "Parrilla eléctrica de mesa con superficie antiadherente, control de temperatura y bandeja recolectora. Ideal para departamentos sin salida al exterior."
+    category: "electrodomesticos"
+    base_price: 78000
+    currency: "ARS"
+    sku: "PB-PE-AG2200"
+    brand: "peabody"
+    attributes:
+      potencia: 2200
+      material: "Acero inoxidable"
+      superficie_coccion: 45
+      control_temperatura: true
+      
+  - id: "licuadora-liliana-power"
+    name: "Licuadora Liliana Power Max AL350"
+    description: "Licuadora de 350W con jarra de vidrio resistente, 5 velocidades y función pulso. Fabricada en Argentina con garantía oficial."
+    category: "electrodomesticos"
+    base_price: 35000
+    currency: "ARS"
+    sku: "LI-LIC-AL350"
+    brand: "liliana"
+    attributes:
+      potencia: 350
+      material_jarra: "Vidrio"
+      capacidad: 1.5
+      velocidades: 5
+      
+  - id: "lavandina-ayudin"
+    name: "Lavandina Ayudín Clásica 2L"
+    description: "Lavandina concentrada para limpieza y desinfección del hogar. Elimina gérmenes y bacterias. Producto esencial en hogares argentinos."
+    category: "limpieza-hogar"
+    base_price: 1400
+    currency: "ARS"
+    sku: "AY-LAV-CLA-2L"
+    brand: "ayudin"
+    attributes:
+      contenido: 2000
+      concentracion: "60g/L"
+      aroma: "Original"
+      tipo: "Multiuso"
+      
+  - id: "sofa-casa-lopez"
+    name: "Sofá 3 Cuerpos Casa López Modelo Palermo"
+    description: "Sofá de 3 cuerpos tapizado en pana de alta calidad. Diseño elegante y contemporáneo, fabricado en Argentina con materiales premium."
+    category: "muebles-hogar"
+    base_price: 750000
+    currency: "ARS"
+    sku: "CL-SOF-PAL-3C"
+    brand: "casa-lopez"
+    attributes:
+      color: "Gris"
+      material: "Pana"
+      plazas: 3
+      dimensiones: "220x90x85 cm"
+      incluye_almohadones: true
+      
+  - id: "escritorio-favarolo"
+    name: "Escritorio Favarolo Office Plus con Cajonera"
+    description: "Escritorio de oficina con cajonera incorporada, fabricado en melamina de alta resistencia. Diseñado y producido en Argentina."
+    category: "muebles-oficina"
+    base_price: 120000
+    currency: "ARS"
+    sku: "FV-ESC-OFP-CAJ"
+    brand: "favarolo"
+    attributes:
+      color: "Roble Claro"
+      material: "Melamina 18mm"
+      dimensiones: "120x60x75 cm"
+      cajones: 3
+      resistente_humedad: true
+      
+  - id: "set-materas-pampa"
+    name: "Set Matero Pampa Completo con Bolso"
+    description: "Set completo para mate que incluye termo de acero inoxidable 1L, mate de calabaza, bombilla, yerbera, azucarera y bolso de cuero sintético. Producto típico argentino."
+    category: "hogar-cocina"
+    base_price: 45000
+    currency: "ARS"
+    sku: "PM-SET-MAT-COM"
+    brand: "arcor"
+    attributes:
+      color: "Marrón"
+      material_termo: "Acero inoxidable"
+      material_mate: "Calabaza natural"
+      material_bolso: "Cuero sintético"
+      piezas: 6 

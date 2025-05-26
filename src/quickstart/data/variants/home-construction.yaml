@@ -1,23 +1,501 @@
 business_type: "home-construction"
 variants:
-  # TODO: Implementar variantes para home-construction
-  # Estructura de ejemplo:
-  # - id: "color-size"
-  #   name: "Color y Tamaño"
-  #   description: "Variante por color y tamaño del producto"
-  #   attributes:
-  #     - "color"
-  #     - "size"
-  #   combinations:
-  #     - color: "Rojo"
-  #       size: "S"
-  #       sku_suffix: "RED-S"
-  #     - color: "Rojo"
-  #       size: "M"
-  #       sku_suffix: "RED-M"
-  #     - color: "Azul"
-  #       size: "S"
-  #       sku_suffix: "BLU-S"
-  #     - color: "Azul"
-  #       size: "M"
-  #       sku_suffix: "BLU-M"
+  - id: "color-size"
+    name: "Color y Tamaño"
+    description: "Variante por color y tamaño del producto"
+    attributes:
+      - "color"
+      - "dimensions"
+    combinations:
+      - color: "Blanco"
+        dimensions: "30cm x 30cm"
+        sku_suffix: "WHT-30X30"
+      - color: "Blanco"
+        dimensions: "45cm x 45cm"
+        sku_suffix: "WHT-45X45"
+      - color: "Blanco"
+        dimensions: "60cm x 60cm"
+        sku_suffix: "WHT-60X60"
+      - color: "Beige"
+        dimensions: "30cm x 30cm"
+        sku_suffix: "BEI-30X30"
+      - color: "Beige"
+        dimensions: "45cm x 45cm"
+        sku_suffix: "BEI-45X45"
+      - color: "Beige"
+        dimensions: "60cm x 60cm"
+        sku_suffix: "BEI-60X60"
+      - color: "Gris"
+        dimensions: "30cm x 30cm"
+        sku_suffix: "GRY-30X30"
+      - color: "Gris"
+        dimensions: "45cm x 45cm"
+        sku_suffix: "GRY-45X45"
+      - color: "Gris"
+        dimensions: "60cm x 60cm"
+        sku_suffix: "GRY-60X60"
+
+  - id: "color-finish"
+    name: "Color y Acabado"
+    description: "Variante por color y tipo de acabado"
+    attributes:
+      - "color"
+      - "finish"
+    combinations:
+      - color: "Blanco"
+        finish: "Mate"
+        sku_suffix: "WHT-MAT"
+      - color: "Blanco"
+        finish: "Satinado"
+        sku_suffix: "WHT-SAT"
+      - color: "Blanco"
+        finish: "Brillante"
+        sku_suffix: "WHT-BRI"
+      - color: "Negro"
+        finish: "Mate"
+        sku_suffix: "BLK-MAT"
+      - color: "Negro"
+        finish: "Satinado"
+        sku_suffix: "BLK-SAT"
+      - color: "Negro"
+        finish: "Brillante"
+        sku_suffix: "BLK-BRI"
+      - color: "Gris"
+        finish: "Mate"
+        sku_suffix: "GRY-MAT"
+      - color: "Gris"
+        finish: "Satinado"
+        sku_suffix: "GRY-SAT"
+
+  - id: "power-brand"
+    name: "Potencia y Marca"
+    description: "Variante por potencia y marca de herramientas eléctricas"
+    attributes:
+      - "power"
+      - "brand-origin"
+    combinations:
+      - power: 450
+        brand-origin: "Importado"
+        sku_suffix: "450W-IMP"
+      - power: 650
+        brand-origin: "Importado"
+        sku_suffix: "650W-IMP"
+      - power: 850
+        brand-origin: "Importado"
+        sku_suffix: "850W-IMP"
+      - power: 500
+        brand-origin: "Nacional"
+        sku_suffix: "500W-NAC"
+      - power: 750
+        brand-origin: "Nacional"
+        sku_suffix: "750W-NAC"
+
+  - id: "diameter-length"
+    name: "Diámetro y Longitud"
+    description: "Variante por diámetro y longitud para caños y barras"
+    attributes:
+      - "thickness"
+      - "dimensions"
+    combinations:
+      - thickness: 6
+        dimensions: "6mm x 12m"
+        sku_suffix: "6MM-12M"
+      - thickness: 8
+        dimensions: "8mm x 12m"
+        sku_suffix: "8MM-12M"
+      - thickness: 10
+        dimensions: "10mm x 12m"
+        sku_suffix: "10MM-12M"
+      - thickness: 12
+        dimensions: "12mm x 12m"
+        sku_suffix: "12MM-12M"
+      - thickness: 110
+        dimensions: "110mm x 3m"
+        sku_suffix: "110MM-3M"
+      - thickness: 110
+        dimensions: "110mm x 6m"
+        sku_suffix: "110MM-6M"
+      - thickness: 160
+        dimensions: "160mm x 3m"
+        sku_suffix: "160MM-3M"
+
+  - id: "color-current"
+    name: "Color y Amperaje"
+    description: "Variante por color y amperaje para elementos eléctricos"
+    attributes:
+      - "color"
+      - "voltage"
+    combinations:
+      - color: "Blanco"
+        voltage: "220V"
+        sku_suffix: "WHT-220V"
+      - color: "Marfil"
+        voltage: "220V"
+        sku_suffix: "IVO-220V"
+      - color: "Gris"
+        voltage: "220V"
+        sku_suffix: "GRY-220V"
+
+  - id: "color-section"
+    name: "Color y Sección"
+    description: "Variante por color y sección para cables eléctricos"
+    attributes:
+      - "color"
+      - "dimensions"
+    combinations:
+      - color: "Azul"
+        dimensions: "1.5mm² x 100m"
+        sku_suffix: "BLU-1.5MM"
+      - color: "Azul"
+        dimensions: "2.5mm² x 100m"
+        sku_suffix: "BLU-2.5MM"
+      - color: "Azul"
+        dimensions: "4mm² x 100m"
+        sku_suffix: "BLU-4MM"
+      - color: "Marrón"
+        dimensions: "1.5mm² x 100m"
+        sku_suffix: "BRN-1.5MM"
+      - color: "Marrón"
+        dimensions: "2.5mm² x 100m"
+        sku_suffix: "BRN-2.5MM"
+      - color: "Verde"
+        dimensions: "1.5mm² x 100m"
+        sku_suffix: "GRN-1.5MM"
+      - color: "Verde"
+        dimensions: "2.5mm² x 100m"
+        sku_suffix: "GRN-2.5MM"
+      - color: "Amarillo"
+        dimensions: "1.5mm² x 100m"
+        sku_suffix: "YEL-1.5MM"
+
+  - id: "power-temperature"
+    name: "Potencia y Temperatura"
+    description: "Variante por potencia y temperatura de color para lámparas LED"
+    attributes:
+      - "power"
+      - "color"
+    combinations:
+      - power: 7
+        color: "Blanco Cálido"
+        sku_suffix: "7W-CAL"
+      - power: 9
+        color: "Blanco Cálido"
+        sku_suffix: "9W-CAL"
+      - power: 12
+        color: "Blanco Cálido"
+        sku_suffix: "12W-CAL"
+      - power: 15
+        color: "Blanco Cálido"
+        sku_suffix: "15W-CAL"
+      - power: 7
+        color: "Blanco Frío"
+        sku_suffix: "7W-FRI"
+      - power: 9
+        color: "Blanco Frío"
+        sku_suffix: "9W-FRI"
+      - power: 12
+        color: "Blanco Frío"
+        sku_suffix: "12W-FRI"
+      - power: 15
+        color: "Blanco Frío"
+        sku_suffix: "15W-FRI"
+
+  - id: "weight-handle"
+    name: "Peso y Tipo de Mango"
+    description: "Variante por peso y tipo de mango para herramientas"
+    attributes:
+      - "weight"
+      - "material"
+    combinations:
+      - weight: 0.3
+        material: "Madera"
+        sku_suffix: "300G-MAD"
+      - weight: 0.45
+        material: "Madera"
+        sku_suffix: "450G-MAD"
+      - weight: 0.6
+        material: "Madera"
+        sku_suffix: "600G-MAD"
+      - weight: 0.3
+        material: "Fibra de Vidrio"
+        sku_suffix: "300G-FIB"
+      - weight: 0.45
+        material: "Fibra de Vidrio"
+        sku_suffix: "450G-FIB"
+      - weight: 0.6
+        material: "Fibra de Vidrio"
+        sku_suffix: "600G-FIB"
+
+  - id: "color-style"
+    name: "Color y Estilo"
+    description: "Variante por color y estilo para sanitarios y muebles"
+    attributes:
+      - "color"
+      - "style"
+    combinations:
+      - color: "Blanco"
+        style: "Clásico"
+        sku_suffix: "WHT-CLA"
+      - color: "Blanco"
+        style: "Moderno"
+        sku_suffix: "WHT-MOD"
+      - color: "Blanco"
+        style: "Contemporáneo"
+        sku_suffix: "WHT-CON"
+      - color: "Beige"
+        style: "Clásico"
+        sku_suffix: "BEI-CLA"
+      - color: "Beige"
+        style: "Moderno"
+        sku_suffix: "BEI-MOD"
+
+  - id: "finish-style"
+    name: "Acabado y Estilo"
+    description: "Variante por acabado y estilo para griferías"
+    attributes:
+      - "finish"
+      - "style"
+    combinations:
+      - finish: "Cromado"
+        style: "Clásico"
+        sku_suffix: "CRO-CLA"
+      - finish: "Cromado"
+        style: "Moderno"
+        sku_suffix: "CRO-MOD"
+      - finish: "Cromado"
+        style: "Contemporáneo"
+        sku_suffix: "CRO-CON"
+      - finish: "Cepillado"
+        style: "Moderno"
+        sku_suffix: "CEP-MOD"
+      - finish: "Negro Mate"
+        style: "Moderno"
+        sku_suffix: "NEG-MOD"
+
+  - id: "color-thickness"
+    name: "Color y Espesor"
+    description: "Variante por color y espesor para pisos laminados"
+    attributes:
+      - "color"
+      - "thickness"
+    combinations:
+      - color: "Roble"
+        thickness: 7
+        sku_suffix: "ROB-7MM"
+      - color: "Roble"
+        thickness: 8
+        sku_suffix: "ROB-8MM"
+      - color: "Roble"
+        thickness: 10
+        sku_suffix: "ROB-10MM"
+      - color: "Cerezo"
+        thickness: 7
+        sku_suffix: "CER-7MM"
+      - color: "Cerezo"
+        thickness: 8
+        sku_suffix: "CER-8MM"
+      - color: "Cedro"
+        thickness: 8
+        sku_suffix: "CED-8MM"
+      - color: "Cedro"
+        thickness: 10
+        sku_suffix: "CED-10MM"
+
+  - id: "color-capacity"
+    name: "Color y Capacidad"
+    description: "Variante por color y capacidad para pinturas"
+    attributes:
+      - "color"
+      - "capacity"
+    combinations:
+      - color: "Blanco"
+        capacity: 1
+        sku_suffix: "WHT-1L"
+      - color: "Blanco"
+        capacity: 4
+        sku_suffix: "WHT-4L"
+      - color: "Blanco"
+        capacity: 10
+        sku_suffix: "WHT-10L"
+      - color: "Blanco"
+        capacity: 20
+        sku_suffix: "WHT-20L"
+      - color: "Negro"
+        capacity: 1
+        sku_suffix: "BLK-1L"
+      - color: "Negro"
+        capacity: 4
+        sku_suffix: "BLK-4L"
+      - color: "Azul"
+        capacity: 1
+        sku_suffix: "BLU-1L"
+      - color: "Azul"
+        capacity: 4
+        sku_suffix: "BLU-4L"
+      - color: "Verde"
+        capacity: 1
+        sku_suffix: "GRN-1L"
+      - color: "Rojo"
+        capacity: 1
+        sku_suffix: "RED-1L"
+
+  - id: "power-size"
+    name: "Potencia y Tamaño"
+    description: "Variante por potencia y tamaño para herramientas eléctricas"
+    attributes:
+      - "power"
+      - "dimensions"
+    combinations:
+      - power: 650
+        dimensions: "115mm"
+        sku_suffix: "650W-115"
+      - power: 750
+        dimensions: "115mm"
+        sku_suffix: "750W-115"
+      - power: 850
+        dimensions: "115mm"
+        sku_suffix: "850W-115"
+      - power: 750
+        dimensions: "125mm"
+        sku_suffix: "750W-125"
+      - power: 850
+        dimensions: "125mm"
+        sku_suffix: "850W-125"
+
+  - id: "weight-packaging"
+    name: "Peso y Empaque"
+    description: "Variante por peso y tipo de empaque para materiales"
+    attributes:
+      - "weight"
+      - "material"
+    combinations:
+      - weight: 25
+        material: "Cemento"
+        sku_suffix: "25KG-CEM"
+      - weight: 50
+        material: "Cemento"
+        sku_suffix: "50KG-CEM"
+      - weight: 1
+        material: "Adhesivo"
+        sku_suffix: "1KG-ADH"
+      - weight: 5
+        material: "Adhesivo"
+        sku_suffix: "5KG-ADH"
+      - weight: 25
+        material: "Adhesivo"
+        sku_suffix: "25KG-ADH"
+
+  - id: "quantity-packaging"
+    name: "Cantidad y Empaque"
+    description: "Variante por cantidad y tipo de empaque"
+    attributes:
+      - "dimensions"
+      - "material"
+    combinations:
+      - dimensions: "Unidad"
+        material: "Individual"
+        sku_suffix: "UNI-IND"
+      - dimensions: "50 unidades"
+        material: "Paquete"
+        sku_suffix: "50U-PAQ"
+      - dimensions: "100 unidades"
+        material: "Paquete"
+        sku_suffix: "100U-PAQ"
+      - dimensions: "500 unidades"
+        material: "Palet"
+        sku_suffix: "500U-PAL"
+      - dimensions: "1000 unidades"
+        material: "Palet"
+        sku_suffix: "1000U-PAL"
+
+  - id: "size-style"
+    name: "Tamaño y Estilo"
+    description: "Variante por tamaño y estilo para muebles"
+    attributes:
+      - "dimensions"
+      - "style"
+    combinations:
+      - dimensions: "80cm x 40cm"
+        style: "Moderno"
+        sku_suffix: "80X40-MOD"
+      - dimensions: "110cm x 60cm"
+        style: "Moderno"
+        sku_suffix: "110X60-MOD"
+      - dimensions: "130cm x 70cm"
+        style: "Moderno"
+        sku_suffix: "130X70-MOD"
+      - dimensions: "80cm x 40cm"
+        style: "Clásico"
+        sku_suffix: "80X40-CLA"
+      - dimensions: "110cm x 60cm"
+        style: "Clásico"
+        sku_suffix: "110X60-CLA"
+
+  - id: "color-fabric"
+    name: "Color y Tela"
+    description: "Variante por color y tipo de tela para muebles tapizados"
+    attributes:
+      - "color"
+      - "material"
+    combinations:
+      - color: "Gris"
+        material: "Textil"
+        sku_suffix: "GRY-TEX"
+      - color: "Beige"
+        material: "Textil"
+        sku_suffix: "BEI-TEX"
+      - color: "Azul"
+        material: "Textil"
+        sku_suffix: "BLU-TEX"
+      - color: "Negro"
+        material: "Cuero"
+        sku_suffix: "BLK-CUE"
+      - color: "Marrón"
+        material: "Cuero"
+        sku_suffix: "BRN-CUE"
+
+  - id: "power-cutting-width"
+    name: "Potencia y Ancho de Corte"
+    description: "Variante por potencia y ancho de corte para cortadoras"
+    attributes:
+      - "power"
+      - "dimensions"
+    combinations:
+      - power: 1000
+        dimensions: "32cm"
+        sku_suffix: "1000W-32CM"
+      - power: 1200
+        dimensions: "35cm"
+        sku_suffix: "1200W-35CM"
+      - power: 1400
+        dimensions: "40cm"
+        sku_suffix: "1400W-40CM"
+      - power: 1600
+        dimensions: "45cm"
+        sku_suffix: "1600W-45CM"
+
+  - id: "length-diameter"
+    name: "Longitud y Diámetro"
+    description: "Variante por longitud y diámetro para mangueras y tubos"
+    attributes:
+      - "dimensions"
+      - "thickness"
+    combinations:
+      - dimensions: "15m"
+        thickness: 12
+        sku_suffix: "15M-12MM"
+      - dimensions: "25m"
+        thickness: 12
+        sku_suffix: "25M-12MM"
+      - dimensions: "50m"
+        thickness: 12
+        sku_suffix: "50M-12MM"
+      - dimensions: "15m"
+        thickness: 19
+        sku_suffix: "15M-19MM"
+      - dimensions: "25m"
+        thickness: 19
+        sku_suffix: "25M-19MM"
+      - dimensions: "50m"
+        thickness: 19
+        sku_suffix: "50M-19MM"

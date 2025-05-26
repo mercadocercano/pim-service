@@ -1,35 +1,228 @@
 business_type: "beauty-cosmetics"
 attributes:
-  # TODO: Implementar atributos para beauty-cosmetics
-  # Estructura de ejemplo:
-  # - id: "color"
-  #   name: "Color"
-  #   type: "select"
-  #   required: false
-  #   description: "Color del producto"
-  #   values:
-  #     - "Rojo"
-  #     - "Azul"
-  #     - "Verde"
-  #
-  # - id: "weight"
-  #   name: "Peso"
-  #   type: "number"
-  #   required: false
-  #   description: "Peso del producto en gramos"
-  #   unit: "g"
-  #   min_value: 0
-  #   max_value: 10000
-  #
-  # - id: "description"
-  #   name: "Descripción Detallada"
-  #   type: "text"
-  #   required: false
-  #   description: "Descripción detallada del producto"
-  #   placeholder: "Ingrese descripción..."
-  #
-  # - id: "premium"
-  #   name: "Producto Premium"
-  #   type: "boolean"
-  #   required: false
-  #   description: "Indica si es un producto premium"
+  # Atributos Generales
+  - id: "linea"
+    name: "Línea"
+    description: "Línea o colección del producto"
+    type: "text"
+    required: false
+    searchable: true
+    filterable: true
+
+  - id: "registro_sanitario"
+    name: "Registro ANMAT"
+    description: "Número de registro ANMAT"
+    type: "text"
+    required: true
+    searchable: true
+    filterable: true
+
+  # Atributos de Fragancias
+  - id: "tipo_fragancia"
+    name: "Tipo de Fragancia"
+    description: "Clasificación de la fragancia"
+    type: "select"
+    options:
+      - "Eau de Parfum"
+      - "Eau de Toilette"
+      - "Eau de Cologne"
+      - "Perfume"
+      - "Body Splash"
+      - "After Shave"
+    required: false
+    filterable: true
+
+  - id: "familia_olfativa"
+    name: "Familia Olfativa"
+    description: "Familia olfativa de la fragancia"
+    type: "select"
+    options:
+      - "Floral"
+      - "Oriental"
+      - "Amaderada"
+      - "Cítrica"
+      - "Aromática"
+      - "Fougère"
+      - "Chipre"
+      - "Gourmand"
+    required: false
+    filterable: true
+
+  - id: "notas_salida"
+    name: "Notas de Salida"
+    description: "Notas olfativas iniciales"
+    type: "text"
+    required: false
+    searchable: true
+
+  - id: "notas_corazon"
+    name: "Notas de Corazón"
+    description: "Notas olfativas medias"
+    type: "text"
+    required: false
+    searchable: true
+
+  - id: "notas_fondo"
+    name: "Notas de Fondo"
+    description: "Notas olfativas base"
+    type: "text"
+    required: false
+    searchable: true
+
+  # Atributos de Maquillaje
+  - id: "tono"
+    name: "Tono"
+    description: "Tono o color del producto"
+    type: "text"
+    required: false
+    searchable: true
+    filterable: true
+
+  - id: "acabado"
+    name: "Acabado"
+    description: "Tipo de acabado del producto"
+    type: "select"
+    options:
+      - "Mate"
+      - "Satinado"
+      - "Brillante"
+      - "Metalizado"
+      - "Natural"
+      - "Glitter"
+    required: false
+    filterable: true
+
+  - id: "cobertura"
+    name: "Cobertura"
+    description: "Nivel de cobertura del producto"
+    type: "select"
+    options:
+      - "Ligera"
+      - "Media"
+      - "Alta"
+      - "Total"
+    required: false
+    filterable: true
+
+  # Atributos de Skincare
+  - id: "tipo_piel"
+    name: "Tipo de Piel"
+    description: "Tipo de piel recomendado"
+    type: "select"
+    options:
+      - "Normal"
+      - "Seca"
+      - "Grasa"
+      - "Mixta"
+      - "Sensible"
+      - "Madura"
+    required: false
+    filterable: true
+
+  - id: "beneficios"
+    name: "Beneficios"
+    description: "Beneficios principales del producto"
+    type: "multi_select"
+    options:
+      - "Hidratación"
+      - "Anti-edad"
+      - "Iluminador"
+      - "Matificante"
+      - "Antiacné"
+      - "Calmante"
+      - "Reafirmante"
+      - "Antioxidante"
+    required: false
+    filterable: true
+
+  # Atributos de Cabello
+  - id: "tipo_cabello"
+    name: "Tipo de Cabello"
+    description: "Tipo de cabello recomendado"
+    type: "select"
+    options:
+      - "Normal"
+      - "Seco"
+      - "Graso"
+      - "Mixto"
+      - "Teñido"
+      - "Rizado"
+      - "Liso"
+    required: false
+    filterable: true
+
+  # Atributos Comerciales
+  - id: "contenido"
+    name: "Contenido"
+    description: "Cantidad o volumen del producto"
+    type: "text"
+    required: true
+    filterable: true
+
+  - id: "presentacion"
+    name: "Presentación"
+    description: "Formato de presentación del producto"
+    type: "text"
+    required: true
+    searchable: true
+
+  - id: "origen"
+    name: "País de Origen"
+    description: "País de origen del producto"
+    type: "text"
+    required: true
+    filterable: true
+
+  - id: "genero"
+    name: "Género"
+    description: "Género al que está dirigido el producto"
+    type: "select"
+    options:
+      - "Femenino"
+      - "Masculino"
+      - "Unisex"
+      - "Infantil"
+    required: false
+    filterable: true
+
+  - id: "hipoalergenico"
+    name: "Hipoalergénico"
+    description: "Indica si el producto es hipoalergénico"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  - id: "dermatologicamente_testeado"
+    name: "Testeado Dermatológicamente"
+    description: "Indica si fue testeado dermatológicamente"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  - id: "vegano"
+    name: "Vegano"
+    description: "Indica si el producto es vegano"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  - id: "cruelty_free"
+    name: "Cruelty Free"
+    description: "Indica si el producto no fue testeado en animales"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  - id: "codigo_barras"
+    name: "Código de Barras"
+    description: "Código de barras del producto"
+    type: "text"
+    required: true
+    searchable: true
+
+  - id: "codigo_interno"
+    name: "Código Interno"
+    description: "Código interno del producto"
+    type: "text"
+    required: true
+    searchable: true

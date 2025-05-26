@@ -1,33 +1,136 @@
 business_type: "electronics"
 products:
-  # TODO: Implementar productos para electronics
-  # Estructura de ejemplo:
-  # - id: "product-example-1"
-  #   name: "Producto de Ejemplo 1"
-  #   description: "Descripción del producto de ejemplo"
-  #   category: "main-category"
-  #   base_price: 9999
-  #   currency: "ARS"
-  #   sku: "PROD-001"
-  #   attributes:
-  #     color: "Rojo"
-  #     weight: 500
-  #     premium: true
-  #   variants:
-  #     - "color-size"
-  #   stock: 100
-  #
-  # - id: "product-example-2"
-  #   name: "Producto de Ejemplo 2"
-  #   description: "Otro producto de ejemplo"
-  #   category: "subcategory-1"
-  #   base_price: 15999
-  #   currency: "ARS"
-  #   sku: "PROD-002"
-  #   attributes:
-  #     color: "Azul"
-  #     weight: 750
-  #     premium: false
-  #   variants:
-  #     - "color-size"
-  #   stock: 50
+  # TV y Video
+  - id: "samsung-tv-55-4k"
+    name: "Smart TV Samsung 55 Pulgadas Crystal UHD 4K BU8000"
+    description: "Smart TV Samsung de 55 pulgadas con resolución 4K Crystal UHD, HDR, y sistema operativo Tizen."
+    category_id: "televisores"
+    attributes:
+      marca: "Samsung"
+      linea_producto: "Crystal UHD"
+      modelo: "UN55BU8000GCZB"
+      origen: "Argentina"
+      garantia_fabricante: "12 meses"
+      eficiencia_energetica: "A (#CCFF33)"
+      certificacion_iram: true
+      tamano_pantalla_tv: 55
+      resolucion_pantalla_tv: "4K UHD (3840x2160)"
+      tipo_pantalla_tv: "LED"
+      smart_tv: true
+      sistema_operativo_tv: "Tizen (Samsung)"
+      voltaje: "220V"
+      color: "Negro"
+      dimensiones_producto_cm: "123.2 x 70.8 x 2.5 cm (sin base)"
+      peso_producto_kg: 15.5
+      codigo_barras_ean: "8806094005782"
+      codigo_sku_interno: "TV-SAM-55BU8000"
+      manual_usuario_es: true
+      accesorios_incluidos: "Control remoto, cable de alimentación, manual de usuario"
+
+  # Celulares y Telefonía
+  - id: "motorola-edge-40"
+    name: "Celular Motorola Edge 40 256GB 8GB RAM"
+    description: "Smartphone Motorola Edge 40 con pantalla pOLED de 6.55\" FullHD+, procesador Dimensity 8020, cámara de 50MP y carga rápida."
+    category_id: "celulares-smartphones"
+    attributes:
+      marca: "Motorola"
+      linea_producto: "Edge"
+      modelo: "Edge 40"
+      origen: "Argentina"
+      garantia_fabricante: "12 meses"
+      certificacion_iram: true # Para el cargador
+      sistema_operativo_dispositivo_movil: "Android"
+      memoria_ram_celular_pc: 8
+      almacenamiento_interno_celular_pc: "256 GB"
+      tamano_pantalla_celular: 6.55
+      resolucion_camara_principal_celular: 50
+      resolucion_camara_frontal_celular: 32
+      dual_sim: true
+      conectividad_red_celular: ["4G LTE", "5G"]
+      voltaje: "A Batería"
+      color: "Negro Eclipse"
+      dimensiones_producto_cm: "15.84 x 7.19 x 0.75 cm"
+      peso_producto_kg: 0.171
+      codigo_barras_ean: "7790000012345"
+      codigo_sku_interno: "CEL-MOT-EDGE40N"
+      manual_usuario_es: true
+      accesorios_incluidos: "Cargador TurboPower 68W, cable USB-C, funda protectora, herramienta de extracción de SIM"
+
+  # Computación
+  - id: "lenovo-ideapad-slim-3"
+    name: "Notebook Lenovo IdeaPad Slim 3 15.6\" Ryzen 5 8GB 512GB SSD"
+    description: "Notebook Lenovo IdeaPad Slim 3 con pantalla Full HD de 15.6 pulgadas, procesador AMD Ryzen 5, 8GB de RAM y 512GB SSD."
+    category_id: "notebooks"
+    attributes:
+      marca: "Lenovo"
+      linea_producto: "IdeaPad"
+      modelo: "Slim 3 15AMN8"
+      origen: "China"
+      garantia_fabricante: "12 meses"
+      eficiencia_energetica: "No Aplica"
+      certificacion_iram: true # Para el cargador
+      procesador_pc_notebook: "AMD Ryzen 5 7520U"
+      memoria_ram_celular_pc: 8
+      almacenamiento_interno_celular_pc: "512 GB"
+      tipo_almacenamiento_pc_notebook: "SSD"
+      tamano_pantalla_notebook_tablet: 15.6
+      placa_video_pc_notebook: "Integrada AMD Radeon 610M"
+      teclado_retroiluminado_notebook: false
+      sistema_operativo_pc: "Windows 11 Home"
+      voltaje: "A Batería"
+      color: "Gris Ártico"
+      dimensiones_producto_cm: "35.9 x 23.6 x 1.9 cm"
+      peso_producto_kg: 1.62
+      codigo_barras_ean: "196801891234"
+      codigo_sku_interno: "NB-LEN-IDPS3R5G"
+      manual_usuario_es: true
+      accesorios_incluidos: "Cargador, manual de usuario"
+
+  # Electrodomésticos de Cocina
+  - id: "whirlpool-heladera-wrw50"
+    name: "Heladera con Freezer Whirlpool No Frost WRW50NK 443L"
+    description: "Heladera con freezer No Frost Whirlpool de 443 litros de capacidad total, tecnología Evox y Sexto Sentido."
+    category_id: "heladeras-freezers"
+    attributes:
+      marca: "Whirlpool"
+      linea_producto: "No Frost"
+      modelo: "WRW50NK"
+      origen: "Argentina"
+      garantia_fabricante: "12 meses"
+      eficiencia_energetica: "A (#CCFF33)"
+      certificacion_iram: true
+      capacidad_heladera_litros: 443
+      tipo_heladera: "Con Freezer (No Frost)"
+      voltaje: "220V"
+      color: "Inox"
+      dimensiones_producto_cm: "185 x 69.5 x 73.5 cm"
+      peso_producto_kg: 70
+      codigo_barras_ean: "7891129234567"
+      codigo_sku_interno: "HEL-WHI-WRW50NK"
+      manual_usuario_es: true
+      accesorios_incluidos: "Manual de usuario, cubeteras"
+
+  # Climatización
+  - id: "surrey-aire-553gf"
+    name: "Aire Acondicionado Split Surrey 553GFQ1201F Frío/Calor 3000fg Inverter"
+    description: "Aire acondicionado tipo Split Surrey, capacidad 3000 frigorías, tecnología Inverter, frío/calor, eficiencia energética A++."
+    category_id: "aires-acondicionados"
+    attributes:
+      marca: "Surrey"
+      linea_producto: "Inverter"
+      modelo: "553GFQ1201F"
+      origen: "Argentina"
+      garantia_fabricante: "12 meses"
+      eficiencia_energetica: "A++ (#66CC33)" # Para refrigeración, puede variar para calefacción
+      certificacion_iram: true
+      frigorias_aire_acondicionado: 3000
+      tipo_aire_acondicionado: "Split Frío/Calor"
+      tecnologia_inverter_ac: true
+      voltaje: "220V"
+      color: "Blanco"
+      dimensiones_producto_cm: "Unidad Interior: 80 x 28 x 19 cm, Unidad Exterior: 78 x 54 x 25 cm"
+      peso_producto_kg: 35 # Peso aproximado total
+      codigo_barras_ean: "7797010001234"
+      codigo_sku_interno: "AA-SUR-553GFQ12INV"
+      manual_usuario_es: true
+      accesorios_incluidos: "Control remoto, manual de usuario, kit de instalación básico"

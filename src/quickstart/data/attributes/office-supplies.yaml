@@ -1,35 +1,221 @@
 business_type: "office-supplies"
 attributes:
-  # TODO: Implementar atributos para office-supplies
-  # Estructura de ejemplo:
-  # - id: "color"
-  #   name: "Color"
-  #   type: "select"
-  #   required: false
-  #   description: "Color del producto"
-  #   values:
-  #     - "Rojo"
-  #     - "Azul"
-  #     - "Verde"
-  #
-  # - id: "weight"
-  #   name: "Peso"
-  #   type: "number"
-  #   required: false
-  #   description: "Peso del producto en gramos"
-  #   unit: "g"
-  #   min_value: 0
-  #   max_value: 10000
-  #
-  # - id: "description"
-  #   name: "Descripción Detallada"
-  #   type: "text"
-  #   required: false
-  #   description: "Descripción detallada del producto"
-  #   placeholder: "Ingrese descripción..."
-  #
-  # - id: "premium"
-  #   name: "Producto Premium"
-  #   type: "boolean"
-  #   required: false
-  #   description: "Indica si es un producto premium"
+  - id: "color"
+    name: "Color"
+    type: "select"
+    required: false
+    description: "Color del producto"
+    values:
+      - "Negro"
+      - "Azul"
+      - "Rojo"
+      - "Verde"
+      - "Amarillo"
+      - "Blanco"
+      - "Gris"
+      - "Transparente"
+      - "Multicolor"
+      - "Rosa"
+      - "Violeta"
+      - "Naranja"
+      - "Celeste"
+      - "Marrón"
+      - "Plateado"
+      - "Dorado"
+
+  - id: "material"
+    name: "Material"
+    type: "select"
+    required: false
+    description: "Material principal del producto"
+    values:
+      - "Plástico"
+      - "Metal"
+      - "Papel"
+      - "Cartón"
+      - "Madera"
+      - "Cuero"
+      - "Vidrio"
+      - "Sintético"
+      - "Polipropileno"
+      - "Acrílico"
+      - "Aluminio"
+      - "Poliéster"
+      - "Algodón"
+      - "Tela"
+      - "Goma"
+      - "Silicona"
+
+  - id: "unidades_por_pack"
+    name: "Unidades por Pack"
+    type: "number"
+    required: false
+    description: "Cantidad de unidades incluidas en el paquete"
+    unit: "u"
+    min_value: 1
+    max_value: 1000
+    
+  - id: "peso"
+    name: "Peso"
+    type: "number"
+    required: false
+    description: "Peso del producto en gramos"
+    unit: "g"
+    min_value: 0
+    max_value: 10000
+    
+  - id: "medidas"
+    name: "Medidas"
+    type: "text"
+    required: false
+    description: "Dimensiones del producto (alto x ancho x profundidad)"
+    placeholder: "Ej: 21 x 29,7 x 1 cm"
+    
+  - id: "grosor_punta"
+    name: "Grosor de Punta"
+    type: "select"
+    required: false
+    description: "Grosor de la punta para instrumentos de escritura"
+    values:
+      - "Ultrafino (0.1-0.3 mm)"
+      - "Fino (0.4-0.6 mm)"
+      - "Medio (0.7-0.9 mm)"
+      - "Grueso (1.0-1.4 mm)"
+      - "Extragrueso (1.5+ mm)"
+      
+  - id: "tipo_papel"
+    name: "Tipo de Papel"
+    type: "select"
+    required: false
+    description: "Tipo de papel utilizado"
+    values:
+      - "Bond"
+      - "Reciclado"
+      - "Mate"
+      - "Satinado"
+      - "Fotográfico"
+      - "Autocopiante"
+      - "Couché"
+      - "Kraft"
+      - "Térmico"
+      - "Vegetal"
+      - "Cartulina"
+      - "Adhesivo"
+      
+  - id: "gramaje"
+    name: "Gramaje"
+    type: "number"
+    required: false
+    description: "Gramaje del papel en g/m²"
+    unit: "g/m²"
+    min_value: 50
+    max_value: 350
+    
+  - id: "hojas"
+    name: "Cantidad de Hojas"
+    type: "number"
+    required: false
+    description: "Número de hojas en cuadernos, blocks o resmas"
+    unit: "hojas"
+    min_value: 1
+    max_value: 1000
+    
+  - id: "tamano"
+    name: "Tamaño"
+    type: "select"
+    required: false
+    description: "Tamaño estandarizado del producto"
+    values:
+      - "A4 (210 x 297 mm)"
+      - "A5 (148 x 210 mm)"
+      - "A3 (297 x 420 mm)"
+      - "Carta (216 x 279 mm)"
+      - "Oficio (216 x 356 mm)"
+      - "Cuaderno N°1 (20 x 14 cm)"
+      - "Cuaderno N°3 (24 x 16 cm)"
+      - "Cuaderno N°5 (21 x 16 cm)"
+      - "Executive (184 x 267 mm)"
+      - "Legal (216 x 356 mm)"
+      - "Pequeño"
+      - "Mediano"
+      - "Grande"
+      - "Extra Grande"
+      - "Personalizado"
+      
+  - id: "rayado"
+    name: "Tipo de Rayado"
+    type: "select"
+    required: false
+    description: "Tipo de rayado o cuadriculado"
+    values:
+      - "Liso"
+      - "Rayado"
+      - "Cuadriculado"
+      - "Cuadriculado 5mm"
+      - "Cuadriculado 7mm"
+      - "Punteado"
+      - "Milimetrado"
+      - "Doble Raya"
+      - "Dos Columnas"
+      - "Contable"
+      
+  - id: "anillas"
+    name: "Número de Anillas"
+    type: "select"
+    required: false
+    description: "Cantidad de anillas en carpetas y archivadores"
+    values:
+      - "2 anillas"
+      - "3 anillas"
+      - "4 anillas"
+      - "20 anillas (espiral)"
+      - "24 anillas (espiral)"
+      - "30 anillas (espiral)"
+      - "40 anillas (espiral)"
+      - "Sin anillas"
+      
+  - id: "capacidad"
+    name: "Capacidad"
+    type: "text"
+    required: false
+    description: "Capacidad de almacenamiento de carpetas y archivadores"
+    placeholder: "Ej: 350 hojas, 40mm, 4cm, etc."
+    
+  - id: "escolar"
+    name: "Uso Escolar"
+    type: "boolean"
+    required: false
+    description: "Indica si el producto es apto para uso escolar"
+    
+  - id: "recargable"
+    name: "Recargable"
+    type: "boolean"
+    required: false
+    description: "Indica si el producto puede recargarse o reponerse"
+    
+  - id: "descuento_mayorista"
+    name: "Descuento Mayorista"
+    type: "boolean"
+    required: false
+    description: "Indica si el producto aplica para descuentos por compra mayorista"
+    
+  - id: "certificaciones"
+    name: "Certificaciones"
+    type: "multiselect"
+    required: false
+    description: "Certificaciones y normas que cumple el producto"
+    values:
+      - "IRAM"
+      - "ISO 9001"
+      - "Certificación FSC"
+      - "No tóxico"
+      - "Ecológico"
+      - "Reciclable"
+      - "Biodegradable"
+      - "Producto Argentino"
+      
+  - id: "fabricacion_nacional"
+    name: "Fabricación Nacional"
+    type: "boolean"
+    required: false
+    description: "Indica si el producto es fabricado en Argentina"

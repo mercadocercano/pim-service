@@ -1,0 +1,531 @@
+business_type: "polirubro"
+variants:
+  # Variantes de Yerba Mate
+  - id: "yerba-playadito"
+    name: "Yerba Mate Playadito"
+    description: "Yerba mate Playadito en diferentes presentaciones"
+    base_product_id: "yerba-playadito-tradicional"
+    options:
+      - name: "Peso"
+        values:
+          - "500g"
+          - "1kg"
+      - name: "Tipo"
+        values:
+          - "Tradicional"
+          - "Suave"
+          - "Despalada (sin palo)"
+    variants:
+      - id: "yerba-playadito-tradicional-500g"
+        name: "Yerba Mate Playadito Tradicional 500g"
+        sku: "YRB-PLAY-001"
+        price: 2500.00
+        currency: "ARS"
+        stock_quantity: 45
+        attributes:
+          "Peso": "500g"
+          "Tipo": "Tradicional"
+        images: []
+      
+      - id: "yerba-playadito-tradicional-1kg"
+        name: "Yerba Mate Playadito Tradicional 1kg"
+        sku: "YRB-PLAY-002"
+        price: 4800.00
+        currency: "ARS"
+        stock_quantity: 30
+        attributes:
+          "Peso": "1kg"
+          "Tipo": "Tradicional"
+        images: []
+      
+      - id: "yerba-playadito-suave-500g"
+        name: "Yerba Mate Playadito Suave 500g"
+        sku: "YRB-PLAY-003"
+        price: 2600.00
+        currency: "ARS"
+        stock_quantity: 25
+        attributes:
+          "Peso": "500g"
+          "Tipo": "Suave"
+        images: []
+      
+      - id: "yerba-playadito-despalada-500g"
+        name: "Yerba Mate Playadito Despalada 500g"
+        sku: "YRB-PLAY-004"
+        price: 2700.00
+        currency: "ARS"
+        stock_quantity: 20
+        attributes:
+          "Peso": "500g"
+          "Tipo": "Despalada (sin palo)"
+        images: []
+
+  # Variantes de Alfajores Havanna
+  - id: "alfajor-havanna"
+    name: "Alfajor Havanna"
+    description: "Alfajores Havanna en diferentes sabores"
+    base_product_id: "alfajor-havanna-chocolate"
+    options:
+      - name: "Sabor"
+        values:
+          - "Chocolate negro"
+          - "Chocolate blanco"
+          - "Nuez"
+          - "Limón"
+      - name: "Presentación"
+        values:
+          - "Individual"
+          - "Caja x6"
+          - "Caja x12"
+    variants:
+      - id: "alfajor-havanna-chocolate-individual"
+        name: "Alfajor Havanna de Chocolate Individual"
+        sku: "ALF-HAV-001"
+        price: 650.00
+        currency: "ARS"
+        stock_quantity: 50
+        attributes:
+          "Sabor": "Chocolate negro"
+          "Presentación": "Individual"
+        images: []
+      
+      - id: "alfajor-havanna-chocolate-caja6"
+        name: "Alfajores Havanna de Chocolate Caja x6"
+        sku: "ALF-HAV-002"
+        price: 3700.00
+        currency: "ARS"
+        stock_quantity: 20
+        attributes:
+          "Sabor": "Chocolate negro"
+          "Presentación": "Caja x6"
+        images: []
+      
+      - id: "alfajor-havanna-blanco-individual"
+        name: "Alfajor Havanna de Chocolate Blanco Individual"
+        sku: "ALF-HAV-003"
+        price: 650.00
+        currency: "ARS"
+        stock_quantity: 45
+        attributes:
+          "Sabor": "Chocolate blanco"
+          "Presentación": "Individual"
+        images: []
+      
+      - id: "alfajor-havanna-nuez-individual"
+        name: "Alfajor Havanna de Nuez Individual"
+        sku: "ALF-HAV-004"
+        price: 700.00
+        currency: "ARS"
+        stock_quantity: 30
+        attributes:
+          "Sabor": "Nuez"
+          "Presentación": "Individual"
+        images: []
+      
+      - id: "alfajor-havanna-limon-individual"
+        name: "Alfajor Havanna de Limón Individual"
+        sku: "ALF-HAV-005"
+        price: 650.00
+        currency: "ARS"
+        stock_quantity: 25
+        attributes:
+          "Sabor": "Limón"
+          "Presentación": "Individual"
+        images: []
+      
+      - id: "alfajor-havanna-mixto-caja12"
+        name: "Alfajores Havanna Surtidos Caja x12"
+        sku: "ALF-HAV-006"
+        price: 7500.00
+        currency: "ARS"
+        stock_quantity: 15
+        attributes:
+          "Sabor": "Mixto"
+          "Presentación": "Caja x12"
+        images: []
+
+  # Variantes de Vino Norton Malbec
+  - id: "vino-norton-malbec"
+    name: "Vino Norton Malbec"
+    description: "Vino Norton Malbec en diferentes presentaciones y añejamientos"
+    base_product_id: "vino-norton-malbec"
+    options:
+      - name: "Línea"
+        values:
+          - "Clásico"
+          - "Reserva"
+          - "Gran Reserva"
+          - "Barrel Select"
+      - name: "Cosecha"
+        values:
+          - "2020"
+          - "2021"
+          - "2022"
+    variants:
+      - id: "vino-norton-malbec-clasico-2022"
+        name: "Vino Norton Malbec Clásico 2022"
+        sku: "VIN-NOR-001"
+        price: 2200.00
+        currency: "ARS"
+        stock_quantity: 35
+        attributes:
+          "Línea": "Clásico"
+          "Cosecha": "2022"
+        images: []
+      
+      - id: "vino-norton-malbec-reserva-2021"
+        name: "Vino Norton Malbec Reserva 2021"
+        sku: "VIN-NOR-002"
+        price: 3800.00
+        currency: "ARS"
+        stock_quantity: 24
+        attributes:
+          "Línea": "Reserva"
+          "Cosecha": "2021"
+        images: []
+      
+      - id: "vino-norton-malbec-gran-reserva-2020"
+        name: "Vino Norton Malbec Gran Reserva 2020"
+        sku: "VIN-NOR-003"
+        price: 6500.00
+        currency: "ARS"
+        stock_quantity: 15
+        attributes:
+          "Línea": "Gran Reserva"
+          "Cosecha": "2020"
+        images: []
+      
+      - id: "vino-norton-malbec-barrel-2021"
+        name: "Vino Norton Malbec Barrel Select 2021"
+        sku: "VIN-NOR-004"
+        price: 4900.00
+        currency: "ARS"
+        stock_quantity: 18
+        attributes:
+          "Línea": "Barrel Select"
+          "Cosecha": "2021"
+        images: []
+
+  # Variantes de Gaseosa Coca-Cola
+  - id: "coca-cola"
+    name: "Coca-Cola"
+    description: "Gaseosa Coca-Cola en diferentes presentaciones"
+    base_product_id: "coca-cola-2l"
+    options:
+      - name: "Tamaño"
+        values:
+          - "500ml"
+          - "1.5L"
+          - "2L"
+          - "2.25L"
+      - name: "Tipo"
+        values:
+          - "Regular"
+          - "Sin Azúcar (Zero)"
+          - "Light"
+      - name: "Envase"
+        values:
+          - "Retornable"
+          - "No Retornable"
+    variants:
+      - id: "coca-cola-regular-2l-retornable"
+        name: "Coca-Cola Regular 2L Retornable"
+        sku: "BEB-COCA-001"
+        price: 1200.00
+        currency: "ARS"
+        stock_quantity: 60
+        attributes:
+          "Tamaño": "2L"
+          "Tipo": "Regular"
+          "Envase": "Retornable"
+        images: []
+      
+      - id: "coca-cola-regular-2l-no-retornable"
+        name: "Coca-Cola Regular 2L No Retornable"
+        sku: "BEB-COCA-002"
+        price: 1300.00
+        currency: "ARS"
+        stock_quantity: 45
+        attributes:
+          "Tamaño": "2L"
+          "Tipo": "Regular"
+          "Envase": "No Retornable"
+        images: []
+      
+      - id: "coca-cola-zero-225l-no-retornable"
+        name: "Coca-Cola Zero 2.25L No Retornable"
+        sku: "BEB-COCA-003"
+        price: 1350.00
+        currency: "ARS"
+        stock_quantity: 40
+        attributes:
+          "Tamaño": "2.25L"
+          "Tipo": "Sin Azúcar (Zero)"
+          "Envase": "No Retornable"
+        images: []
+      
+      - id: "coca-cola-regular-500ml-no-retornable"
+        name: "Coca-Cola Regular 500ml No Retornable"
+        sku: "BEB-COCA-004"
+        price: 700.00
+        currency: "ARS"
+        stock_quantity: 80
+        attributes:
+          "Tamaño": "500ml"
+          "Tipo": "Regular"
+          "Envase": "No Retornable"
+        images: []
+      
+      - id: "coca-cola-light-15l-no-retornable"
+        name: "Coca-Cola Light 1.5L No Retornable"
+        sku: "BEB-COCA-005"
+        price: 1150.00
+        currency: "ARS"
+        stock_quantity: 30
+        attributes:
+          "Tamaño": "1.5L"
+          "Tipo": "Light"
+          "Envase": "No Retornable"
+        images: []
+
+  # Variantes de Cuaderno Rivadavia
+  - id: "cuaderno-rivadavia"
+    name: "Cuaderno Rivadavia"
+    description: "Cuadernos Rivadavia en diferentes formatos"
+    base_product_id: "cuaderno-rivadavia"
+    options:
+      - name: "Tipo"
+        values:
+          - "Rayado"
+          - "Cuadriculado"
+          - "Liso"
+      - name: "Tamaño"
+        values:
+          - "16x21cm"
+          - "21x27cm"
+          - "22x29cm"
+      - name: "Hojas"
+        values:
+          - "48 hojas"
+          - "84 hojas"
+          - "98 hojas"
+    variants:
+      - id: "cuaderno-rivadavia-rayado-21x27-84"
+        name: "Cuaderno Rivadavia Rayado 21x27cm 84 hojas"
+        sku: "LIB-RIV-001"
+        price: 2200.00
+        currency: "ARS"
+        stock_quantity: 30
+        attributes:
+          "Tipo": "Rayado"
+          "Tamaño": "21x27cm"
+          "Hojas": "84 hojas"
+        images: []
+      
+      - id: "cuaderno-rivadavia-cuadriculado-21x27-84"
+        name: "Cuaderno Rivadavia Cuadriculado 21x27cm 84 hojas"
+        sku: "LIB-RIV-002"
+        price: 2200.00
+        currency: "ARS"
+        stock_quantity: 25
+        attributes:
+          "Tipo": "Cuadriculado"
+          "Tamaño": "21x27cm"
+          "Hojas": "84 hojas"
+        images: []
+      
+      - id: "cuaderno-rivadavia-rayado-16x21-48"
+        name: "Cuaderno Rivadavia Rayado 16x21cm 48 hojas"
+        sku: "LIB-RIV-003"
+        price: 1500.00
+        currency: "ARS"
+        stock_quantity: 40
+        attributes:
+          "Tipo": "Rayado"
+          "Tamaño": "16x21cm"
+          "Hojas": "48 hojas"
+        images: []
+      
+      - id: "cuaderno-rivadavia-rayado-22x29-98"
+        name: "Cuaderno Rivadavia Rayado 22x29cm 98 hojas"
+        sku: "LIB-RIV-004"
+        price: 2800.00
+        currency: "ARS"
+        stock_quantity: 20
+        attributes:
+          "Tipo": "Rayado"
+          "Tamaño": "22x29cm"
+          "Hojas": "98 hojas"
+        images: []
+      
+      - id: "cuaderno-rivadavia-liso-21x27-84"
+        name: "Cuaderno Rivadavia Liso 21x27cm 84 hojas"
+        sku: "LIB-RIV-005"
+        price: 2200.00
+        currency: "ARS"
+        stock_quantity: 15
+        attributes:
+          "Tipo": "Liso"
+          "Tamaño": "21x27cm"
+          "Hojas": "84 hojas"
+        images: []
+
+  # Variantes de Mate Imperial
+  - id: "mate-imperial"
+    name: "Mate Imperial"
+    description: "Mates Imperial en diferentes materiales y diseños"
+    base_product_id: "mate-imperial"
+    options:
+      - name: "Material"
+        values:
+          - "Calabaza y cuero"
+          - "Calabaza y alpaca"
+          - "Madera"
+          - "Cerámica"
+      - name: "Diseño"
+        values:
+          - "Clásico"
+          - "Premium"
+          - "Cincelado"
+          - "Artesanal"
+    variants:
+      - id: "mate-imperial-calabaza-cuero-clasico"
+        name: "Mate Imperial Calabaza y Cuero Clásico"
+        sku: "BAZ-MAT-001"
+        price: 9500.00
+        currency: "ARS"
+        stock_quantity: 15
+        attributes:
+          "Material": "Calabaza y cuero"
+          "Diseño": "Clásico"
+        images: []
+      
+      - id: "mate-imperial-calabaza-alpaca-premium"
+        name: "Mate Imperial Calabaza y Alpaca Premium"
+        sku: "BAZ-MAT-002"
+        price: 12500.00
+        currency: "ARS"
+        stock_quantity: 10
+        attributes:
+          "Material": "Calabaza y alpaca"
+          "Diseño": "Premium"
+        images: []
+      
+      - id: "mate-imperial-madera-artesanal"
+        name: "Mate Imperial Madera Artesanal"
+        sku: "BAZ-MAT-003"
+        price: 7800.00
+        currency: "ARS"
+        stock_quantity: 12
+        attributes:
+          "Material": "Madera"
+          "Diseño": "Artesanal"
+        images: []
+      
+      - id: "mate-imperial-ceramica-cincelado"
+        name: "Mate Imperial Cerámica Cincelado"
+        sku: "BAZ-MAT-004"
+        price: 6500.00
+        currency: "ARS"
+        stock_quantity: 18
+        attributes:
+          "Material": "Cerámica"
+          "Diseño": "Cincelado"
+        images: []
+
+  # Variantes de Termo Lumilagro
+  - id: "termo-lumilagro"
+    name: "Termo Lumilagro"
+    description: "Termos Lumilagro en diferentes capacidades y líneas"
+    base_product_id: "termo-lumilagro"
+    options:
+      - name: "Capacidad"
+        values:
+          - "500ml"
+          - "1L"
+          - "1.5L"
+          - "2L"
+      - name: "Línea"
+        values:
+          - "Luminox (Acero inoxidable)"
+          - "Cebador (con pico cebador)"
+          - "Clásico"
+          - "Económico"
+      - name: "Color"
+        values:
+          - "Plateado"
+          - "Negro"
+          - "Rojo"
+          - "Azul"
+    variants:
+      - id: "termo-lumilagro-luminox-1l-plateado"
+        name: "Termo Lumilagro Luminox 1L Plateado"
+        sku: "BAZ-TERM-001"
+        price: 12000.00
+        currency: "ARS"
+        stock_quantity: 18
+        attributes:
+          "Capacidad": "1L"
+          "Línea": "Luminox (Acero inoxidable)"
+          "Color": "Plateado"
+        images: []
+      
+      - id: "termo-lumilagro-luminox-1l-negro"
+        name: "Termo Lumilagro Luminox 1L Negro"
+        sku: "BAZ-TERM-002"
+        price: 12000.00
+        currency: "ARS"
+        stock_quantity: 15
+        attributes:
+          "Capacidad": "1L"
+          "Línea": "Luminox (Acero inoxidable)"
+          "Color": "Negro"
+        images: []
+      
+      - id: "termo-lumilagro-cebador-1l-plateado"
+        name: "Termo Lumilagro Cebador 1L Plateado"
+        sku: "BAZ-TERM-003"
+        price: 13500.00
+        currency: "ARS"
+        stock_quantity: 12
+        attributes:
+          "Capacidad": "1L"
+          "Línea": "Cebador (con pico cebador)"
+          "Color": "Plateado"
+        images: []
+      
+      - id: "termo-lumilagro-clasico-15l-rojo"
+        name: "Termo Lumilagro Clásico 1.5L Rojo"
+        sku: "BAZ-TERM-004"
+        price: 9800.00
+        currency: "ARS"
+        stock_quantity: 20
+        attributes:
+          "Capacidad": "1.5L"
+          "Línea": "Clásico"
+          "Color": "Rojo"
+        images: []
+      
+      - id: "termo-lumilagro-economico-1l-azul"
+        name: "Termo Lumilagro Económico 1L Azul"
+        sku: "BAZ-TERM-005"
+        price: 7500.00
+        currency: "ARS"
+        stock_quantity: 25
+        attributes:
+          "Capacidad": "1L"
+          "Línea": "Económico"
+          "Color": "Azul"
+        images: []
+      
+      - id: "termo-lumilagro-luminox-500ml-plateado"
+        name: "Termo Lumilagro Luminox 500ml Plateado"
+        sku: "BAZ-TERM-006"
+        price: 9800.00
+        currency: "ARS"
+        stock_quantity: 22
+        attributes:
+          "Capacidad": "500ml"
+          "Línea": "Luminox (Acero inoxidable)"
+          "Color": "Plateado"
+        images: [] 

@@ -1,33 +1,418 @@
 business_type: "fashion"
 products:
-  # TODO: Implementar productos para fashion
-  # Estructura de ejemplo:
-  # - id: "product-example-1"
-  #   name: "Producto de Ejemplo 1"
-  #   description: "Descripción del producto de ejemplo"
-  #   category: "main-category"
-  #   base_price: 9999
-  #   currency: "ARS"
-  #   sku: "PROD-001"
-  #   attributes:
-  #     color: "Rojo"
-  #     weight: 500
-  #     premium: true
-  #   variants:
-  #     - "color-size"
-  #   stock: 100
-  #
-  # - id: "product-example-2"
-  #   name: "Producto de Ejemplo 2"
-  #   description: "Otro producto de ejemplo"
-  #   category: "subcategory-1"
-  #   base_price: 15999
-  #   currency: "ARS"
-  #   sku: "PROD-002"
-  #   attributes:
-  #     color: "Azul"
-  #     weight: 750
-  #     premium: false
-  #   variants:
-  #     - "color-size"
-  #   stock: 50
+  # Ropa Femenina
+  - id: "remera-basica-mujer"
+    name: "Remera Básica Mujer"
+    description: "Remera básica de algodón para uso diario"
+    category: "womens-tops"
+    base_price: 4999
+    currency: "ARS"
+    sku: "REM-BAS-001"
+    attributes:
+      color: "Blanco"
+      material: "Algodón"
+      size: "M"
+      gender: "Mujer"
+      season: "Todo el año"
+      style: "Básico"
+      fit: "Regular"
+      sleeve-length: "Manga Corta"
+      care-instructions: "Lavar a máquina en agua fría"
+      sustainable: false
+      stretch: true
+    variants:
+      - "color-size"
+    stock: 120
+
+  - id: "jean-skinny-mujer"
+    name: "Jean Skinny Mujer"
+    description: "Jean de corte skinny con elastano para mayor comodidad"
+    category: "womens-bottoms"
+    base_price: 15999
+    currency: "ARS"
+    sku: "JEA-SKI-001"
+    attributes:
+      color: "Azul"
+      material: "Denim"
+      size: "28"
+      gender: "Mujer"
+      season: "Todo el año"
+      style: "Casual"
+      fit: "Skinny"
+      care-instructions: "Lavar a máquina en agua fría, no usar blanqueador"
+      stretch: true
+    variants:
+      - "color-size"
+    stock: 85
+
+  - id: "vestido-floral"
+    name: "Vestido Floral"
+    description: "Vestido midi con estampado floral para primavera-verano"
+    category: "womens-dresses"
+    base_price: 12999
+    currency: "ARS"
+    sku: "VES-FLO-001"
+    attributes:
+      color: "Multicolor"
+      material: "Viscosa"
+      size: "M"
+      gender: "Mujer"
+      season: "Primavera-Verano"
+      style: "Romántico"
+      fit: "Regular"
+      pattern: "Flores"
+      neckline: "V"
+      sleeve-length: "Manga Corta"
+      occasion: "Casual"
+      care-instructions: "Lavar a mano o lavado delicado"
+    variants:
+      - "color-size"
+    stock: 45
+
+  - id: "blazer-mujer"
+    name: "Blazer Mujer"
+    description: "Blazer clásico para oficina y ocasiones formales"
+    category: "womens-outerwear"
+    base_price: 25999
+    currency: "ARS"
+    sku: "BLA-MUJ-001"
+    attributes:
+      color: "Negro"
+      material: "Poliéster"
+      size: "M"
+      gender: "Mujer"
+      season: "Todo el año"
+      style: "Formal"
+      fit: "Ajustado"
+      occasion: "Trabajo"
+      care-instructions: "Lavado en seco recomendado"
+    variants:
+      - "color-size"
+    stock: 30
+
+  # Ropa Masculina
+  - id: "remera-polo-hombre"
+    name: "Remera Polo Hombre"
+    description: "Polo clásico de algodón piqué"
+    category: "mens-shirts"
+    base_price: 7999
+    currency: "ARS"
+    sku: "POL-HOM-001"
+    attributes:
+      color: "Azul Marino"
+      material: "Algodón"
+      size: "L"
+      gender: "Hombre"
+      season: "Todo el año"
+      style: "Casual"
+      fit: "Regular"
+      sleeve-length: "Manga Corta"
+      neckline: "Polo"
+      care-instructions: "Lavar a máquina en agua fría"
+    variants:
+      - "color-size"
+    stock: 75
+
+  - id: "pantalon-chino"
+    name: "Pantalón Chino"
+    description: "Pantalón chino de gabardina para hombre"
+    category: "mens-pants"
+    base_price: 13999
+    currency: "ARS"
+    sku: "PAN-CHI-001"
+    attributes:
+      color: "Beige"
+      material: "Gabardina"
+      size: "32"
+      gender: "Hombre"
+      season: "Todo el año"
+      style: "Casual"
+      fit: "Slim Fit"
+      occasion: "Casual"
+      care-instructions: "Lavar a máquina en agua fría"
+    variants:
+      - "color-size"
+    stock: 60
+
+  - id: "camisa-formal"
+    name: "Camisa Formal"
+    description: "Camisa de vestir de algodón para ocasiones formales"
+    category: "mens-shirts"
+    base_price: 11999
+    currency: "ARS"
+    sku: "CAM-FOR-001"
+    attributes:
+      color: "Blanco"
+      material: "Algodón"
+      size: "L"
+      gender: "Hombre"
+      season: "Todo el año"
+      style: "Formal"
+      fit: "Regular"
+      sleeve-length: "Manga Larga"
+      neckline: "Camisero"
+      occasion: "Trabajo"
+      care-instructions: "Lavar a máquina, planchar"
+    variants:
+      - "color-size"
+    stock: 50
+
+  # Calzado Femenino
+  - id: "zapatillas-urbanas-mujer"
+    name: "Zapatillas Urbanas Mujer"
+    description: "Zapatillas blancas urbanas para uso diario"
+    category: "womens-sneakers"
+    base_price: 18999
+    currency: "ARS"
+    sku: "ZAP-URB-001"
+    attributes:
+      color: "Blanco"
+      material: "Cuero Sintético"
+      shoe-size: "38"
+      gender: "Mujer"
+      season: "Todo el año"
+      style: "Urbano"
+      heel-height: "Sin Taco"
+      occasion: "Casual"
+      breathable: true
+      care-instructions: "Limpiar con paño húmedo"
+    variants:
+      - "color-shoe-size"
+    stock: 90
+
+  - id: "stilettos-negros"
+    name: "Stilettos Negros"
+    description: "Zapatos de taco alto para ocasiones elegantes"
+    category: "womens-heels"
+    base_price: 22999
+    currency: "ARS"
+    sku: "STI-NEG-001"
+    attributes:
+      color: "Negro"
+      material: "Cuero Sintético"
+      shoe-size: "38"
+      gender: "Mujer"
+      season: "Todo el año"
+      style: "Elegante"
+      heel-height: "Taco Alto (8-10cm)"
+      occasion: "Fiesta"
+      care-instructions: "Limpiar con productos específicos para cuero"
+    variants:
+      - "color-shoe-size"
+    stock: 35
+
+  - id: "botas-mujer"
+    name: "Botas Mujer"
+    description: "Botas de caña media para otoño-invierno"
+    category: "womens-boots"
+    base_price: 28999
+    currency: "ARS"
+    sku: "BOT-MUJ-001"
+    attributes:
+      color: "Marrón"
+      material: "Cuero"
+      shoe-size: "38"
+      gender: "Mujer"
+      season: "Otoño-Invierno"
+      style: "Casual"
+      heel-height: "Taco Bajo (1-3cm)"
+      occasion: "Diario"
+      waterproof: false
+      care-instructions: "Aplicar crema para cuero regularmente"
+    variants:
+      - "color-shoe-size"
+    stock: 40
+
+  # Calzado Masculino
+  - id: "zapatillas-deportivas-hombre"
+    name: "Zapatillas Deportivas Hombre"
+    description: "Zapatillas para running y actividades deportivas"
+    category: "mens-sneakers"
+    base_price: 24999
+    currency: "ARS"
+    sku: "ZAP-DEP-001"
+    attributes:
+      color: "Negro"
+      material: "Tela Técnica"
+      shoe-size: "42"
+      gender: "Hombre"
+      season: "Todo el año"
+      style: "Deportivo"
+      heel-height: "Sin Taco"
+      occasion: "Deportes"
+      breathable: true
+      care-instructions: "Lavar a mano con agua fría"
+    variants:
+      - "color-shoe-size"
+    stock: 70
+
+  - id: "zapatos-vestir-hombre"
+    name: "Zapatos de Vestir Hombre"
+    description: "Zapatos formales de cuero para ocasiones elegantes"
+    category: "mens-dress-shoes"
+    base_price: 32999
+    currency: "ARS"
+    sku: "ZAP-VES-001"
+    attributes:
+      color: "Negro"
+      material: "Cuero"
+      shoe-size: "42"
+      gender: "Hombre"
+      season: "Todo el año"
+      style: "Formal"
+      heel-height: "Sin Taco"
+      occasion: "Trabajo"
+      care-instructions: "Lustrar regularmente, usar horma"
+    variants:
+      - "color-shoe-size"
+    stock: 25
+
+  # Accesorios
+  - id: "cartera-cuero-mujer"
+    name: "Cartera de Cuero Mujer"
+    description: "Cartera de cuero genuino con múltiples compartimentos"
+    category: "womens-bags"
+    base_price: 19999
+    currency: "ARS"
+    sku: "CAR-CUE-001"
+    attributes:
+      color: "Negro"
+      material: "Cuero"
+      gender: "Mujer"
+      season: "Todo el año"
+      style: "Clásico"
+      occasion: "Diario"
+      care-instructions: "Limpiar con productos específicos para cuero"
+      handmade: false
+    variants:
+      - "color-only"
+    stock: 55
+
+  - id: "reloj-deportivo"
+    name: "Reloj Deportivo"
+    description: "Reloj digital resistente al agua para actividades deportivas"
+    category: "mens-watches"
+    base_price: 8999
+    currency: "ARS"
+    sku: "REL-DEP-001"
+    attributes:
+      color: "Negro"
+      material: "Silicona"
+      gender: "Unisex"
+      season: "Todo el año"
+      style: "Deportivo"
+      occasion: "Deportes"
+      waterproof: true
+      care-instructions: "Limpiar con paño húmedo"
+    variants:
+      - "color-only"
+    stock: 80
+
+  - id: "cinturon-cuero-hombre"
+    name: "Cinturón de Cuero Hombre"
+    description: "Cinturón clásico de cuero genuino con hebilla metálica"
+    category: "mens-accessories-other"
+    base_price: 6999
+    currency: "ARS"
+    sku: "CIN-CUE-001"
+    attributes:
+      color: "Marrón"
+      material: "Cuero"
+      size: "L"
+      gender: "Hombre"
+      season: "Todo el año"
+      style: "Clásico"
+      occasion: "Diario"
+      care-instructions: "Aplicar crema para cuero ocasionalmente"
+    variants:
+      - "color-size"
+    stock: 65
+
+  # Ropa Interior y Lencería
+  - id: "corpino-encaje"
+    name: "Corpiño de Encaje"
+    description: "Corpiño con encaje y relleno push-up"
+    category: "womens-bras"
+    base_price: 3999
+    currency: "ARS"
+    sku: "COR-ENC-001"
+    attributes:
+      color: "Negro"
+      material: "Encaje"
+      size: "85B"
+      gender: "Mujer"
+      season: "Todo el año"
+      style: "Romántico"
+      care-instructions: "Lavar a mano con agua fría"
+    variants:
+      - "color-size"
+    stock: 100
+
+  - id: "boxer-algodon-hombre"
+    name: "Boxer de Algodón Hombre"
+    description: "Boxer cómodo de algodón con elástico suave"
+    category: "mens-underwear"
+    base_price: 2499
+    currency: "ARS"
+    sku: "BOX-ALG-001"
+    attributes:
+      color: "Azul"
+      material: "Algodón"
+      size: "L"
+      gender: "Hombre"
+      season: "Todo el año"
+      style: "Básico"
+      care-instructions: "Lavar a máquina en agua tibia"
+      organic: false
+      stretch: true
+    variants:
+      - "color-size"
+    stock: 150
+
+  # Moda Infantil
+  - id: "remera-ninos"
+    name: "Remera Niños"
+    description: "Remera colorida con estampado para niños"
+    category: "boys-shirts"
+    base_price: 3499
+    currency: "ARS"
+    sku: "REM-NIN-001"
+    attributes:
+      color: "Azul"
+      material: "Algodón"
+      size: "8"
+      gender: "Niño"
+      season: "Todo el año"
+      style: "Casual"
+      fit: "Regular"
+      sleeve-length: "Manga Corta"
+      pattern: "Estampado"
+      age-group: "Niños (3-12 años)"
+      care-instructions: "Lavar a máquina en agua fría"
+    variants:
+      - "color-size"
+    stock: 90
+
+  - id: "vestido-ninas"
+    name: "Vestido Niñas"
+    description: "Vestido con volados y estampado de flores"
+    category: "girls-dresses"
+    base_price: 5999
+    currency: "ARS"
+    sku: "VES-NIN-001"
+    attributes:
+      color: "Rosa"
+      material: "Algodón"
+      size: "8"
+      gender: "Niña"
+      season: "Primavera-Verano"
+      style: "Romántico"
+      fit: "Regular"
+      pattern: "Flores"
+      sleeve-length: "Sin Mangas"
+      age-group: "Niños (3-12 años)"
+      occasion: "Fiesta"
+      care-instructions: "Lavar a máquina en agua fría"
+    variants:
+      - "color-size"
+    stock: 60
