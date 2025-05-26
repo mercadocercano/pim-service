@@ -1,0 +1,23 @@
+business_type: "books-media"
+variants:
+  # TODO: Implementar variantes para books-media
+  # Estructura de ejemplo:
+  # - id: "color-size"
+  #   name: "Color y Tamaño"
+  #   description: "Variante por color y tamaño del producto"
+  #   attributes:
+  #     - "color"
+  #     - "size"
+  #   combinations:
+  #     - color: "Rojo"
+  #       size: "S"
+  #       sku_suffix: "RED-S"
+  #     - color: "Rojo"
+  #       size: "M"
+  #       sku_suffix: "RED-M"
+  #     - color: "Azul"
+  #       size: "S"
+  #       sku_suffix: "BLU-S"
+  #     - color: "Azul"
+  #       size: "M"
+  #       sku_suffix: "BLU-M"

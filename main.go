@@ -9,6 +9,7 @@ import (
 	brandConfig "pim/src/brand/infrastructure/config"
 	categoryConfig "pim/src/category/infrastructure/config"
 	productConfig "pim/src/product/infrastructure/config"
+	quickstartConfig "pim/src/quickstart/infrastructure/config"
 	sharedConfig "pim/src/shared/infrastructure/config"
 
 	"github.com/gin-gonic/gin"
@@ -91,6 +92,7 @@ func main() {
 	categoryConfig.SetupCategoryModule(v1, db)
 	setupBrandModule(v1, db)
 	setupProductModule(v1, db)
+	setupQuickstartModule(v1, db)
 
 	// Aquí se agregarían más módulos:
 	// - Ubicaciones de Stock
@@ -156,4 +158,31 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  PUT    /api/v1/products/:product_id/variants/:variant_id")
 	log.Println("  DELETE /api/v1/products/:product_id/variants/:variant_id")
 	log.Println("  GET    /api/v1/variants")
+}
+
+// setupQuickstartModule configura el módulo Quickstart
+func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Quickstart...")
+
+	// Crear el loader de datos YAML
+	dataLoader := quickstartConfig.NewYAMLDataLoader("src/quickstart/data")
+
+	// Crear configuración del módulo Quickstart
+	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db, dataLoader)
+
+	// Obtener el handler
+	quickstartHandler := quickstartCfg.GetQuickstartHandler()
+
+	// Registrar rutas usando el método RegisterRoutes del handler
+	quickstartHandler.RegisterRoutes(router)
+
+	log.Println("Módulo Quickstart configurado exitosamente")
+	log.Println("Rutas Quickstart disponibles:")
+	log.Println("  GET    /api/v1/quickstart/business-types")
+	log.Println("  GET    /api/v1/quickstart/categories/:businessType")
+	log.Println("  GET    /api/v1/quickstart/attributes/:businessType")
+	log.Println("  GET    /api/v1/quickstart/variants/:businessType")
+	log.Println("  GET    /api/v1/quickstart/products/:businessType")
+	log.Println("  GET    /api/v1/quickstart/brands/:businessType")
+	log.Println("  POST   /api/v1/quickstart/setup")
 }

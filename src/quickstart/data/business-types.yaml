@@ -1,0 +1,70 @@
+business_types:
+  - id: "retail"
+    name: "Comercio Minorista"
+    description: "Tiendas de venta al por menor, supermercados, minimarkets"
+    icon: "store"
+    
+  - id: "food-beverage"
+    name: "Alimentos y Bebidas"
+    description: "Restaurantes, cafeterías, distribuidores de alimentos, bares"
+    icon: "utensils"
+    
+  - id: "fashion"
+    name: "Moda y Vestimenta"
+    description: "Ropa, calzado, accesorios de moda, boutiques"
+    icon: "shirt"
+    
+  - id: "electronics"
+    name: "Electrónicos y Tecnología"
+    description: "Dispositivos electrónicos, computadoras, smartphones, gadgets"
+    icon: "smartphone"
+    
+  - id: "automotive"
+    name: "Automotriz y Repuestos"
+    description: "Vehículos, repuestos automotrices, accesorios para autos"
+    icon: "car"
+    
+  - id: "sports-fitness"
+    name: "Deportes y Fitness"
+    description: "Equipamiento deportivo, ropa deportiva, suplementos"
+    icon: "dumbbell"
+    
+  - id: "health-pharmacy"
+    name: "Salud y Farmacia"
+    description: "Medicamentos, productos de salud, equipos médicos"
+    icon: "heart-pulse"
+    
+  - id: "books-media"
+    name: "Libros y Medios"
+    description: "Libros, revistas, música, películas, contenido digital"
+    icon: "book"
+    
+  - id: "home-construction"
+    name: "Hogar y Construcción"
+    description: "Muebles, herramientas, materiales de construcción, decoración"
+    icon: "hammer"
+    
+  - id: "beauty-cosmetics"
+    name: "Belleza y Cosméticos"
+    description: "Productos de belleza, cosméticos, cuidado personal"
+    icon: "sparkles"
+    
+  - id: "toys-games"
+    name: "Juguetes y Juegos"
+    description: "Juguetes infantiles, juegos de mesa, videojuegos"
+    icon: "gamepad-2"
+    
+  - id: "pet-supplies"
+    name: "Mascotas y Suministros"
+    description: "Alimentos para mascotas, accesorios, productos veterinarios"
+    icon: "dog"
+    
+  - id: "office-supplies"
+    name: "Oficina y Papelería"
+    description: "Suministros de oficina, papelería, equipos de trabajo"
+    icon: "briefcase"
+    
+  - id: "jewelry-accessories"
+    name: "Joyería y Accesorios"
+    description: "Joyas, relojes, accesorios personales, bisutería"
+    icon: "gem" 

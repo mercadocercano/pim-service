@@ -1,0 +1,16 @@
+business_type: "pet-supplies"
+categories:
+  # TODO: Implementar categorías para pet-supplies
+  # Estructura de ejemplo:
+  # - id: "main-category"
+  #   name: "Categoría Principal"
+  #   description: "Descripción de la categoría"
+  #   parent_id: null
+  #   subcategories:
+  #     - id: "subcategory-1"
+  #       name: "Subcategoría 1"
+  #       description: "Descripción de subcategoría"
+  #       subcategories:
+  #         - id: "sub-subcategory-1"
+  #           name: "Sub-subcategoría 1"
+  #           description: "Descripción de sub-subcategoría"

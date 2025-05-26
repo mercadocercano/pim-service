@@ -36,6 +36,9 @@ COPY --from=builder /app/templates /app/templates
 # Copiar la documentación OpenAPI
 COPY --from=builder /app/api-docs /app/api-docs
 
+# Copiar los datos YAML del módulo quickstart
+COPY --from=builder /app/src/quickstart/data /app/src/quickstart/data
+
 # Copiar las migraciones de todos los módulos
 COPY --from=builder /app/migrations/*.sql /app/migrations/
 

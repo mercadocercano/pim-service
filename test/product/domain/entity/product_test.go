@@ -1,9 +1,9 @@
 package entity
 
 import (
-	"testing"
-	"pim/src/product/domain/entity"
 	"github.com/stretchr/testify/assert"
+	"pim/src/product/domain/entity"
+	"testing"
 )
 
 func TestProduct_Simple(t *testing.T) {
@@ -25,10 +25,10 @@ func TestProduct_Update(t *testing.T) {
 func TestProduct_StatusTransitions(t *testing.T) {
 	product := createTestProduct()
 	assert.True(t, product.IsActive())
-	
+
 	product.Deactivate()
 	assert.False(t, product.IsActive())
-	
+
 	product.Activate()
 	assert.True(t, product.IsActive())
 }

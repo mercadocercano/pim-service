@@ -745,6 +745,302 @@ components:
           type: string
           format: date-time
 
+    # 🚀 QUICKSTART SCHEMAS
+    BusinessType:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único del tipo de negocio
+          example: "retail"
+        name:
+          type: string
+          description: Nombre del tipo de negocio
+          example: "Comercio Minorista"
+        description:
+          type: string
+          description: Descripción del tipo de negocio
+          example: "Tiendas de venta al por menor, supermercados, minimarkets"
+        icon:
+          type: string
+          description: Icono representativo del tipo de negocio
+          example: "store"
+
+    QuickstartCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único de la categoría
+          example: "home-garden"
+        name:
+          type: string
+          description: Nombre de la categoría
+          example: "Hogar y Jardín"
+        description:
+          type: string
+          description: Descripción de la categoría
+          example: "Productos para el hogar y jardinería"
+        parent_id:
+          type: string
+          nullable: true
+          description: ID de la categoría padre
+          example: null
+        subcategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuickstartCategory'
+          description: Subcategorías anidadas
+
+    QuickstartAttribute:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único del atributo
+          example: "color"
+        name:
+          type: string
+          description: Nombre del atributo
+          example: "Color"
+        type:
+          type: string
+          enum: ["select", "number", "text", "boolean"]
+          description: Tipo de dato del atributo
+          example: "select"
+        required:
+          type: boolean
+          description: Si el atributo es obligatorio
+          example: false
+        description:
+          type: string
+          description: Descripción del atributo
+          example: "Color del producto"
+        values:
+          type: array
+          items:
+            type: string
+          description: Valores posibles para atributos tipo select
+          example: ["Negro", "Blanco", "Gris", "Azul", "Rojo"]
+        unit:
+          type: string
+          nullable: true
+          description: Unidad de medida para atributos numéricos
+          example: "cm"
+        min_value:
+          type: number
+          nullable: true
+          description: Valor mínimo para atributos numéricos
+          example: 0
+        max_value:
+          type: number
+          nullable: true
+          description: Valor máximo para atributos numéricos
+          example: 1000
+        placeholder:
+          type: string
+          nullable: true
+          description: Texto de ayuda para atributos de texto
+          example: "Ingrese descripción..."
+
+    QuickstartVariant:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único de la configuración de variante
+          example: "color-size"
+        name:
+          type: string
+          description: Nombre de la configuración de variante
+          example: "Color y Talla"
+        description:
+          type: string
+          description: Descripción de la configuración de variante
+          example: "Variante por color y talla del producto"
+        attributes:
+          type: array
+          items:
+            type: string
+          description: Lista de atributos que componen la variante
+          example: ["color", "size"]
+        combinations:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: Combinaciones específicas de valores de atributos
+          example:
+            - color: "Negro"
+              size: "M"
+              sku_suffix: "BLK-M"
+
+    QuickstartProduct:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único del producto
+          example: "sofa-3-plazas"
+        name:
+          type: string
+          description: Nombre del producto
+          example: "Sofá de 3 Plazas"
+        description:
+          type: string
+          description: Descripción del producto
+          example: "Sofá cómodo de 3 plazas ideal para sala de estar"
+        category:
+          type: string
+          description: ID de la categoría del producto
+          example: "living-room-furniture"
+        base_price:
+          type: integer
+          description: Precio base del producto en centavos
+          example: 89999
+        currency:
+          type: string
+          description: Moneda del precio
+          example: "ARS"
+        sku:
+          type: string
+          description: Código SKU del producto
+          example: "SOFA-001"
+        attributes:
+          type: object
+          additionalProperties: true
+          description: Atributos específicos del producto
+          example:
+            color: "Gris"
+            material: "Tela"
+            weight: 45000
+        variants:
+          type: array
+          items:
+            type: string
+          description: Configuraciones de variantes aplicables
+          example: ["color-material"]
+        stock:
+          type: integer
+          description: Stock inicial del producto
+          example: 10
+
+    QuickstartBrand:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único de la marca
+          example: "ikea"
+        name:
+          type: string
+          description: Nombre de la marca
+          example: "IKEA"
+        description:
+          type: string
+          description: Descripción de la marca
+          example: "Muebles y artículos para el hogar"
+        country_origin:
+          type: string
+          description: País de origen de la marca
+          example: "Suecia"
+        category:
+          type: string
+          description: Categoría principal de la marca
+          example: "Muebles y Decoración"
+        website:
+          type: string
+          format: uri
+          nullable: true
+          description: Sitio web oficial de la marca
+          example: "https://www.ikea.com"
+        logo_url:
+          type: string
+          nullable: true
+          description: URL del logo de la marca
+          example: "/brands/ikea-logo.png"
+
+    SetupTenantRequest:
+      type: object
+      required:
+        - business_type
+      properties:
+        business_type:
+          type: string
+          enum: [retail, food-beverage, fashion, electronics, automotive, sports-fitness, health-pharmacy, books-media, home-construction, beauty-cosmetics, toys-games, pet-supplies, office-supplies, jewelry-accessories]
+          description: Tipo de negocio para la configuración quickstart
+          example: "retail"
+        include_categories:
+          type: boolean
+          default: true
+          description: Incluir categorías predefinidas
+          example: true
+        include_attributes:
+          type: boolean
+          default: true
+          description: Incluir atributos predefinidos
+          example: true
+        include_variants:
+          type: boolean
+          default: true
+          description: Incluir configuraciones de variantes predefinidas
+          example: true
+        include_products:
+          type: boolean
+          default: false
+          description: Incluir productos de ejemplo
+          example: false
+        include_brands:
+          type: boolean
+          default: true
+          description: Incluir marcas predefinidas
+          example: true
+
+    SetupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indica si la configuración fue exitosa
+          example: true
+        business_type:
+          type: string
+          description: Tipo de negocio configurado
+          example: "retail"
+        tenant_id:
+          type: string
+          format: uuid
+          description: ID del tenant configurado
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        configured_components:
+          type: object
+          properties:
+            categories:
+              type: integer
+              description: Número de categorías creadas
+              example: 5
+            attributes:
+              type: integer
+              description: Número de atributos creados
+              example: 20
+            variants:
+              type: integer
+              description: Número de configuraciones de variantes creadas
+              example: 10
+            products:
+              type: integer
+              description: Número de productos creados
+              example: 0
+            brands:
+              type: integer
+              description: Número de marcas creadas
+              example: 37
+        timestamp:
+          type: string
+          format: date-time
+          description: Fecha y hora de la configuración
+          example: "2024-05-25T22:30:00Z"
+
 paths:
   /health:
     get:
@@ -1416,6 +1712,257 @@ paths:
                 items:
                   $ref: '#/components/schemas/Category'
 
+  # 🚀 QUICKSTART MODULE ENDPOINTS
+  /quickstart/business-types:
+    get:
+      summary: Obtener tipos de negocio disponibles
+      tags: [Quickstart]
+      description: Obtiene la lista de tipos de negocio disponibles para configuración quickstart
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Lista de tipos de negocio disponibles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  business_types:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BusinessType'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/categories/{businessType}:
+    parameters:
+      - name: businessType
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [retail, food-beverage, fashion, electronics, automotive, sports-fitness, health-pharmacy, books-media, home-construction, beauty-cosmetics, toys-games, pet-supplies, office-supplies, jewelry-accessories]
+        description: Tipo de negocio
+    get:
+      summary: Obtener categorías predefinidas por tipo de negocio
+      tags: [Quickstart]
+      description: Obtiene las categorías predefinidas para un tipo de negocio específico
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Categorías predefinidas para el tipo de negocio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  business_type:
+                    type: string
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuickstartCategory'
+        '400':
+          description: Tipo de negocio inválido
+        '404':
+          description: Tipo de negocio no encontrado
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/attributes/{businessType}:
+    parameters:
+      - name: businessType
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [retail, food-beverage, fashion, electronics, automotive, sports-fitness, health-pharmacy, books-media, home-construction, beauty-cosmetics, toys-games, pet-supplies, office-supplies, jewelry-accessories]
+        description: Tipo de negocio
+    get:
+      summary: Obtener atributos predefinidos por tipo de negocio
+      tags: [Quickstart]
+      description: Obtiene los atributos predefinidos para un tipo de negocio específico
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Atributos predefinidos para el tipo de negocio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  business_type:
+                    type: string
+                  attributes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuickstartAttribute'
+        '400':
+          description: Tipo de negocio inválido
+        '404':
+          description: Tipo de negocio no encontrado
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/variants/{businessType}:
+    parameters:
+      - name: businessType
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [retail, food-beverage, fashion, electronics, automotive, sports-fitness, health-pharmacy, books-media, home-construction, beauty-cosmetics, toys-games, pet-supplies, office-supplies, jewelry-accessories]
+        description: Tipo de negocio
+    get:
+      summary: Obtener configuraciones de variantes predefinidas
+      tags: [Quickstart]
+      description: Obtiene las configuraciones de variantes predefinidas para un tipo de negocio específico
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Configuraciones de variantes predefinidas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  business_type:
+                    type: string
+                  variants:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuickstartVariant'
+        '400':
+          description: Tipo de negocio inválido
+        '404':
+          description: Tipo de negocio no encontrado
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/products/{businessType}:
+    parameters:
+      - name: businessType
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [retail, food-beverage, fashion, electronics, automotive, sports-fitness, health-pharmacy, books-media, home-construction, beauty-cosmetics, toys-games, pet-supplies, office-supplies, jewelry-accessories]
+        description: Tipo de negocio
+    get:
+      summary: Obtener productos de ejemplo predefinidos
+      tags: [Quickstart]
+      description: Obtiene los productos de ejemplo predefinidos para un tipo de negocio específico
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Productos de ejemplo predefinidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  business_type:
+                    type: string
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuickstartProduct'
+        '400':
+          description: Tipo de negocio inválido
+        '404':
+          description: Tipo de negocio no encontrado
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/brands/{businessType}:
+    parameters:
+      - name: businessType
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [retail, food-beverage, fashion, electronics, automotive, sports-fitness, health-pharmacy, books-media, home-construction, beauty-cosmetics, toys-games, pet-supplies, office-supplies, jewelry-accessories]
+        description: Tipo de negocio
+    get:
+      summary: Obtener marcas predefinidas por tipo de negocio
+      tags: [Quickstart]
+      description: Obtiene las marcas predefinidas para un tipo de negocio específico
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Marcas predefinidas para el tipo de negocio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  business_type:
+                    type: string
+                  brands:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuickstartBrand'
+        '400':
+          description: Tipo de negocio inválido
+        '404':
+          description: Tipo de negocio no encontrado
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/setup:
+    post:
+      summary: Aplicar configuración quickstart completa
+      tags: [Quickstart]
+      description: Aplica la configuración quickstart completa a un tenant, creando categorías, atributos, variantes, productos y marcas predefinidos
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetupTenantRequest'
+      responses:
+        '200':
+          description: Configuración quickstart aplicada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetupResponse'
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '409':
+          description: Configuración quickstart ya existe para este tenant
+        '500':
+          description: Error interno del servidor
+
 tags:
   - name: Health
     description: Endpoints de salud del sistema
@@ -1424,4 +1971,6 @@ tags:
   - name: Products
     description: Gestión de productos del catálogo
   - name: Categories
-    description: Gestión de categorías de productos 
+    description: Gestión de categorías de productos
+  - name: Quickstart
+    description: 🚀 Configuración rápida de catálogos predefinidos por tipo de negocio 
