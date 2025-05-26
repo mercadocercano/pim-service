@@ -8,6 +8,7 @@ import (
 	apiConfig "pim/src/api/config"
 	brandConfig "pim/src/brand/infrastructure/config"
 	categoryConfig "pim/src/category/infrastructure/config"
+	productConfig "pim/src/product/infrastructure/config"
 	sharedConfig "pim/src/shared/infrastructure/config"
 
 	"github.com/gin-gonic/gin"
@@ -53,11 +54,11 @@ func main() {
 	sharedConfig.SetupSharedMiddleware(router, sharedCfg)
 
 	// Obtener configuración de la base de datos de variables de entorno
-	dbHost := getEnv("POSTGRES_HOST", "localhost")
-	dbPort := getEnv("POSTGRES_PORT", "5432")
-	dbUser := getEnv("POSTGRES_USER", "postgres")
-	dbPassword := getEnv("POSTGRES_PASSWORD", "postgres")
-	dbName := getEnv("POSTGRES_DB", "pim")
+	dbHost := getEnv("DB_HOST", "localhost")
+	dbPort := getEnv("DB_PORT", "5432")
+	dbUser := getEnv("DB_USER", "postgres")
+	dbPassword := getEnv("DB_PASSWORD", "postgres")
+	dbName := getEnv("DB_NAME", "pim_db")
 
 	// Crear string de conexión
 	connStr := "postgres://" + dbUser + ":" + dbPassword + "@" + dbHost + ":" + dbPort + "/" + dbName + "?sslmode=disable"
@@ -89,9 +90,9 @@ func main() {
 	// Configurar módulos
 	categoryConfig.SetupCategoryModule(v1, db)
 	setupBrandModule(v1, db)
+	setupProductModule(v1, db)
 
 	// Aquí se agregarían más módulos:
-	// - Productos
 	// - Ubicaciones de Stock
 
 	// Iniciar el servidor
@@ -126,4 +127,33 @@ func setupBrandModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  GET    /api/v1/brands/:id")
 	log.Println("  PUT    /api/v1/brands/:id")
 	log.Println("  DELETE /api/v1/brands/:id")
+}
+
+// setupProductModule configura el módulo Product
+func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Product...")
+
+	// Crear configuración del módulo Product
+	productCfg := productConfig.NewProductConfig(db)
+
+	// Registrar rutas del Product
+	productCfg.ProductController.RegisterRoutes(router)
+
+	// Registrar rutas de Product Variants
+	productCfg.ProductVariantController.RegisterRoutes(router)
+
+	log.Println("Módulo Product configurado exitosamente")
+	log.Println("Rutas Product disponibles:")
+	log.Println("  POST   /api/v1/products")
+	log.Println("  GET    /api/v1/products")
+	log.Println("  GET    /api/v1/products/:id")
+	log.Println("  PUT    /api/v1/products/:id")
+	log.Println("  DELETE /api/v1/products/:id")
+	log.Println("Rutas Product Variants disponibles:")
+	log.Println("  POST   /api/v1/products/:product_id/variants")
+	log.Println("  GET    /api/v1/products/:product_id/variants")
+	log.Println("  GET    /api/v1/products/:product_id/variants/:variant_id")
+	log.Println("  PUT    /api/v1/products/:product_id/variants/:variant_id")
+	log.Println("  DELETE /api/v1/products/:product_id/variants/:variant_id")
+	log.Println("  GET    /api/v1/variants")
 }

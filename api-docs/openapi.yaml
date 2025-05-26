@@ -154,6 +154,83 @@ components:
         type: string
         enum: ["true"]
 
+    # Parámetros específicos para productos
+    ProductStatusParam:
+      name: status
+      in: query
+      description: Estado del producto
+      required: false
+      schema:
+        type: string
+        enum: ["active", "inactive", "discontinued", "deleted"]
+    
+    ProductNameParam:
+      name: name
+      in: query
+      description: "Búsqueda por nombre (LIKE)"
+      required: false
+      schema:
+        type: string
+    
+    ProductDescriptionParam:
+      name: description
+      in: query
+      description: "Búsqueda por descripción (LIKE)"
+      required: false
+      schema:
+        type: string
+    
+    ProductSKUParam:
+      name: sku
+      in: query
+      description: "Búsqueda por SKU (LIKE)"
+      required: false
+      schema:
+        type: string
+    
+    ProductCategoryIdParam:
+      name: category_id
+      in: query
+      description: ID de la categoría
+      required: false
+      schema:
+        type: string
+        format: uuid
+    
+    ProductBrandIdParam:
+      name: brand_id
+      in: query
+      description: ID de la marca
+      required: false
+      schema:
+        type: string
+        format: uuid
+    
+    ProductCategoryNameParam:
+      name: category_name
+      in: query
+      description: "Búsqueda por nombre de categoría (LIKE)"
+      required: false
+      schema:
+        type: string
+    
+    ProductBrandNameParam:
+      name: brand_name
+      in: query
+      description: "Búsqueda por nombre de marca (LIKE)"
+      required: false
+      schema:
+        type: string
+    
+    ProductIncludeDeletedParam:
+      name: include_deleted
+      in: query
+      description: Incluir productos eliminados
+      required: false
+      schema:
+        type: boolean
+        default: false
+
   schemas:
     # Respuesta genérica de listado
     ListResponse:
@@ -268,6 +345,78 @@ components:
           format: date-time
           description: Fecha de última actualización
 
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único del producto
+        tenant_id:
+          type: string
+          description: ID del tenant propietario
+        name:
+          type: string
+          description: Nombre del producto
+        description:
+          type: string
+          nullable: true
+          description: Descripción del producto
+        sku:
+          type: string
+          nullable: true
+          description: Código SKU del producto
+        status:
+          type: string
+          enum: ["active", "inactive", "discontinued", "deleted"]
+          description: Estado del producto
+        category:
+          $ref: '#/components/schemas/CategoryReference'
+        brand:
+          $ref: '#/components/schemas/BrandReference'
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación
+        updated_at:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+
+    CategoryReference:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID de la categoría
+        name:
+          type: string
+          description: Nombre de la categoría
+
+    BrandReference:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID de la marca
+        name:
+          type: string
+          description: Nombre de la marca
+
+    ProductListResponse:
+      allOf:
+        - $ref: '#/components/schemas/ListResponse'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+
     CreateCategoryRequest:
       type: object
       required:
@@ -355,6 +504,230 @@ components:
           format: uri
           nullable: true
           description: Sitio web oficial de la marca
+
+    CreateProductRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 255
+          description: Nombre del producto
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Descripción del producto
+        sku:
+          type: string
+          minLength: 3
+          maxLength: 50
+          nullable: true
+          description: Código SKU del producto
+        category_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la categoría
+        brand_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la marca
+
+    UpdateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 255
+          description: Nombre del producto
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Descripción del producto
+        sku:
+          type: string
+          minLength: 3
+          maxLength: 50
+          nullable: true
+          description: Código SKU del producto
+        category_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la categoría
+        brand_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la marca
+
+    ProductVariant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la variante
+        tenant_id:
+          type: string
+          format: uuid
+          description: ID del tenant
+        product_id:
+          type: string
+          format: uuid
+          description: ID del producto padre
+        name:
+          type: string
+          description: Nombre de la variante
+        sku:
+          type: string
+          nullable: true
+          description: Código SKU de la variante
+        status:
+          type: string
+          enum: [active, inactive, discontinued, deleted]
+          description: Estado de la variante
+        is_default:
+          type: boolean
+          description: Indica si es la variante por defecto
+        sort_order:
+          type: integer
+          description: Orden de clasificación
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/VariantAttribute'
+          description: Atributos de la variante
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación
+        updated_at:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+
+    VariantAttribute:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del atributo
+        value:
+          type: string
+          description: Valor del atributo
+
+    CreateProductVariantRequest:
+      type: object
+      required:
+        - product_id
+        - name
+      properties:
+        product_id:
+          type: string
+          format: uuid
+          description: ID del producto padre
+        name:
+          type: string
+          minLength: 2
+          maxLength: 255
+          description: Nombre de la variante
+        sku:
+          type: string
+          minLength: 3
+          maxLength: 50
+          nullable: true
+          description: Código SKU de la variante
+        is_default:
+          type: boolean
+          nullable: true
+          description: Indica si es la variante por defecto
+        sort_order:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Orden de clasificación
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateVariantAttributeRequest'
+          description: Atributos de la variante
+
+    CreateVariantAttributeRequest:
+      type: object
+      required:
+        - name
+        - value
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Nombre del atributo
+        value:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Valor del atributo
+
+    UpdateProductVariantRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 255
+          description: Nombre de la variante
+        sku:
+          type: string
+          minLength: 3
+          maxLength: 50
+          nullable: true
+          description: Código SKU de la variante
+        is_default:
+          type: boolean
+          nullable: true
+          description: Indica si es la variante por defecto
+        sort_order:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Orden de clasificación
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateVariantAttributeRequest'
+          description: Atributos de la variante
+
+    UpdateVariantAttributeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Nombre del atributo
+        value:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Valor del atributo
+
+    ProductVariantListResponse:
+      allOf:
+        - $ref: '#/components/schemas/ListResponse'
+        - type: object
+          properties:
+            variants:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProductVariant'
 
     HealthResponse:
       type: object
@@ -508,6 +881,299 @@ paths:
           description: Marca no encontrada
         '409':
           description: No se puede eliminar (tiene productos asociados)
+
+  /products:
+    get:
+      summary: Listar productos con filtros y paginación
+      tags: [Products]
+      description: Obtiene una lista paginada de productos con opciones de filtrado
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SortByParam'
+        - $ref: '#/components/parameters/SortDirParam'
+        - $ref: '#/components/parameters/ProductStatusParam'
+        - $ref: '#/components/parameters/ProductNameParam'
+        - $ref: '#/components/parameters/ProductDescriptionParam'
+        - $ref: '#/components/parameters/ProductSKUParam'
+        - $ref: '#/components/parameters/ProductCategoryIdParam'
+        - $ref: '#/components/parameters/ProductBrandIdParam'
+        - $ref: '#/components/parameters/ProductCategoryNameParam'
+        - $ref: '#/components/parameters/ProductBrandNameParam'
+        - $ref: '#/components/parameters/ProductIncludeDeletedParam'
+      responses:
+        '200':
+          description: Lista paginada de productos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '400':
+          description: Parámetros de filtrado inválidos
+        '401':
+          description: No autorizado
+        '403':
+          description: Sin permisos para acceder a productos
+
+    post:
+      summary: Crear nuevo producto
+      tags: [Products]
+      description: Crea un nuevo producto en el sistema
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '201':
+          description: Producto creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '409':
+          description: Producto ya existe (nombre o SKU duplicado)
+
+  /products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Obtener producto por ID
+      tags: [Products]
+      description: Devuelve los detalles de un producto específico
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Detalles del producto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Producto no encontrado
+
+    put:
+      summary: Actualizar producto
+      tags: [Products]
+      description: Actualiza los datos de un producto existente
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+      responses:
+        '200':
+          description: Producto actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Datos de entrada inválidos
+        '404':
+          description: Producto no encontrado
+        '409':
+          description: Conflicto (nombre o SKU duplicado)
+
+    delete:
+      summary: Eliminar producto
+      tags: [Products]
+      description: Elimina un producto del sistema (soft delete)
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '204':
+          description: Producto eliminado
+        '404':
+          description: Producto no encontrado
+
+  /product-variants:
+    get:
+      summary: Listar todas las variantes de productos
+      tags: [Product Variants]
+      description: Obtiene una lista paginada de todas las variantes de productos con opciones de filtrado
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SortByParam'
+        - $ref: '#/components/parameters/SortDirParam'
+        - name: product_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por ID de producto
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filtrar por nombre de variante
+        - name: sku
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filtrar por SKU de variante
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [active, inactive, discontinued]
+          description: Filtrar por estado
+        - name: is_default
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Filtrar por variante por defecto
+      responses:
+        '200':
+          description: Lista paginada de variantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVariantListResponse'
+        '400':
+          description: Parámetros de filtrado inválidos
+        '401':
+          description: No autorizado
+
+    post:
+      summary: Crear nueva variante de producto
+      tags: [Product Variants]
+      description: Crea una nueva variante para un producto específico
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductVariantRequest'
+      responses:
+        '201':
+          description: Variante creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVariant'
+        '400':
+          description: Datos de entrada inválidos
+        '404':
+          description: Producto no encontrado
+        '409':
+          description: Variante ya existe (nombre o SKU duplicado)
+
+  /product-variants/{variant_id}:
+    parameters:
+      - name: variant_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Obtener variante por ID
+      tags: [Product Variants]
+      description: Devuelve los detalles de una variante específica
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Detalles de la variante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVariant'
+        '404':
+          description: Variante no encontrada
+
+    put:
+      summary: Actualizar variante de producto
+      tags: [Product Variants]
+      description: Actualiza los datos de una variante existente
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: product_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del producto padre
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductVariantRequest'
+      responses:
+        '200':
+          description: Variante actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductVariant'
+        '400':
+          description: Datos de entrada inválidos
+        '404':
+          description: Variante no encontrada
+        '409':
+          description: Conflicto (nombre o SKU duplicado)
+
+    delete:
+      summary: Eliminar variante de producto
+      tags: [Product Variants]
+      description: Elimina una variante de producto (soft delete)
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: product_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del producto padre
+      responses:
+        '204':
+          description: Variante eliminada
+        '404':
+          description: Variante no encontrada
 
   /categories:
     get:
@@ -755,5 +1421,7 @@ tags:
     description: Endpoints de salud del sistema
   - name: Brands
     description: Gestión de marcas de productos
+  - name: Products
+    description: Gestión de productos del catálogo
   - name: Categories
     description: Gestión de categorías de productos 

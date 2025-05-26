@@ -13,8 +13,8 @@ RUN go mod download
 # Copiar el código fuente
 COPY . .
 
-# Compilar la aplicación
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/api
+# Compilar la aplicación desde la raíz
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # Final stage
 FROM alpine:3.18
@@ -30,8 +30,14 @@ RUN mkdir -p /app/scripts /app/migrations
 # Copiar el binario compilado
 COPY --from=builder /app/main .
 
-# Copiar las migraciones
-COPY --from=builder /app/src/category/infrastructure/persistence/migrations/*.sql /app/migrations/
+# Copiar las plantillas HTML
+COPY --from=builder /app/templates /app/templates
+
+# Copiar la documentación OpenAPI
+COPY --from=builder /app/api-docs /app/api-docs
+
+# Copiar las migraciones de todos los módulos
+COPY --from=builder /app/migrations/*.sql /app/migrations/
 
 # Exponer el puerto
 EXPOSE 8080
