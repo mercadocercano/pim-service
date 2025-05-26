@@ -1,33 +1,138 @@
 business_type: "sports-fitness"
 products:
-  # TODO: Implementar productos para sports-fitness
-  # Estructura de ejemplo:
-  # - id: "product-example-1"
-  #   name: "Producto de Ejemplo 1"
-  #   description: "Descripción del producto de ejemplo"
-  #   category: "main-category"
-  #   base_price: 9999
-  #   currency: "ARS"
-  #   sku: "PROD-001"
-  #   attributes:
-  #     color: "Rojo"
-  #     weight: 500
-  #     premium: true
-  #   variants:
-  #     - "color-size"
-  #   stock: 100
-  #
-  # - id: "product-example-2"
-  #   name: "Producto de Ejemplo 2"
-  #   description: "Otro producto de ejemplo"
-  #   category: "subcategory-1"
-  #   base_price: 15999
-  #   currency: "ARS"
-  #   sku: "PROD-002"
-  #   attributes:
-  #     color: "Azul"
-  #     weight: 750
-  #     premium: false
-  #   variants:
-  #     - "color-size"
-  #   stock: 50
+  # Productos de Fútbol
+  - id: "botines-adidas-predator"
+    name: "Botines Adidas Predator Edge.3 FG"
+    description: "Botines de fútbol para césped natural con tecnología Control Zone"
+    brand: "adidas"
+    category: "futbol"
+    subcategory: "botines"
+    attributes:
+      color: "Core Black / Team Solar Yellow"
+      genero: "Hombre"
+      nivel_uso: "Avanzado"
+      tipo_superficie: "Césped Natural"
+      tecnologias: ["Control Zone", "Hybrid Touch"]
+      
+  - id: "pelota-adidas-al-rihla"
+    name: "Pelota Adidas Al Rihla Pro"
+    description: "Pelota oficial del Mundial Qatar 2022"
+    brand: "adidas"
+    category: "futbol"
+    subcategory: "pelotas"
+    attributes:
+      color: "Blanco / Multicolor"
+      certificaciones: ["FIFA Quality Pro"]
+      nivel_uso: "Profesional"
+      
+  # Productos de Running
+  - id: "zapatillas-nike-pegasus"
+    name: "Nike Air Zoom Pegasus 39"
+    description: "Zapatillas versátiles para running diario"
+    brand: "nike"
+    category: "running"
+    subcategory: "zapatillas-running"
+    attributes:
+      color: "Black / White"
+      genero: "Unisex"
+      talle_calzado: ["38", "39", "40", "41", "42", "43"]
+      nivel_uso: "Intermedio"
+      tecnologias: ["Air Zoom", "React Foam"]
+      
+  # Productos de Gimnasio
+  - id: "mancuernas-set"
+    name: "Set de Mancuernas Hexagonales"
+    description: "Set de mancuernas de goma hexagonales de 2 a 10 kg"
+    brand: "rogue"
+    category: "gimnasio"
+    subcategory: "pesas-mancuernas"
+    attributes:
+      peso: "24"
+      material: "Goma y acero"
+      nivel_uso: "Intermedio"
+      
+  - id: "banco-multiproposito"
+    name: "Banco Multipropósito Ajustable"
+    description: "Banco de ejercicios ajustable para entrenamiento completo"
+    brand: "technogym"
+    category: "gimnasio"
+    subcategory: "maquinas-ejercicio"
+    attributes:
+      dimensiones: "130x30x45 cm"
+      peso: "15"
+      material: "Acero y polipiel"
+      nivel_uso: "Avanzado"
+      
+  # Productos de Tenis
+  - id: "raqueta-wilson-blade"
+    name: "Raqueta Wilson Blade 98 16x19 v8"
+    description: "Raqueta de tenis profesional con gran control y potencia"
+    brand: "wilson"
+    category: "tenis"
+    subcategory: "raquetas"
+    attributes:
+      peso: "305"
+      nivel_uso: "Avanzado"
+      tecnologias: ["DirectConnect", "FortyFive°"]
+      
+  # Indumentaria Deportiva
+  - id: "remera-under-armour"
+    name: "Remera Under Armour Tech 2.0"
+    description: "Remera deportiva con tecnología anti-transpirante"
+    brand: "under-armour"
+    category: "indumentaria-deportiva"
+    subcategory: "remeras-deportivas"
+    attributes:
+      color: "Gris"
+      talle: ["S", "M", "L", "XL"]
+      genero: "Hombre"
+      material: "100% Poliéster"
+      tecnologias: ["HeatGear", "Anti-Odor"]
+      
+  # Nutrición Deportiva
+  - id: "proteina-ena"
+    name: "Proteína ENA Sport True Made Whey Protein"
+    description: "Proteína de suero de leche de alta calidad"
+    brand: "ena"
+    category: "nutricion-deportiva"
+    subcategory: "proteinas"
+    attributes:
+      contenido_neto: 930
+      sabor: "Chocolate"
+      porciones: 30
+      
+  # Accesorios Deportivos
+  - id: "reloj-garmin"
+    name: "Reloj Deportivo Garmin Forerunner 255"
+    description: "Reloj GPS multideporte con métricas avanzadas"
+    brand: "garmin"
+    category: "accesorios-deportivos"
+    subcategory: "medicion-monitoreo"
+    attributes:
+      color: "Negro"
+      tecnologias: ["GPS", "Heart Rate", "Body Battery"]
+      caracteristicas_especiales: ["Autonomía 14 días", "NFC", "Music"]
+      
+  # CrossFit y Funcional
+  - id: "soga-saltar"
+    name: "Soga de Saltar Pro"
+    description: "Soga de saltar profesional para CrossFit"
+    brand: "rogue"
+    category: "crossfit-funcional"
+    subcategory: "elementos-funcional"
+    attributes:
+      material: "Cable de acero y mangos de aluminio"
+      nivel_uso: "Profesional"
+      caracteristicas_especiales: ["Rodamientos sellados", "Cable ajustable"]
+      
+  - id: "kettlebell-pro"
+    name: "Kettlebell Pro Competition"
+    description: "Kettlebell de competición calibrada"
+    brand: "rogue"
+    category: "crossfit-funcional"
+    subcategory: "elementos-funcional"
+    attributes:
+      peso: 16
+      material: "Acero"
+      nivel_uso: "Profesional"
+      certificaciones: ["Competition Standard"]

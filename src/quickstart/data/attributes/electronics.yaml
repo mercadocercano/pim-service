@@ -1,35 +1,524 @@
 business_type: "electronics"
 attributes:
-  # TODO: Implementar atributos para electronics
-  # Estructura de ejemplo:
-  # - id: "color"
-  #   name: "Color"
-  #   type: "select"
-  #   required: false
-  #   description: "Color del producto"
-  #   values:
-  #     - "Rojo"
-  #     - "Azul"
-  #     - "Verde"
-  #
-  # - id: "weight"
-  #   name: "Peso"
-  #   type: "number"
-  #   required: false
-  #   description: "Peso del producto en gramos"
-  #   unit: "g"
-  #   min_value: 0
-  #   max_value: 10000
-  #
-  # - id: "description"
-  #   name: "Descripción Detallada"
-  #   type: "text"
-  #   required: false
-  #   description: "Descripción detallada del producto"
-  #   placeholder: "Ingrese descripción..."
-  #
-  # - id: "premium"
-  #   name: "Producto Premium"
-  #   type: "boolean"
-  #   required: false
-  #   description: "Indica si es un producto premium"
+  # Atributos Generales
+  - id: "linea_producto"
+    name: "Línea de Producto"
+    description: "Línea o gama a la que pertenece el producto (ej: Galaxy S, iPhone, Bravia)"
+    type: "text"
+    required: false
+    searchable: true
+    filterable: true
+
+  - id: "modelo"
+    name: "Modelo"
+    description: "Modelo específico del producto (ej: S23 Ultra, iPhone 15 Pro, XR-55X90J)"
+    type: "text"
+    required: true
+    searchable: true
+
+  - id: "origen"
+    name: "País de Origen"
+    description: "País de fabricación o ensamblaje del producto"
+    type: "select"
+    options:
+      - "Argentina"
+      - "China"
+      - "Corea del Sur"
+      - "Japón"
+      - "Estados Unidos"
+      - "Brasil"
+      - "México"
+      - "Vietnam"
+      - "Otro"
+    required: true
+    filterable: true
+
+  - id: "garantia_fabricante"
+    name: "Garantía del Fabricante"
+    description: "Período de garantía oficial ofrecido por el fabricante en Argentina"
+    type: "text"
+    required: true
+    filterable: true
+    placeholder: "Ej: 12 meses, 2 años"
+
+  - id: "eficiencia_energetica"
+    name: "Eficiencia Energética"
+    description: "Clasificación de eficiencia energética según normativa argentina (si aplica)"
+    type: "select"
+    options:
+      - "A+++ (#009933)"
+      - "A++ (#66CC33)"
+      - "A+ (#99FF33)"
+      - "A (#CCFF33)"
+      - "B (#FFFF33)"
+      - "C (#FFCC33)"
+      - "D (#FF9933)"
+      - "E (#FF6633)"
+      - "F (#FF3333)"
+      - "G (#CC0033)"
+      - "No Aplica"
+    required: false
+    filterable: true
+
+  - id: "certificacion_iram"
+    name: "Certificación IRAM"
+    description: "Indica si el producto cuenta con certificación de seguridad eléctrica IRAM"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  # Atributos Técnicos - TV y Video
+  - id: "tamano_pantalla_tv"
+    name: "Tamaño de Pantalla (TV)"
+    description: "Tamaño diagonal de la pantalla en pulgadas"
+    type: "number_with_unit"
+    unit: "pulgadas"
+    required: false
+    filterable: true
+
+  - id: "resolucion_pantalla_tv"
+    name: "Resolución de Pantalla (TV)"
+    description: "Resolución máxima de la pantalla"
+    type: "select"
+    options:
+      - "HD (1280x720)"
+      - "Full HD (1920x1080)"
+      - "4K UHD (3840x2160)"
+      - "8K UHD (7680x4320)"
+    required: false
+    filterable: true
+
+  - id: "tipo_pantalla_tv"
+    name: "Tipo de Pantalla (TV)"
+    description: "Tecnología del panel de la pantalla"
+    type: "select"
+    options:
+      - "LED"
+      - "OLED"
+      - "QLED"
+      - "NanoCell"
+      - "LCD"
+    required: false
+    filterable: true
+
+  - id: "smart_tv"
+    name: "Smart TV"
+    description: "Indica si el televisor tiene funciones Smart"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  - id: "sistema_operativo_tv"
+    name: "Sistema Operativo (TV)"
+    description: "Sistema operativo del Smart TV"
+    type: "select"
+    options:
+      - "Android TV"
+      - "Google TV"
+      - "Tizen (Samsung)"
+      - "webOS (LG)"
+      - "Roku TV"
+      - "Otro"
+      - "No Aplica"
+    required: false
+    filterable: true
+
+  # Atributos Técnicos - Audio
+  - id: "tipo_auricular"
+    name: "Tipo de Auricular"
+    description: "Formato del auricular"
+    type: "select"
+    options:
+      - "In-Ear"
+      - "On-Ear"
+      - "Over-Ear"
+    required: false
+    filterable: true
+
+  - id: "conectividad_auricular"
+    name: "Conectividad Auricular/Parlante"
+    description: "Tipo de conexión principal"
+    type: "multi_select"
+    options:
+      - "Bluetooth"
+      - "Cable Jack 3.5mm"
+      - "USB"
+      - "Wi-Fi"
+      - "NFC"
+    required: false
+    filterable: true
+
+  - id: "cancelacion_ruido"
+    name: "Cancelación de Ruido (Auriculares)"
+    description: "Indica si posee tecnología de cancelación activa de ruido"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  - id: "potencia_parlante_rms"
+    name: "Potencia RMS (Parlantes/Equipos)"
+    description: "Potencia real de salida en Watts RMS"
+    type: "number_with_unit"
+    unit: "W RMS"
+    required: false
+    filterable: true
+
+  # Atributos Técnicos - Celulares y Telefonía
+  - id: "sistema_operativo_dispositivo_movil"
+    name: "Sistema Operativo (Móvil)"
+    description: "Sistema operativo del smartphone o tablet"
+    type: "select"
+    options:
+      - "Android"
+      - "iOS"
+      - "Otro"
+    required: false
+    filterable: true
+
+  - id: "memoria_ram_celular_pc"
+    name: "Memoria RAM (Celular/PC/Notebook)"
+    description: "Capacidad de memoria RAM en Gigabytes"
+    type: "number_with_unit"
+    unit: "GB"
+    required: false
+    filterable: true
+
+  - id: "almacenamiento_interno_celular_pc"
+    name: "Almacenamiento Interno (Celular/PC/Notebook)"
+    description: "Capacidad de almacenamiento interno en Gigabytes o Terabytes"
+    type: "text" # Permite ej: "128 GB", "1 TB"
+    required: false
+    searchable: true
+    filterable: true
+
+  - id: "tamano_pantalla_celular"
+    name: "Tamaño de Pantalla (Celular)"
+    description: "Tamaño diagonal de la pantalla en pulgadas"
+    type: "number_with_unit"
+    unit: "pulgadas"
+    required: false
+    filterable: true
+
+  - id: "resolucion_camara_principal_celular"
+    name: "Resolución Cámara Principal (Celular)"
+    description: "Resolución de la cámara trasera principal en Megapíxeles"
+    type: "number_with_unit"
+    unit: "MP"
+    required: false
+    filterable: true
+
+  - id: "resolucion_camara_frontal_celular"
+    name: "Resolución Cámara Frontal (Celular)"
+    description: "Resolución de la cámara frontal en Megapíxeles"
+    type: "number_with_unit"
+    unit: "MP"
+    required: false
+    filterable: true
+
+  - id: "dual_sim"
+    name: "Dual SIM"
+    description: "Indica si el celular admite dos tarjetas SIM"
+    type: "boolean"
+    required: false
+    filterable: true
+  
+  - id: "conectividad_red_celular"
+    name: "Conectividad de Red (Celular)"
+    description: "Tecnologías de red móvil soportadas"
+    type: "multi_select"
+    options:
+      - "3G"
+      - "4G LTE"
+      - "5G"
+    required: false
+    filterable: true
+
+  # Atributos Técnicos - Computación (Notebooks, PC, Tablets)
+  - id: "procesador_pc_notebook"
+    name: "Procesador (PC/Notebook)"
+    description: "Marca y modelo del procesador"
+    type: "text"
+    required: false
+    searchable: true
+    filterable: true
+    placeholder: "Ej: Intel Core i7-13700K, AMD Ryzen 5 7600X"
+
+  - id: "sistema_operativo_pc"
+    name: "Sistema Operativo (PC/Notebook)"
+    description: "Sistema operativo de la computadora"
+    type: "select"
+    options:
+      - "Windows 11 Home"
+      - "Windows 11 Pro"
+      - "Windows 10 Home"
+      - "Windows 10 Pro"
+      - "Linux (Ubuntu, Fedora, etc.)"
+      - "macOS"
+      - "FreeDOS (Sin SO)"
+      - "Otro"
+    required: false
+    searchable: true
+    filterable: true
+
+  - id: "tipo_almacenamiento_pc_notebook"
+    name: "Tipo de Almacenamiento (PC/Notebook)"
+    description: "Tecnología del disco de almacenamiento principal"
+    type: "select"
+    options:
+      - "SSD"
+      - "HDD"
+      - "SSD + HDD"
+      - "eMMC"
+    required: false
+    filterable: true
+
+  - id: "placa_video_pc_notebook"
+    name: "Placa de Video (PC/Notebook)"
+    description: "Marca y modelo de la placa de video (dedicada o integrada)"
+    type: "text"
+    required: false
+    searchable: true
+    filterable: true
+    placeholder: "Ej: NVIDIA GeForce RTX 4070, AMD Radeon RX 6800 XT, Intel Iris Xe"
+  
+  - id: "tamano_pantalla_notebook_tablet"
+    name: "Tamaño de Pantalla (Notebook/Tablet)"
+    description: "Tamaño diagonal de la pantalla en pulgadas"
+    type: "number_with_unit"
+    unit: "pulgadas"
+    required: false
+    filterable: true
+
+  - id: "teclado_retroiluminado_notebook"
+    name: "Teclado Retroiluminado (Notebook)"
+    description: "Indica si el teclado de la notebook es retroiluminado"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  - id: "tipo_impresora"
+    name: "Tipo de Impresora"
+    description: "Tecnología de impresión"
+    type: "select"
+    options:
+      - "Inyección de Tinta"
+      - "Láser Monocromática"
+      - "Láser Color"
+      - "Multifunción Tinta"
+      - "Multifunción Láser"
+      - "Matricial"
+    required: false
+    filterable: true
+
+  # Atributos Técnicos - Consolas
+  - id: "plataforma_consola"
+    name: "Plataforma (Consola)"
+    description: "Plataforma de la consola"
+    type: "select"
+    options:
+      - "PlayStation 5"
+      - "PlayStation 4"
+      - "Xbox Series X"
+      - "Xbox Series S"
+      - "Nintendo Switch"
+      - "PC"
+    required: false
+    filterable: true
+
+  - id: "capacidad_almacenamiento_consola"
+    name: "Capacidad de Almacenamiento (Consola)"
+    description: "Capacidad de almacenamiento interno de la consola"
+    type: "text"
+    required: false
+    searchable: true
+    filterable: true
+    placeholder: "Ej: 512 GB, 1 TB, 825 GB"
+
+  # Atributos Técnicos - Electrodomésticos
+  - id: "capacidad_heladera_litros"
+    name: "Capacidad (Heladera/Freezer)"
+    description: "Capacidad total en litros"
+    type: "number_with_unit"
+    unit: "L"
+    required: false
+    filterable: true
+
+  - id: "tipo_heladera"
+    name: "Tipo de Heladera"
+    description: "Tipo de heladera según su diseño y tecnología"
+    type: "select"
+    options:
+      - "Con Freezer (Cíclica)"
+      - "Con Freezer (No Frost)"
+      - "Side by Side"
+      - "Freezer Vertical"
+      - "Freezer Horizontal"
+    required: false
+    filterable: true
+
+  - id: "cantidad_hornallas_cocina"
+    name: "Cantidad de Hornallas (Cocina)"
+    description: "Número de hornallas de la cocina"
+    type: "number"
+    required: false
+    filterable: true
+
+  - id: "tipo_cocina_horno"
+    name: "Tipo de Cocina/Horno"
+    description: "Fuente de energía y tipo"
+    type: "select"
+    options:
+      - "A Gas"
+      - "Eléctrica"
+      - "Vitrocerámica"
+      - "Inducción"
+      - "Empotrable a Gas"
+      - "Empotrable Eléctrico"
+    required: false
+    filterable: true
+
+  - id: "potencia_microondas_watts"
+    name: "Potencia (Microondas)"
+    description: "Potencia del microondas en Watts"
+    type: "number_with_unit"
+    unit: "W"
+    required: false
+    filterable: true
+
+  - id: "capacidad_lavarropas_kg"
+    name: "Capacidad de Lavado (Lavarropas)"
+    description: "Capacidad máxima de carga en kilogramos"
+    type: "number_with_unit"
+    unit: "kg"
+    required: false
+    filterable: true
+  
+  - id: "rpm_lavarropas"
+    name: "RPM (Lavarropas)"
+    description: "Revoluciones por minuto del centrifugado"
+    type: "number"
+    required: false
+    filterable: true
+
+  - id: "tipo_carga_lavarropas"
+    name: "Tipo de Carga (Lavarropas)"
+    description: "Ubicación de la puerta de carga"
+    type: "select"
+    options:
+      - "Frontal"
+      - "Superior"
+    required: false
+    filterable: true
+
+  # Atributos Técnicos - Climatización
+  - id: "frigorias_aire_acondicionado"
+    name: "Frigorías (Aire Acondicionado)"
+    description: "Capacidad de refrigeración en frigorías"
+    type: "number_with_unit"
+    unit: "Frigorías"
+    required: false
+    filterable: true
+
+  - id: "tipo_aire_acondicionado"
+    name: "Tipo de Aire Acondicionado"
+    description: "Tecnología y formato del equipo"
+    type: "select"
+    options:
+      - "Split Frío/Calor"
+      - "Split Sólo Frío"
+      - "Ventana"
+      - "Portátil"
+    required: false
+    filterable: true
+  
+  - id: "tecnologia_inverter_ac"
+    name: "Tecnología Inverter (Aire Ac.)"
+    description: "Indica si el aire acondicionado cuenta con tecnología Inverter"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  - id: "potencia_calefactor_watts"
+    name: "Potencia (Calefactor)"
+    description: "Potencia del calefactor en Watts"
+    type: "number_with_unit"
+    unit: "W"
+    required: false
+    filterable: true
+
+  - id: "tipo_calefactor"
+    name: "Tipo de Calefacción"
+    description: "Tipo de calefactor"
+    type: "select"
+    options:
+      - "Caloventor"
+      - "Estufa Halógena"
+      - "Estufa de Cuarzo"
+      - "Vitroconvector"
+      - "Panel Calefactor"
+      - "Radiador de Aceite"
+    required: false
+    filterable: true
+
+  # Atributos Comerciales
+  - id: "voltaje"
+    name: "Voltaje"
+    description: "Voltaje de funcionamiento (220V estándar en Argentina)"
+    type: "select"
+    options:
+      - "220V"
+      - "110V-240V (Autovoltaje)"
+      - "A Batería"
+      - "USB Powered"
+      - "No Aplica"
+    required: true
+    filterable: true
+
+  - id: "color"
+    name: "Color Principal"
+    description: "Color predominante del producto"
+    type: "text"
+    required: true
+    searchable: true
+    filterable: true
+
+  - id: "dimensiones_producto_cm"
+    name: "Dimensiones del Producto (Al x An x Prof cm)"
+    description: "Dimensiones del producto en formato Alto x Ancho x Profundidad en cm"
+    type: "text"
+    required: false
+    placeholder: "Ej: 60 x 50 x 45 cm"
+
+  - id: "peso_producto_kg"
+    name: "Peso del Producto (kg)"
+    description: "Peso del producto en kilogramos"
+    type: "number_with_unit"
+    unit: "kg"
+    required: false
+
+  - id: "codigo_barras_ean"
+    name: "Código de Barras (EAN)"
+    description: "Código de barras EAN del producto"
+    type: "text"
+    required: true
+    searchable: true
+
+  - id: "codigo_sku_interno"
+    name: "SKU / Código Interno"
+    description: "Código interno o SKU del producto"
+    type: "text"
+    required: true
+    searchable: true
+
+  - id: "manual_usuario_es"
+    name: "Manual de Usuario en Español"
+    description: "Indica si el producto incluye manual de usuario en español"
+    type: "boolean"
+    required: false
+    filterable: true
+
+  - id: "accesorios_incluidos"
+    name: "Accesorios Incluidos"
+    description: "Listado de accesorios que vienen con el producto"
+    type: "text_area"
+    required: false

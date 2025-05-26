@@ -1,33 +1,182 @@
 business_type: "health-pharmacy"
 products:
-  # TODO: Implementar productos para health-pharmacy
-  # Estructura de ejemplo:
-  # - id: "product-example-1"
-  #   name: "Producto de Ejemplo 1"
-  #   description: "Descripción del producto de ejemplo"
-  #   category: "main-category"
-  #   base_price: 9999
-  #   currency: "ARS"
-  #   sku: "PROD-001"
-  #   attributes:
-  #     color: "Rojo"
-  #     weight: 500
-  #     premium: true
-  #   variants:
-  #     - "color-size"
-  #   stock: 100
-  #
-  # - id: "product-example-2"
-  #   name: "Producto de Ejemplo 2"
-  #   description: "Otro producto de ejemplo"
-  #   category: "subcategory-1"
-  #   base_price: 15999
-  #   currency: "ARS"
-  #   sku: "PROD-002"
-  #   attributes:
-  #     color: "Azul"
-  #     weight: 750
-  #     premium: false
-  #   variants:
-  #     - "color-size"
-  #   stock: 50
+  # Medicamentos de Venta Libre
+  - id: "ibupirac-400"
+    name: "Ibupirac 400mg"
+    description: "Analgésico, antiinflamatorio y antifebril"
+    category_id: "analgesicos"
+    attributes:
+      marca: "Ibupirac"
+      laboratorio: "Pfizer"
+      registro_sanitario: "ANMAT-12345"
+      principio_activo: "Ibuprofeno"
+      concentracion: "400mg"
+      forma_farmaceutica: "Comprimidos"
+      requiere_receta: false
+      condicion_venta: "Venta Libre"
+      condicion_conservacion: "Temperatura Ambiente"
+      presentacion: "Blister x 8 comprimidos"
+      contenido: "8 unidades"
+      uso_pediatrico: false
+      codigo_barras: "7791234567890"
+      codigo_interno: "IBU400-8"
+      cobertura_obra_social: true
+      porcentaje_descuento: 40
+
+  - id: "tafirol-500"
+    name: "Tafirol 500mg"
+    description: "Analgésico y antifebril"
+    category_id: "analgesicos"
+    attributes:
+      marca: "Tafirol"
+      laboratorio: "Genomma Lab"
+      registro_sanitario: "ANMAT-23456"
+      principio_activo: "Paracetamol"
+      concentracion: "500mg"
+      forma_farmaceutica: "Comprimidos"
+      requiere_receta: false
+      condicion_venta: "Venta Libre"
+      condicion_conservacion: "Temperatura Ambiente"
+      presentacion: "Blister x 16 comprimidos"
+      contenido: "16 unidades"
+      uso_pediatrico: false
+      codigo_barras: "7792345678901"
+      codigo_interno: "TAF500-16"
+      cobertura_obra_social: true
+      porcentaje_descuento: 35
+
+  # Medicamentos Bajo Receta
+  - id: "amoxidal-500"
+    name: "Amoxidal 500mg"
+    description: "Antibiótico de amplio espectro"
+    category_id: "antibioticos"
+    attributes:
+      marca: "Amoxidal"
+      laboratorio: "Roemmers"
+      registro_sanitario: "ANMAT-34567"
+      principio_activo: "Amoxicilina"
+      concentracion: "500mg"
+      forma_farmaceutica: "Cápsulas"
+      requiere_receta: true
+      condicion_venta: "Bajo Receta"
+      condicion_conservacion: "Temperatura Ambiente"
+      presentacion: "Envase x 21 cápsulas"
+      contenido: "21 unidades"
+      uso_pediatrico: false
+      codigo_barras: "7793456789012"
+      codigo_interno: "AMX500-21"
+      cobertura_obra_social: true
+      porcentaje_descuento: 70
+
+  # Productos de Cuidado Personal
+  - id: "dermaglos-emulsion"
+    name: "Dermaglos Emulsión Hidratante"
+    description: "Crema hidratante para rostro y cuerpo"
+    category_id: "dermocosmetica"
+    attributes:
+      marca: "Dermaglos"
+      laboratorio: "Andrómaco"
+      registro_sanitario: "ANMAT-45678"
+      forma_farmaceutica: "Crema"
+      requiere_receta: false
+      condicion_venta: "Venta Libre"
+      condicion_conservacion: "Temperatura Ambiente"
+      presentacion: "Envase x 200ml"
+      contenido: "200ml"
+      tipo_piel: "Normal"
+      hipoalergenico: true
+      codigo_barras: "7794567890123"
+      codigo_interno: "DGL-200"
+      cobertura_obra_social: false
+
+  # Equipamiento Médico
+  - id: "omron-m3"
+    name: "Tensiómetro Digital Automático OMRON M3"
+    description: "Tensiómetro digital de brazo con tecnología Intellisense"
+    category_id: "presion-arterial"
+    attributes:
+      marca: "OMRON"
+      registro_sanitario: "ANMAT-56789"
+      condicion_conservacion: "Temperatura Ambiente"
+      garantia: "5 años"
+      certificacion: "ISO 13485, CE"
+      codigo_barras: "7795678901234"
+      codigo_interno: "OMR-M3"
+      cobertura_obra_social: true
+      porcentaje_descuento: 25
+
+  # Productos para Bebés
+  - id: "huggies-supreme"
+    name: "Huggies Supreme Care XG"
+    description: "Pañales premium con máxima absorción"
+    category_id: "panales"
+    attributes:
+      marca: "Huggies"
+      laboratorio: "Kimberly-Clark"
+      registro_sanitario: "ANMAT-67890"
+      presentacion: "Paquete x 52 unidades"
+      contenido: "52 unidades"
+      hipoalergenico: true
+      uso_pediatrico: true
+      codigo_barras: "7796789012345"
+      codigo_interno: "HGG-XG52"
+      cobertura_obra_social: false
+      porcentaje_descuento: 15
+
+  # Suplementos
+  - id: "centrum-adultos"
+    name: "Centrum Adultos"
+    description: "Suplemento multivitamínico completo"
+    category_id: "vitaminas"
+    attributes:
+      marca: "Centrum"
+      laboratorio: "Pfizer"
+      registro_sanitario: "ANMAT-78901"
+      forma_farmaceutica: "Comprimidos"
+      requiere_receta: false
+      condicion_venta: "Venta Libre"
+      condicion_conservacion: "Temperatura Ambiente"
+      presentacion: "Frasco x 60 comprimidos"
+      contenido: "60 unidades"
+      uso_pediatrico: false
+      codigo_barras: "7797890123456"
+      codigo_interno: "CTR-60"
+      cobertura_obra_social: false
+      porcentaje_descuento: 20
+
+  # Perfumes y Fragancias
+  - id: "ch-good-girl"
+    name: "Carolina Herrera Good Girl EDP"
+    description: "Perfume femenino con notas de jazmín y cacao"
+    category_id: "fragancias"
+    attributes:
+      marca: "Carolina Herrera"
+      registro_sanitario: "ANMAT-89012"
+      tipo_fragancia: "Eau de Parfum"
+      familia_olfativa: "Oriental"
+      genero: "Femenino"
+      volumen: 80
+      duracion: "Larga (6-8 horas)"
+      presentacion: "Envase x 80ml"
+      contenido: "80ml"
+      codigo_barras: "7798901234567"
+      codigo_interno: "CH-GG-80"
+      cobertura_obra_social: false
+      porcentaje_descuento: 10
+
+  - id: "maybelline-fit-me"
+    name: "Maybelline Fit Me Matte"
+    description: "Base de maquillaje mate de larga duración"
+    category_id: "maquillaje"
+    attributes:
+      marca: "Maybelline"
+      registro_sanitario: "ANMAT-90123"
+      acabado: "Mate"
+      duracion: "Extra Larga (8+ horas)"
+      presentacion: "Envase x 30ml"
+      contenido: "30ml"
+      hipoalergenico: true
+      codigo_barras: "7799012345678"
+      codigo_interno: "MBL-FM-30"
+      cobertura_obra_social: false
+      porcentaje_descuento: 15

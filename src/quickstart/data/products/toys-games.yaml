@@ -1,33 +1,176 @@
 business_type: "toys-games"
 products:
-  # TODO: Implementar productos para toys-games
-  # Estructura de ejemplo:
-  # - id: "product-example-1"
-  #   name: "Producto de Ejemplo 1"
-  #   description: "Descripción del producto de ejemplo"
-  #   category: "main-category"
-  #   base_price: 9999
-  #   currency: "ARS"
-  #   sku: "PROD-001"
-  #   attributes:
-  #     color: "Rojo"
-  #     weight: 500
-  #     premium: true
-  #   variants:
-  #     - "color-size"
-  #   stock: 100
-  #
-  # - id: "product-example-2"
-  #   name: "Producto de Ejemplo 2"
-  #   description: "Otro producto de ejemplo"
-  #   category: "subcategory-1"
-  #   base_price: 15999
-  #   currency: "ARS"
-  #   sku: "PROD-002"
-  #   attributes:
-  #     color: "Azul"
-  #     weight: 750
-  #     premium: false
-  #   variants:
-  #     - "color-size"
-  #   stock: 50
+  # Juguetes para primera infancia
+  - id: "gimnasio-activity"
+    name: "Gimnasio de Actividades Fisher-Price"
+    description: "Centro de actividades para bebés con luces, sonidos y texturas"
+    brand: "fisher-price"
+    category: "primera-infancia"
+    subcategory: "gimnasios-actividades"
+    attributes:
+      color: "Multicolor"
+      edad_recomendada: "0-12 meses"
+      tipo_pilas: "AA"
+      pilas_incluidas: false
+      tipo_juguete: "Juguete Educativo"
+      habilidades_desarrollo: ["Motricidad", "Estimulación sensorial", "Coordinación"]
+      
+  - id: "peluche-antex-osito"
+    name: "Peluche Osito Suave Antex"
+    description: "Osito de peluche suave y lavable para bebés"
+    brand: "antex"
+    category: "primera-infancia"
+    subcategory: "peluches-bebes"
+    attributes:
+      color: "Beige"
+      edad_recomendada: "0-12 meses"
+      material: "Poliéster antialérgico"
+      peso: 150
+      tipo_juguete: "Peluche"
+      
+  # Juguetes preescolares
+  - id: "bloques-lego-duplo"
+    name: "LEGO DUPLO Classic Caja de Ladrillos"
+    description: "Set de 65 bloques DUPLO para construcciones básicas"
+    brand: "lego"
+    category: "preescolar"
+    subcategory: "bloques-construccion"
+    attributes:
+      color: "Multicolor"
+      edad_recomendada: "1-3 años"
+      cantidad_piezas: 65
+      tipo_juguete: "Juguete de Construcción"
+      material: "Plástico ABS"
+      habilidades_desarrollo: ["Creatividad", "Motricidad fina", "Reconocimiento de colores"]
+      
+  - id: "masa-plastilina-playskool"
+    name: "Set de Plastilina PlaySkool"
+    description: "Kit de 6 colores de plastilina no tóxica"
+    brand: "playskool"
+    category: "preescolar"
+    subcategory: "plastilinas-masas"
+    attributes:
+      color: "Multicolor"
+      edad_recomendada: "3-6 años"
+      cantidad_piezas: 6
+      tipo_juguete: "Arte y Manualidades"
+      
+  # Juguetes 6-12 años
+  - id: "auto-hot-wheels"
+    name: "Hot Wheels Pack 5 Autos"
+    description: "Set de 5 vehículos Hot Wheels surtidos"
+    brand: "hot-wheels"
+    category: "ninos-6-12"
+    subcategory: "juguetes-accion"
+    attributes:
+      color: "Varios"
+      edad_recomendada: "3-6 años"
+      material: "Metal y plástico"
+      cantidad_piezas: 5
+      tipo_juguete: "Juguete de Acción"
+      
+  - id: "nerf-elite"
+    name: "Nerf Elite Disruptor"
+    description: "Lanzador Nerf con tambor giratorio de 6 dardos"
+    brand: "nerf"
+    category: "ninos-6-12"
+    subcategory: "juguetes-accion"
+    attributes:
+      color: "Azul/Naranja"
+      edad_recomendada: "6-9 años"
+      material: "Plástico"
+      tipo_juguete: "Juguete de Acción"
+      
+  # Juegos de mesa
+  - id: "teg"
+    name: "T.E.G. Plan Táctico y Estratégico de la Guerra"
+    description: "Juego de mesa de estrategia y conquista de territorios"
+    brand: "ruibal"
+    category: "juegos-mesa"
+    subcategory: "juegos-estrategia"
+    attributes:
+      edad_recomendada: "+12 años"
+      cantidad_jugadores: "2-6"
+      tiempo_juego: "60-120 minutos"
+      tipo_juguete: "Juego de Mesa"
+      nivel_dificultad: "Intermedio"
+      idioma: "Español"
+      
+  - id: "cartas-uno"
+    name: "UNO Cartas"
+    description: "El clásico juego de cartas familiar"
+    brand: "mattel"
+    category: "juegos-mesa"
+    subcategory: "juegos-cartas"
+    attributes:
+      edad_recomendada: "+6 años"
+      cantidad_jugadores: "2-10"
+      tiempo_juego: "15-30 minutos"
+      tipo_juguete: "Juego de Mesa"
+      nivel_dificultad: "Fácil"
+      idioma: "Multilingüe"
+      
+  # Muñecas y figuras
+  - id: "barbie-fashionista"
+    name: "Barbie Fashionista"
+    description: "Muñeca Barbie con ropa y accesorios de moda"
+    brand: "barbie"
+    category: "munecos-figuras"
+    subcategory: "munecas-moda"
+    attributes:
+      color: "Varios"
+      edad_recomendada: "3-6 años"
+      genero: "Niñas"
+      tipo_juguete: "Muñeco/Muñeca"
+      
+  - id: "playmobil-granja"
+    name: "Playmobil Granja de Animales"
+    description: "Set de granja con figuras de granjeros y animales"
+    brand: "playmobil"
+    category: "munecos-figuras"
+    subcategory: "figuras-accion"
+    attributes:
+      edad_recomendada: "3-6 años"
+      cantidad_piezas: 45
+      tipo_juguete: "Juguete de Acción"
+      
+  # Juguetes de exterior
+  - id: "triciclo-duravit"
+    name: "Triciclo Infantil Duravit"
+    description: "Triciclo resistente con estructura metálica y pedales antideslizantes"
+    brand: "duravit"
+    category: "juguetes-exterior"
+    subcategory: "bicicletas-triciclos"
+    attributes:
+      color: "Rojo"
+      edad_recomendada: "3-6 años"
+      material: "Metal y plástico"
+      tipo_juguete: "Juguete para Exterior"
+      peso: 3500
+      
+  - id: "balde-playa-yetem"
+    name: "Set de Playa Yetem 7 piezas"
+    description: "Kit de juguetes para arena con balde, pala, rastrillo y moldes"
+    brand: "yetem"
+    category: "juguetes-exterior"
+    subcategory: "juguetes-playa"
+    attributes:
+      color: "Multicolor"
+      edad_recomendada: "1-3 años"
+      material: "Plástico"
+      cantidad_piezas: 7
+      tipo_juguete: "Juguete para Exterior"
+      
+  # Juguetes de construcción
+  - id: "rasti-dinosaurios"
+    name: "Rasti Dinosaurios"
+    description: "Set para construir 4 diferentes dinosaurios"
+    brand: "rasti"
+    category: "preescolar"
+    subcategory: "bloques-construccion"
+    attributes:
+      edad_recomendada: "3-6 años"
+      cantidad_piezas: 75
+      tipo_juguete: "Juguete de Construcción"
+      origen: "Argentina"
+      habilidades_desarrollo: ["Motricidad fina", "Creatividad", "Concentración"]

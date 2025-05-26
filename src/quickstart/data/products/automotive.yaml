@@ -1,33 +1,221 @@
 business_type: "automotive"
 products:
-  # TODO: Implementar productos para automotive
-  # Estructura de ejemplo:
-  # - id: "product-example-1"
-  #   name: "Producto de Ejemplo 1"
-  #   description: "Descripción del producto de ejemplo"
-  #   category: "main-category"
-  #   base_price: 9999
-  #   currency: "ARS"
-  #   sku: "PROD-001"
-  #   attributes:
-  #     color: "Rojo"
-  #     weight: 500
-  #     premium: true
-  #   variants:
-  #     - "color-size"
-  #   stock: 100
-  #
-  # - id: "product-example-2"
-  #   name: "Producto de Ejemplo 2"
-  #   description: "Otro producto de ejemplo"
-  #   category: "subcategory-1"
-  #   base_price: 15999
-  #   currency: "ARS"
-  #   sku: "PROD-002"
-  #   attributes:
-  #     color: "Azul"
-  #     weight: 750
-  #     premium: false
-  #   variants:
-  #     - "color-size"
-  #   stock: 50
+  - id: "aceite-ypf-elaion-f10"
+    name: "Aceite de Motor YPF Elaion F10 15W-40"
+    description: "Aceite lubricante mineral para motores nafteros, diesel y GNC. Protección para motores con más de 100.000 km. Ideal para el parque automotor argentino."
+    category: "aceite-mineral"
+    base_price: 6800
+    currency: "ARS"
+    sku: "YPF-AEM-F10-15W40-1L"
+    brand: "ypf"
+    attributes:
+      color: "Amarillo"
+      material: "Aceite mineral"
+      volumen: 1
+      aplicacion_vehiculo: ["Fiat", "Volkswagen", "Chevrolet", "Ford", "Renault", "Peugeot"]
+      tipo_motor: "Naftero/Gasolina"
+      viscosidad: "15W-40"
+      norma_aceite: ["API SN", "API CI-4"]
+      tipo_combustible: "Multi-combustible"
+      fabricacion_nacional: true
+      garantia_meses: 12
+    variants:
+      - "aceite-volumen"
+    stock: 150
+    
+  - id: "pastillas-freno-fric-rot-volkswagen"
+    name: "Pastillas de Freno Delanteras Fric Rot para Volkswagen Gol"
+    description: "Juego de pastillas de freno delanteras de alta calidad para Volkswagen Gol. Material de fricción que garantiza frenadas seguras y efectivas en todas las condiciones."
+    category: "pastillas-freno-delanteras"
+    base_price: 8500
+    currency: "ARS"
+    sku: "FR-PFD-VW-GOL"
+    brand: "fric-rot"
+    attributes:
+      material: "Material compuesto"
+      peso: 850
+      aplicacion_vehiculo: ["Volkswagen"]
+      modelo_vehiculo: "Gol, Voyage, Saveiro"
+      ano_fabricacion: "2008-2022"
+      posicion: "Delantera"
+      tipo_freno: "Disco"
+      unidades_por_pack: 4
+      fabricacion_nacional: true
+      garantia_meses: 6
+      homologado: true
+    variants:
+      - "pastillas-aplicacion"
+    stock: 45
+    
+  - id: "amortiguador-corven-trasero-renault"
+    name: "Amortiguador Trasero Corven para Renault Sandero"
+    description: "Amortiguador trasero de alta calidad para Renault Sandero y Logan. Proporciona excelente estabilidad y confort de marcha, con tecnología de válvulas calibradas."
+    category: "amortiguadores-traseros"
+    base_price: 12900
+    currency: "ARS"
+    sku: "COR-AMT-REN-SAN"
+    brand: "corven"
+    attributes:
+      color: "Negro"
+      material: "Acero"
+      peso: 1800
+      aplicacion_vehiculo: ["Renault"]
+      modelo_vehiculo: "Sandero, Logan"
+      ano_fabricacion: "2015-2022"
+      posicion: "Trasera"
+      unidades_por_pack: 1
+      fabricacion_nacional: true
+      garantia_meses: 12
+    variants:
+      - "amortiguador-posicion"
+    stock: 28
+    
+  - id: "filtro-aceite-bosch-chevrolet"
+    name: "Filtro de Aceite Bosch para Chevrolet Cruze"
+    description: "Filtro de aceite de alta eficiencia para Chevrolet Cruze. Retiene impurezas y partículas dañinas, prolongando la vida útil del motor y asegurando la correcta lubricación."
+    category: "filtros-aceite-autos"
+    base_price: 3200
+    currency: "ARS"
+    sku: "BOS-FAC-CHE-CRU"
+    brand: "bosch"
+    attributes:
+      color: "Blanco"
+      material: "Metal y papel filtrante"
+      peso: 350
+      aplicacion_vehiculo: ["Chevrolet"]
+      modelo_vehiculo: "Cruze, Sonic, Tracker"
+      ano_fabricacion: "2011-2022"
+      tipo_motor: "Naftero/Gasolina"
+      tipo_rosca: "M20x1.5"
+      unidades_por_pack: 1
+      garantia_meses: 6
+    variants: []
+    stock: 75
+    
+  - id: "bateria-acdelco-60ah"
+    name: "Batería ACDelco 12V 60Ah Positivo Derecho"
+    description: "Batería de arranque libre de mantenimiento para vehículos medianos. Alta potencia de arranque y excelente rendimiento en condiciones extremas, con tecnología Silver Calcium."
+    category: "baterias-autos"
+    base_price: 42000
+    currency: "ARS"
+    sku: "ACD-BAT-60AH-PD"
+    brand: "acdelco"
+    attributes:
+      color: "Negro"
+      material: "Plástico y plomo"
+      peso: 14000
+      aplicacion_vehiculo: ["Volkswagen", "Ford", "Chevrolet", "Fiat", "Renault"]
+      modelo_vehiculo: "Vehículos medianos nafteros"
+      tipo_motor: "Naftero/Gasolina"
+      voltaje: "12V"
+      amperaje: 60
+      posicion: "Positivo Derecho"
+      garantia_meses: 12
+    variants:
+      - "bateria-amperaje"
+    stock: 20
+    
+  - id: "bujia-bosch-doble-platino"
+    name: "Bujía Bosch Doble Platino para Volkswagen"
+    description: "Bujía de encendido con doble electrodo de platino para mayor durabilidad y rendimiento. Optimiza el consumo de combustible y asegura un arranque eficiente."
+    category: "bujias"
+    base_price: 2500
+    currency: "ARS"
+    sku: "BOS-BUJ-DP-VW"
+    brand: "bosch"
+    attributes:
+      material: "Platino y cerámica"
+      peso: 80
+      aplicacion_vehiculo: ["Volkswagen"]
+      modelo_vehiculo: "Gol, Fox, Suran, Voyage"
+      ano_fabricacion: "2009-2022"
+      tipo_motor: "Naftero/Gasolina"
+      tipo_rosca: "M14x1.25"
+      unidades_por_pack: 1
+      garantia_meses: 24
+    variants:
+      - "bujia-aplicacion"
+    stock: 120
+    
+  - id: "junta-tapa-cilindros-ferrazzi-fiat"
+    name: "Junta de Tapa de Cilindros Ferrazzi para Fiat Palio Fire"
+    description: "Junta de tapa de cilindros de alta calidad para motor Fiat Fire 1.4. Fabricada con materiales compuestos de última generación que garantizan sellado perfecto y durabilidad."
+    category: "juntas-culata"
+    base_price: 4900
+    currency: "ARS"
+    sku: "FER-JTC-FIAT-1.4"
+    brand: "ferrazzi"
+    attributes:
+      material: "Material compuesto"
+      peso: 120
+      aplicacion_vehiculo: ["Fiat"]
+      modelo_vehiculo: "Palio, Siena, Uno, Grand Siena con motor Fire"
+      ano_fabricacion: "2002-2022"
+      tipo_motor: "Naftero/Gasolina"
+      cilindrada: "1.4"
+      fabricacion_nacional: true
+      garantia_meses: 12
+    variants: []
+    stock: 35
+    
+  - id: "kit-distribucion-bosch-ford"
+    name: "Kit de Distribución Bosch para Ford Focus 1.6"
+    description: "Kit completo de distribución que incluye correa, tensor y rodillo. Componentes de alta calidad para asegurar el funcionamiento preciso del sistema de distribución."
+    category: "correas-distribucion"
+    base_price: 28500
+    currency: "ARS"
+    sku: "BOS-KD-FORD-1.6"
+    brand: "bosch"
+    attributes:
+      material: "Caucho y metal"
+      peso: 950
+      aplicacion_vehiculo: ["Ford"]
+      modelo_vehiculo: "Focus, Fiesta, EcoSport con motor Sigma"
+      ano_fabricacion: "2003-2019"
+      tipo_motor: "Naftero/Gasolina"
+      cilindrada: "1.6"
+      unidades_por_pack: 3
+      garantia_meses: 24
+    variants: []
+    stock: 18
+    
+  - id: "liquido-frenos-aca-dot4"
+    name: "Líquido de Frenos ACA DOT 4 500ml"
+    description: "Líquido de frenos de alto punto de ebullición para sistemas hidráulicos de frenos y embragues. Cumple con normas DOT 4 para mayor seguridad en condiciones exigentes."
+    category: "liquido-freno-dot4"
+    base_price: 3200
+    currency: "ARS"
+    sku: "ACA-LF-DOT4-500"
+    brand: "aca"
+    attributes:
+      color: "Amarillo"
+      volumen: 0.5
+      tipo_freno: "Disco"
+      fabricacion_nacional: true
+      garantia_meses: 12
+      homologado: true
+    variants:
+      - "liquido-freno-volumen"
+    stock: 85
+    
+  - id: "escape-deportivo-vulcano-gol"
+    name: "Escape Deportivo Vulcano para Volkswagen Gol"
+    description: "Sistema de escape deportivo completo con silenciador y cola de salida deportiva. Mejora el rendimiento y sonido del motor con un diseño agresivo y deportivo."
+    category: "juntas-carter"
+    base_price: 32000
+    currency: "ARS"
+    sku: "VUL-EDP-VW-GOL"
+    brand: "vulcano"
+    attributes:
+      color: "Cromado"
+      material: "Acero inoxidable"
+      peso: 5200
+      aplicacion_vehiculo: ["Volkswagen"]
+      modelo_vehiculo: "Gol Trend, Voyage"
+      ano_fabricacion: "2008-2022"
+      tipo_motor: "Naftero/Gasolina"
+      fabricacion_nacional: true
+      garantia_meses: 12
+      homologado: true
+    variants: []
+    stock: 10

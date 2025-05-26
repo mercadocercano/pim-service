@@ -1,23 +1,148 @@
 business_type: "beauty-cosmetics"
 variants:
-  # TODO: Implementar variantes para beauty-cosmetics
-  # Estructura de ejemplo:
-  # - id: "color-size"
-  #   name: "Color y Tamaño"
-  #   description: "Variante por color y tamaño del producto"
-  #   attributes:
-  #     - "color"
-  #     - "size"
-  #   combinations:
-  #     - color: "Rojo"
-  #       size: "S"
-  #       sku_suffix: "RED-S"
-  #     - color: "Rojo"
-  #       size: "M"
-  #       sku_suffix: "RED-M"
-  #     - color: "Azul"
-  #       size: "S"
-  #       sku_suffix: "BLU-S"
-  #     - color: "Azul"
-  #       size: "M"
-  #       sku_suffix: "BLU-M"
+  # Variantes de 212 VIP Rosé
+  - product_id: "212-vip-rose"
+    variants:
+      - id: "212-vip-rose-30"
+        name: "212 VIP Rosé EDP 30ml"
+        sku: "CH-212VR-30"
+        attributes:
+          presentacion: "Envase x 30ml"
+          contenido: "30ml"
+          precio_base: 45000
+          stock: 25
+      - id: "212-vip-rose-50"
+        name: "212 VIP Rosé EDP 50ml"
+        sku: "CH-212VR-50"
+        attributes:
+          presentacion: "Envase x 50ml"
+          contenido: "50ml"
+          precio_base: 65000
+          stock: 20
+      - id: "212-vip-rose-80"
+        name: "212 VIP Rosé EDP 80ml"
+        sku: "CH-212VR-80"
+        attributes:
+          presentacion: "Envase x 80ml"
+          contenido: "80ml"
+          precio_base: 85000
+          stock: 15
+
+  # Variantes de One Million
+  - product_id: "one-million"
+    variants:
+      - id: "one-million-50"
+        name: "1 Million EDT 50ml"
+        sku: "PR-1M-50"
+        attributes:
+          presentacion: "Envase x 50ml"
+          contenido: "50ml"
+          precio_base: 55000
+          stock: 30
+      - id: "one-million-100"
+        name: "1 Million EDT 100ml"
+        sku: "PR-1M-100"
+        attributes:
+          presentacion: "Envase x 100ml"
+          contenido: "100ml"
+          precio_base: 75000
+          stock: 25
+      - id: "one-million-200"
+        name: "1 Million EDT 200ml"
+        sku: "PR-1M-200"
+        attributes:
+          presentacion: "Envase x 200ml"
+          contenido: "200ml"
+          precio_base: 95000
+          stock: 15
+
+  # Variantes de Fit Me Matte
+  - product_id: "fit-me-matte"
+    variants:
+      - id: "fit-me-matte-110"
+        name: "Fit Me Matte Porcelain 110"
+        sku: "MBL-FM-110"
+        attributes:
+          presentacion: "Envase x 30ml"
+          contenido: "30ml"
+          tono: "110 Porcelain"
+          precio_base: 8500
+          stock: 40
+      - id: "fit-me-matte-220"
+        name: "Fit Me Matte Natural Beige 220"
+        sku: "MBL-FM-220"
+        attributes:
+          presentacion: "Envase x 30ml"
+          contenido: "30ml"
+          tono: "220 Natural Beige"
+          precio_base: 8500
+          stock: 45
+      - id: "fit-me-matte-330"
+        name: "Fit Me Matte Toffee 330"
+        sku: "MBL-FM-330"
+        attributes:
+          presentacion: "Envase x 30ml"
+          contenido: "30ml"
+          tono: "330 Toffee"
+          precio_base: 8500
+          stock: 35
+
+  # Variantes de Cicatricure Gold Lift
+  - product_id: "cicatricure-gold-lift"
+    variants:
+      - id: "cicatricure-gold-lift-50"
+        name: "Cicatricure Gold Lift Día 50g"
+        sku: "CIC-GL-50"
+        attributes:
+          presentacion: "Pote x 50g"
+          contenido: "50g"
+          precio_base: 12000
+          stock: 50
+      - id: "cicatricure-gold-lift-100"
+        name: "Cicatricure Gold Lift Día 100g"
+        sku: "CIC-GL-100"
+        attributes:
+          presentacion: "Pote x 100g"
+          contenido: "100g"
+          precio_base: 20000
+          stock: 30
+
+  # Variantes de Elvive Óleo Extraordinario
+  - product_id: "elvive-oleo-extraordinario"
+    variants:
+      - id: "elvive-oleo-extraordinario-200"
+        name: "Elvive Óleo Extraordinario 200ml"
+        sku: "LOR-ELV-200"
+        attributes:
+          presentacion: "Botella x 200ml"
+          contenido: "200ml"
+          precio_base: 2500
+          stock: 60
+      - id: "elvive-oleo-extraordinario-400"
+        name: "Elvive Óleo Extraordinario 400ml"
+        sku: "LOR-ELV-400"
+        attributes:
+          presentacion: "Botella x 400ml"
+          contenido: "400ml"
+          precio_base: 4500
+          stock: 45
+
+  # Variantes de Set Good Girl
+  - product_id: "set-good-girl"
+    variants:
+      - id: "set-good-girl-80"
+        name: "Set Good Girl EDP 80ml + Body Lotion"
+        sku: "CH-GG-SET1"
+        attributes:
+          presentacion: "Cofre Regalo"
+          contenido: "80ml EDP + 100ml Body Lotion"
+          precio_base: 95000
+          stock: 20
+      - id: "set-good-girl-50"
+        name: "Set Good Girl EDP 50ml + Body Lotion"
+        sku: "CH-GG-SET2"
+        attributes:
+          presentacion: "Cofre Regalo"
+          contenido: "50ml EDP + 75ml Body Lotion"
+          precio_base: 75000
+          stock: 25

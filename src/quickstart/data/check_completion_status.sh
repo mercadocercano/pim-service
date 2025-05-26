@@ -54,23 +54,32 @@ count_elements() {
         return
     fi
     
+    # Asegurarse de que la salida sea un número entero válido
+    local count
     case $element_type in
         "categories")
-            grep -c "^  - id:" "$file" 2>/dev/null || echo "0"
+            count=$(grep -c "^  - id:" "$file" 2>/dev/null || echo "0")
             ;;
         "attributes")
-            grep -c "^  - id:" "$file" 2>/dev/null || echo "0"
+            count=$(grep -c "^  - id:" "$file" 2>/dev/null || echo "0")
             ;;
         "variants")
-            grep -c "^  - id:" "$file" 2>/dev/null || echo "0"
+            count=$(grep -c "^  - id:" "$file" 2>/dev/null || echo "0")
             ;;
         "products")
-            grep -c "^  - id:" "$file" 2>/dev/null || echo "0"
+            count=$(grep -c "^  - id:" "$file" 2>/dev/null || echo "0")
             ;;
         "brands")
-            grep -c "^  - id:" "$file" 2>/dev/null || echo "0"
+            count=$(grep -c "^  - id:" "$file" 2>/dev/null || echo "0")
             ;;
     esac
+    
+    # Asegurarse de que es un número y no tiene caracteres extraños
+    if [[ "$count" =~ ^[0-9]+$ ]]; then
+        echo "$count"
+    else
+        echo "0"
+    fi
 }
 
 echo "┌─────────────────────┬────────────┬────────────┬──────────┬──────────┬────────────┬─────────┐"
@@ -107,6 +116,13 @@ for business_type in "${BUSINESS_TYPES[@]}"; do
     
     # Formatear nombre del tipo de negocio
     formatted_name=$(echo "$business_type" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1')
+    
+    # Asegurarse de que todos los valores son números
+    cat_count=${cat_count:-0}
+    attr_count=${attr_count:-0}
+    var_count=${var_count:-0}
+    prod_count=${prod_count:-0}
+    brand_count=${brand_count:-0}
     
     printf "│ %-19s │ %2s (%2d)    │ %2s (%2d)    │ %2s (%2d)   │ %2s (%2d)   │ %2s (%2d)    │ %-7s │\n" \
         "$formatted_name" \

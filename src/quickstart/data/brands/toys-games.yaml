@@ -1,19 +1,148 @@
 business_type: "toys-games"
 brands:
-  # TODO: Implementar marcas para toys-games
-  # Estructura de ejemplo:
-  # - id: "brand-example-1"
-  #   name: "Marca Ejemplo 1"
-  #   description: "Descripción de la marca ejemplo"
-  #   country_origin: "Argentina"
-  #   category: "Categoría de la Marca"
-  #   website: "https://www.ejemplo.com"
-  #   logo_url: "/brands/ejemplo-logo.png"
-  #
-  # - id: "brand-example-2"
-  #   name: "Marca Ejemplo 2"
-  #   description: "Otra marca de ejemplo"
-  #   country_origin: "Estados Unidos"
-  #   category: "Otra Categoría"
-  #   website: "https://www.ejemplo2.com"
-  #   logo_url: "/brands/ejemplo2-logo.png"
+  # Marcas nacionales argentinas
+  - id: "duravit"
+    name: "Duravit"
+    description: "Fabricante argentino de juguetes tradicionales desde 1961"
+    country_of_origin: "Argentina"
+    website: "https://www.duravit.com.ar"
+    categories:
+      - "juguetes-ninos"
+      - "primera-infancia"
+      
+  - id: "ruibal"
+    name: "Ruibal"
+    description: "Fabricante argentino de juegos de mesa tradicionales"
+    country_of_origin: "Argentina"
+    website: "https://www.juegosruibal.com.ar"
+    categories:
+      - "juegos-mesa"
+      - "juegos-familia"
+      
+  - id: "antex"
+    name: "Antex"
+    description: "Fabricante de peluches y juguetes de tela argentina"
+    country_of_origin: "Argentina"
+    website: "https://www.antex.com.ar"
+    categories:
+      - "juguetes-ninos"
+      - "primera-infancia"
+      
+  - id: "yetem"
+    name: "Yetem"
+    description: "Marca argentina de juguetes plásticos y al aire libre"
+    country_of_origin: "Argentina"
+    website: "https://www.yetem.com.ar"
+    categories:
+      - "juguetes-exterior"
+      - "juguetes-playa"
+      
+  # Marcas internacionales
+  - id: "mattel"
+    name: "Mattel"
+    description: "Multinacional fabricante de juguetes y juegos"
+    country_of_origin: "Estados Unidos"
+    website: "https://www.mattel.com"
+    categories:
+      - "munecos-figuras"
+      - "juguetes-ninos"
+      
+  - id: "hasbro"
+    name: "Hasbro"
+    description: "Empresa líder en juguetes, juegos de mesa y entretenimiento"
+    country_of_origin: "Estados Unidos"
+    website: "https://www.hasbro.com"
+    categories:
+      - "juegos-mesa"
+      - "munecos-figuras"
+      
+  - id: "lego"
+    name: "LEGO"
+    description: "Fabricante de juguetes de construcción por bloques"
+    country_of_origin: "Dinamarca"
+    website: "https://www.lego.com/es-ar"
+    categories:
+      - "juguetes-ninos"
+      - "bloques-construccion"
+      
+  - id: "fisher-price"
+    name: "Fisher-Price"
+    description: "Especialista en juguetes para bebés y niños pequeños"
+    country_of_origin: "Estados Unidos"
+    website: "https://www.fisherprice.com"
+    categories:
+      - "primera-infancia"
+      - "preescolar"
+      
+  - id: "playskool"
+    name: "Playskool"
+    description: "Marca especializada en juguetes educativos para niños pequeños"
+    country_of_origin: "Estados Unidos"
+    website: "https://www.hasbro.com/es-ar/brands/playskool"
+    categories:
+      - "primera-infancia"
+      - "preescolar"
+      
+  - id: "nerf"
+    name: "Nerf"
+    description: "Fabricante de juguetes de acción y lanzadores de espuma"
+    country_of_origin: "Estados Unidos"
+    website: "https://www.hasbro.com/es-ar/brands/nerf"
+    categories:
+      - "ninos-6-12"
+      - "juguetes-accion"
+      
+  - id: "hot-wheels"
+    name: "Hot Wheels"
+    description: "Marca de autos coleccionables a escala"
+    country_of_origin: "Estados Unidos"
+    website: "https://www.hotwheels.com"
+    categories:
+      - "vehiculos-pequenos"
+      - "juguetes-ninos"
+      
+  - id: "barbie"
+    name: "Barbie"
+    description: "Marca icónica de muñecas de moda"
+    country_of_origin: "Estados Unidos"
+    website: "https://www.barbie.com/es-ar"
+    categories:
+      - "munecas"
+      - "munecas-moda"
+      
+  - id: "playmobil"
+    name: "Playmobil"
+    description: "Figuras y sets de juego temáticos"
+    country_of_origin: "Alemania"
+    website: "https://www.playmobil.com.ar"
+    categories:
+      - "juguetes-ninos"
+      - "preescolar"
+      
+  # Marcas de juegos de mesa
+  - id: "didacticos-pinocho"
+    name: "Didácticos Pinocho"
+    description: "Fabricante argentino de juegos didácticos y educativos"
+    country_of_origin: "Argentina"
+    website: "https://www.didacticospinocho.com.ar"
+    categories:
+      - "juegos-mesa"
+      - "juegos-educativos"
+      
+  - id: "toyco"
+    name: "Toyco"
+    description: "Empresa argentina de juguetes y entretenimiento infantil"
+    country_of_origin: "Argentina"
+    website: "https://www.toyco.com.ar"
+    categories:
+      - "juegos-mesa"
+      - "juguetes-ninos"
+      
+  - id: "rasti"
+    name: "Rasti"
+    description: "Marca argentina de bloques de construcción"
+    country_of_origin: "Argentina"
+    website: "https://www.rasti.com.ar"
+    categories:
+      - "bloques-construccion"
+      - "juguetes-ninos"

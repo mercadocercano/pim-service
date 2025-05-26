@@ -1,35 +1,284 @@
 business_type: "automotive"
 attributes:
-  # TODO: Implementar atributos para automotive
-  # Estructura de ejemplo:
-  # - id: "color"
-  #   name: "Color"
-  #   type: "select"
-  #   required: false
-  #   description: "Color del producto"
-  #   values:
-  #     - "Rojo"
-  #     - "Azul"
-  #     - "Verde"
-  #
-  # - id: "weight"
-  #   name: "Peso"
-  #   type: "number"
-  #   required: false
-  #   description: "Peso del producto en gramos"
-  #   unit: "g"
-  #   min_value: 0
-  #   max_value: 10000
-  #
-  # - id: "description"
-  #   name: "Descripción Detallada"
-  #   type: "text"
-  #   required: false
-  #   description: "Descripción detallada del producto"
-  #   placeholder: "Ingrese descripción..."
-  #
-  # - id: "premium"
-  #   name: "Producto Premium"
-  #   type: "boolean"
-  #   required: false
-  #   description: "Indica si es un producto premium"
+  - id: "color"
+    name: "Color"
+    type: "select"
+    required: false
+    description: "Color del producto"
+    values:
+      - "Negro"
+      - "Gris"
+      - "Blanco"
+      - "Rojo"
+      - "Azul"
+      - "Verde"
+      - "Amarillo"
+      - "Plateado"
+      - "Dorado"
+      - "Cromado"
+      - "Transparente"
+      - "Multicolor"
+      
+  - id: "material"
+    name: "Material"
+    type: "select"
+    required: false
+    description: "Material principal del producto"
+    values:
+      - "Acero"
+      - "Aluminio"
+      - "Hierro"
+      - "Plástico"
+      - "Goma"
+      - "Caucho"
+      - "Fibra de carbono"
+      - "Vidrio"
+      - "Cerámica"
+      - "Bronce"
+      - "Cobre"
+      - "Material compuesto"
+      
+  - id: "peso"
+    name: "Peso"
+    type: "number"
+    required: false
+    description: "Peso del producto en gramos"
+    unit: "g"
+    min_value: 0
+    max_value: 100000
+    
+  - id: "volumen"
+    name: "Volumen"
+    type: "number"
+    required: false
+    description: "Volumen del producto en litros (para aceites y fluidos)"
+    unit: "L"
+    min_value: 0
+    max_value: 1000
+    
+  - id: "medidas"
+    name: "Medidas"
+    type: "text"
+    required: false
+    description: "Dimensiones del producto (largo x ancho x alto)"
+    placeholder: "Ej: 25cm x 15cm x 5cm"
+    
+  - id: "aplicacion_vehiculo"
+    name: "Aplicación por Vehículo"
+    type: "multiselect"
+    required: false
+    description: "Vehículos en los que se puede usar el producto"
+    values:
+      - "Fiat"
+      - "Volkswagen"
+      - "Chevrolet"
+      - "Ford"
+      - "Renault"
+      - "Peugeot"
+      - "Toyota"
+      - "Citroën"
+      - "Honda"
+      - "Nissan"
+      - "Mercedes Benz"
+      - "BMW"
+      - "Audi"
+      - "Jeep"
+      - "Mitsubishi"
+      - "Hyundai"
+      - "Kia"
+      - "Volvo"
+      - "Ram"
+      
+  - id: "modelo_vehiculo"
+    name: "Modelo de Vehículo"
+    type: "text"
+    required: false
+    description: "Modelos específicos de vehículos compatibles"
+    placeholder: "Ej: Gol, Corsa, Hilux, etc."
+    
+  - id: "ano_fabricacion"
+    name: "Año de Fabricación"
+    type: "text"
+    required: false
+    description: "Años de fabricación compatibles con el producto"
+    placeholder: "Ej: 2010-2022"
+    
+  - id: "tipo_motor"
+    name: "Tipo de Motor"
+    type: "select"
+    required: false
+    description: "Tipo de motor para el que está diseñado el producto"
+    values:
+      - "Naftero/Gasolina"
+      - "Diesel"
+      - "GNC/Gas"
+      - "Híbrido"
+      - "Eléctrico"
+      - "Bi-fuel"
+      
+  - id: "cilindrada"
+    name: "Cilindrada"
+    type: "text"
+    required: false
+    description: "Cilindrada del motor compatible (en cc o litros)"
+    placeholder: "Ej: 1.6, 2.0, 1800cc"
+    
+  - id: "posicion"
+    name: "Posición"
+    type: "select"
+    required: false
+    description: "Posición del componente en el vehículo"
+    values:
+      - "Delantera Izquierda"
+      - "Delantera Derecha"
+      - "Trasera Izquierda"
+      - "Trasera Derecha"
+      - "Delantera"
+      - "Trasera"
+      - "Izquierda"
+      - "Derecha"
+      - "Central"
+      - "Superior"
+      - "Inferior"
+      
+  - id: "viscosidad"
+    name: "Viscosidad"
+    type: "select"
+    required: false
+    description: "Grado de viscosidad para aceites y lubricantes"
+    values:
+      - "0W-20"
+      - "0W-30"
+      - "5W-30"
+      - "5W-40"
+      - "10W-30"
+      - "10W-40"
+      - "15W-40"
+      - "20W-50"
+      - "75W-90"
+      - "80W-90"
+      - "85W-140"
+      - "ATF"
+      
+  - id: "norma_aceite"
+    name: "Norma de Aceite"
+    type: "multiselect"
+    required: false
+    description: "Normas y especificaciones que cumple el aceite"
+    values:
+      - "API SN"
+      - "API SP"
+      - "API SM"
+      - "API SL"
+      - "API CI-4"
+      - "API CJ-4"
+      - "API CK-4"
+      - "ACEA A3/B4"
+      - "ACEA C3"
+      - "VW 502.00"
+      - "VW 504.00"
+      - "MB 229.5"
+      - "MB 229.51"
+      
+  - id: "tipo_combustible"
+    name: "Tipo de Combustible"
+    type: "select"
+    required: false
+    description: "Tipo de combustible compatible con el producto"
+    values:
+      - "Nafta/Gasolina Común"
+      - "Nafta/Gasolina Premium"
+      - "Diesel Común"
+      - "Diesel Premium"
+      - "GNC"
+      - "GLP"
+      - "Biodiésel"
+      - "Etanol"
+      - "Multi-combustible"
+      
+  - id: "unidades_por_pack"
+    name: "Unidades por Pack"
+    type: "number"
+    required: false
+    description: "Cantidad de unidades incluidas en el paquete"
+    unit: "u"
+    min_value: 1
+    max_value: 1000
+    
+  - id: "tipo_freno"
+    name: "Tipo de Freno"
+    type: "select"
+    required: false
+    description: "Tipo de sistema de freno compatible"
+    values:
+      - "Disco"
+      - "Tambor"
+      - "Disco ventilado"
+      - "Disco perforado"
+      - "Disco carbocerámico"
+      - "ABS"
+      - "No ABS"
+      
+  - id: "potencia"
+    name: "Potencia"
+    type: "number"
+    required: false
+    description: "Potencia del componente en watts"
+    unit: "W"
+    min_value: 0
+    max_value: 100000
+    
+  - id: "voltaje"
+    name: "Voltaje"
+    type: "select"
+    required: false
+    description: "Voltaje del componente eléctrico"
+    values:
+      - "12V"
+      - "24V"
+      - "6V"
+      - "42V"
+      - "48V"
+      
+  - id: "amperaje"
+    name: "Amperaje"
+    type: "number"
+    required: false
+    description: "Capacidad en amperios para baterías y componentes eléctricos"
+    unit: "A"
+    min_value: 0
+    max_value: 1000
+    
+  - id: "original"
+    name: "Repuesto Original"
+    type: "boolean"
+    required: false
+    description: "Indica si es un repuesto original del fabricante"
+    
+  - id: "homologado"
+    name: "Homologado"
+    type: "boolean"
+    required: false
+    description: "Indica si el producto está homologado por entes reguladores"
+    
+  - id: "garantia_meses"
+    name: "Garantía en Meses"
+    type: "number"
+    required: false
+    description: "Duración de la garantía en meses"
+    unit: "meses"
+    min_value: 0
+    max_value: 120
+    
+  - id: "fabricacion_nacional"
+    name: "Fabricación Nacional"
+    type: "boolean"
+    required: false
+    description: "Indica si el producto es fabricado en Argentina"
+    
+  - id: "tipo_rosca"
+    name: "Tipo de Rosca"
+    type: "text"
+    required: false
+    description: "Especificación del tipo de rosca para componentes roscados"
+    placeholder: "Ej: M14x1.25, 3/8 NPT"

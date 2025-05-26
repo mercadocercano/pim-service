@@ -1,23 +1,101 @@
 business_type: "electronics"
 variants:
-  # TODO: Implementar variantes para electronics
-  # Estructura de ejemplo:
-  # - id: "color-size"
-  #   name: "Color y Tamaño"
-  #   description: "Variante por color y tamaño del producto"
-  #   attributes:
-  #     - "color"
-  #     - "size"
-  #   combinations:
-  #     - color: "Rojo"
-  #       size: "S"
-  #       sku_suffix: "RED-S"
-  #     - color: "Rojo"
-  #       size: "M"
-  #       sku_suffix: "RED-M"
-  #     - color: "Azul"
-  #       size: "S"
-  #       sku_suffix: "BLU-S"
-  #     - color: "Azul"
-  #       size: "M"
-  #       sku_suffix: "BLU-M"
+  # Variantes para Celular Motorola Edge 40
+  - product_id: "motorola-edge-40"
+    variants:
+      - id: "motorola-edge-40-256-ne"
+        name: "Motorola Edge 40"
+        sku: "CEL-MOT-EDGE40-256-NE"
+        attributes:
+          almacenamiento: "256GB"
+          color: "Negro Eclipse"
+          precio_base: 749999
+          stock: 50
+      - id: "motorola-edge-40-256-vm"
+        name: "Motorola Edge 40"
+        sku: "CEL-MOT-EDGE40-256-VM"
+        attributes:
+          almacenamiento: "256GB"
+          color: "Viva Magenta"
+          precio_base: 759999
+          stock: 30
+      - id: "motorola-edge-40-256-vi"
+        name: "Motorola Edge 40"
+        sku: "CEL-MOT-EDGE40-256-VI"
+        attributes:
+          almacenamiento: "256GB"
+          color: "Verde Irlandés"
+          precio_base: 749999
+          stock: 25
+
+  # Variantes para Notebook Lenovo IdeaPad Slim 3
+  - product_id: "lenovo-ideapad-slim-3"
+    variants:
+      - id: "lenovo-ideapad-slim-3-r5-8-512-ga"
+        name: "Lenovo IdeaPad Slim 3"
+        sku: "NB-LEN-IDPS3-R5-8-512-GA"
+        attributes:
+          procesador: "Ryzen 5"
+          memoria_ram: "8GB"
+          almacenamiento: "512GB SSD"
+          color: "Gris Ártico"
+          precio_base: 899999
+          stock: 40
+      - id: "lenovo-ideapad-slim-3-r5-8-512-aa"
+        name: "Lenovo IdeaPad Slim 3"
+        sku: "NB-LEN-IDPS3-R5-8-512-AA"
+        attributes:
+          procesador: "Ryzen 5"
+          memoria_ram: "8GB"
+          almacenamiento: "512GB SSD"
+          color: "Azul Abismo"
+          precio_base: 899999
+          stock: 20
+
+  # Variantes para Heladera Whirlpool WRW50NK
+  - product_id: "whirlpool-heladera-wrw50"
+    variants:
+      - id: "whirlpool-wrw50nk-443-inox"
+        name: "Heladera Whirlpool WRW50NK"
+        sku: "HEL-WHI-WRW50NK-443-INOX"
+        attributes:
+          tipo: "No Frost"
+          capacidad: "443L"
+          color: "Inox"
+          precio_base: 1250000
+          stock: 15
+      - id: "whirlpool-wrw50nk-443-bl"
+        name: "Heladera Whirlpool WRW50NK"
+        sku: "HEL-WHI-WRW50NK-443-BL"
+        attributes:
+          tipo: "No Frost"
+          capacidad: "443L"
+          color: "Blanco"
+          precio_base: 1200000
+          stock: 25
+
+  # Variantes para Smart TV Samsung (aunque sea un solo color, definimos sus características)
+  - product_id: "samsung-tv-bu8000"
+    variants:
+      - id: "samsung-tv-bu8000-55-ne"
+        name: "Smart TV Samsung Crystal UHD"
+        sku: "TV-SAM-BU8000-55-NE"
+        attributes:
+          tamaño_pantalla: "55 pulgadas"
+          resolucion: "4K UHD"
+          color: "Negro"
+          precio_base: 850000
+          stock: 30
+
+  # Variantes para Aire Acondicionado Surrey
+  - product_id: "surrey-553gfq1201f"
+    variants:
+      - id: "surrey-553gfq1201f-3200-bl"
+        name: "Aire Acondicionado Surrey Split"
+        sku: "AA-SUR-553GFQ1201F-3200-BL"
+        attributes:
+          capacidad_frio: "3200W"
+          tipo: "Split"
+          color: "Blanco"
+          precio_base: 650000
+          stock: 35

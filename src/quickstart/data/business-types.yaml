@@ -67,4 +67,9 @@ business_types:
   - id: "jewelry-accessories"
     name: "Joyería y Accesorios"
     description: "Joyas, relojes, accesorios personales, bisutería"
-    icon: "gem" 
+    icon: "gem"
+  
+  - id: "polirubro"
+    name: "Polirubro"
+    description: "Comercios que ofrecen productos de múltiples categorías: kiosco, almacén, librería, bazar y más"
+    icon: "shopping-basket" 

@@ -1,23 +1,193 @@
 business_type: "health-pharmacy"
 variants:
-  # TODO: Implementar variantes para health-pharmacy
-  # Estructura de ejemplo:
-  # - id: "color-size"
-  #   name: "Color y Tamaño"
-  #   description: "Variante por color y tamaño del producto"
-  #   attributes:
-  #     - "color"
-  #     - "size"
-  #   combinations:
-  #     - color: "Rojo"
-  #       size: "S"
-  #       sku_suffix: "RED-S"
-  #     - color: "Rojo"
-  #       size: "M"
-  #       sku_suffix: "RED-M"
-  #     - color: "Azul"
-  #       size: "S"
-  #       sku_suffix: "BLU-S"
-  #     - color: "Azul"
-  #       size: "M"
-  #       sku_suffix: "BLU-M"
+  # Variantes de Ibupirac
+  - product_id: "ibupirac-400"
+    variants:
+      - id: "ibupirac-400-8"
+        name: "Ibupirac 400mg x 8 comprimidos"
+        sku: "IBU400-8"
+        attributes:
+          presentacion: "Blister x 8 comprimidos"
+          contenido: "8 unidades"
+          precio_base: 1500
+          stock: 100
+      - id: "ibupirac-400-16"
+        name: "Ibupirac 400mg x 16 comprimidos"
+        sku: "IBU400-16"
+        attributes:
+          presentacion: "Blister x 16 comprimidos"
+          contenido: "16 unidades"
+          precio_base: 2800
+          stock: 75
+      - id: "ibupirac-400-24"
+        name: "Ibupirac 400mg x 24 comprimidos"
+        sku: "IBU400-24"
+        attributes:
+          presentacion: "Blister x 24 comprimidos"
+          contenido: "24 unidades"
+          precio_base: 4000
+          stock: 50
+
+  # Variantes de Tafirol
+  - product_id: "tafirol-500"
+    variants:
+      - id: "tafirol-500-16"
+        name: "Tafirol 500mg x 16 comprimidos"
+        sku: "TAF500-16"
+        attributes:
+          presentacion: "Blister x 16 comprimidos"
+          contenido: "16 unidades"
+          precio_base: 1200
+          stock: 150
+      - id: "tafirol-500-24"
+        name: "Tafirol 500mg x 24 comprimidos"
+        sku: "TAF500-24"
+        attributes:
+          presentacion: "Blister x 24 comprimidos"
+          contenido: "24 unidades"
+          precio_base: 1700
+          stock: 100
+
+  # Variantes de Amoxidal
+  - product_id: "amoxidal-500"
+    variants:
+      - id: "amoxidal-500-21"
+        name: "Amoxidal 500mg x 21 cápsulas"
+        sku: "AMX500-21"
+        attributes:
+          presentacion: "Envase x 21 cápsulas"
+          contenido: "21 unidades"
+          precio_base: 3500
+          stock: 80
+      - id: "amoxidal-500-30"
+        name: "Amoxidal 500mg x 30 cápsulas"
+        sku: "AMX500-30"
+        attributes:
+          presentacion: "Envase x 30 cápsulas"
+          contenido: "30 unidades"
+          precio_base: 4800
+          stock: 60
+
+  # Variantes de Dermaglos
+  - product_id: "dermaglos-emulsion"
+    variants:
+      - id: "dermaglos-emulsion-200"
+        name: "Dermaglos Emulsión x 200ml"
+        sku: "DGL-200"
+        attributes:
+          presentacion: "Envase x 200ml"
+          contenido: "200ml"
+          precio_base: 3200
+          stock: 45
+      - id: "dermaglos-emulsion-400"
+        name: "Dermaglos Emulsión x 400ml"
+        sku: "DGL-400"
+        attributes:
+          presentacion: "Envase x 400ml"
+          contenido: "400ml"
+          precio_base: 5800
+          stock: 30
+
+  # Variantes de Huggies
+  - product_id: "huggies-supreme"
+    variants:
+      - id: "huggies-supreme-xg-52"
+        name: "Huggies Supreme Care XG x 52 unidades"
+        sku: "HGG-XG52"
+        attributes:
+          presentacion: "Paquete x 52 unidades"
+          contenido: "52 unidades"
+          precio_base: 4500
+          stock: 200
+      - id: "huggies-supreme-xg-104"
+        name: "Huggies Supreme Care XG x 104 unidades"
+        sku: "HGG-XG104"
+        attributes:
+          presentacion: "Paquete x 104 unidades"
+          contenido: "104 unidades"
+          precio_base: 8500
+          stock: 150
+
+  # Variantes de Centrum
+  - product_id: "centrum-adultos"
+    variants:
+      - id: "centrum-adultos-30"
+        name: "Centrum Adultos x 30 comprimidos"
+        sku: "CTR-30"
+        attributes:
+          presentacion: "Frasco x 30 comprimidos"
+          contenido: "30 unidades"
+          precio_base: 4200
+          stock: 40
+      - id: "centrum-adultos-60"
+        name: "Centrum Adultos x 60 comprimidos"
+        sku: "CTR-60"
+        attributes:
+          presentacion: "Frasco x 60 comprimidos"
+          contenido: "60 unidades"
+          precio_base: 7800
+          stock: 25
+      - id: "centrum-adultos-100"
+        name: "Centrum Adultos x 100 comprimidos"
+        sku: "CTR-100"
+        attributes:
+          presentacion: "Frasco x 100 comprimidos"
+          contenido: "100 unidades"
+          precio_base: 12500
+          stock: 15
+
+  # Variantes de Carolina Herrera Good Girl
+  - product_id: "ch-good-girl"
+    variants:
+      - id: "ch-good-girl-30"
+        name: "Carolina Herrera Good Girl EDP 30ml"
+        sku: "CH-GG-30"
+        attributes:
+          presentacion: "Envase x 30ml"
+          contenido: "30ml"
+          precio_base: 45000
+          stock: 20
+      - id: "ch-good-girl-50"
+        name: "Carolina Herrera Good Girl EDP 50ml"
+        sku: "CH-GG-50"
+        attributes:
+          presentacion: "Envase x 50ml"
+          contenido: "50ml"
+          precio_base: 65000
+          stock: 15
+      - id: "ch-good-girl-80"
+        name: "Carolina Herrera Good Girl EDP 80ml"
+        sku: "CH-GG-80"
+        attributes:
+          presentacion: "Envase x 80ml"
+          contenido: "80ml"
+          precio_base: 85000
+          stock: 10
+
+  # Variantes de Maybelline Fit Me
+  - product_id: "maybelline-fit-me"
+    variants:
+      - id: "maybelline-fit-me-classic-ivory"
+        name: "Maybelline Fit Me Matte Classic Ivory"
+        sku: "MBL-FM-CI"
+        attributes:
+          presentacion: "Envase x 30ml"
+          contenido: "30ml"
+          precio_base: 8500
+          stock: 50
+      - id: "maybelline-fit-me-natural-beige"
+        name: "Maybelline Fit Me Matte Natural Beige"
+        sku: "MBL-FM-NB"
+        attributes:
+          presentacion: "Envase x 30ml"
+          contenido: "30ml"
+          precio_base: 8500
+          stock: 45
+      - id: "maybelline-fit-me-sun-beige"
+        name: "Maybelline Fit Me Matte Sun Beige"
+        sku: "MBL-FM-SB"
+        attributes:
+          presentacion: "Envase x 30ml"
+          contenido: "30ml"
+          precio_base: 8500
+          stock: 40

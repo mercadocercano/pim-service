@@ -1,35 +1,195 @@
 business_type: "sports-fitness"
 attributes:
-  # TODO: Implementar atributos para sports-fitness
-  # Estructura de ejemplo:
-  # - id: "color"
-  #   name: "Color"
-  #   type: "select"
-  #   required: false
-  #   description: "Color del producto"
-  #   values:
-  #     - "Rojo"
-  #     - "Azul"
-  #     - "Verde"
-  #
-  # - id: "weight"
-  #   name: "Peso"
-  #   type: "number"
-  #   required: false
-  #   description: "Peso del producto en gramos"
-  #   unit: "g"
-  #   min_value: 0
-  #   max_value: 10000
-  #
-  # - id: "description"
-  #   name: "Descripción Detallada"
-  #   type: "text"
-  #   required: false
-  #   description: "Descripción detallada del producto"
-  #   placeholder: "Ingrese descripción..."
-  #
-  # - id: "premium"
-  #   name: "Producto Premium"
-  #   type: "boolean"
-  #   required: false
-  #   description: "Indica si es un producto premium"
+  # Atributos generales
+  - id: "marca"
+    name: "Marca"
+    type: "string"
+    required: true
+    filterable: true
+    searchable: true
+    
+  - id: "modelo"
+    name: "Modelo"
+    type: "string"
+    required: true
+    filterable: true
+    searchable: true
+    
+  - id: "genero"
+    name: "Género"
+    type: "enum"
+    required: true
+    filterable: true
+    options:
+      - "Hombre"
+      - "Mujer"
+      - "Unisex"
+      - "Niños"
+      - "Niñas"
+    
+  # Atributos de indumentaria
+  - id: "talle"
+    name: "Talle"
+    type: "enum"
+    required: false
+    filterable: true
+    options:
+      - "XS"
+      - "S"
+      - "M"
+      - "L"
+      - "XL"
+      - "XXL"
+      
+  - id: "talle_calzado"
+    name: "Talle de Calzado"
+    type: "enum"
+    required: false
+    filterable: true
+    options:
+      - "35"
+      - "36"
+      - "37"
+      - "38"
+      - "39"
+      - "40"
+      - "41"
+      - "42"
+      - "43"
+      - "44"
+      - "45"
+      
+  - id: "color"
+    name: "Color"
+    type: "string"
+    required: true
+    filterable: true
+    
+  - id: "material"
+    name: "Material"
+    type: "string"
+    required: false
+    filterable: true
+    
+  # Atributos específicos de equipamiento
+  - id: "peso"
+    name: "Peso"
+    type: "number"
+    required: false
+    unit: "kg"
+    filterable: true
+    
+  - id: "dimensiones"
+    name: "Dimensiones"
+    type: "string"
+    required: false
+    
+  - id: "nivel_uso"
+    name: "Nivel de Uso"
+    type: "enum"
+    required: true
+    filterable: true
+    options:
+      - "Principiante"
+      - "Intermedio"
+      - "Avanzado"
+      - "Profesional"
+      
+  # Atributos de nutrición deportiva
+  - id: "contenido_neto"
+    name: "Contenido Neto"
+    type: "number"
+    required: false
+    unit: "g"
+    
+  - id: "sabor"
+    name: "Sabor"
+    type: "string"
+    required: false
+    filterable: true
+    
+  - id: "porciones"
+    name: "Cantidad de Porciones"
+    type: "number"
+    required: false
+    
+  - id: "fecha_vencimiento"
+    name: "Fecha de Vencimiento"
+    type: "date"
+    required: false
+    
+  # Atributos de seguridad y certificaciones
+  - id: "certificaciones"
+    name: "Certificaciones"
+    type: "array"
+    required: false
+    
+  - id: "advertencias"
+    name: "Advertencias de Uso"
+    type: "text"
+    required: false
+    
+  # Atributos comerciales
+  - id: "garantia"
+    name: "Garantía"
+    type: "string"
+    required: false
+    
+  - id: "origen"
+    name: "País de Origen"
+    type: "string"
+    required: true
+    filterable: true
+    
+  - id: "temporada"
+    name: "Temporada"
+    type: "enum"
+    required: false
+    filterable: true
+    options:
+      - "Primavera/Verano"
+      - "Otoño/Invierno"
+      - "Todo el año"
+      
+  # Atributos específicos por deporte
+  - id: "deporte"
+    name: "Deporte"
+    type: "enum"
+    required: true
+    filterable: true
+    options:
+      - "Fútbol"
+      - "Running"
+      - "Tenis"
+      - "Básquet"
+      - "Yoga"
+      - "CrossFit"
+      - "Gimnasio"
+      - "Ciclismo"
+      - "Natación"
+      - "Otros"
+      
+  - id: "tipo_superficie"
+    name: "Tipo de Superficie"
+    type: "enum"
+    required: false
+    filterable: true
+    options:
+      - "Indoor"
+      - "Outdoor"
+      - "Múltiple"
+      - "Césped Natural"
+      - "Césped Sintético"
+      - "Tierra Batida"
+      - "Cemento"
+      
+  # Atributos técnicos
+  - id: "tecnologias"
+    name: "Tecnologías"
+    type: "array"
+    required: false
+    
+  - id: "caracteristicas_especiales"
+    name: "Características Especiales"
+    type: "array"
+    required: false

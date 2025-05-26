@@ -1,16 +1,139 @@
 business_type: "toys-games"
 categories:
-  # TODO: Implementar categorías para toys-games
-  # Estructura de ejemplo:
-  # - id: "main-category"
-  #   name: "Categoría Principal"
-  #   description: "Descripción de la categoría"
-  #   parent_id: null
-  #   subcategories:
-  #     - id: "subcategory-1"
-  #       name: "Subcategoría 1"
-  #       description: "Descripción de subcategoría"
-  #       subcategories:
-  #         - id: "sub-subcategory-1"
-  #           name: "Sub-subcategoría 1"
-  #           description: "Descripción de sub-subcategoría"
+  - id: "juguetes-ninos"
+    name: "Juguetes para Niños"
+    description: "Juguetes para todas las edades"
+    subcategories:
+      - id: "primera-infancia"
+        name: "Primera Infancia (0-3 años)"
+        description: "Juguetes seguros para bebés y niños pequeños"
+        subcategories:
+          - id: "sonajeros-mordillos"
+            name: "Sonajeros y Mordillos"
+          - id: "peluches-bebes"
+            name: "Peluches para Bebés"
+          - id: "gimnasios-actividades"
+            name: "Gimnasios y Centros de Actividades"
+          - id: "apilables-encajables"
+            name: "Apilables y Encajables"
+            
+      - id: "preescolar"
+        name: "Preescolar (3-6 años)"
+        description: "Juguetes educativos y recreativos para niños en edad preescolar"
+        subcategories:
+          - id: "bloques-construccion"
+            name: "Bloques de Construcción"
+          - id: "plastilinas-masas"
+            name: "Plastilinas y Masas"
+          - id: "vehiculos-pequenos"
+            name: "Vehículos y Pistas"
+          - id: "disfraces-infantiles"
+            name: "Disfraces y Accesorios"
+            
+      - id: "ninos-6-12"
+        name: "Niños (6-12 años)"
+        description: "Juguetes para niños en edad escolar"
+        subcategories:
+          - id: "juguetes-accion"
+            name: "Juguetes de Acción"
+          - id: "munecos-coleccionables"
+            name: "Muñecos Coleccionables"
+          - id: "juguetes-radiocontrol"
+            name: "Juguetes a Control Remoto"
+          - id: "juguetes-cientificos"
+            name: "Juguetes Científicos"
+            
+  - id: "juegos-mesa"
+    name: "Juegos de Mesa"
+    description: "Juegos de mesa tradicionales y modernos"
+    subcategories:
+      - id: "juegos-familia"
+        name: "Juegos Familiares"
+        subcategories:
+          - id: "juegos-clasicos"
+            name: "Juegos Clásicos"
+          - id: "juegos-cartas"
+            name: "Juegos de Cartas"
+          - id: "juegos-estrategia"
+            name: "Juegos de Estrategia"
+            
+      - id: "juegos-infantiles"
+        name: "Juegos Infantiles"
+        subcategories:
+          - id: "juegos-educativos"
+            name: "Juegos Educativos"
+          - id: "juegos-memoria"
+            name: "Juegos de Memoria"
+            
+      - id: "juegos-adultos"
+        name: "Juegos para Adultos"
+        subcategories:
+          - id: "juegos-estrategia-avanzada"
+            name: "Juegos de Estrategia Avanzada"
+          - id: "juegos-fiesta"
+            name: "Juegos de Fiesta"
+          - id: "escape-rooms"
+            name: "Escape Rooms"
+            
+  - id: "munecos-figuras"
+    name: "Muñecos y Figuras"
+    description: "Muñecos, figuras de acción y coleccionables"
+    subcategories:
+      - id: "munecas"
+        name: "Muñecas"
+        subcategories:
+          - id: "munecas-bebes"
+            name: "Muñecas Bebé"
+          - id: "munecas-moda"
+            name: "Muñecas de Moda"
+          - id: "munecas-licencias"
+            name: "Muñecas de Licencias"
+            
+      - id: "figuras-accion"
+        name: "Figuras de Acción"
+        subcategories:
+          - id: "figuras-superheroes"
+            name: "Figuras de Superhéroes"
+          - id: "figuras-peliculas"
+            name: "Figuras de Películas"
+          - id: "figuras-coleccion"
+            name: "Figuras de Colección"
+            
+  - id: "juguetes-exterior"
+    name: "Juguetes de Exterior"
+    description: "Juguetes para jugar al aire libre"
+    subcategories:
+      - id: "juguetes-playa"
+        name: "Juguetes de Playa y Pileta"
+      - id: "bicicletas-triciclos"
+        name: "Bicicletas y Triciclos"
+      - id: "patines-skates"
+        name: "Patines y Skates"
+      - id: "pelotas-deportivas"
+        name: "Pelotas y Juegos Deportivos"
+        
+  - id: "juguetes-electronicos"
+    name: "Juguetes Electrónicos"
+    description: "Juguetes con componentes electrónicos"
+    subcategories:
+      - id: "consolas-juegos"
+        name: "Consolas y Videojuegos"
+      - id: "drones-infantiles"
+        name: "Drones Infantiles"
+      - id: "tablets-infantiles"
+        name: "Tablets Infantiles"
+      - id: "juguetes-interactivos"
+        name: "Juguetes Interactivos"
+        
+  - id: "arte-manualidades"
+    name: "Arte y Manualidades"
+    description: "Productos para actividades creativas"
+    subcategories:
+      - id: "kits-creativos"
+        name: "Kits Creativos"
+      - id: "pintura-infantil"
+        name: "Pintura y Colores"
+      - id: "arcilla-modelado"
+        name: "Arcilla y Modelado"
+      - id: "tejido-costura"
+        name: "Tejido y Costura"

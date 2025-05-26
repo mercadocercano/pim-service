@@ -1,33 +1,116 @@
 business_type: "beauty-cosmetics"
 products:
-  # TODO: Implementar productos para beauty-cosmetics
-  # Estructura de ejemplo:
-  # - id: "product-example-1"
-  #   name: "Producto de Ejemplo 1"
-  #   description: "Descripción del producto de ejemplo"
-  #   category: "main-category"
-  #   base_price: 9999
-  #   currency: "ARS"
-  #   sku: "PROD-001"
-  #   attributes:
-  #     color: "Rojo"
-  #     weight: 500
-  #     premium: true
-  #   variants:
-  #     - "color-size"
-  #   stock: 100
-  #
-  # - id: "product-example-2"
-  #   name: "Producto de Ejemplo 2"
-  #   description: "Otro producto de ejemplo"
-  #   category: "subcategory-1"
-  #   base_price: 15999
-  #   currency: "ARS"
-  #   sku: "PROD-002"
-  #   attributes:
-  #     color: "Azul"
-  #     weight: 750
-  #     premium: false
-  #   variants:
-  #     - "color-size"
-  #   stock: 50
+  # Fragancias
+  - id: "212-vip-rose"
+    name: "212 VIP Rosé"
+    description: "Eau de parfum femenina con notas florales y frutales"
+    category_id: "perfumes-mujer"
+    attributes:
+      marca: "Carolina Herrera"
+      linea: "212 VIP"
+      registro_sanitario: "ANMAT-89012"
+      tipo_fragancia: "Eau de Parfum"
+      familia_olfativa: "Floral"
+      notas_salida: "Champagne rosado, pétalos de rosa"
+      notas_corazon: "Flor de durazno, magnolia"
+      notas_fondo: "Almizcle, ámbar"
+      genero: "Femenino"
+      origen: "España"
+      contenido: "80ml"
+      presentacion: "Envase x 80ml"
+      codigo_barras: "8411061823521"
+      codigo_interno: "CH-212VR-80"
+
+  - id: "one-million"
+    name: "1 Million"
+    description: "Eau de toilette masculina con notas especiadas y amaderadas"
+    category_id: "perfumes-hombre"
+    attributes:
+      marca: "Paco Rabanne"
+      linea: "Million"
+      registro_sanitario: "ANMAT-89013"
+      tipo_fragancia: "Eau de Toilette"
+      familia_olfativa: "Oriental"
+      notas_salida: "Mandarina, menta, pomelo"
+      notas_corazon: "Canela, especias, rosa"
+      notas_fondo: "Cuero, ámbar, madera"
+      genero: "Masculino"
+      origen: "Francia"
+      contenido: "100ml"
+      presentacion: "Envase x 100ml"
+      codigo_barras: "3349666007891"
+      codigo_interno: "PR-1M-100"
+
+  # Maquillaje
+  - id: "fit-me-matte"
+    name: "Fit Me Matte + Poreless"
+    description: "Base de maquillaje mate de larga duración"
+    category_id: "bases"
+    attributes:
+      marca: "Maybelline"
+      linea: "Fit Me"
+      registro_sanitario: "ANMAT-90123"
+      tono: "220 Natural Beige"
+      acabado: "Mate"
+      cobertura: "Media"
+      tipo_piel: "Mixta a Grasa"
+      hipoalergenico: true
+      dermatologicamente_testeado: true
+      contenido: "30ml"
+      presentacion: "Envase x 30ml"
+      origen: "Argentina"
+      codigo_barras: "7799012345678"
+      codigo_interno: "MBL-FM-220"
+
+  # Skincare
+  - id: "cicatricure-gold-lift"
+    name: "Cicatricure Gold Lift Día"
+    description: "Crema antiarrugas con tecnología Gold Lift"
+    category_id: "tratamiento-facial"
+    attributes:
+      marca: "Cicatricure"
+      linea: "Gold Lift"
+      registro_sanitario: "ANMAT-90124"
+      tipo_piel: "Madura"
+      beneficios: ["Anti-edad", "Reafirmante", "Hidratación"]
+      dermatologicamente_testeado: true
+      contenido: "50g"
+      presentacion: "Pote x 50g"
+      origen: "Argentina"
+      codigo_barras: "7799012345679"
+      codigo_interno: "CIC-GL-50"
+
+  # Cuidado del Cabello
+  - id: "elvive-oleo-extraordinario"
+    name: "Elvive Óleo Extraordinario"
+    description: "Shampoo nutritivo con aceites extraordinarios"
+    category_id: "shampoo"
+    attributes:
+      marca: "L'Oréal Paris"
+      linea: "Elvive"
+      registro_sanitario: "ANMAT-90125"
+      tipo_cabello: "Seco"
+      beneficios: ["Hidratación", "Nutrición"]
+      contenido: "400ml"
+      presentacion: "Botella x 400ml"
+      origen: "Argentina"
+      codigo_barras: "7799012345680"
+      codigo_interno: "LOR-ELV-400"
+
+  # Sets y Cofres
+  - id: "set-good-girl"
+    name: "Set Good Girl EDP"
+    description: "Set de fragancia Good Girl con body lotion"
+    category_id: "sets-fragancias"
+    attributes:
+      marca: "Carolina Herrera"
+      linea: "Good Girl"
+      registro_sanitario: "ANMAT-90126"
+      tipo_fragancia: "Eau de Parfum"
+      familia_olfativa: "Oriental"
+      genero: "Femenino"
+      contenido: "80ml EDP + 100ml Body Lotion"
+      presentacion: "Cofre Regalo"
+      origen: "España"
+      codigo_barras: "8411061823538"
+      codigo_interno: "CH-GG-SET1"
