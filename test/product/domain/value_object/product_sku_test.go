@@ -1,10 +1,10 @@
 package value_object
 
 import (
-	"testing"
-	"pim/src/product/domain/value_object"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pim/src/product/domain/value_object"
+	"testing"
 )
 
 func TestNewProductSKU(t *testing.T) {
@@ -24,7 +24,7 @@ func TestProductSKU_Equals(t *testing.T) {
 	sku1, _ := value_object.NewProductSKU("PROD-001")
 	sku2, _ := value_object.NewProductSKU("PROD-001")
 	sku3, _ := value_object.NewProductSKU("PROD-002")
-	
+
 	assert.True(t, sku1.Equals(sku2))
 	assert.False(t, sku1.Equals(sku3))
 	assert.False(t, sku1.Equals(nil))

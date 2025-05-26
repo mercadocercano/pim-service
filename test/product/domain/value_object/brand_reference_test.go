@@ -1,11 +1,11 @@
 package value_object
 
 import (
-	"testing"
-	"pim/src/product/domain/value_object"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"pim/src/product/domain/value_object"
+	"testing"
 )
 
 func TestNewBrandReference(t *testing.T) {
@@ -45,7 +45,7 @@ func TestNewBrandReference(t *testing.T) {
 func TestBrandReference_Methods(t *testing.T) {
 	id := uuid.New().String()
 	brandRef, _ := value_object.NewBrandReference(id, "Marca Test")
-	
+
 	assert.Equal(t, id, brandRef.ID())
 	assert.Equal(t, "Marca Test", brandRef.Name())
 	assert.Equal(t, "Marca Test", brandRef.String())

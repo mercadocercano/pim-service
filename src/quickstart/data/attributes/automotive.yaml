@@ -1,0 +1,35 @@
+business_type: "automotive"
+attributes:
+  # TODO: Implementar atributos para automotive
+  # Estructura de ejemplo:
+  # - id: "color"
+  #   name: "Color"
+  #   type: "select"
+  #   required: false
+  #   description: "Color del producto"
+  #   values:
+  #     - "Rojo"
+  #     - "Azul"
+  #     - "Verde"
+  #
+  # - id: "weight"
+  #   name: "Peso"
+  #   type: "number"
+  #   required: false
+  #   description: "Peso del producto en gramos"
+  #   unit: "g"
+  #   min_value: 0
+  #   max_value: 10000
+  #
+  # - id: "description"
+  #   name: "Descripción Detallada"
+  #   type: "text"
+  #   required: false
+  #   description: "Descripción detallada del producto"
+  #   placeholder: "Ingrese descripción..."
+  #
+  # - id: "premium"
+  #   name: "Producto Premium"
+  #   type: "boolean"
+  #   required: false
+  #   description: "Indica si es un producto premium"

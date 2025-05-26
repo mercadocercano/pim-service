@@ -2,11 +2,11 @@ package usecase
 
 import (
 	"context"
-	"testing"
+	"github.com/stretchr/testify/assert"
 	"pim/src/product/application/mapper"
 	"pim/src/product/application/request"
 	"pim/src/product/application/usecase"
-	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestCreateProductUseCase_InvalidRequest(t *testing.T) {

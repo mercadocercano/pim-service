@@ -1,0 +1,265 @@
+business_type: "retail"
+attributes:
+  - id: "color"
+    name: "Color"
+    type: "select"
+    required: false
+    description: "Color principal del producto"
+    values:
+      - "Negro"
+      - "Blanco"
+      - "Gris"
+      - "Rojo"
+      - "Azul"
+      - "Verde"
+      - "Amarillo"
+      - "Naranja"
+      - "Rosa"
+      - "Morado"
+      - "Marrón"
+      - "Beige"
+      - "Dorado"
+      - "Plateado"
+      - "Transparente"
+      - "Multicolor"
+
+  - id: "material"
+    name: "Material"
+    type: "select"
+    required: false
+    description: "Material principal de fabricación"
+    values:
+      - "Algodón"
+      - "Poliéster"
+      - "Lana"
+      - "Seda"
+      - "Lino"
+      - "Cuero"
+      - "Cuero Sintético"
+      - "Metal"
+      - "Acero Inoxidable"
+      - "Aluminio"
+      - "Plástico"
+      - "Vidrio"
+      - "Madera"
+      - "MDF"
+      - "Bambú"
+      - "Cerámica"
+      - "Porcelana"
+      - "Silicona"
+      - "Goma"
+      - "Papel"
+      - "Cartón"
+
+  - id: "brand-origin"
+    name: "Origen de Marca"
+    type: "select"
+    required: false
+    description: "Origen de la marca del producto"
+    values:
+      - "Nacional"
+      - "Importado"
+      - "Artesanal Local"
+      - "Marca Propia"
+
+  - id: "size"
+    name: "Talla/Tamaño"
+    type: "select"
+    required: false
+    description: "Talla o tamaño del producto"
+    values:
+      - "XS"
+      - "S"
+      - "M"
+      - "L"
+      - "XL"
+      - "XXL"
+      - "XXXL"
+      - "Único"
+      - "Pequeño"
+      - "Mediano"
+      - "Grande"
+      - "Extra Grande"
+
+  - id: "weight"
+    name: "Peso"
+    type: "number"
+    required: false
+    description: "Peso del producto en gramos"
+    unit: "g"
+    min_value: 0
+    max_value: 50000
+
+  - id: "dimensions"
+    name: "Dimensiones"
+    type: "text"
+    required: false
+    description: "Dimensiones del producto (largo x ancho x alto)"
+    placeholder: "ej: 30cm x 20cm x 15cm"
+
+  - id: "warranty"
+    name: "Garantía"
+    type: "select"
+    required: false
+    description: "Período de garantía del producto"
+    values:
+      - "Sin garantía"
+      - "3 meses"
+      - "6 meses"
+      - "1 año"
+      - "2 años"
+      - "3 años"
+      - "5 años"
+      - "Garantía de por vida"
+
+  - id: "energy-efficiency"
+    name: "Eficiencia Energética"
+    type: "select"
+    required: false
+    description: "Clasificación de eficiencia energética"
+    values:
+      - "A+++"
+      - "A++"
+      - "A+"
+      - "A"
+      - "B"
+      - "C"
+      - "D"
+      - "E"
+      - "F"
+      - "G"
+      - "No aplica"
+
+  - id: "age-group"
+    name: "Grupo de Edad"
+    type: "select"
+    required: false
+    description: "Grupo de edad recomendado"
+    values:
+      - "Bebés (0-2 años)"
+      - "Niños (3-12 años)"
+      - "Adolescentes (13-17 años)"
+      - "Adultos (18-64 años)"
+      - "Adultos Mayores (65+ años)"
+      - "Todas las edades"
+
+  - id: "gender"
+    name: "Género"
+    type: "select"
+    required: false
+    description: "Género objetivo del producto"
+    values:
+      - "Masculino"
+      - "Femenino"
+      - "Unisex"
+      - "Niños"
+      - "Niñas"
+
+  - id: "season"
+    name: "Temporada"
+    type: "select"
+    required: false
+    description: "Temporada recomendada de uso"
+    values:
+      - "Primavera"
+      - "Verano"
+      - "Otoño"
+      - "Invierno"
+      - "Todo el año"
+
+  - id: "care-instructions"
+    name: "Instrucciones de Cuidado"
+    type: "text"
+    required: false
+    description: "Instrucciones especiales de cuidado y mantenimiento"
+    placeholder: "ej: Lavar a máquina en agua fría"
+
+  - id: "country-origin"
+    name: "País de Origen"
+    type: "select"
+    required: false
+    description: "País donde fue fabricado el producto"
+    values:
+      - "Argentina"
+      - "Brasil"
+      - "Chile"
+      - "Colombia"
+      - "México"
+      - "Perú"
+      - "Uruguay"
+      - "China"
+      - "Estados Unidos"
+      - "Alemania"
+      - "Italia"
+      - "España"
+      - "Francia"
+      - "Reino Unido"
+      - "Japón"
+      - "Corea del Sur"
+      - "India"
+      - "Turquía"
+      - "Otro"
+
+  - id: "eco-friendly"
+    name: "Eco-Amigable"
+    type: "boolean"
+    required: false
+    description: "Producto fabricado con materiales sostenibles"
+
+  - id: "organic"
+    name: "Orgánico"
+    type: "boolean"
+    required: false
+    description: "Producto orgánico o natural"
+
+  - id: "recyclable"
+    name: "Reciclable"
+    type: "boolean"
+    required: false
+    description: "Producto o empaque reciclable"
+
+  - id: "fragrance"
+    name: "Fragancia"
+    type: "select"
+    required: false
+    description: "Tipo de fragancia del producto"
+    values:
+      - "Sin fragancia"
+      - "Floral"
+      - "Frutal"
+      - "Cítrico"
+      - "Herbal"
+      - "Dulce"
+      - "Fresco"
+      - "Amaderado"
+      - "Oriental"
+      - "Marino"
+
+  - id: "texture"
+    name: "Textura"
+    type: "select"
+    required: false
+    description: "Textura del producto"
+    values:
+      - "Suave"
+      - "Rugosa"
+      - "Lisa"
+      - "Áspera"
+      - "Cremosa"
+      - "Líquida"
+      - "Sólida"
+      - "Gel"
+      - "Espuma"
+      - "Polvo"
+
+  - id: "water-resistant"
+    name: "Resistente al Agua"
+    type: "boolean"
+    required: false
+    description: "Producto resistente al agua o impermeable"
+
+  - id: "assembly-required"
+    name: "Requiere Ensamblaje"
+    type: "boolean"
+    required: false
+    description: "El producto requiere ensamblaje por parte del cliente" 

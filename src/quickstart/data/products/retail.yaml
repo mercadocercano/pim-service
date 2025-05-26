@@ -1,0 +1,383 @@
+business_type: "retail"
+products:
+  # Muebles de Sala
+  - id: "sofa-3-plazas"
+    name: "Sofá de 3 Plazas"
+    description: "Sofá cómodo de 3 plazas para sala de estar"
+    category: "living-room-furniture"
+    base_price: 89999
+    currency: "ARS"
+    sku: "SOF-3P-001"
+    attributes:
+      color: "Gris"
+      material: "Tela"
+      dimensions: "200cm x 90cm x 85cm"
+      weight: 45000
+      warranty: "2 años"
+      assembly-required: true
+    variants:
+      - "color-material"
+    stock: 15
+
+  - id: "mesa-centro-madera"
+    name: "Mesa de Centro de Madera"
+    description: "Mesa de centro rectangular de madera maciza"
+    category: "living-room-furniture"
+    base_price: 25999
+    currency: "ARS"
+    sku: "MES-CEN-001"
+    attributes:
+      color: "Marrón"
+      material: "Madera"
+      dimensions: "120cm x 60cm x 45cm"
+      weight: 18000
+      warranty: "1 año"
+      assembly-required: false
+    variants:
+      - "color-only"
+    stock: 25
+
+  # Muebles de Dormitorio
+  - id: "cama-matrimonial"
+    name: "Cama Matrimonial"
+    description: "Cama matrimonial con cabecera tapizada"
+    category: "bedroom-furniture"
+    base_price: 65999
+    currency: "ARS"
+    sku: "CAM-MAT-001"
+    attributes:
+      color: "Blanco"
+      material: "MDF"
+      dimensions: "200cm x 160cm x 120cm"
+      weight: 35000
+      warranty: "2 años"
+      assembly-required: true
+    variants:
+      - "color-material"
+    stock: 12
+
+  - id: "comoda-6-cajones"
+    name: "Cómoda de 6 Cajones"
+    description: "Cómoda espaciosa con 6 cajones para dormitorio"
+    category: "bedroom-furniture"
+    base_price: 42999
+    currency: "ARS"
+    sku: "COM-6C-001"
+    attributes:
+      color: "Blanco"
+      material: "MDF"
+      dimensions: "120cm x 40cm x 80cm"
+      weight: 28000
+      warranty: "1 año"
+      assembly-required: true
+    variants:
+      - "color-only"
+    stock: 18
+
+  # Electrodomésticos de Cocina
+  - id: "microondas-20l"
+    name: "Microondas 20 Litros"
+    description: "Microondas digital de 20 litros con grill"
+    category: "kitchen-appliances"
+    base_price: 35999
+    currency: "ARS"
+    sku: "MIC-20L-001"
+    attributes:
+      color: "Negro"
+      material: "Metal"
+      dimensions: "45cm x 35cm x 25cm"
+      weight: 12000
+      warranty: "1 año"
+      energy-efficiency: "A"
+    variants:
+      - "color-only"
+    stock: 30
+
+  - id: "licuadora-1-5l"
+    name: "Licuadora 1.5 Litros"
+    description: "Licuadora de vidrio con motor de 600W"
+    category: "kitchen-appliances"
+    base_price: 18999
+    currency: "ARS"
+    sku: "LIC-15L-001"
+    attributes:
+      color: "Blanco"
+      material: "Vidrio"
+      dimensions: "20cm x 20cm x 40cm"
+      weight: 3500
+      warranty: "1 año"
+    variants:
+      - "color-only"
+    stock: 45
+
+  # Ropa Masculina
+  - id: "camisa-manga-larga"
+    name: "Camisa Manga Larga"
+    description: "Camisa clásica de manga larga para hombre"
+    category: "mens-formal"
+    base_price: 8999
+    currency: "ARS"
+    sku: "CAM-ML-001"
+    attributes:
+      color: "Blanco"
+      material: "Algodón"
+      size: "M"
+      gender: "Masculino"
+      season: "Todo el año"
+      care-instructions: "Lavar a máquina en agua fría"
+    variants:
+      - "color-size"
+    stock: 60
+
+  - id: "jean-clasico"
+    name: "Jean Clásico"
+    description: "Jean de corte clásico para hombre"
+    category: "mens-casual"
+    base_price: 12999
+    currency: "ARS"
+    sku: "JEA-CLA-001"
+    attributes:
+      color: "Azul"
+      material: "Algodón"
+      size: "32"
+      gender: "Masculino"
+      season: "Todo el año"
+      care-instructions: "Lavar a máquina en agua fría"
+    variants:
+      - "color-size"
+    stock: 80
+
+  # Ropa Femenina
+  - id: "blusa-seda"
+    name: "Blusa de Seda"
+    description: "Blusa elegante de seda para mujer"
+    category: "womens-formal"
+    base_price: 15999
+    currency: "ARS"
+    sku: "BLU-SED-001"
+    attributes:
+      color: "Rosa"
+      material: "Seda"
+      size: "M"
+      gender: "Femenino"
+      season: "Primavera"
+      care-instructions: "Lavar a mano o lavado en seco"
+    variants:
+      - "color-size"
+    stock: 35
+
+  - id: "vestido-casual"
+    name: "Vestido Casual"
+    description: "Vestido casual de algodón para uso diario"
+    category: "womens-casual"
+    base_price: 9999
+    currency: "ARS"
+    sku: "VES-CAS-001"
+    attributes:
+      color: "Negro"
+      material: "Algodón"
+      size: "M"
+      gender: "Femenino"
+      season: "Todo el año"
+      care-instructions: "Lavar a máquina en agua fría"
+    variants:
+      - "color-size"
+    stock: 50
+
+  # Calzado
+  - id: "zapatillas-running"
+    name: "Zapatillas Running"
+    description: "Zapatillas deportivas para running y ejercicio"
+    category: "sports-shoes"
+    base_price: 22999
+    currency: "ARS"
+    sku: "ZAP-RUN-001"
+    attributes:
+      color: "Negro"
+      material: "Cuero Sintético"
+      size: "42"
+      gender: "Unisex"
+      season: "Todo el año"
+      water-resistant: true
+    variants:
+      - "color-size"
+    stock: 70
+
+  - id: "zapatos-vestir"
+    name: "Zapatos de Vestir"
+    description: "Zapatos formales de cuero para ocasiones especiales"
+    category: "formal-shoes"
+    base_price: 18999
+    currency: "ARS"
+    sku: "ZAP-VES-001"
+    attributes:
+      color: "Negro"
+      material: "Cuero"
+      size: "42"
+      gender: "Masculino"
+      season: "Todo el año"
+      care-instructions: "Limpiar con crema para cuero"
+    variants:
+      - "color-size"
+    stock: 40
+
+  # Productos de Belleza
+  - id: "crema-facial-hidratante"
+    name: "Crema Facial Hidratante"
+    description: "Crema hidratante para rostro con ácido hialurónico"
+    category: "facial-care"
+    base_price: 4999
+    currency: "ARS"
+    sku: "CRE-FAC-001"
+    attributes:
+      color: "Blanco"
+      texture: "Cremosa"
+      fragrance: "Sin fragancia"
+      weight: 50
+      organic: true
+      age-group: "Adultos (18-64 años)"
+    variants:
+      - "fragrance-texture"
+    stock: 100
+
+  - id: "shampoo-cabello-graso"
+    name: "Shampoo para Cabello Graso"
+    description: "Shampoo especial para cabello graso con extractos naturales"
+    category: "hair-care"
+    base_price: 2999
+    currency: "ARS"
+    sku: "SHA-GRA-001"
+    attributes:
+      color: "Transparente"
+      texture: "Líquida"
+      fragrance: "Herbal"
+      weight: 400
+      organic: true
+      age-group: "Todas las edades"
+    variants:
+      - "fragrance-texture"
+    stock: 85
+
+  # Alimentos Envasados
+  - id: "aceite-oliva-500ml"
+    name: "Aceite de Oliva Extra Virgen 500ml"
+    description: "Aceite de oliva extra virgen prensado en frío"
+    category: "canned-goods"
+    base_price: 1899
+    currency: "ARS"
+    sku: "ACE-OLI-001"
+    attributes:
+      color: "Dorado"
+      weight: 500
+      organic: true
+      country-origin: "España"
+      recyclable: true
+    variants:
+      - "size-weight"
+    stock: 120
+
+  - id: "arroz-integral-1kg"
+    name: "Arroz Integral 1kg"
+    description: "Arroz integral orgánico de grano largo"
+    category: "canned-goods"
+    base_price: 899
+    currency: "ARS"
+    sku: "ARR-INT-001"
+    attributes:
+      color: "Marrón"
+      weight: 1000
+      organic: true
+      country-origin: "Argentina"
+      recyclable: true
+    variants:
+      - "size-weight"
+    stock: 200
+
+  # Bebidas
+  - id: "agua-mineral-500ml"
+    name: "Agua Mineral 500ml"
+    description: "Agua mineral natural sin gas"
+    category: "soft-drinks"
+    base_price: 299
+    currency: "ARS"
+    sku: "AGU-MIN-001"
+    attributes:
+      color: "Transparente"
+      weight: 500
+      recyclable: true
+      country-origin: "Argentina"
+    variants:
+      - "size-weight"
+    stock: 500
+
+  - id: "jugo-naranja-1l"
+    name: "Jugo de Naranja 1L"
+    description: "Jugo de naranja natural sin azúcar agregada"
+    category: "juices"
+    base_price: 599
+    currency: "ARS"
+    sku: "JUG-NAR-001"
+    attributes:
+      color: "Naranja"
+      weight: 1000
+      organic: false
+      country-origin: "Argentina"
+      recyclable: true
+    variants:
+      - "size-weight"
+    stock: 150
+
+  # Productos de Limpieza
+  - id: "detergente-liquido-1l"
+    name: "Detergente Líquido 1L"
+    description: "Detergente líquido concentrado para ropa"
+    category: "cleaning-appliances"
+    base_price: 799
+    currency: "ARS"
+    sku: "DET-LIQ-001"
+    attributes:
+      color: "Azul"
+      texture: "Líquida"
+      fragrance: "Fresco"
+      weight: 1000
+      eco-friendly: true
+      recyclable: true
+    variants:
+      - "fragrance-texture"
+    stock: 180
+
+  # Productos para Jardín
+  - id: "maceta-ceramica-20cm"
+    name: "Maceta de Cerámica 20cm"
+    description: "Maceta decorativa de cerámica con plato"
+    category: "plants"
+    base_price: 1299
+    currency: "ARS"
+    sku: "MAC-CER-001"
+    attributes:
+      color: "Terracota"
+      material: "Cerámica"
+      dimensions: "20cm x 20cm x 18cm"
+      weight: 800
+      water-resistant: true
+    variants:
+      - "color-only"
+    stock: 75
+
+  # Electrónicos
+  - id: "auriculares-bluetooth"
+    name: "Auriculares Bluetooth"
+    description: "Auriculares inalámbricos con cancelación de ruido"
+    category: "audio-video"
+    base_price: 12999
+    currency: "ARS"
+    sku: "AUR-BLU-001"
+    attributes:
+      color: "Negro"
+      material: "Plástico"
+      weight: 250
+      warranty: "1 año"
+      water-resistant: true
+    variants:
+      - "color-only"
+    stock: 95 

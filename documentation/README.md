@@ -14,6 +14,7 @@ El Sistema PIM es una solución multi-tenant para la gestión de información de
 - **Containerización**: Despliegue con Docker y Docker Compose
 - **API Gateway**: Kong para enrutamiento y gestión de APIs
 - **Monitoreo**: Prometheus, Grafana y Loki para observabilidad
+- **🚀 Quickstart**: Configuración rápida de catálogos predefinidos por tipo de negocio
 
 ## Módulos Implementados
 
@@ -42,6 +43,13 @@ El Sistema PIM es una solución multi-tenant para la gestión de información de
 - SKU único por variante
 - Estados independientes del producto base
 
+### 5. 🚀 Quickstart (Nuevo)
+- Configuración rápida de catálogos predefinidos
+- 14 tipos de negocio soportados (retail completamente implementado)
+- Datos YAML con categorías, atributos, variantes, productos y marcas
+- Integración con sistema de onboarding multi-tenant
+- Sistema de caché thread-safe para optimización
+
 ## Arquitectura del Sistema
 
 ```
@@ -58,6 +66,11 @@ El Sistema PIM es una solución multi-tenant para la gestión de información de
 │  │  Categories  │  │    Brands    │  │   Products   │     │
 │  │    Module    │  │    Module    │  │    Module    │     │
 │  └──────────────┘  └──────────────┘  └──────────────┘     │
+│                                                            │
+│  ┌──────────────┐  ┌─────────────────────────────────┐     │
+│  │   Variants   │  │        🚀 Quickstart           │     │
+│  │    Module    │  │         Module                 │     │
+│  └──────────────┘  └─────────────────────────────────┘     │
 │                                                            │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │            Arquitectura Hexagonal                  │   │
@@ -81,9 +94,9 @@ El Sistema PIM es una solución multi-tenant para la gestión de información de
 │  │  categories  │  │    brands    │  │   products   │     │
 │  └──────────────┘  └──────────────┘  └──────────────┘     │
 │                                                            │
-│  ┌──────────────┐  ┌──────────────┐                       │
-│  │product_variants│ │variant_attributes│                  │
-│  └──────────────┘  └──────────────┘                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │product_variants│ │variant_attributes│ │quickstart_history│ │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -98,6 +111,7 @@ El Sistema PIM es una solución multi-tenant para la gestión de información de
 - **Documentación**: OpenAPI 3.1 / Swagger
 - **Monitoreo**: Prometheus, Grafana, Loki
 - **Logs**: Structured logging con Promtail
+- **Configuración**: YAML para datos predefinidos
 
 ## Estructura del Proyecto
 
@@ -107,6 +121,11 @@ pim/
 │   ├── category/           # Módulo de categorías
 │   ├── brand/             # Módulo de marcas
 │   ├── product/           # Módulo de productos y variantes
+│   ├── quickstart/        # 🚀 Módulo quickstart
+│   │   ├── domain/        # Entidades y lógica de negocio
+│   │   ├── application/   # Casos de uso
+│   │   ├── infrastructure/# Controllers y loaders
+│   │   └── data/          # Datos YAML predefinidos
 │   ├── shared/            # Código compartido
 │   └── api/               # Configuración de API
 ├── migrations/            # Migraciones de base de datos
@@ -119,12 +138,18 @@ pim/
 
 ## Guías de Uso
 
+### Documentación Principal
 - [Guía de Instalación](./installation.md)
 - [Guía de Desarrollo](./development.md)
 - [Arquitectura Detallada](./architecture.md)
 - [API Reference](./api-reference.md)
 - [Ejemplos de Uso](./examples.md)
 - [Troubleshooting](./troubleshooting.md)
+
+### 🚀 Documentación Quickstart
+- [**Módulo Quickstart**](./quickstart-module.md) - Documentación completa del módulo
+- [**Integración con Onboarding**](../../documentation/Onboarding.md#-integración-con-el-módulo-quickstart-del-pim) - Cómo se integra con el proceso de onboarding
+- [**Integración Técnica**](../../documentation/PIM-Onboarding-Integration.md) - Detalles técnicos de la integración
 
 ## Endpoints Principales
 
@@ -156,6 +181,14 @@ pim/
 - `PUT /api/v1/product-variants/{id}` - Actualizar variante
 - `DELETE /api/v1/product-variants/{id}` - Eliminar variante
 
+### 🚀 Quickstart
+- `GET /api/quickstart/business-types` - Listar tipos de negocio disponibles
+- `GET /api/quickstart/categories/{businessType}` - Obtener categorías predefinidas
+- `GET /api/quickstart/attributes/{businessType}` - Obtener atributos predefinidos
+- `GET /api/quickstart/variants/{businessType}` - Obtener configuraciones de variantes
+- `GET /api/quickstart/products/{businessType}` - Obtener productos de ejemplo
+- `POST /api/quickstart/setup` - Aplicar configuración quickstart completa
+
 ## Multi-Tenancy
 
 El sistema implementa multi-tenancy a nivel de aplicación:
@@ -164,6 +197,7 @@ El sistema implementa multi-tenancy a nivel de aplicación:
 - **Aislamiento de datos**: Cada tenant solo ve sus propios datos
 - **Base de datos compartida**: Una sola base de datos con filtrado por tenant_id
 - **Validaciones**: Todas las operaciones validan pertenencia al tenant
+- **🚀 Quickstart**: Configuraciones independientes por tenant con historial
 
 ## Seguridad
 
@@ -172,6 +206,7 @@ El sistema implementa multi-tenancy a nivel de aplicación:
 - **Validación**: Validación estricta de entrada en todos los endpoints
 - **SQL Injection**: Uso de prepared statements
 - **CORS**: Configurado en API Gateway
+- **🚀 Quickstart**: Validaciones de límites de recursos por tenant
 
 ## Monitoreo y Observabilidad
 
@@ -180,6 +215,36 @@ El sistema implementa multi-tenancy a nivel de aplicación:
 - **Health Check**: Endpoint `/health` para verificar estado
 - **Tracing**: Logs de requests con correlation IDs
 - **Dashboards**: Grafana para visualización
+- **🚀 Quickstart**: Métricas específicas de adopción y performance
+
+## 🚀 Tipos de Negocio Quickstart
+
+### Completamente Implementado
+- ✅ **Retail** - Comercio minorista con 5 categorías, 20 atributos, 10 variantes, 20 productos y 40+ marcas
+
+### En Desarrollo
+- 🔄 **Food & Beverage** - Alimentos y bebidas
+- 🔄 **Fashion** - Moda y vestimenta
+- 🔄 **Electronics** - Electrónicos y tecnología
+- 🔄 **Automotive** - Automotriz y repuestos
+- 🔄 **Sports & Fitness** - Deportes y fitness
+- 🔄 **Health & Pharmacy** - Salud y farmacia
+- 🔄 **Books & Media** - Libros y medios
+- 🔄 **Home & Construction** - Hogar y construcción
+- 🔄 **Beauty & Cosmetics** - Belleza y cosméticos
+- 🔄 **Toys & Games** - Juguetes y juegos
+- 🔄 **Pet Supplies** - Mascotas y suministros
+- 🔄 **Office Supplies** - Oficina y papelería
+- 🔄 **Jewelry & Accessories** - Joyería y accesorios
+
+## Integración con Onboarding
+
+El módulo quickstart se integra perfectamente con el sistema de onboarding multi-tenant:
+
+- **Detección automática**: Basada en el tipo de industria seleccionado
+- **Configuración opcional**: Los usuarios pueden elegir aplicar o no el quickstart
+- **Aplicación selectiva**: Categorías, atributos, variantes, productos y marcas por separado
+- **Time-to-value**: Reducción de días a minutos para tener un catálogo funcional
 
 ## Contribución
 
@@ -190,6 +255,7 @@ Para contribuir al proyecto:
 3. Documentar cambios en OpenAPI
 4. Seguir convenciones de naming y estructura
 5. Validar multi-tenancy en nuevos endpoints
+6. **🚀 Para Quickstart**: Agregar nuevos tipos de negocio siguiendo la estructura YAML establecida
 
 ## Licencia
 

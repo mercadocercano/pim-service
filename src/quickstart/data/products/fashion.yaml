@@ -1,0 +1,33 @@
+business_type: "fashion"
+products:
+  # TODO: Implementar productos para fashion
+  # Estructura de ejemplo:
+  # - id: "product-example-1"
+  #   name: "Producto de Ejemplo 1"
+  #   description: "Descripción del producto de ejemplo"
+  #   category: "main-category"
+  #   base_price: 9999
+  #   currency: "ARS"
+  #   sku: "PROD-001"
+  #   attributes:
+  #     color: "Rojo"
+  #     weight: 500
+  #     premium: true
+  #   variants:
+  #     - "color-size"
+  #   stock: 100
+  #
+  # - id: "product-example-2"
+  #   name: "Producto de Ejemplo 2"
+  #   description: "Otro producto de ejemplo"
+  #   category: "subcategory-1"
+  #   base_price: 15999
+  #   currency: "ARS"
+  #   sku: "PROD-002"
+  #   attributes:
+  #     color: "Azul"
+  #     weight: 750
+  #     premium: false
+  #   variants:
+  #     - "color-size"
+  #   stock: 50

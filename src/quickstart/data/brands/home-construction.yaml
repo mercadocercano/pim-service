@@ -1,0 +1,19 @@
+business_type: "home-construction"
+brands:
+  # TODO: Implementar marcas para home-construction
+  # Estructura de ejemplo:
+  # - id: "brand-example-1"
+  #   name: "Marca Ejemplo 1"
+  #   description: "Descripción de la marca ejemplo"
+  #   country_origin: "Argentina"
+  #   category: "Categoría de la Marca"
+  #   website: "https://www.ejemplo.com"
+  #   logo_url: "/brands/ejemplo-logo.png"
+  #
+  # - id: "brand-example-2"
+  #   name: "Marca Ejemplo 2"
+  #   description: "Otra marca de ejemplo"
+  #   country_origin: "Estados Unidos"
+  #   category: "Otra Categoría"
+  #   website: "https://www.ejemplo2.com"
+  #   logo_url: "/brands/ejemplo2-logo.png"
