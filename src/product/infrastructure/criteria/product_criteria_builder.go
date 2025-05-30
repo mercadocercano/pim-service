@@ -1,56 +1,112 @@
 package criteria
 
 import (
-	"github.com/gin-gonic/gin"
+	"net/url"
 
-	"pim/src/shared/domain/criteria"
+	domainCriteria "pim/src/shared/domain/criteria"
 	sharedCriteria "pim/src/shared/infrastructure/criteria"
+
+	"github.com/gin-gonic/gin"
 )
 
 // ProductCriteriaBuilder construye criterios específicos para productos
 type ProductCriteriaBuilder struct {
-	helper  *sharedCriteria.EntityCriteriaHelper
-	builder *criteria.CriteriaBuilder
+	*domainCriteria.CriteriaBuilder
+	helper *sharedCriteria.EntityCriteriaHelper
 }
 
-// NewProductCriteriaBuilder crea una nueva instancia del builder
+// NewProductCriteriaBuilder crea un nuevo builder para criterios de productos
 func NewProductCriteriaBuilder() *ProductCriteriaBuilder {
 	return &ProductCriteriaBuilder{
-		helper: sharedCriteria.NewEntityCriteriaHelper(),
+		CriteriaBuilder: domainCriteria.NewCriteriaBuilder(),
+		helper:          sharedCriteria.NewEntityCriteriaHelper(),
 	}
 }
 
-// FromContext construye criterios desde el contexto de Gin
-func (b *ProductCriteriaBuilder) FromContext(c *gin.Context) *ProductCriteriaBuilder {
-	b.builder = b.helper.BuildBaseFromContext(c)
+// BuildFromContext construye criterios desde el contexto de Gin con filtros específicos de productos
+func (b *ProductCriteriaBuilder) BuildFromContext(c *gin.Context) *ProductCriteriaBuilder {
+	// Construir criterios base desde query parameters
+	b.CriteriaBuilder = b.helper.BuildBaseFromContext(c)
 
-	// Filtros específicos de productos
-	b.builder.AddLikeFilter("name", c.Query("name"))
-	b.builder.AddLikeFilter("description", c.Query("description"))
-	b.builder.AddLikeFilter("sku", c.Query("sku"))
-	b.builder.AddEqualFilter("status", c.Query("status"))
-	b.builder.AddUUIDFilter("category_id", c.Query("category_id"))
-	b.builder.AddUUIDFilter("brand_id", c.Query("brand_id"))
-	b.builder.AddLikeFilter("category_name", c.Query("category_name"))
-	b.builder.AddLikeFilter("brand_name", c.Query("brand_name"))
-
-	// Filtro para excluir productos eliminados por defecto
-	if c.Query("include_deleted") != "true" {
-		b.builder.AddNotEqualFilter("status", "deleted")
-	}
+	// Agregar filtros específicos de productos
+	b.addProductFilters(c.Request.URL.Query())
 
 	return b
 }
 
-// BuildValidated construye y valida los criterios
-func (b *ProductCriteriaBuilder) BuildValidated(c *gin.Context) criteria.Criteria {
-	searchCriteria := b.FromContext(c).Build()
-	return b.helper.ValidateAndSanitizeCriteria(searchCriteria, b.GetAllowedFields())
+// BuildValidated construye y valida criterios desde el contexto
+func (b *ProductCriteriaBuilder) BuildValidated(c *gin.Context) domainCriteria.Criteria {
+	criteria := b.BuildFromContext(c).Build()
+	return b.helper.ValidateAndSanitizeCriteria(criteria, b.GetAllowedFields())
 }
 
-// Build construye los criterios sin validación adicional
-func (b *ProductCriteriaBuilder) Build() criteria.Criteria {
-	return b.builder.Build()
+// addProductFilters agrega filtros específicos de productos
+func (b *ProductCriteriaBuilder) addProductFilters(values url.Values) {
+	// Filtro por tenant_id (obligatorio)
+	if tenantID := values.Get("tenant_id"); tenantID != "" {
+		b.AddUUIDFilter("tenant_id", tenantID)
+	}
+
+	// Filtros de búsqueda por texto
+	if name := values.Get("name"); name != "" {
+		b.AddLikeFilter("name", name)
+	}
+
+	if description := values.Get("description"); description != "" {
+		b.AddLikeFilter("description", description)
+	}
+
+	if sku := values.Get("sku"); sku != "" {
+		b.AddLikeFilter("sku", sku)
+	}
+
+	// Filtros exactos
+	if status := values.Get("status"); status != "" {
+		b.AddEqualFilter("status", status)
+	}
+
+	if categoryID := values.Get("category_id"); categoryID != "" {
+		b.AddUUIDFilter("category_id", categoryID)
+	}
+
+	if brandID := values.Get("brand_id"); brandID != "" {
+		b.AddUUIDFilter("brand_id", brandID)
+	}
+
+	// Filtros por nombres relacionados
+	if categoryName := values.Get("category_name"); categoryName != "" {
+		b.AddLikeFilter("category_name", categoryName)
+	}
+
+	if brandName := values.Get("brand_name"); brandName != "" {
+		b.AddLikeFilter("brand_name", brandName)
+	}
+
+	// Filtros especiales
+	if active := values.Get("active"); active == "true" {
+		b.AddEqualFilter("status", "active")
+	}
+
+	// Filtro para excluir productos eliminados por defecto
+	if includeDeleted := values.Get("include_deleted"); includeDeleted != "true" {
+		b.AddFilter("status", domainCriteria.OpNotEqual, "deleted")
+	}
+
+	// Filtros de disponibilidad
+	if inStock := values.Get("in_stock"); inStock == "true" {
+		b.AddFilter("stock_quantity", domainCriteria.OpGreaterThan, 0)
+	} else if inStock == "false" {
+		b.AddFilter("stock_quantity", domainCriteria.OpLessThanOrEqual, 0)
+	}
+
+	// Filtros de precio
+	if minPrice := values.Get("min_price"); minPrice != "" {
+		b.AddFilter("price", domainCriteria.OpGreaterThanOrEqual, minPrice)
+	}
+
+	if maxPrice := values.Get("max_price"); maxPrice != "" {
+		b.AddFilter("price", domainCriteria.OpLessThanOrEqual, maxPrice)
+	}
 }
 
 // GetAllowedFields retorna los campos permitidos para filtrado y ordenamiento
@@ -66,6 +122,8 @@ func (b *ProductCriteriaBuilder) GetAllowedFields() []string {
 		"category_name",
 		"brand_id",
 		"brand_name",
+		"price",
+		"stock_quantity",
 		"created_at",
 		"updated_at",
 	}

@@ -170,6 +170,9 @@ func (s *SQLCriteriaConverter) processFilterWithIndex(filter domainCriteria.Filt
 	case domainCriteria.OpIsNotNull:
 		condition = fmt.Sprintf("%s IS NOT NULL", filter.Field)
 		return condition, nil
+	case domainCriteria.OpArrayContains:
+		// PostgreSQL: para verificar si un array contiene un valor específico
+		condition = fmt.Sprintf("%s @> ARRAY[%s]", filter.Field, placeholder)
 	default:
 		condition = fmt.Sprintf("%s = %s", filter.Field, placeholder)
 	}
@@ -201,6 +204,9 @@ func (s *SQLCriteriaConverter) processFilter(filter domainCriteria.Filter) (stri
 	case "NOT NULL":
 		condition = fmt.Sprintf("%s IS NOT NULL", filter.Field)
 		return condition, nil
+	case "ARRAY_CONTAINS":
+		// PostgreSQL: para verificar si un array contiene un valor específico
+		condition = fmt.Sprintf("%s @> ARRAY[$?]", filter.Field)
 	default:
 		condition = fmt.Sprintf("%s = $?", filter.Field)
 	}

@@ -9,7 +9,6 @@ import (
 	"pim/src/product/application/request"
 	"pim/src/product/application/usecase"
 	"pim/src/product/infrastructure/criteria"
-	domainCriteria "pim/src/shared/domain/criteria"
 )
 
 // ProductController maneja las peticiones HTTP para productos
@@ -232,34 +231,34 @@ func (ctrl *ProductController) DeleteProduct(c *gin.Context) {
 // @Param category_name query string false "Filtrar por nombre de categoría (búsqueda parcial)"
 // @Param brand_name query string false "Filtrar por nombre de marca (búsqueda parcial)"
 // @Param include_deleted query bool false "Incluir productos eliminados" default(false)
+// @Param in_stock query bool false "Filtrar por disponibilidad en stock"
+// @Param min_price query number false "Precio mínimo"
+// @Param max_price query number false "Precio máximo"
 // @Success 200 {object} response.ProductListResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /products [get]
 // @Security BearerAuth
 func (ctrl *ProductController) ListProducts(c *gin.Context) {
-	// Obtener tenant ID del header
+	// Obtener el tenantID del header y agregarlo a los query parameters
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
 		return
 	}
 
-	// Construir criterios de búsqueda
-	searchCriteria := ctrl.criteriaBuilder.BuildValidated(c)
+	// Agregar tenant_id a los query parameters para el filtrado
+	query := c.Request.URL.Query()
+	query.Set("tenant_id", tenantID)
+	c.Request.URL.RawQuery = query.Encode()
 
-	// Agregar filtro de tenant automáticamente
-	tenantFilter := domainCriteria.Filter{
-		Field:    "tenant_id",
-		Operator: "=",
-		Value:    tenantID,
-	}
-	searchCriteria.Filters.Add(tenantFilter)
+	// Construir y validar criterios
+	criteria := ctrl.criteriaBuilder.BuildValidated(c)
 
-	// Ejecutar caso de uso
-	result, err := ctrl.listProductsByCriteriaUseCase.Execute(c.Request.Context(), searchCriteria)
+	// Ejecutar el caso de uso
+	result, err := ctrl.listProductsByCriteriaUseCase.Execute(c.Request.Context(), criteria)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
