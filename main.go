@@ -8,6 +8,7 @@ import (
 	apiConfig "pim/src/api/config"
 	brandConfig "pim/src/brand/infrastructure/config"
 	categoryConfig "pim/src/category/infrastructure/config"
+	categoryAttributeConfig "pim/src/category_attribute/infrastructure/config"
 	productConfig "pim/src/product/infrastructure/config"
 	quickstartConfig "pim/src/quickstart/infrastructure/config"
 	sharedConfig "pim/src/shared/infrastructure/config"
@@ -90,6 +91,14 @@ func main() {
 
 	// Configurar módulos
 	categoryConfig.SetupCategoryModule(v1, db)
+	categoryAttributeConfig.SetupCategoryAttributeModule(v1, db)
+	log.Println("Módulo CategoryAttribute configurado exitosamente")
+	log.Println("Rutas CategoryAttribute disponibles:")
+	log.Println("  GET    /api/v1/category-attributes (con filtros y paginación)")
+	log.Println("  GET    /api/v1/category-attributes/simple (listado simple)")
+	log.Println("  POST   /api/v1/category-attributes")
+	log.Println("  PUT    /api/v1/category-attributes/:id")
+	log.Println("  DELETE /api/v1/category-attributes/:id")
 	setupBrandModule(v1, db)
 	setupProductModule(v1, db)
 	setupQuickstartModule(v1, db)
