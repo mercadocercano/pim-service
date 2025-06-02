@@ -1,77 +1,73 @@
-# PIM (Product Information Management)
+# saas-mt-pim-service
 
-Sistema de gestión de información de productos, desarrollado con Go y siguiendo arquitectura hexagonal y Domain-Driven Design (DDD).
+Este proyecto fue extraído del monorepo SaaS Marketplace como parte de la migración a repositorios independientes.
 
-## Estructura del Proyecto
+## Descripción
 
-El proyecto sigue una arquitectura hexagonal (puertos y adaptadores) con principios de DDD:
+Servicio pim del ecosistema SaaS Marketplace.
 
-```
-src/
-├── category/           # Módulo de categorías
-│   ├── application/    # Capa de aplicación (casos de uso, DTOs)
-│   │   ├── mapper/
-│   │   ├── request/
-│   │   ├── response/
-│   │   └── usecase/
-│   ├── domain/         # Capa de dominio (entidades, reglas de negocio)
-│   │   ├── entity/
-│   │   ├── exception/
-│   │   ├── port/
-│   │   └── value_object/
-│   └── infrastructure/ # Capa de infraestructura (adaptadores)
-│       ├── config/
-│       ├── controller/
-│       ├── event/
-│       └── persistence/
-├── product/            # Módulo de productos
-│   ├── application/
-│   ├── domain/
-│   └── infrastructure/
-└── stock_location/     # Módulo de ubicaciones de stock
-    ├── application/
-    ├── domain/
-    └── infrastructure/
-```
+## Tecnología
 
-## Requisitos
-
-- Go 1.21 o superior
-- Gin Web Framework
-
-## Instalación
-
-1. Clonar el repositorio
-2. Instalar dependencias:
-
-```bash
-go mod tidy
-```
-
-## Ejecutar
-
-```bash
-go run main.go
-```
-
-El servidor API estará accesible en http://localhost:8080
-
-## Endpoints API
-
-### Health Check
-- GET /health
-
-### API v1 Categorías
-- GET /api/v1/categories
-- GET /api/v1/categories/:id
-- POST /api/v1/categories
+- **Tipo**: go
+- **Lenguaje**: Go
+- **Framework**: Gin/Fiber
+- **Base de datos**: PostgreSQL
 
 ## Desarrollo
 
-Este proyecto sigue los principios de arquitectura hexagonal:
+### Prerrequisitos
 
-- **Dominio**: Contiene las entidades y reglas de negocio.
-- **Puertos**: Interfaces que definen cómo se comunica el dominio con el exterior.
-- **Adaptadores**: Implementaciones de los puertos para tecnologías específicas.
+- Go 1.21+
+- PostgreSQL 15+
+- Docker (opcional)
 
-Cada módulo (categorías, productos, ubicaciones) tiene su propia estructura hexagonal completa, permitiendo evolucionar de forma independiente. 
+### Instalación
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/trinityweb/saas-mt-pim-service.git
+cd saas-mt-pim-service
+
+# Instalar dependencias
+go mod download
+
+# Ejecutar
+go run main.go
+```
+
+### Docker
+
+```bash
+# Construir imagen
+docker build -t saas-mt-pim-service .
+
+# Ejecutar contenedor
+docker run -p 8080:8080 saas-mt-pim-service
+```
+
+## Configuración
+
+Copia `.env.example` a `.env` y configura las variables necesarias.
+
+## Documentación
+
+- [Documentación de API](./api-docs/)
+- [Documentación técnica](./documentation/)
+
+## Migración desde Monorepo
+
+Este proyecto fue extraído del monorepo original manteniendo todo su historial de git.
+
+**Repositorio original**: https://github.com/trinityweb/saas-marketplace.git
+
+## Contribución
+
+1. Fork el proyecto
+2. Crea una rama para tu feature
+3. Commit tus cambios
+4. Push a la rama
+5. Abre un Pull Request
+
+## Licencia
+
+[Licencia del proyecto]
