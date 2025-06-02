@@ -14,6 +14,11 @@ type AttributeService interface {
 	CreateFromTemplate(ctx context.Context, tenantID string, templateData interface{}) error
 }
 
+// CategoryAttributeService define las operaciones para crear relaciones categoría-atributo desde el quickstart
+type CategoryAttributeService interface {
+	CreateFromTemplate(ctx context.Context, tenantID string, templateData interface{}) error
+}
+
 // VariantService define las operaciones para crear variantes desde el quickstart
 type VariantService interface {
 	CreateFromTemplate(ctx context.Context, tenantID string, templateData interface{}) error

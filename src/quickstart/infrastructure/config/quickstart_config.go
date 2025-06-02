@@ -8,6 +8,7 @@ import (
 	"pim/src/quickstart/domain/service"
 	"pim/src/quickstart/infrastructure/controller"
 	"pim/src/quickstart/infrastructure/loader"
+	infrastructureService "pim/src/quickstart/infrastructure/service"
 )
 
 // QuickstartModuleConfig contiene toda la configuración del módulo quickstart
@@ -27,20 +28,30 @@ type QuickstartModuleConfig struct {
 
 // NewQuickstartModuleConfig crea una nueva configuración del módulo quickstart
 func NewQuickstartModuleConfig(db *sql.DB, dataLoader port.YamlDataLoader) *QuickstartModuleConfig {
-	// Crear servicio de dominio
-	quickstartService := service.NewQuickstartService(dataLoader)
+	// Crear servicios de dominio
+	quickstartDomainService := service.NewQuickstartService(dataLoader)
+	categoryService := infrastructureService.NewCategoryService(db)
+	attributeService := infrastructureService.NewAttributeService(db)
+	categoryAttributeService := infrastructureService.NewCategoryAttributeService(db)
 
 	// Crear casos de uso
-	getBusinessTypesUseCase := usecase.NewGetBusinessTypesUseCase(quickstartService)
-	getCategoriesByBusinessTypeUseCase := usecase.NewGetCategoriesByBusinessTypeUseCase(quickstartService)
-	getAttributesByBusinessTypeUseCase := usecase.NewGetAttributesByBusinessTypeUseCase(quickstartService)
-	getVariantsByBusinessTypeUseCase := usecase.NewGetVariantsByBusinessTypeUseCase(quickstartService)
-	getProductsByBusinessTypeUseCase := usecase.NewGetProductsByBusinessTypeUseCase(quickstartService)
-	getBrandsByBusinessTypeUseCase := usecase.NewGetBrandsByBusinessTypeUseCase(quickstartService)
+	getBusinessTypesUseCase := usecase.NewGetBusinessTypesUseCase(quickstartDomainService)
+	getCategoriesByBusinessTypeUseCase := usecase.NewGetCategoriesByBusinessTypeUseCase(quickstartDomainService)
+	getAttributesByBusinessTypeUseCase := usecase.NewGetAttributesByBusinessTypeUseCase(quickstartDomainService)
+	getVariantsByBusinessTypeUseCase := usecase.NewGetVariantsByBusinessTypeUseCase(quickstartDomainService)
+	getProductsByBusinessTypeUseCase := usecase.NewGetProductsByBusinessTypeUseCase(quickstartDomainService)
+	getBrandsByBusinessTypeUseCase := usecase.NewGetBrandsByBusinessTypeUseCase(quickstartDomainService)
 
-	// Para el setup tenant, necesitamos implementaciones mock por ahora
-	// TODO: Implementar repositorios y servicios reales
-	setupTenantUseCase := &usecase.SetupTenantUseCase{}
+	// Para el setup tenant, usar servicios reales donde sea posible
+	setupTenantUseCase := usecase.NewSetupTenantUseCase(
+		quickstartDomainService,
+		nil,                      // historyRepo - temporal nil (necesita implementación)
+		categoryService,          // categoryService - ahora implementado
+		attributeService,         // attributeService - ahora implementado
+		categoryAttributeService, // categoryAttributeService - ahora implementado
+		nil,                      // variantService - temporal nil (necesita implementación)
+		nil,                      // productService - temporal nil (necesita implementación)
+	)
 
 	// Crear handler
 	quickstartHandler := controller.NewQuickstartHandler(
@@ -56,7 +67,7 @@ func NewQuickstartModuleConfig(db *sql.DB, dataLoader port.YamlDataLoader) *Quic
 	return &QuickstartModuleConfig{
 		DB:                                 db,
 		DataLoader:                         dataLoader,
-		QuickstartService:                  quickstartService,
+		QuickstartService:                  quickstartDomainService,
 		GetBusinessTypesUseCase:            getBusinessTypesUseCase,
 		GetCategoriesByBusinessTypeUseCase: getCategoriesByBusinessTypeUseCase,
 		GetAttributesByBusinessTypeUseCase: getAttributesByBusinessTypeUseCase,
