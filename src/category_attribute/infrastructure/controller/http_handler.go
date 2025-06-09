@@ -8,6 +8,8 @@ import (
 	"pim/src/category_attribute/application/usecase"
 	categoryAttributeCriteria "pim/src/category_attribute/infrastructure/criteria"
 
+	"log"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,6 +19,7 @@ type CategoryAttributeHandler struct {
 	updateUseCase                           *usecase.UpdateCategoryAttributeUseCase
 	deleteUseCase                           *usecase.DeleteCategoryAttributeUseCase
 	getUseCase                              *usecase.GetCategoryAttributesUseCase
+	getDetailedUseCase                      *usecase.GetDetailedCategoryAttributesUseCase
 	listCategoryAttributesByCriteriaUseCase *usecase.ListCategoryAttributesByCriteriaUseCase
 	criteriaBuilder                         *categoryAttributeCriteria.CategoryAttributeCriteriaBuilder
 }
@@ -27,6 +30,7 @@ func NewCategoryAttributeHandler(
 	updateUseCase *usecase.UpdateCategoryAttributeUseCase,
 	deleteUseCase *usecase.DeleteCategoryAttributeUseCase,
 	getUseCase *usecase.GetCategoryAttributesUseCase,
+	getDetailedUseCase *usecase.GetDetailedCategoryAttributesUseCase,
 	listCategoryAttributesByCriteriaUseCase *usecase.ListCategoryAttributesByCriteriaUseCase,
 ) *CategoryAttributeHandler {
 	return &CategoryAttributeHandler{
@@ -34,6 +38,7 @@ func NewCategoryAttributeHandler(
 		updateUseCase:                           updateUseCase,
 		deleteUseCase:                           deleteUseCase,
 		getUseCase:                              getUseCase,
+		getDetailedUseCase:                      getDetailedUseCase,
 		listCategoryAttributesByCriteriaUseCase: listCategoryAttributesByCriteriaUseCase,
 		criteriaBuilder:                         categoryAttributeCriteria.NewCategoryAttributeCriteriaBuilder(),
 	}
@@ -41,14 +46,25 @@ func NewCategoryAttributeHandler(
 
 // RegisterRoutes registra las rutas del API para atributos de categoría
 func (h *CategoryAttributeHandler) RegisterRoutes(router *gin.RouterGroup) {
+	log.Println("🔧 CategoryAttributeHandler: Registrando rutas...")
+
 	categoryAttributes := router.Group("/category-attributes")
 	{
 		categoryAttributes.GET("", h.ListWithCriteria)
 		categoryAttributes.GET("/simple", h.List)
+		categoryAttributes.GET("/detailed", h.ListDetailed)
 		categoryAttributes.POST("", h.Create)
 		categoryAttributes.PUT("/:id", h.Update)
 		categoryAttributes.DELETE("/:id", h.Delete)
 	}
+
+	log.Println("✅ CategoryAttributeHandler: Rutas registradas exitosamente")
+	log.Println("   - GET /category-attributes (con criterios)")
+	log.Println("   - GET /category-attributes/simple")
+	log.Println("   - GET /category-attributes/detailed")
+	log.Println("   - POST /category-attributes")
+	log.Println("   - PUT /category-attributes/:id")
+	log.Println("   - DELETE /category-attributes/:id")
 }
 
 // ListWithCriteria maneja la solicitud para listar atributos de categoría con filtros y paginación
@@ -126,6 +142,48 @@ func (h *CategoryAttributeHandler) List(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"data": response.FromEntityList(categoryAttributes),
+	})
+}
+
+// ListDetailed maneja la solicitud para obtener atributos detallados de categoría con JOIN
+func (h *CategoryAttributeHandler) ListDetailed(c *gin.Context) {
+	log.Println("🔍 ListDetailed: Endpoint llamado")
+
+	// Obtener el tenantID del header o query param
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		tenantID = c.Query("tenant_id")
+	}
+
+	log.Printf("🔍 ListDetailed: tenantID = %s", tenantID)
+
+	if tenantID == "" {
+		log.Println("❌ ListDetailed: tenant_id faltante")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "el tenant_id es obligatorio"})
+		return
+	}
+
+	categoryID := c.Query("category_id")
+	log.Printf("🔍 ListDetailed: categoryID = %s", categoryID)
+
+	if categoryID == "" {
+		log.Println("❌ ListDetailed: category_id faltante")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "el category_id es obligatorio para obtener atributos detallados"})
+		return
+	}
+
+	log.Println("🔍 ListDetailed: Llamando al caso de uso...")
+	detailedAttributes, err := h.getDetailedUseCase.Execute(c.Request.Context(), tenantID, categoryID)
+	if err != nil {
+		log.Printf("❌ ListDetailed: Error en caso de uso: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Printf("✅ ListDetailed: Encontrados %d atributos detallados", len(detailedAttributes))
+
+	c.JSON(http.StatusOK, gin.H{
+		"items": response.FromDetailedEntityList(detailedAttributes),
 	})
 }
 
