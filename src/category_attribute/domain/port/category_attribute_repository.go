@@ -2,6 +2,7 @@ package port
 
 import (
 	"context"
+	"time"
 
 	"pim/src/category_attribute/domain/entity"
 	"pim/src/shared/domain/criteria"
@@ -17,6 +18,9 @@ type CategoryAttributeRepository interface {
 
 	// FindByCategoryAndTenant busca atributos de categoría por categoryID y tenantID
 	FindByCategoryAndTenant(ctx context.Context, categoryID string, tenantID string) ([]*entity.CategoryAttribute, error)
+
+	// FindDetailedByCategoryAndTenant busca atributos completos con JOIN para una categoría
+	FindDetailedByCategoryAndTenant(ctx context.Context, categoryID string, tenantID string) ([]*DetailedCategoryAttribute, error)
 
 	// FindByTenant recupera todos los atributos de categoría de un tenant
 	FindByTenant(ctx context.Context, tenantID string) ([]*entity.CategoryAttribute, error)
@@ -36,4 +40,20 @@ type CategoryAttributeCriteriaRepository interface {
 	CategoryAttributeRepository
 	criteria.CriteriaRepository[entity.CategoryAttribute]
 	criteria.ListRepository[entity.CategoryAttribute]
+}
+
+// DetailedCategoryAttribute representa un atributo de categoría con datos completos del atributo
+type DetailedCategoryAttribute struct {
+	ID               string
+	CategoryID       string
+	AttributeID      string
+	AttributeName    string
+	AttributeType    string
+	Description      string
+	Required         bool
+	AttributeOptions []string
+	AllowedValues    []string
+	Active           bool
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }

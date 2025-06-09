@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"pim/src/category_attribute/domain/entity"
+	"pim/src/category_attribute/domain/port"
 	"pim/src/category_attribute/infrastructure/persistence/mapper"
 	"pim/src/category_attribute/infrastructure/persistence/model"
 	"pim/src/shared/domain/criteria"
@@ -309,4 +310,71 @@ func (r *CategoryAttributePostgresRepository) Delete(ctx context.Context, id str
 	}
 
 	return nil
+}
+
+// FindDetailedByCategoryAndTenant busca atributos completos con JOIN para una categoría
+func (r *CategoryAttributePostgresRepository) FindDetailedByCategoryAndTenant(ctx context.Context, categoryID string, tenantID string) ([]*port.DetailedCategoryAttribute, error) {
+	query := `
+		SELECT 
+			ca.id,
+			ca.category_id,
+			ca.attribute_id,
+			a.name as attribute_name,
+			a.type as attribute_type,
+			a.description,
+			a.required,
+			a.options as attribute_options,
+			ca.allowed_values,
+			ca.status,
+			ca.created_at,
+			ca.updated_at
+		FROM category_attributes ca
+		INNER JOIN attributes a ON ca.attribute_id = a.id AND ca.tenant_id = a.tenant_id
+		WHERE ca.category_id = $1 AND ca.tenant_id = $2 AND ca.status = 'active'
+		ORDER BY ca.created_at
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, categoryID, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var detailedAttributes []*port.DetailedCategoryAttribute
+	for rows.Next() {
+		var detailed port.DetailedCategoryAttribute
+		var attributeOptions pq.StringArray
+		var allowedValues pq.StringArray
+		var status string
+
+		err := rows.Scan(
+			&detailed.ID,
+			&detailed.CategoryID,
+			&detailed.AttributeID,
+			&detailed.AttributeName,
+			&detailed.AttributeType,
+			&detailed.Description,
+			&detailed.Required,
+			&attributeOptions,
+			&allowedValues,
+			&status,
+			&detailed.CreatedAt,
+			&detailed.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		detailed.AttributeOptions = []string(attributeOptions)
+		detailed.AllowedValues = []string(allowedValues)
+		detailed.Active = status == "active"
+
+		detailedAttributes = append(detailedAttributes, &detailed)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return detailedAttributes, nil
 }
