@@ -8,6 +8,8 @@ import (
 
 	brandConfig "pim/src/brand/infrastructure/config"
 	categoryConfig "pim/src/category/infrastructure/config"
+	marketplaceConfig "pim/src/marketplace/infrastructure/config"
+	"pim/src/shared/infrastructure/database"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -20,13 +22,20 @@ func main() {
 		log.Println("Error loading .env file, using environment variables instead")
 	}
 
-	// Configurar la base de datos
+	// Configurar la base de datos PostgreSQL
 	dbConfig := categoryConfig.NewDatabaseConfig()
 	db, err := dbConfig.Connect()
 	if err != nil {
-		log.Fatal("Error connecting to database:", err)
+		log.Fatal("Error connecting to PostgreSQL:", err)
 	}
 	defer db.Close()
+
+	// Configurar MongoDB para marketplace
+	mongoClient, err := database.NewMongoDBClient()
+	if err != nil {
+		log.Fatal("Error connecting to MongoDB:", err)
+	}
+	defer mongoClient.Close()
 
 	// Configurar el router
 	router := gin.New()
@@ -71,6 +80,7 @@ func main() {
 	// Configurar módulos
 	setupCategoryModule(v1, db)
 	setupBrandModule(v1, db)
+	setupMarketplaceModule(v1, db, mongoClient)
 
 	// Iniciar el servidor
 	port := os.Getenv("PORT")
@@ -90,4 +100,9 @@ func setupCategoryModule(v1 *gin.RouterGroup, db *sql.DB) {
 // setupBrandModule configura las rutas del módulo de marcas
 func setupBrandModule(v1 *gin.RouterGroup, db *sql.DB) {
 	brandConfig.SetupBrandModule(v1, db)
+}
+
+// setupMarketplaceModule configura las rutas del módulo marketplace
+func setupMarketplaceModule(v1 *gin.RouterGroup, db *sql.DB, mongoClient *database.MongoDBClient) {
+	marketplaceConfig.SetupMarketplaceModule(v1, db, mongoClient)
 }
