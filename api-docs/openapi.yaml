@@ -1041,6 +1041,297 @@ components:
           description: Fecha y hora de la configuración
           example: "2024-05-25T22:30:00Z"
 
+    # ========================================
+    # MARKETPLACE SCHEMAS
+    # ========================================
+
+    MarketplaceCategoryNode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID de la categoría marketplace
+        name:
+          type: string
+          description: Nombre de la categoría
+        description:
+          type: string
+          description: Descripción de la categoría
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la categoría padre
+        tenant_mapping:
+          type: object
+          nullable: true
+          properties:
+            custom_name:
+              type: string
+              description: Nombre personalizado por el tenant
+            is_mapped:
+              type: boolean
+              description: Si el tenant ha mapeado esta categoría
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarketplaceCategoryNode'
+          description: Categorías hijas
+
+    MarketplaceCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la categoría marketplace
+        name:
+          type: string
+          description: Nombre de la categoría
+        description:
+          type: string
+          description: Descripción de la categoría
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la categoría padre
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarketplaceAttribute'
+          description: Atributos asociados a la categoría
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación
+        updated_at:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+
+    MarketplaceAttribute:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único del atributo
+        name:
+          type: string
+          description: Nombre del atributo
+        type:
+          type: string
+          enum: [text, number, boolean, select, multiselect]
+          description: Tipo de atributo
+        required:
+          type: boolean
+          description: Si el atributo es obligatorio
+        options:
+          type: array
+          items:
+            type: string
+          description: Opciones para atributos select/multiselect
+          nullable: true
+
+    TenantCategoryMapping:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único del mapeo
+        tenant_id:
+          type: string
+          format: uuid
+          description: ID del tenant
+        marketplace_category_id:
+          type: string
+          format: uuid
+          description: ID de la categoría marketplace
+        custom_name:
+          type: string
+          description: Nombre personalizado por el tenant
+        custom_description:
+          type: string
+          nullable: true
+          description: Descripción personalizada por el tenant
+        is_active:
+          type: boolean
+          description: Si el mapeo está activo
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación
+        updated_at:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+
+    TenantCustomAttribute:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único del atributo personalizado
+        tenant_id:
+          type: string
+          format: uuid
+          description: ID del tenant
+        name:
+          type: string
+          description: Nombre del atributo personalizado
+        type:
+          type: string
+          enum: [text, number, boolean, select, multiselect]
+          description: Tipo de atributo
+        required:
+          type: boolean
+          description: Si el atributo es obligatorio
+        options:
+          type: array
+          items:
+            type: string
+          description: Opciones para atributos select/multiselect
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación
+        updated_at:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+
+    CreateMarketplaceCategoryRequest:
+      type: object
+      required: [name, description]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Nombre de la categoría marketplace
+        description:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Descripción de la categoría marketplace
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la categoría padre (null para categorías raíz)
+        attributes:
+          type: array
+          items:
+            type: object
+            required: [name, type]
+            properties:
+              name:
+                type: string
+                description: Nombre del atributo
+              type:
+                type: string
+                enum: [text, number, boolean, select, multiselect]
+                description: Tipo de atributo
+              required:
+                type: boolean
+                default: false
+                description: Si el atributo es obligatorio
+              options:
+                type: array
+                items:
+                  type: string
+                description: Opciones para select/multiselect
+          description: Atributos asociados a la categoría
+
+    MapTenantCategoryRequest:
+      type: object
+      required: [marketplace_category_id, custom_name]
+      properties:
+        marketplace_category_id:
+          type: string
+          format: uuid
+          description: ID de la categoría marketplace global
+        custom_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Nombre personalizado para el tenant
+        custom_description:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Descripción personalizada para el tenant
+        is_active:
+          type: boolean
+          default: true
+          description: Si el mapeo está activo
+
+    UpdateTenantCategoryMappingRequest:
+      type: object
+      properties:
+        custom_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Nombre personalizado actualizado
+        custom_description:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Descripción personalizada actualizada
+        is_active:
+          type: boolean
+          description: Estado del mapeo
+
+    CreateTenantCustomAttributeRequest:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Nombre del atributo personalizado
+        type:
+          type: string
+          enum: [text, number, boolean, select, multiselect]
+          description: Tipo de atributo
+        required:
+          type: boolean
+          default: false
+          description: Si el atributo es obligatorio
+        options:
+          type: array
+          items:
+            type: string
+          description: Opciones para atributos select/multiselect
+
+    UpdateTenantCustomAttributeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Nombre actualizado del atributo
+        type:
+          type: string
+          enum: [text, number, boolean, select, multiselect]
+          description: Tipo actualizado del atributo
+        required:
+          type: boolean
+          description: Si el atributo es obligatorio
+        options:
+          type: array
+          items:
+            type: string
+          description: Opciones actualizadas para select/multiselect
+
 paths:
   /health:
     get:
@@ -1963,6 +2254,625 @@ paths:
         '500':
           description: Error interno del servidor
 
+  # ========================================
+  # MARKETPLACE ENDPOINTS
+  # ========================================
+  
+  /marketplace/categories:
+    post:
+      summary: Crear categoría marketplace global
+      tags: [Marketplace]
+      description: Crea una nueva categoría en la taxonomía global del marketplace (solo administradores)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-User-Role
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [super_admin, marketplace_admin]
+          description: Rol del usuario (solo administradores)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, description]
+              properties:
+                name:
+                  type: string
+                  description: Nombre de la categoría
+                  example: "Electrónicos"
+                description:
+                  type: string
+                  description: Descripción de la categoría
+                  example: "Productos electrónicos y tecnológicos"
+                parent_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: ID de la categoría padre (null para categorías raíz)
+                attributes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      type:
+                        type: string
+                        enum: [text, number, boolean, select, multiselect]
+                      required:
+                        type: boolean
+                      options:
+                        type: array
+                        items:
+                          type: string
+      responses:
+        '201':
+          description: Categoría marketplace creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  parent_id:
+                    type: string
+                    format: uuid
+                    nullable: true
+                  created_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '403':
+          description: Sin permisos de administrador
+
+  /marketplace/categories/validate-hierarchy:
+    post:
+      summary: Validar jerarquía de categorías marketplace
+      tags: [Marketplace]
+      description: Valida la consistencia de la jerarquía de categorías marketplace (solo administradores)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-User-Role
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [super_admin, marketplace_admin]
+          description: Rol del usuario (solo administradores)
+      responses:
+        '200':
+          description: Jerarquía validada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  issues:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        category_id:
+                          type: string
+                          format: uuid
+                        issue_type:
+                          type: string
+                        description:
+                          type: string
+        '401':
+          description: No autorizado
+        '403':
+          description: Sin permisos de administrador
+
+  /marketplace/sync-changes:
+    post:
+      summary: Sincronizar cambios marketplace
+      tags: [Marketplace]
+      description: Sincroniza cambios de taxonomía marketplace con todos los tenants (solo administradores)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-User-Role
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [super_admin, marketplace_admin]
+          description: Rol del usuario (solo administradores)
+      responses:
+        '200':
+          description: Sincronización iniciada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sync_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [initiated, in_progress, completed, failed]
+                  affected_tenants:
+                    type: integer
+        '401':
+          description: No autorizado
+        '403':
+          description: Sin permisos de administrador
+
+  /marketplace/taxonomy:
+    get:
+      summary: Obtener taxonomía marketplace para tenant
+      tags: [Marketplace]
+      description: Obtiene la taxonomía global del marketplace filtrada y personalizada para el tenant
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del tenant
+        - name: X-User-Role
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [tenant_admin, tenant_user]
+          description: Rol del usuario
+      responses:
+        '200':
+          description: Taxonomía marketplace para el tenant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        parent_id:
+                          type: string
+                          format: uuid
+                          nullable: true
+                        tenant_mapping:
+                          type: object
+                          properties:
+                            custom_name:
+                              type: string
+                            is_mapped:
+                              type: boolean
+                        children:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/MarketplaceCategoryNode'
+        '400':
+          description: Tenant ID inválido
+        '401':
+          description: No autorizado
+        '404':
+          description: Tenant no encontrado
+
+  /marketplace/tenant/category-mappings:
+    post:
+      summary: Mapear categoría marketplace a tenant
+      tags: [Marketplace]
+      description: Crea un mapeo entre una categoría marketplace global y una personalización del tenant
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del tenant
+        - name: X-User-Role
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [tenant_admin, tenant_user]
+          description: Rol del usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [marketplace_category_id, custom_name]
+              properties:
+                marketplace_category_id:
+                  type: string
+                  format: uuid
+                  description: ID de la categoría marketplace global
+                custom_name:
+                  type: string
+                  description: Nombre personalizado para el tenant
+                  example: "Mis Electrónicos"
+                custom_description:
+                  type: string
+                  description: Descripción personalizada para el tenant
+                is_active:
+                  type: boolean
+                  default: true
+                  description: Si el mapeo está activo
+      responses:
+        '201':
+          description: Mapeo creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  marketplace_category_id:
+                    type: string
+                    format: uuid
+                  custom_name:
+                    type: string
+                  custom_description:
+                    type: string
+                  is_active:
+                    type: boolean
+                  created_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Datos de entrada inválidos o Tenant ID inválido
+        '401':
+          description: No autorizado
+        '409':
+          description: Mapeo ya existe para esta categoría
+
+  /marketplace/tenant/category-mappings/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID del mapeo de categoría
+      - name: X-Tenant-ID
+        in: header
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID del tenant
+      - name: X-User-Role
+        in: header
+        required: true
+        schema:
+          type: string
+          enum: [tenant_admin, tenant_user]
+        description: Rol del usuario
+    
+    put:
+      summary: Actualizar mapeo de categoría tenant
+      tags: [Marketplace]
+      description: Actualiza un mapeo existente entre categoría marketplace y tenant
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                custom_name:
+                  type: string
+                  description: Nombre personalizado actualizado
+                custom_description:
+                  type: string
+                  description: Descripción personalizada actualizada
+                is_active:
+                  type: boolean
+                  description: Estado del mapeo
+      responses:
+        '200':
+          description: Mapeo actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  custom_name:
+                    type: string
+                  custom_description:
+                    type: string
+                  is_active:
+                    type: boolean
+                  updated_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Datos de entrada inválidos o Tenant ID inválido
+        '401':
+          description: No autorizado
+        '404':
+          description: Mapeo no encontrado
+
+    delete:
+      summary: Eliminar mapeo de categoría tenant
+      tags: [Marketplace]
+      description: Elimina un mapeo entre categoría marketplace y tenant
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Mapeo eliminado exitosamente
+        '400':
+          description: Tenant ID inválido
+        '401':
+          description: No autorizado
+        '404':
+          description: Mapeo no encontrado
+
+  /marketplace/tenant/custom-attributes:
+    get:
+      summary: Listar atributos personalizados del tenant
+      tags: [Marketplace]
+      description: Obtiene los atributos personalizados definidos por el tenant para marketplace
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del tenant
+        - name: X-User-Role
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [tenant_admin, tenant_user]
+          description: Rol del usuario
+      responses:
+        '200':
+          description: Lista de atributos personalizados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    name:
+                      type: string
+                    type:
+                      type: string
+                      enum: [text, number, boolean, select, multiselect]
+                    required:
+                      type: boolean
+                    options:
+                      type: array
+                      items:
+                        type: string
+                    created_at:
+                      type: string
+                      format: date-time
+        '400':
+          description: Tenant ID inválido
+        '401':
+          description: No autorizado
+
+    post:
+      summary: Crear atributo personalizado del tenant
+      tags: [Marketplace]
+      description: Crea un nuevo atributo personalizado para el tenant en marketplace
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del tenant
+        - name: X-User-Role
+          in: header
+          required: true
+          schema:
+            type: string
+            enum: [tenant_admin, tenant_user]
+          description: Rol del usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, type]
+              properties:
+                name:
+                  type: string
+                  description: Nombre del atributo
+                  example: "Color personalizado"
+                type:
+                  type: string
+                  enum: [text, number, boolean, select, multiselect]
+                  description: Tipo de atributo
+                required:
+                  type: boolean
+                  default: false
+                  description: Si el atributo es obligatorio
+                options:
+                  type: array
+                  items:
+                    type: string
+                  description: Opciones para atributos select/multiselect
+      responses:
+        '201':
+          description: Atributo personalizado creado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  type:
+                    type: string
+                  required:
+                    type: boolean
+                  options:
+                    type: array
+                    items:
+                      type: string
+                  created_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Datos de entrada inválidos o Tenant ID inválido
+        '401':
+          description: No autorizado
+
+  /marketplace/tenant/custom-attributes/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID del atributo personalizado
+      - name: X-Tenant-ID
+        in: header
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID del tenant
+      - name: X-User-Role
+        in: header
+        required: true
+        schema:
+          type: string
+          enum: [tenant_admin, tenant_user]
+        description: Rol del usuario
+
+    put:
+      summary: Actualizar atributo personalizado del tenant
+      tags: [Marketplace]
+      description: Actualiza un atributo personalizado existente del tenant
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Nombre actualizado del atributo
+                type:
+                  type: string
+                  enum: [text, number, boolean, select, multiselect]
+                  description: Tipo actualizado del atributo
+                required:
+                  type: boolean
+                  description: Si el atributo es obligatorio
+                options:
+                  type: array
+                  items:
+                    type: string
+                  description: Opciones actualizadas para select/multiselect
+      responses:
+        '200':
+          description: Atributo personalizado actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  type:
+                    type: string
+                  required:
+                    type: boolean
+                  options:
+                    type: array
+                    items:
+                      type: string
+                  updated_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Datos de entrada inválidos o Tenant ID inválido
+        '401':
+          description: No autorizado
+        '404':
+          description: Atributo no encontrado
+
+    delete:
+      summary: Eliminar atributo personalizado del tenant
+      tags: [Marketplace]
+      description: Elimina un atributo personalizado del tenant
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Atributo personalizado eliminado exitosamente
+        '400':
+          description: Tenant ID inválido
+        '401':
+          description: No autorizado
+        '404':
+          description: Atributo no encontrado
+
 tags:
   - name: Health
     description: Endpoints de salud del sistema
@@ -1973,4 +2883,6 @@ tags:
   - name: Categories
     description: Gestión de categorías de productos
   - name: Quickstart
-    description: 🚀 Configuración rápida de catálogos predefinidos por tipo de negocio 
+    description: 🚀 Configuración rápida de catálogos predefinidos por tipo de negocio
+  - name: Marketplace
+    description: 🏪 Gestión de taxonomía global marketplace y mapeos tenant 

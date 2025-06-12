@@ -3,15 +3,24 @@ package main
 import (
 	"database/sql"
 	"log"
+	"net/http"
 	"os"
 
 	apiConfig "pim/src/api/config"
 	brandConfig "pim/src/brand/infrastructure/config"
 	categoryConfig "pim/src/category/infrastructure/config"
 	categoryAttributeConfig "pim/src/category_attribute/infrastructure/config"
+	"pim/src/marketplace/application/usecase"
+	"pim/src/marketplace/infrastructure/controller"
+	"pim/src/marketplace/infrastructure/persistence"
 	productConfig "pim/src/product/infrastructure/config"
 	quickstartConfig "pim/src/quickstart/infrastructure/config"
 	sharedConfig "pim/src/shared/infrastructure/config"
+	"pim/src/shared/infrastructure/database"
+
+	// Marketplace imports
+
+	// Database imports
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // Driver de PostgreSQL
@@ -80,6 +89,20 @@ func main() {
 	}
 	log.Println("Conexión a la base de datos establecida con éxito")
 
+	// Configurar MongoDB para marketplace
+	log.Println("Inicializando conexión MongoDB para marketplace...")
+	mongoClient, err := database.NewMongoDBClient()
+	if err != nil {
+		log.Fatalf("Error al conectar a MongoDB: %v", err)
+	}
+	defer mongoClient.Close()
+
+	// Verificar conexión MongoDB
+	if err := mongoClient.HealthCheck(nil); err != nil {
+		log.Fatalf("Error al verificar la conexión a MongoDB: %v", err)
+	}
+	log.Println("Conexión a MongoDB establecida con éxito")
+
 	// API v1 grupo de rutas
 	v1 := router.Group("/api/v1")
 
@@ -102,6 +125,7 @@ func main() {
 	setupBrandModule(v1, db)
 	setupProductModule(v1, db)
 	setupQuickstartModule(v1, db)
+	setupMarketplaceModuleWithMongoDB(v1, db, mongoClient)
 
 	// Aquí se agregarían más módulos:
 	// - Ubicaciones de Stock
@@ -194,4 +218,139 @@ func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  GET    /api/v1/quickstart/products/:businessType")
 	log.Println("  GET    /api/v1/quickstart/brands/:businessType")
 	log.Println("  POST   /api/v1/quickstart/setup")
+}
+
+// setupMarketplaceModuleWithMongoDB configura el módulo Marketplace con MongoDB (COMPLETO)
+func setupMarketplaceModuleWithMongoDB(router *gin.RouterGroup, db *sql.DB, mongoClient *database.MongoDBClient) {
+	log.Println("Configurando módulo Marketplace con MongoDB...")
+
+	// Crear repositorios MongoDB
+	log.Println("🔧 Creando repositorios MongoDB...")
+	tenantCustomAttributeRepo := persistence.NewTenantCustomAttributeMongoRepository(mongoClient.Database)
+	tenantCategoryMappingRepo := persistence.NewTenantCategoryMappingMongoRepository(mongoClient.Database)
+
+	// Crear repositorios PostgreSQL (para categorías marketplace)
+	log.Println("🔧 Creando repositorios PostgreSQL...")
+	marketplaceCategoryRepo := persistence.NewMarketplaceCategoryPostgresRepository(db)
+
+	// Crear casos de uso para atributos personalizados
+	log.Println("🔧 Creando casos de uso para atributos personalizados...")
+	extendTenantAttributesUC := usecase.NewExtendTenantAttributesUseCase(
+		marketplaceCategoryRepo, // Usar el repositorio correcto en lugar de nil
+		tenantCustomAttributeRepo,
+	)
+
+	getTenantCustomAttributesUC := usecase.NewGetTenantCustomAttributesUseCase(
+		tenantCustomAttributeRepo,
+	)
+
+	updateTenantCustomAttributeUC := usecase.NewUpdateTenantCustomAttributeUseCase(
+		tenantCustomAttributeRepo,
+	)
+
+	deleteTenantCustomAttributeUC := usecase.NewDeleteTenantCustomAttributeUseCase(
+		tenantCustomAttributeRepo,
+	)
+
+	// Crear casos de uso para categorías marketplace
+	log.Println("🔧 Creando casos de uso para categorías marketplace...")
+	createMarketplaceCategoryUC := usecase.NewCreateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
+	getTenantTaxonomyUC := usecase.NewGetTenantTaxonomyUseCase(marketplaceCategoryRepo, tenantCategoryMappingRepo, tenantCustomAttributeRepo)
+	validateCategoryHierarchyUC := usecase.NewValidateCategoryHierarchyUseCase(marketplaceCategoryRepo)
+	syncMarketplaceChangesUC := usecase.NewSyncMarketplaceChangesUseCase(marketplaceCategoryRepo, tenantCategoryMappingRepo, tenantCustomAttributeRepo)
+
+	// Crear caso de uso para mapeo de categorías
+	log.Println("🔧 Creando caso de uso para mapeo de categorías...")
+	mapTenantCategoryUC := usecase.NewMapTenantCategoryUseCase(marketplaceCategoryRepo, tenantCategoryMappingRepo)
+
+	// Crear controladores
+	log.Println("🔧 Creando controladores...")
+	tenantCustomAttributeHandler := controller.NewTenantCustomAttributeHandler(
+		extendTenantAttributesUC,
+		getTenantCustomAttributesUC,
+		updateTenantCustomAttributeUC,
+		deleteTenantCustomAttributeUC,
+	)
+
+	marketplaceCategoryHandler := controller.NewMarketplaceCategoryHandler(
+		createMarketplaceCategoryUC,
+		getTenantTaxonomyUC,
+		validateCategoryHierarchyUC,
+		syncMarketplaceChangesUC,
+	)
+
+	tenantCategoryMappingHandler := controller.NewTenantCategoryMappingHandler(
+		mapTenantCategoryUC,
+	)
+
+	log.Println("🔧 Controladores creados exitosamente")
+
+	// Configurar rutas marketplace
+	log.Println("🔧 Configurando rutas marketplace...")
+	marketplace := router.Group("/marketplace")
+	{
+		// Health check específico para marketplace con MongoDB
+		marketplace.GET("/health", func(c *gin.Context) {
+			if err := mongoClient.HealthCheck(c.Request.Context()); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"status": "error",
+					"module": "marketplace",
+					"error":  "MongoDB connection failed",
+				})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"status":   "up",
+				"module":   "marketplace",
+				"database": "mongodb",
+			})
+		})
+
+		// Endpoint de prueba MongoDB
+		marketplace.GET("/test-mongo", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"status":  "success",
+				"message": "MongoDB repositories ready",
+			})
+		})
+
+		// Rutas para administradores marketplace (categorías globales)
+		marketplace.POST("/categories", marketplaceCategoryHandler.CreateMarketplaceCategory)
+		marketplace.POST("/categories/validate-hierarchy", marketplaceCategoryHandler.ValidateCategoryHierarchy)
+		marketplace.POST("/sync-changes", marketplaceCategoryHandler.SyncMarketplaceChanges)
+
+		// Rutas para tenants (taxonomía personalizada)
+		marketplace.GET("/taxonomy", marketplaceCategoryHandler.GetTenantTaxonomy)
+
+		// Rutas para tenants (atributos personalizados y mapeos)
+		tenantGroup := marketplace.Group("/tenant")
+		{
+			// Atributos personalizados
+			tenantGroup.POST("/custom-attributes", tenantCustomAttributeHandler.ExtendTenantAttributes)
+			tenantGroup.GET("/custom-attributes", tenantCustomAttributeHandler.GetTenantCustomAttributes)
+			tenantGroup.PUT("/custom-attributes/:attribute_id", tenantCustomAttributeHandler.UpdateTenantCustomAttribute)
+			tenantGroup.DELETE("/custom-attributes/:attribute_id", tenantCustomAttributeHandler.DeleteTenantCustomAttribute)
+
+			// Mapeos de categorías
+			tenantGroup.POST("/category-mappings", tenantCategoryMappingHandler.MapTenantCategory)
+			tenantGroup.PUT("/category-mappings/:mapping_id", tenantCategoryMappingHandler.UpdateTenantCategoryMapping)
+			tenantGroup.DELETE("/category-mappings/:mapping_id", tenantCategoryMappingHandler.DeleteTenantCategoryMapping)
+		}
+	}
+
+	log.Println("Módulo Marketplace configurado exitosamente con MongoDB")
+	log.Println("Rutas Marketplace disponibles:")
+	log.Println("  GET    /api/v1/marketplace/health")
+	log.Println("  GET    /api/v1/marketplace/test-mongo")
+	log.Println("  POST   /api/v1/marketplace/categories (admin)")
+	log.Println("  POST   /api/v1/marketplace/categories/validate-hierarchy (admin)")
+	log.Println("  POST   /api/v1/marketplace/sync-changes (admin)")
+	log.Println("  GET    /api/v1/marketplace/taxonomy (tenant)")
+	log.Println("  POST   /api/v1/marketplace/tenant/custom-attributes")
+	log.Println("  GET    /api/v1/marketplace/tenant/custom-attributes")
+	log.Println("  PUT    /api/v1/marketplace/tenant/custom-attributes/:attribute_id")
+	log.Println("  DELETE /api/v1/marketplace/tenant/custom-attributes/:attribute_id")
+	log.Println("  POST   /api/v1/marketplace/tenant/category-mappings")
+	log.Println("  PUT    /api/v1/marketplace/tenant/category-mappings/:mapping_id")
+	log.Println("  DELETE /api/v1/marketplace/tenant/category-mappings/:mapping_id")
 }
