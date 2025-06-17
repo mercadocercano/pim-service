@@ -745,13 +745,18 @@ components:
           type: string
           format: date-time
 
-    # 🚀 QUICKSTART SCHEMAS
+    # 🚀 BUSINESS TYPES SCHEMAS
     BusinessType:
       type: object
       properties:
         id:
           type: string
+          format: uuid
           description: ID único del tipo de negocio
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        code:
+          type: string
+          description: Código único del tipo de negocio
           example: "retail"
         name:
           type: string
@@ -765,6 +770,127 @@ components:
           type: string
           description: Icono representativo del tipo de negocio
           example: "store"
+        color:
+          type: string
+          description: Color representativo del tipo de negocio
+          example: "#3B82F6"
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Metadatos adicionales del tipo de negocio
+          example:
+            industry: "retail"
+            target_audience: "general"
+        is_active:
+          type: boolean
+          description: Si el tipo de negocio está activo
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación
+          example: "2024-01-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+          example: "2024-01-15T10:30:00Z"
+
+    CreateBusinessTypeRequest:
+      type: object
+      required:
+        - code
+        - name
+        - description
+      properties:
+        code:
+          type: string
+          description: Código único del tipo de negocio
+          example: "retail"
+          pattern: "^[a-z0-9-]+$"
+          minLength: 2
+          maxLength: 50
+        name:
+          type: string
+          description: Nombre del tipo de negocio
+          example: "Comercio Minorista"
+          minLength: 2
+          maxLength: 100
+        description:
+          type: string
+          description: Descripción del tipo de negocio
+          example: "Tiendas de venta al por menor, supermercados, minimarkets"
+          minLength: 10
+          maxLength: 500
+        icon:
+          type: string
+          description: Icono representativo del tipo de negocio
+          example: "store"
+          maxLength: 50
+        color:
+          type: string
+          description: Color representativo del tipo de negocio (formato hex)
+          example: "#3B82F6"
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Metadatos adicionales del tipo de negocio
+          example:
+            industry: "retail"
+            target_audience: "general"
+
+    UpdateBusinessTypeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del tipo de negocio
+          example: "Comercio Minorista"
+          minLength: 2
+          maxLength: 100
+        description:
+          type: string
+          description: Descripción del tipo de negocio
+          example: "Tiendas de venta al por menor, supermercados, minimarkets"
+          minLength: 10
+          maxLength: 500
+        icon:
+          type: string
+          description: Icono representativo del tipo de negocio
+          example: "store"
+          maxLength: 50
+        color:
+          type: string
+          description: Color representativo del tipo de negocio (formato hex)
+          example: "#3B82F6"
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Metadatos adicionales del tipo de negocio
+          example:
+            industry: "retail"
+            target_audience: "general"
+        is_active:
+          type: boolean
+          description: Si el tipo de negocio está activo
+          example: true
+
+    BusinessTypesResponse:
+      type: object
+      properties:
+        business_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessType'
+          description: Lista de tipos de negocio
+        total:
+          type: integer
+          description: Total de tipos de negocio
+          example: 8
+
+    # 🚀 QUICKSTART SCHEMAS
 
     QuickstartCategory:
       type: object
@@ -1345,6 +1471,147 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+
+  /business-types:
+    get:
+      summary: Listar tipos de negocio
+      tags: [Business Types]
+      description: Obtiene la lista de tipos de negocio disponibles
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: only_active
+          in: query
+          description: Solo tipos de negocio activos
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Lista de tipos de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessTypesResponse'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+    post:
+      summary: Crear tipo de negocio
+      tags: [Business Types]
+      description: Crea un nuevo tipo de negocio (solo administradores)
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBusinessTypeRequest'
+      responses:
+        '201':
+          description: Tipo de negocio creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessType'
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '403':
+          description: Solo administradores pueden crear tipos de negocio
+        '409':
+          description: Tipo de negocio ya existe
+        '500':
+          description: Error interno del servidor
+
+  /business-types/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID del tipo de negocio
+    get:
+      summary: Obtener tipo de negocio por ID
+      tags: [Business Types]
+      description: Devuelve los detalles de un tipo de negocio específico
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Detalles del tipo de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessType'
+        '404':
+          description: Tipo de negocio no encontrado
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar tipo de negocio
+      tags: [Business Types]
+      description: Actualiza los datos de un tipo de negocio existente (solo administradores)
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBusinessTypeRequest'
+      responses:
+        '200':
+          description: Tipo de negocio actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessType'
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '403':
+          description: Solo administradores pueden actualizar tipos de negocio
+        '404':
+          description: Tipo de negocio no encontrado
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      summary: Eliminar tipo de negocio
+      tags: [Business Types]
+      description: Elimina un tipo de negocio del sistema (solo administradores)
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '204':
+          description: Tipo de negocio eliminado
+        '401':
+          description: No autorizado
+        '403':
+          description: Solo administradores pueden eliminar tipos de negocio
+        '404':
+          description: Tipo de negocio no encontrado
+        '409':
+          description: No se puede eliminar (tiene datos asociados)
+        '500':
+          description: Error interno del servidor
 
   /brands:
     get:

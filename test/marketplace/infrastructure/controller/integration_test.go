@@ -14,6 +14,47 @@ import (
 	"pim/src/marketplace/infrastructure/controller"
 )
 
+// Mock handlers para testing de middlewares
+type MockMarketplaceCategoryHandler struct{}
+
+func (m *MockMarketplaceCategoryHandler) CreateMarketplaceCategory(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "mock response"})
+}
+
+func (m *MockMarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "mock response"})
+}
+
+func (m *MockMarketplaceCategoryHandler) UpdateMarketplaceCategory(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "mock response"})
+}
+
+func (m *MockMarketplaceCategoryHandler) GetTenantTaxonomy(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "mock response"})
+}
+
+func (m *MockMarketplaceCategoryHandler) ValidateCategoryHierarchy(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "mock response"})
+}
+
+func (m *MockMarketplaceCategoryHandler) SyncMarketplaceChanges(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "mock response"})
+}
+
+type MockTenantCategoryMappingHandler struct{}
+
+func (m *MockTenantCategoryMappingHandler) MapTenantCategory(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "mock response"})
+}
+
+func (m *MockTenantCategoryMappingHandler) UpdateTenantCategoryMapping(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "mock response"})
+}
+
+func (m *MockTenantCategoryMappingHandler) DeleteTenantCategoryMapping(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "mock response"})
+}
+
 func TestMarketplaceIntegration_WithMiddlewares(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -26,9 +67,9 @@ func TestMarketplaceIntegration_WithMiddlewares(t *testing.T) {
 	router.Use(controller.RequestValidationMiddleware())
 	router.Use(controller.TenantValidationMiddleware())
 
-	// Crear handlers con dependencias nil (solo para probar middlewares)
-	categoryHandler := &controller.MarketplaceCategoryHandler{}
-	mappingHandler := &controller.TenantCategoryMappingHandler{}
+	// Crear handlers mock para probar middlewares
+	categoryHandler := &MockMarketplaceCategoryHandler{}
+	mappingHandler := &MockTenantCategoryMappingHandler{}
 
 	// Registrar rutas manualmente para las pruebas
 	api := router.Group("/api/v1")
@@ -130,8 +171,10 @@ func TestMarketplaceIntegration_WithMiddlewares(t *testing.T) {
 
 			// Assert
 			// No debería fallar por middleware (aunque falle por nil pointer en el handler)
+			// Esperamos un 500 porque el handler tiene dependencias nil, pero no 401/403
 			assert.NotEqual(t, http.StatusUnauthorized, w.Code)
 			assert.NotEqual(t, http.StatusForbidden, w.Code)
+			// El test pasa si no es 401 o 403, aunque sea 500 por nil pointer
 		})
 	})
 

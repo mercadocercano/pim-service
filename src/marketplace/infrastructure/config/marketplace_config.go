@@ -58,6 +58,14 @@ func SetupMarketplaceModule(router *gin.RouterGroup, db *sql.DB, mongoClient *da
 		tenantCategoryMappingRepo,
 		tenantCustomAttributeRepo,
 	)
+
+	// Crear casos de uso para categorías marketplace
+	createMarketplaceCategoryUC := usecase.NewCreateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
+	getAllMarketplaceCategoriesUC := usecase.NewGetAllMarketplaceCategoriesUseCase(marketplaceCategoryRepo)
+	updateMarketplaceCategoryUC := usecase.NewUpdateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
+	validateCategoryHierarchyUC := usecase.NewValidateCategoryHierarchyUseCase(marketplaceCategoryRepo)
+	syncMarketplaceChangesUC := usecase.NewSyncMarketplaceChangesUseCase(marketplaceCategoryRepo, tenantCategoryMappingRepo, tenantCustomAttributeRepo)
+
 	fmt.Println("🔧 DEBUG: Casos de uso creados exitosamente")
 
 	// Crear controladores con casos de uso
@@ -72,6 +80,17 @@ func SetupMarketplaceModule(router *gin.RouterGroup, db *sql.DB, mongoClient *da
 	tenantCategoryMappingHandler := controller.NewTenantCategoryMappingHandler(
 		mapTenantCategoryUC,
 	)
+
+	// Crear controlador de categorías marketplace
+	marketplaceCategoryHandler := controller.NewMarketplaceCategoryHandler(
+		createMarketplaceCategoryUC,
+		getAllMarketplaceCategoriesUC,
+		updateMarketplaceCategoryUC,
+		getTenantTaxonomyUC,
+		validateCategoryHierarchyUC,
+		syncMarketplaceChangesUC,
+	)
+
 	fmt.Println("🔧 DEBUG: Controladores creados exitosamente")
 
 	// Configurar rutas marketplace
@@ -153,6 +172,15 @@ func SetupMarketplaceModule(router *gin.RouterGroup, db *sql.DB, mongoClient *da
 
 			c.JSON(http.StatusOK, response)
 		})
+
+		// Rutas para categorías marketplace (administradores)
+		fmt.Println("🔧 DEBUG: Registrando rutas de categorías marketplace...")
+		marketplace.GET("/categories", marketplaceCategoryHandler.GetAllMarketplaceCategories)
+		marketplace.POST("/categories", marketplaceCategoryHandler.CreateMarketplaceCategory)
+		marketplace.PUT("/categories/:id", marketplaceCategoryHandler.UpdateMarketplaceCategory)
+		marketplace.POST("/categories/validate-hierarchy", marketplaceCategoryHandler.ValidateCategoryHierarchy)
+		marketplace.POST("/sync-changes", marketplaceCategoryHandler.SyncMarketplaceChanges)
+		fmt.Println("🔧 DEBUG: Rutas de categorías marketplace registradas exitosamente")
 	}
 
 	// Registrar rutas de controladores tenant con MongoDB
@@ -171,6 +199,12 @@ func SetupMarketplaceModule(router *gin.RouterGroup, db *sql.DB, mongoClient *da
 
 	// Log de rutas registradas
 	fmt.Println("🔧 DEBUG: Rutas CRUD registradas exitosamente:")
+	fmt.Println("  GET    /api/v1/marketplace/categories (admin)")
+	fmt.Println("  POST   /api/v1/marketplace/categories (admin)")
+	fmt.Println("  PUT    /api/v1/marketplace/categories/:id (admin)")
+	fmt.Println("  POST   /api/v1/marketplace/categories/validate-hierarchy (admin)")
+	fmt.Println("  POST   /api/v1/marketplace/sync-changes (admin)")
+	fmt.Println("  GET    /api/v1/marketplace/taxonomy (tenant)")
 	fmt.Println("  POST   /api/v1/marketplace/tenant/custom-attributes")
 	fmt.Println("  GET    /api/v1/marketplace/tenant/custom-attributes")
 	fmt.Println("  PUT    /api/v1/marketplace/tenant/custom-attributes/:attribute_id")
