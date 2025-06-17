@@ -19,6 +19,8 @@ func SetupMarketplaceModulePostgres(router *gin.RouterGroup, db *sql.DB) {
 
 	// Casos de uso
 	createMarketplaceCategoryUC := usecase.NewCreateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
+	getAllMarketplaceCategoriesUC := usecase.NewGetAllMarketplaceCategoriesUseCase(marketplaceCategoryRepo)
+	updateMarketplaceCategoryUC := usecase.NewUpdateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
 	getTenantTaxonomyUC := usecase.NewGetTenantTaxonomyUseCase(
 		marketplaceCategoryRepo,
 		tenantCategoryMappingRepo,
@@ -42,6 +44,8 @@ func SetupMarketplaceModulePostgres(router *gin.RouterGroup, db *sql.DB) {
 	// Controladores HTTP
 	marketplaceCategoryHandler := controller.NewMarketplaceCategoryHandler(
 		createMarketplaceCategoryUC,
+		getAllMarketplaceCategoriesUC,
+		updateMarketplaceCategoryUC,
 		getTenantTaxonomyUC,
 		validateCategoryHierarchyUC,
 		syncMarketplaceChangesUC,
@@ -72,25 +76,14 @@ func SetupMarketplaceModulePostgres(router *gin.RouterGroup, db *sql.DB) {
 	)
 
 	// Aplicar middlewares
-	marketplaceGroup := router.Group("/marketplace")
+	marketplaceGroup := router.Group("")
 	marketplaceGroup.Use(controller.CORSMiddleware())
 	marketplaceGroup.Use(controller.MarketplaceAuthMiddleware())
 	marketplaceGroup.Use(controller.TenantValidationMiddleware())
 	marketplaceGroup.Use(controller.RequestValidationMiddleware())
 
-	// Rutas que requieren permisos de administrador
-	adminGroup := marketplaceGroup.Group("")
-	adminGroup.Use(controller.AdminOnlyMiddleware())
-
-	// Registrar rutas de administrador
-	adminGroup.POST("/categories", marketplaceCategoryHandler.CreateMarketplaceCategory)
-	adminGroup.POST("/categories/validate-hierarchy", marketplaceCategoryHandler.ValidateCategoryHierarchy)
-	adminGroup.POST("/sync-changes", marketplaceCategoryHandler.SyncMarketplaceChanges)
-
-	// Rutas para tenants (sin restricción de admin)
-	marketplaceGroup.GET("/taxonomy", marketplaceCategoryHandler.GetTenantTaxonomy)
-
-	// Registrar rutas de controladores tenant
+	// Registrar rutas usando el método RegisterRoutes del controlador
+	marketplaceCategoryHandler.RegisterRoutes(marketplaceGroup)
 	tenantCategoryMappingHandler.RegisterRoutes(marketplaceGroup)
 	tenantCustomAttributeHandler.RegisterRoutes(marketplaceGroup)
 }

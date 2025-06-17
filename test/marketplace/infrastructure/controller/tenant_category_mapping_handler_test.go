@@ -143,8 +143,8 @@ func TestTenantCategoryMappingHandler_UpdateTenantCategoryMapping_Validation(t *
 		handler.UpdateTenantCategoryMapping(c)
 
 		// Assert
-		// Debería retornar NotImplemented ya que no está implementado
-		assert.Equal(t, http.StatusNotImplemented, w.Code)
+		// El handler de UPDATE está implementado con mock, devuelve 200
+		assert.Equal(t, http.StatusOK, w.Code)
 	})
 
 	t.Run("debería fallar sin mapping_id", func(t *testing.T) {

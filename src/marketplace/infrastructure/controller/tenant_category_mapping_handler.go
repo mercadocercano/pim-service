@@ -42,15 +42,15 @@ func (h *TenantCategoryMappingHandler) MapTenantCategory(c *gin.Context) {
 		return
 	}
 
-	// Verificar si el caso de uso está implementado
-	if h.mapTenantCategoryUseCase == nil {
-		c.JSON(http.StatusNotImplemented, gin.H{"error": "Funcionalidad no implementada aún"})
-		return
-	}
-
 	var req request.MapTenantCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		return
+	}
+
+	// Verificar si el caso de uso está implementado
+	if h.mapTenantCategoryUseCase == nil {
+		c.JSON(http.StatusNotImplemented, gin.H{"error": "Funcionalidad no implementada aún"})
 		return
 	}
 

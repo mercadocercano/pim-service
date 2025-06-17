@@ -4,8 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"pim/src/attribute/application/usecase"
-	"pim/src/shared/domain/criteria"
+	// "pim/src/attribute/application/usecase" // TODO: Implementar casos de uso
 	sharedCriteria "pim/src/shared/infrastructure/criteria"
 )
 
@@ -69,7 +68,7 @@ func (h *AttributeHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
+	_ = c.Param("id") // TODO: usar cuando se implemente
 	// TODO: Implementar obtención por ID
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "no implementado - falta implementar casos de uso"})
 }
@@ -83,7 +82,7 @@ func (h *AttributeHandler) Update(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
+	_ = c.Param("id") // TODO: usar cuando se implemente
 	// TODO: Implementar actualización
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "no implementado - falta implementar casos de uso"})
 }
@@ -97,7 +96,7 @@ func (h *AttributeHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
+	_ = c.Param("id") // TODO: usar cuando se implemente
 	// TODO: Implementar eliminación
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "no implementado - falta implementar casos de uso"})
 }

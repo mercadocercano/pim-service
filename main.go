@@ -2,15 +2,20 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	apiConfig "pim/src/api/config"
 	brandConfig "pim/src/brand/infrastructure/config"
+	businesstypeUsecase "pim/src/businesstype/application/usecase"
+	businesstypeController "pim/src/businesstype/infrastructure/controller"
+	businesstypeRepository "pim/src/businesstype/infrastructure/persistence/repository"
 	categoryConfig "pim/src/category/infrastructure/config"
 	categoryAttributeConfig "pim/src/category_attribute/infrastructure/config"
+	globalCatalogConfig "pim/src/global_catalog/infrastructure/config"
 	"pim/src/marketplace/application/usecase"
+	marketplaceConfig "pim/src/marketplace/infrastructure/config"
 	"pim/src/marketplace/infrastructure/controller"
 	"pim/src/marketplace/infrastructure/persistence"
 	productConfig "pim/src/product/infrastructure/config"
@@ -37,6 +42,8 @@ func getEnv(key, defaultValue string) string {
 }
 
 func main() {
+	fmt.Println("🚀🚀🚀 INICIO ABSOLUTO DEL MAIN.GO 🚀🚀🚀")
+	log.Println("🚀 *** MAIN.GO DE LA RAÍZ EJECUTÁNDOSE - VERSIÓN NUEVA ***")
 	// Configurar el router con Gin
 	router := gin.New()
 
@@ -125,7 +132,10 @@ func main() {
 	setupBrandModule(v1, db)
 	setupProductModule(v1, db)
 	setupQuickstartModule(v1, db)
-	setupMarketplaceModuleWithMongoDB(v1, db, mongoClient)
+	setupBusinessTypeModule(v1, db)
+	setupGlobalCatalogModule(v1, db)
+	// Usar el archivo de configuración del marketplace
+	marketplaceConfig.SetupMarketplaceModule(v1, db, mongoClient)
 
 	// Aquí se agregarían más módulos:
 	// - Ubicaciones de Stock
@@ -220,6 +230,39 @@ func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  POST   /api/v1/quickstart/setup")
 }
 
+// setupBusinessTypeModule configura el módulo BusinessType
+func setupBusinessTypeModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo BusinessType...")
+
+	// Crear repositorio
+	businessTypeRepo := businesstypeRepository.NewBusinessTypePostgresRepository(db)
+
+	// Crear casos de uso
+	createBusinessTypeUC := businesstypeUsecase.NewCreateBusinessTypeUseCase(businessTypeRepo)
+	listBusinessTypesUC := businesstypeUsecase.NewListBusinessTypesUseCase(businessTypeRepo)
+	getBusinessTypeUC := businesstypeUsecase.NewGetBusinessTypeUseCase(businessTypeRepo)
+	updateBusinessTypeUC := businesstypeUsecase.NewUpdateBusinessTypeUseCase(businessTypeRepo)
+
+	// Crear handler
+	businessTypeHandler := businesstypeController.NewBusinessTypeHandler(
+		createBusinessTypeUC,
+		listBusinessTypesUC,
+		getBusinessTypeUC,
+		updateBusinessTypeUC,
+	)
+
+	// Registrar rutas
+	businessTypeHandler.RegisterRoutes(router)
+
+	log.Println("Módulo BusinessType configurado exitosamente")
+	log.Println("Rutas BusinessType disponibles:")
+	log.Println("  POST   /api/v1/business-types")
+	log.Println("  GET    /api/v1/business-types")
+	log.Println("  GET    /api/v1/business-types/:id")
+	log.Println("  PUT    /api/v1/business-types/:id")
+	log.Println("  DELETE /api/v1/business-types/:id")
+}
+
 // setupMarketplaceModuleWithMongoDB configura el módulo Marketplace con MongoDB (COMPLETO)
 func setupMarketplaceModuleWithMongoDB(router *gin.RouterGroup, db *sql.DB, mongoClient *database.MongoDBClient) {
 	log.Println("Configurando módulo Marketplace con MongoDB...")
@@ -255,6 +298,8 @@ func setupMarketplaceModuleWithMongoDB(router *gin.RouterGroup, db *sql.DB, mong
 	// Crear casos de uso para categorías marketplace
 	log.Println("🔧 Creando casos de uso para categorías marketplace...")
 	createMarketplaceCategoryUC := usecase.NewCreateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
+	getAllMarketplaceCategoriesUC := usecase.NewGetAllMarketplaceCategoriesUseCase(marketplaceCategoryRepo)
+	updateMarketplaceCategoryUC := usecase.NewUpdateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
 	getTenantTaxonomyUC := usecase.NewGetTenantTaxonomyUseCase(marketplaceCategoryRepo, tenantCategoryMappingRepo, tenantCustomAttributeRepo)
 	validateCategoryHierarchyUC := usecase.NewValidateCategoryHierarchyUseCase(marketplaceCategoryRepo)
 	syncMarketplaceChangesUC := usecase.NewSyncMarketplaceChangesUseCase(marketplaceCategoryRepo, tenantCategoryMappingRepo, tenantCustomAttributeRepo)
@@ -274,6 +319,8 @@ func setupMarketplaceModuleWithMongoDB(router *gin.RouterGroup, db *sql.DB, mong
 
 	marketplaceCategoryHandler := controller.NewMarketplaceCategoryHandler(
 		createMarketplaceCategoryUC,
+		getAllMarketplaceCategoriesUC,
+		updateMarketplaceCategoryUC,
 		getTenantTaxonomyUC,
 		validateCategoryHierarchyUC,
 		syncMarketplaceChangesUC,
@@ -287,39 +334,33 @@ func setupMarketplaceModuleWithMongoDB(router *gin.RouterGroup, db *sql.DB, mong
 
 	// Configurar rutas marketplace
 	log.Println("🔧 Configurando rutas marketplace...")
+	log.Println("🔧 LÍNEA 340 - ANTES DE CREAR GRUPO")
+	log.Println("🔧 Creando grupo marketplace...")
 	marketplace := router.Group("/marketplace")
+	log.Println("🔧 Grupo marketplace creado exitosamente")
 	{
-		// Health check específico para marketplace con MongoDB
-		marketplace.GET("/health", func(c *gin.Context) {
-			if err := mongoClient.HealthCheck(c.Request.Context()); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"status": "error",
-					"module": "marketplace",
-					"error":  "MongoDB connection failed",
-				})
-				return
-			}
-			c.JSON(http.StatusOK, gin.H{
-				"status":   "up",
-				"module":   "marketplace",
-				"database": "mongodb",
-			})
-		})
+		log.Println("🔧 Configurando endpoints básicos...")
 
-		// Endpoint de prueba MongoDB
-		marketplace.GET("/test-mongo", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"status":  "success",
-				"message": "MongoDB repositories ready",
-			})
-		})
-
-		// Rutas para administradores marketplace (categorías globales)
+		// Registrar rutas de categorías marketplace directamente
+		log.Println("🔧 Registrando ruta GET /categories...")
+		marketplace.GET("/categories", marketplaceCategoryHandler.GetAllMarketplaceCategories)
+		log.Println("🔧 Registrando ruta POST /categories...")
 		marketplace.POST("/categories", marketplaceCategoryHandler.CreateMarketplaceCategory)
+		log.Println("🔧 Registrando ruta PUT /categories/:id...")
+		log.Println("🔧 Antes de crear función PUT...")
+		// Endpoint temporal de prueba
+		putHandler := func(c *gin.Context) {
+			log.Printf("🔧 PUT endpoint llamado con ID: %s", c.Param("id"))
+			c.JSON(200, gin.H{"message": "PUT endpoint funcionando", "id": c.Param("id")})
+		}
+		log.Println("🔧 Función PUT creada, registrando ruta...")
+		marketplace.PUT("/categories/:id", putHandler)
+		log.Println("🔧 Ruta PUT registrada exitosamente")
+		log.Println("🔧 Registrando ruta POST /categories/validate-hierarchy...")
 		marketplace.POST("/categories/validate-hierarchy", marketplaceCategoryHandler.ValidateCategoryHierarchy)
+		log.Println("🔧 Registrando ruta POST /sync-changes...")
 		marketplace.POST("/sync-changes", marketplaceCategoryHandler.SyncMarketplaceChanges)
-
-		// Rutas para tenants (taxonomía personalizada)
+		log.Println("🔧 Registrando ruta GET /taxonomy...")
 		marketplace.GET("/taxonomy", marketplaceCategoryHandler.GetTenantTaxonomy)
 
 		// Rutas para tenants (atributos personalizados y mapeos)
@@ -342,7 +383,9 @@ func setupMarketplaceModuleWithMongoDB(router *gin.RouterGroup, db *sql.DB, mong
 	log.Println("Rutas Marketplace disponibles:")
 	log.Println("  GET    /api/v1/marketplace/health")
 	log.Println("  GET    /api/v1/marketplace/test-mongo")
+	log.Println("  GET    /api/v1/marketplace/categories (admin)")
 	log.Println("  POST   /api/v1/marketplace/categories (admin)")
+	log.Println("  PUT    /api/v1/marketplace/categories/:id (admin)")
 	log.Println("  POST   /api/v1/marketplace/categories/validate-hierarchy (admin)")
 	log.Println("  POST   /api/v1/marketplace/sync-changes (admin)")
 	log.Println("  GET    /api/v1/marketplace/taxonomy (tenant)")
@@ -353,4 +396,43 @@ func setupMarketplaceModuleWithMongoDB(router *gin.RouterGroup, db *sql.DB, mong
 	log.Println("  POST   /api/v1/marketplace/tenant/category-mappings")
 	log.Println("  PUT    /api/v1/marketplace/tenant/category-mappings/:mapping_id")
 	log.Println("  DELETE /api/v1/marketplace/tenant/category-mappings/:mapping_id")
+}
+
+// setupGlobalCatalogModule configura el módulo Global Catalog
+func setupGlobalCatalogModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Global Catalog...")
+
+	// Crear configuración del módulo Global Catalog
+	globalCatalogCfg := globalCatalogConfig.NewGlobalCatalogConfig(db)
+
+	// Obtener el controller
+	globalCatalogController := globalCatalogCfg.GetGlobalCatalogController()
+
+	// Configurar rutas públicas (sin autenticación)
+	public := router.Group("/public/global-catalog")
+	{
+		public.GET("/health", globalCatalogController.HealthCheck)
+		public.GET("/search", globalCatalogController.SearchByEANPublic)
+		public.GET("/suggestions", globalCatalogController.GetProductsSuggestions)
+		public.GET("/products/ean/:ean", globalCatalogController.GetProductByEAN)
+	}
+
+	// Configurar rutas privadas (para scrapers y admin)
+	private := router.Group("/global-catalog")
+	{
+		private.POST("/products", globalCatalogController.CreateProduct)
+		private.GET("/products", globalCatalogController.ListProducts)
+		private.GET("/products/search", globalCatalogController.SearchByEAN)
+	}
+
+	log.Println("Módulo Global Catalog configurado exitosamente")
+	log.Println("Rutas Global Catalog públicas disponibles:")
+	log.Println("  GET    /api/v1/public/global-catalog/health")
+	log.Println("  GET    /api/v1/public/global-catalog/search?ean={ean}")
+	log.Println("  GET    /api/v1/public/global-catalog/suggestions?business_type={type}")
+	log.Println("  GET    /api/v1/public/global-catalog/products/ean/{ean}")
+	log.Println("Rutas Global Catalog privadas disponibles:")
+	log.Println("  POST   /api/v1/global-catalog/products")
+	log.Println("  GET    /api/v1/global-catalog/products")
+	log.Println("  GET    /api/v1/global-catalog/products/search?ean={ean}")
 }
