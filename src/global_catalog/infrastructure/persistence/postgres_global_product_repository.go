@@ -571,10 +571,10 @@ func (r *PostgresGlobalProductRepository) CountByCriteria(ctx context.Context, c
 // scanGlobalProduct escanea una fila en una entidad GlobalProduct
 func (r *PostgresGlobalProductRepository) scanGlobalProduct(row *sql.Row) (*entity.GlobalProduct, error) {
 	var (
-		idStr, ean, name                                     string
+		idStr, ean, name, source                             string
 		description, brand, category, imageURL, businessType *string
 		price, sourceReliability                             *float64
-		source, sourceURL                                    *string
+		sourceURL                                            *string
 		qualityScore                                         int
 		isVerified, isActive                                 bool
 		imageURLsArray, tagsArray                            pq.StringArray
@@ -599,7 +599,7 @@ func (r *PostgresGlobalProductRepository) scanGlobalProduct(row *sql.Row) (*enti
 
 	return r.buildGlobalProductFromScan(
 		idStr, ean, name, description, brand, category, price,
-		sourceReliability, source, sourceURL, qualityScore,
+		sourceReliability, &source, sourceURL, qualityScore,
 		isVerified, isActive, businessType, imageURLsArray, tagsArray,
 		imageURL, metadataJSON, createdAt, updatedAt, lastScrapedAt,
 	)
@@ -611,10 +611,10 @@ func (r *PostgresGlobalProductRepository) scanGlobalProducts(rows *sql.Rows) ([]
 
 	for rows.Next() {
 		var (
-			idStr, ean, name                                     string
+			idStr, ean, name, source                             string
 			description, brand, category, imageURL, businessType *string
 			price, sourceReliability                             *float64
-			source, sourceURL                                    *string
+			sourceURL                                            *string
 			qualityScore                                         int
 			isVerified, isActive                                 bool
 			imageURLsArray, tagsArray                            pq.StringArray
@@ -636,7 +636,7 @@ func (r *PostgresGlobalProductRepository) scanGlobalProducts(rows *sql.Rows) ([]
 
 		product, err := r.buildGlobalProductFromScan(
 			idStr, ean, name, description, brand, category, price,
-			sourceReliability, source, sourceURL, qualityScore,
+			sourceReliability, &source, sourceURL, qualityScore,
 			isVerified, isActive, businessType, imageURLsArray, tagsArray,
 			imageURL, metadataJSON, createdAt, updatedAt, lastScrapedAt,
 		)
