@@ -57,6 +57,7 @@ declare -a INTEGRATION_TESTS=(
     "test-mongodb-endpoints.sh:MongoDB Basic Endpoints"
     "test-mongodb-crud-endpoints.sh:MongoDB CRUD Operations"
     "test-marketplace-endpoints.sh:Marketplace Complete Flow"
+    "test-all-endpoints.sh:Complete Endpoints Coverage"
 )
 
 # Función para mostrar ayuda
