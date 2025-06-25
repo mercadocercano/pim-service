@@ -27,7 +27,7 @@ type QuickstartModuleConfig struct {
 }
 
 // NewQuickstartModuleConfig crea una nueva configuración del módulo quickstart
-func NewQuickstartModuleConfig(db *sql.DB, dataLoader port.YamlDataLoader) *QuickstartModuleConfig {
+func NewQuickstartModuleConfig(db *sql.DB, dataLoader port.YamlDataLoader, productService port.ProductService) *QuickstartModuleConfig {
 	// Crear servicios de dominio
 	quickstartDomainService := service.NewQuickstartService(dataLoader)
 	categoryService := infrastructureService.NewCategoryService(db)
@@ -50,7 +50,7 @@ func NewQuickstartModuleConfig(db *sql.DB, dataLoader port.YamlDataLoader) *Quic
 		attributeService,         // attributeService - ahora implementado
 		categoryAttributeService, // categoryAttributeService - ahora implementado
 		nil,                      // variantService - temporal nil (necesita implementación)
-		nil,                      // productService - temporal nil (necesita implementación)
+		productService,           // productService - ahora implementado
 	)
 
 	// Crear handler

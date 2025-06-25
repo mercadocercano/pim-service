@@ -1,0 +1,1184 @@
+openapi: 3.1.0
+info:
+  title: Multi-Tenant PIM API v2.0
+  version: 2.0.0
+  description: |
+    API para gestión de información de productos multi-tenant.
+    
+    ## 🏗️ Arquitectura Reorganizada v2.0
+    
+    El sistema ha sido completamente reorganizado eliminando el módulo **marketplace** 
+    y distribuyendo su funcionalidad en módulos especializados:
+    
+    - **🏷️ Category**: Gestión de categorías y jerarquías
+    - **🔧 Attribute**: Gestión de atributos personalizados
+    - **🔗 Category-Attribute**: Relación categoría-atributo y validaciones
+    - **📦 Product**: Gestión de productos y variantes
+    - **🏪 Brand**: Gestión de marcas
+    - **🌐 Global Catalog**: Catálogo global público
+    - **🏢 Business Type**: Tipos de negocio
+    - **🚀 Quickstart**: Configuración rápida
+    
+    ## ⚠️ Cambios Importantes v2.0.0
+    
+    - ❌ **Módulo marketplace ELIMINADO**: Funcionalidad distribuida
+    - ✅ **Nuevos endpoints**: Category-Attribute, Attribute management  
+    - 🔄 **Rutas reorganizadas**: Estructura más clara y RESTful
+    - 🛡️ **Seguridad mejorada**: Headers y roles consistentes
+    - 📊 **Filtros avanzados**: Paginación y búsqueda mejorada
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Servidor local de desarrollo
+  - url: /api/v1
+    description: Base URL para la API v1
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT para autenticación
+    
+    TenantAuth:
+      type: apiKey
+      in: header
+      name: X-Tenant-ID
+      description: ID del tenant para operaciones multi-tenant
+    
+    UserRole:
+      type: apiKey
+      in: header
+      name: X-User-Role
+      description: |
+        Rol del usuario para autorización:
+        - `super_admin`: Acceso completo al sistema
+        - `marketplace_admin`: Gestión de marketplace
+        - `tenant_admin`: Administración del tenant
+        - `tenant_user`: Usuario estándar del tenant
+
+  parameters:
+    # Paginación estándar
+    Page:
+      name: page
+      in: query
+      description: "Número de página (default: 1)"
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    
+    PageSize:
+      name: page_size
+      in: query
+      description: "Elementos por página (default: 10, max: 100)"
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    
+    SortBy:
+      name: sort_by
+      in: query
+      description: "Campo de ordenamiento"
+      required: false
+      schema:
+        type: string
+        default: "created_at"
+    
+    SortDir:
+      name: sort_dir
+      in: query
+      description: "Dirección de ordenamiento"
+      required: false
+      schema:
+        type: string
+        enum: ["asc", "desc"]
+        default: "desc"
+
+  schemas:
+    # Esquemas base
+    BaseEntity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identificador único
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación
+        updated_at:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+      required:
+        - id
+        - created_at
+        - updated_at
+
+    PaginatedResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          description: Lista de elementos
+        total_count:
+          type: integer
+          description: Total de elementos
+        page:
+          type: integer
+          description: Página actual
+        page_size:
+          type: integer
+          description: Elementos por página
+        total_pages:
+          type: integer
+          description: Total de páginas
+      required:
+        - items
+        - total_count
+        - page
+        - page_size
+        - total_pages
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Mensaje de error
+        code:
+          type: string
+          description: Código de error
+        details:
+          type: object
+          description: Detalles adicionales del error
+      required:
+        - error
+
+    # Category schemas
+    Category:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            tenant_id:
+              type: string
+              format: uuid
+              description: ID del tenant
+            name:
+              type: string
+              description: Nombre de la categoría
+            description:
+              type: string
+              nullable: true
+              description: Descripción de la categoría
+            parent_id:
+              type: string
+              format: uuid
+              nullable: true
+              description: ID de la categoría padre
+            level:
+              type: integer
+              description: Nivel en la jerarquía
+            status:
+              type: string
+              enum: ["ACTIVE", "INACTIVE"]
+              description: Estado de la categoría
+            children_count:
+              type: integer
+              description: Número de categorías hijas
+          required:
+            - tenant_id
+            - name
+            - level
+            - status
+
+    CreateCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Nombre de la categoría
+        description:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: Descripción de la categoría
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la categoría padre
+      required:
+        - name
+
+    UpdateCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Nombre de la categoría
+        description:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: Descripción de la categoría
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la categoría padre
+
+    MoveCategoryRequest:
+      type: object
+      properties:
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Nuevo ID de la categoría padre
+
+    # Category-Attribute schemas
+    CategoryAttribute:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            tenant_id:
+              type: string
+              format: uuid
+              description: ID del tenant
+            category_id:
+              type: string
+              format: uuid
+              description: ID de la categoría
+            attribute_id:
+              type: string
+              format: uuid
+              description: ID del atributo
+            allowed_values:
+              type: array
+              items:
+                type: string
+              description: Valores permitidos para este atributo en esta categoría
+            status:
+              type: string
+              enum: ["active", "inactive"]
+              description: Estado de la relación
+          required:
+            - tenant_id
+            - category_id
+            - attribute_id
+            - status
+
+    CreateCategoryAttributeRequest:
+      type: object
+      properties:
+        category_id:
+          type: string
+          format: uuid
+          description: ID de la categoría
+        attribute_id:
+          type: string
+          format: uuid
+          description: ID del atributo
+        allowed_values:
+          type: array
+          items:
+            type: string
+          description: Valores permitidos
+      required:
+        - category_id
+        - attribute_id
+
+    UpdateCategoryAttributeRequest:
+      type: object
+      properties:
+        allowed_values:
+          type: array
+          items:
+            type: string
+          description: Nuevos valores permitidos
+      required:
+        - allowed_values
+
+    # Attribute schemas
+    TenantCustomAttribute:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            tenant_id:
+              type: string
+              format: uuid
+              description: ID del tenant
+            marketplace_category_id:
+              type: string
+              format: uuid
+              nullable: true
+              description: ID de la categoría marketplace (opcional)
+            name:
+              type: string
+              description: Nombre del atributo
+            slug:
+              type: string
+              description: Slug único del atributo
+            type:
+              type: string
+              enum: ["text", "number", "boolean", "select", "multi_select"]
+              description: Tipo de atributo
+            is_required:
+              type: boolean
+              description: Si el atributo es obligatorio
+            default_value:
+              type: string
+              nullable: true
+              description: Valor por defecto
+            validation_rules:
+              type: object
+              description: Reglas de validación JSON
+            options:
+              type: array
+              items:
+                type: string
+              description: Opciones para select/multi_select
+          required:
+            - tenant_id
+            - name
+            - slug
+            - type
+            - is_required
+
+    CreateTenantCustomAttributeRequest:
+      type: object
+      properties:
+        marketplace_category_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID de la categoría marketplace
+        name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: Nombre del atributo
+        type:
+          type: string
+          enum: ["text", "number", "boolean", "select", "multi_select"]
+          description: Tipo de atributo
+        is_required:
+          type: boolean
+          default: false
+          description: Si el atributo es obligatorio
+        default_value:
+          type: string
+          nullable: true
+          description: Valor por defecto
+        validation_rules:
+          type: object
+          description: Reglas de validación JSON
+        options:
+          type: array
+          items:
+            type: string
+          description: Opciones para select/multi_select
+      required:
+        - name
+        - type
+
+    # Brand schemas
+    Brand:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            tenant_id:
+              type: string
+              format: uuid
+              description: ID del tenant
+            name:
+              type: string
+              description: Nombre de la marca
+            description:
+              type: string
+              nullable: true
+              description: Descripción de la marca
+            logo_url:
+              type: string
+              nullable: true
+              description: URL del logo
+            website_url:
+              type: string
+              nullable: true
+              description: URL del sitio web
+            status:
+              type: string
+              enum: ["active", "inactive", "deleted"]
+              description: Estado de la marca
+          required:
+            - tenant_id
+            - name
+            - status
+
+    CreateBrandRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Nombre de la marca
+        description:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: Descripción de la marca
+        logo_url:
+          type: string
+          nullable: true
+          format: uri
+          description: URL del logo
+        website_url:
+          type: string
+          nullable: true
+          format: uri
+          description: URL del sitio web
+      required:
+        - name
+
+    # Health check
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["up", "down"]
+          description: Estado del servicio
+        version:
+          type: string
+          description: Versión de la API
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp del health check
+        services:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: ["up", "down"]
+            mongodb:
+              type: string
+              enum: ["up", "down"]
+          description: Estado de servicios dependientes
+      required:
+        - status
+        - version
+        - timestamp
+
+paths:
+  # Health check
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check del servicio
+      description: Verifica el estado del servicio y sus dependencias
+      responses:
+        '200':
+          description: Servicio funcionando correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Servicio no disponible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Categories
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: Listar categorías con filtros avanzados
+      description: |
+        Obtiene categorías con soporte completo para filtros, ordenamiento y paginación.
+        
+        ### Filtros disponibles:
+        - `status`: Estado de la categoría (ACTIVE/INACTIVE)
+        - `parent_id`: ID del padre o null para raíz
+        - `name`: Búsqueda por nombre (LIKE)
+        - `active`: Solo categorías activas
+        - `root_only`: Solo categorías raíz
+      security:
+        - TenantAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/SortBy'
+        - $ref: '#/components/parameters/SortDir'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: ["ACTIVE", "INACTIVE"]
+        - name: parent_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+            nullable: true
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: active
+          in: query
+          schema:
+            type: string
+            enum: ["true"]
+        - name: root_only
+          in: query
+          schema:
+            type: string
+            enum: ["true"]
+      responses:
+        '200':
+          description: Lista de categorías
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Category'
+        '400':
+          description: Parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado - X-Tenant-ID requerido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Categories
+      summary: Crear nueva categoría
+      description: Crea una nueva categoría en el tenant especificado
+      security:
+        - TenantAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '201':
+          description: Categoría creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /categories/simple:
+    get:
+      tags:
+        - Categories
+      summary: Listado simple de categorías
+      description: Obtiene un listado simple sin paginación para casos básicos
+      security:
+        - TenantAuth: []
+      responses:
+        '200':
+          description: Lista simple de categorías
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+
+  /categories/tree:
+    get:
+      tags:
+        - Categories
+      summary: Vista de árbol de categorías
+      description: Obtiene las categorías organizadas en estructura de árbol jerárquico
+      security:
+        - TenantAuth: []
+      responses:
+        '200':
+          description: Árbol de categorías
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Category'
+                        - type: object
+                          properties:
+                            children:
+                              type: array
+                              items:
+                                $ref: '#/components/schemas/Category'
+
+  /categories/{id}:
+    get:
+      tags:
+        - Categories
+      summary: Obtener categoría por ID
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Categoría encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '404':
+          description: Categoría no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Categories
+      summary: Actualizar categoría
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        '200':
+          description: Categoría actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '404':
+          description: Categoría no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /categories/{id}/activate:
+    patch:
+      tags:
+        - Categories
+      summary: Activar categoría
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Categoría activada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+
+  /categories/{id}/deactivate:
+    patch:
+      tags:
+        - Categories
+      summary: Desactivar categoría
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Categoría desactivada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+
+  /categories/{id}/move:
+    patch:
+      tags:
+        - Categories
+      summary: Mover categoría en la jerarquía
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveCategoryRequest'
+      responses:
+        '200':
+          description: Categoría movida exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Movimiento inválido (ciclo detectado)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Category-Attributes
+  /category-attributes:
+    get:
+      tags:
+        - Category-Attributes
+      summary: Listar relaciones categoría-atributo
+      description: |
+        Obtiene relaciones categoría-atributo con filtros avanzados y paginación.
+        
+        ### Filtros disponibles:
+        - `tenant_id`: ID del tenant
+        - `category_id`: ID de categoría específica
+        - `attribute_id`: ID de atributo específico
+        - `status`: Estado (active/inactive)
+        - `allowed_value`: Contiene valor específico
+      security:
+        - TenantAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/SortBy'
+        - $ref: '#/components/parameters/SortDir'
+        - name: tenant_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: category_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: attribute_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: ["active", "inactive"]
+        - name: allowed_value
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de relaciones categoría-atributo
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CategoryAttribute'
+
+    post:
+      tags:
+        - Category-Attributes
+      summary: Crear relación categoría-atributo
+      security:
+        - TenantAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryAttributeRequest'
+      responses:
+        '201':
+          description: Relación creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryAttribute'
+
+  /category-attributes/simple:
+    get:
+      tags:
+        - Category-Attributes
+      summary: Listado simple sin paginación
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: tenant_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: category_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista simple de relaciones
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CategoryAttribute'
+
+  /category-attributes/{id}:
+    put:
+      tags:
+        - Category-Attributes
+      summary: Actualizar valores permitidos
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryAttributeRequest'
+      responses:
+        '200':
+          description: Relación actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryAttribute'
+
+    delete:
+      tags:
+        - Category-Attributes
+      summary: Eliminar relación categoría-atributo
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Relación eliminada exitosamente
+
+  # Tenant Custom Attributes
+  /tenant/custom-attributes:
+    get:
+      tags:
+        - Attributes
+      summary: Listar atributos personalizados del tenant
+      security:
+        - TenantAuth: []
+      responses:
+        '200':
+          description: Lista de atributos personalizados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TenantCustomAttribute'
+
+    post:
+      tags:
+        - Attributes
+      summary: Crear atributo personalizado
+      security:
+        - TenantAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantCustomAttributeRequest'
+      responses:
+        '201':
+          description: Atributo creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantCustomAttribute'
+
+  /tenant/custom-attributes/{attribute_id}:
+    put:
+      tags:
+        - Attributes
+      summary: Actualizar atributo personalizado
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: attribute_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantCustomAttributeRequest'
+      responses:
+        '200':
+          description: Atributo actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantCustomAttribute'
+
+    delete:
+      tags:
+        - Attributes
+      summary: Eliminar atributo personalizado
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: attribute_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Atributo eliminado exitosamente
+
+  # Brands
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Listar marcas
+      security:
+        - TenantAuth: []
+      responses:
+        '200':
+          description: Lista de marcas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Brand'
+
+    post:
+      tags:
+        - Brands
+      summary: Crear marca
+      security:
+        - TenantAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBrandRequest'
+      responses:
+        '201':
+          description: Marca creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+
+  /brands/{id}:
+    get:
+      tags:
+        - Brands
+      summary: Obtener marca por ID
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Marca encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+
+    put:
+      tags:
+        - Brands
+      summary: Actualizar marca
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBrandRequest'
+      responses:
+        '200':
+          description: Marca actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Brand'
+
+    delete:
+      tags:
+        - Brands
+      summary: Eliminar marca
+      security:
+        - TenantAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Marca eliminada exitosamente
+
+tags:
+  - name: Health
+    description: Health checks y estado del servicio
+  - name: Categories
+    description: |
+      Gestión de categorías y jerarquías.
+      
+      **Características:**
+      - Jerarquía multinivel con validación de ciclos
+      - Filtros avanzados y paginación
+      - Estados activo/inactivo
+      - Vista de árbol jerárquico
+      
+  - name: Category-Attributes
+    description: |
+      Gestión de relaciones entre categorías y atributos.
+      
+      **Funcionalidades:**
+      - Definir qué atributos están disponibles por categoría
+      - Especificar valores permitidos por atributo
+      - Validaciones cruzadas
+      
+  - name: Attributes
+    description: |
+      Gestión de atributos personalizados por tenant.
+      
+      **Tipos soportados:**
+      - text, number, boolean, select, multi_select
+      - Validaciones personalizadas
+      - Valores por defecto
+      
+  - name: Brands
+    description: Gestión de marcas por tenant 

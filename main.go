@@ -13,19 +13,24 @@ import (
 	businesstypeRepository "pim/src/businesstype/infrastructure/persistence/repository"
 	categoryConfig "pim/src/category/infrastructure/config"
 	categoryAttributeConfig "pim/src/category_attribute/infrastructure/config"
-	globalCatalogConfig "pim/src/global_catalog/infrastructure/config"
-	"pim/src/marketplace/application/usecase"
-	marketplaceConfig "pim/src/marketplace/infrastructure/config"
-	"pim/src/marketplace/infrastructure/controller"
-	"pim/src/marketplace/infrastructure/persistence"
-	productConfig "pim/src/product/infrastructure/config"
+	globalCatalogConfig "pim/src/product/global_catalog/infrastructure/config"
+	productConfig "pim/src/product/tenant/infrastructure/config"
 	quickstartConfig "pim/src/quickstart/infrastructure/config"
 	sharedConfig "pim/src/shared/infrastructure/config"
 	"pim/src/shared/infrastructure/database"
 
-	// Marketplace imports
+	// Brand imports
+	brandController "pim/src/brand/infrastructure/controller"
+	brandRepository "pim/src/brand/infrastructure/persistence/repository"
 
-	// Database imports
+	// Attribute imports
+
+	// Category imports
+
+	// Marketplace Categories imports
+	categoryUsecase "pim/src/category/application/usecase"
+	categoryController "pim/src/category/infrastructure/controller"
+	categoryPersistence "pim/src/category/infrastructure/persistence"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // Driver de PostgreSQL
@@ -130,19 +135,20 @@ func main() {
 	log.Println("  PUT    /api/v1/category-attributes/:id")
 	log.Println("  DELETE /api/v1/category-attributes/:id")
 	setupBrandModule(v1, db)
+	setupMarketplaceBrandModule(v1, db)
 	setupProductModule(v1, db)
 	setupQuickstartModule(v1, db)
 	setupBusinessTypeModule(v1, db)
 	setupGlobalCatalogModule(v1, db)
-	// Usar el archivo de configuración del marketplace
-	marketplaceConfig.SetupMarketplaceModule(v1, db, mongoClient)
+	setupMarketplaceCategoriesModule(v1, db)
 
 	// Aquí se agregarían más módulos:
 	// - Ubicaciones de Stock
 
 	// Iniciar el servidor
-	log.Println("Servidor iniciando en http://localhost:8080")
-	router.Run(":8080")
+	port := getEnv("PORT", "8090")
+	log.Printf("Servidor iniciando en http://localhost:%s", port)
+	router.Run(":" + port)
 }
 
 // setupBrandModule configura el módulo Brand
@@ -187,6 +193,9 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
 	// Registrar rutas de Product Variants
 	productCfg.ProductVariantController.RegisterRoutes(router)
 
+	// Registrar rutas del Quickstart
+	productCfg.QuickstartController.RegisterRoutes(router)
+
 	log.Println("Módulo Product configurado exitosamente")
 	log.Println("Rutas Product disponibles:")
 	log.Println("  POST   /api/v1/products")
@@ -194,6 +203,8 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  GET    /api/v1/products/:id")
 	log.Println("  PUT    /api/v1/products/:id")
 	log.Println("  DELETE /api/v1/products/:id")
+	log.Println("  PATCH  /api/v1/products/:id/status")
+	log.Println("  GET    /api/v1/products/:id/status/transitions")
 	log.Println("Rutas Product Variants disponibles:")
 	log.Println("  POST   /api/v1/products/:product_id/variants")
 	log.Println("  GET    /api/v1/products/:product_id/variants")
@@ -201,17 +212,24 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  PUT    /api/v1/products/:product_id/variants/:variant_id")
 	log.Println("  DELETE /api/v1/products/:product_id/variants/:variant_id")
 	log.Println("  GET    /api/v1/variants")
+	log.Println("Rutas Quickstart disponibles:")
+	log.Println("  POST   /api/v1/quickstart/products/from-template")
+	log.Println("  POST   /api/v1/quickstart/products/import-from-business-type")
+	log.Println("  GET    /api/v1/quickstart/progress")
 }
 
 // setupQuickstartModule configura el módulo Quickstart
 func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("Configurando módulo Quickstart...")
 
+	// Crear configuración del módulo Product para obtener el ProductService
+	productCfg := productConfig.NewProductConfig(db)
+
 	// Crear el loader de datos YAML
 	dataLoader := quickstartConfig.NewYAMLDataLoader("src/quickstart/data")
 
-	// Crear configuración del módulo Quickstart
-	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db, dataLoader)
+	// Crear configuración del módulo Quickstart con ProductService
+	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db, dataLoader, productCfg.QuickstartProductService)
 
 	// Obtener el handler
 	quickstartHandler := quickstartCfg.GetQuickstartHandler()
@@ -263,141 +281,6 @@ func setupBusinessTypeModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  DELETE /api/v1/business-types/:id")
 }
 
-// setupMarketplaceModuleWithMongoDB configura el módulo Marketplace con MongoDB (COMPLETO)
-func setupMarketplaceModuleWithMongoDB(router *gin.RouterGroup, db *sql.DB, mongoClient *database.MongoDBClient) {
-	log.Println("Configurando módulo Marketplace con MongoDB...")
-
-	// Crear repositorios MongoDB
-	log.Println("🔧 Creando repositorios MongoDB...")
-	tenantCustomAttributeRepo := persistence.NewTenantCustomAttributeMongoRepository(mongoClient.Database)
-	tenantCategoryMappingRepo := persistence.NewTenantCategoryMappingMongoRepository(mongoClient.Database)
-
-	// Crear repositorios PostgreSQL (para categorías marketplace)
-	log.Println("🔧 Creando repositorios PostgreSQL...")
-	marketplaceCategoryRepo := persistence.NewMarketplaceCategoryPostgresRepository(db)
-
-	// Crear casos de uso para atributos personalizados
-	log.Println("🔧 Creando casos de uso para atributos personalizados...")
-	extendTenantAttributesUC := usecase.NewExtendTenantAttributesUseCase(
-		marketplaceCategoryRepo, // Usar el repositorio correcto en lugar de nil
-		tenantCustomAttributeRepo,
-	)
-
-	getTenantCustomAttributesUC := usecase.NewGetTenantCustomAttributesUseCase(
-		tenantCustomAttributeRepo,
-	)
-
-	updateTenantCustomAttributeUC := usecase.NewUpdateTenantCustomAttributeUseCase(
-		tenantCustomAttributeRepo,
-	)
-
-	deleteTenantCustomAttributeUC := usecase.NewDeleteTenantCustomAttributeUseCase(
-		tenantCustomAttributeRepo,
-	)
-
-	// Crear casos de uso para categorías marketplace
-	log.Println("🔧 Creando casos de uso para categorías marketplace...")
-	createMarketplaceCategoryUC := usecase.NewCreateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
-	getAllMarketplaceCategoriesUC := usecase.NewGetAllMarketplaceCategoriesUseCase(marketplaceCategoryRepo)
-	updateMarketplaceCategoryUC := usecase.NewUpdateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
-	getTenantTaxonomyUC := usecase.NewGetTenantTaxonomyUseCase(marketplaceCategoryRepo, tenantCategoryMappingRepo, tenantCustomAttributeRepo)
-	validateCategoryHierarchyUC := usecase.NewValidateCategoryHierarchyUseCase(marketplaceCategoryRepo)
-	syncMarketplaceChangesUC := usecase.NewSyncMarketplaceChangesUseCase(marketplaceCategoryRepo, tenantCategoryMappingRepo, tenantCustomAttributeRepo)
-
-	// Crear caso de uso para mapeo de categorías
-	log.Println("🔧 Creando caso de uso para mapeo de categorías...")
-	mapTenantCategoryUC := usecase.NewMapTenantCategoryUseCase(marketplaceCategoryRepo, tenantCategoryMappingRepo)
-
-	// Crear controladores
-	log.Println("🔧 Creando controladores...")
-	tenantCustomAttributeHandler := controller.NewTenantCustomAttributeHandler(
-		extendTenantAttributesUC,
-		getTenantCustomAttributesUC,
-		updateTenantCustomAttributeUC,
-		deleteTenantCustomAttributeUC,
-	)
-
-	marketplaceCategoryHandler := controller.NewMarketplaceCategoryHandler(
-		createMarketplaceCategoryUC,
-		getAllMarketplaceCategoriesUC,
-		updateMarketplaceCategoryUC,
-		getTenantTaxonomyUC,
-		validateCategoryHierarchyUC,
-		syncMarketplaceChangesUC,
-	)
-
-	tenantCategoryMappingHandler := controller.NewTenantCategoryMappingHandler(
-		mapTenantCategoryUC,
-	)
-
-	log.Println("🔧 Controladores creados exitosamente")
-
-	// Configurar rutas marketplace
-	log.Println("🔧 Configurando rutas marketplace...")
-	log.Println("🔧 LÍNEA 340 - ANTES DE CREAR GRUPO")
-	log.Println("🔧 Creando grupo marketplace...")
-	marketplace := router.Group("/marketplace")
-	log.Println("🔧 Grupo marketplace creado exitosamente")
-	{
-		log.Println("🔧 Configurando endpoints básicos...")
-
-		// Registrar rutas de categorías marketplace directamente
-		log.Println("🔧 Registrando ruta GET /categories...")
-		marketplace.GET("/categories", marketplaceCategoryHandler.GetAllMarketplaceCategories)
-		log.Println("🔧 Registrando ruta POST /categories...")
-		marketplace.POST("/categories", marketplaceCategoryHandler.CreateMarketplaceCategory)
-		log.Println("🔧 Registrando ruta PUT /categories/:id...")
-		log.Println("🔧 Antes de crear función PUT...")
-		// Endpoint temporal de prueba
-		putHandler := func(c *gin.Context) {
-			log.Printf("🔧 PUT endpoint llamado con ID: %s", c.Param("id"))
-			c.JSON(200, gin.H{"message": "PUT endpoint funcionando", "id": c.Param("id")})
-		}
-		log.Println("🔧 Función PUT creada, registrando ruta...")
-		marketplace.PUT("/categories/:id", putHandler)
-		log.Println("🔧 Ruta PUT registrada exitosamente")
-		log.Println("🔧 Registrando ruta POST /categories/validate-hierarchy...")
-		marketplace.POST("/categories/validate-hierarchy", marketplaceCategoryHandler.ValidateCategoryHierarchy)
-		log.Println("🔧 Registrando ruta POST /sync-changes...")
-		marketplace.POST("/sync-changes", marketplaceCategoryHandler.SyncMarketplaceChanges)
-		log.Println("🔧 Registrando ruta GET /taxonomy...")
-		marketplace.GET("/taxonomy", marketplaceCategoryHandler.GetTenantTaxonomy)
-
-		// Rutas para tenants (atributos personalizados y mapeos)
-		tenantGroup := marketplace.Group("/tenant")
-		{
-			// Atributos personalizados
-			tenantGroup.POST("/custom-attributes", tenantCustomAttributeHandler.ExtendTenantAttributes)
-			tenantGroup.GET("/custom-attributes", tenantCustomAttributeHandler.GetTenantCustomAttributes)
-			tenantGroup.PUT("/custom-attributes/:attribute_id", tenantCustomAttributeHandler.UpdateTenantCustomAttribute)
-			tenantGroup.DELETE("/custom-attributes/:attribute_id", tenantCustomAttributeHandler.DeleteTenantCustomAttribute)
-
-			// Mapeos de categorías
-			tenantGroup.POST("/category-mappings", tenantCategoryMappingHandler.MapTenantCategory)
-			tenantGroup.PUT("/category-mappings/:mapping_id", tenantCategoryMappingHandler.UpdateTenantCategoryMapping)
-			tenantGroup.DELETE("/category-mappings/:mapping_id", tenantCategoryMappingHandler.DeleteTenantCategoryMapping)
-		}
-	}
-
-	log.Println("Módulo Marketplace configurado exitosamente con MongoDB")
-	log.Println("Rutas Marketplace disponibles:")
-	log.Println("  GET    /api/v1/marketplace/health")
-	log.Println("  GET    /api/v1/marketplace/test-mongo")
-	log.Println("  GET    /api/v1/marketplace/categories (admin)")
-	log.Println("  POST   /api/v1/marketplace/categories (admin)")
-	log.Println("  PUT    /api/v1/marketplace/categories/:id (admin)")
-	log.Println("  POST   /api/v1/marketplace/categories/validate-hierarchy (admin)")
-	log.Println("  POST   /api/v1/marketplace/sync-changes (admin)")
-	log.Println("  GET    /api/v1/marketplace/taxonomy (tenant)")
-	log.Println("  POST   /api/v1/marketplace/tenant/custom-attributes")
-	log.Println("  GET    /api/v1/marketplace/tenant/custom-attributes")
-	log.Println("  PUT    /api/v1/marketplace/tenant/custom-attributes/:attribute_id")
-	log.Println("  DELETE /api/v1/marketplace/tenant/custom-attributes/:attribute_id")
-	log.Println("  POST   /api/v1/marketplace/tenant/category-mappings")
-	log.Println("  PUT    /api/v1/marketplace/tenant/category-mappings/:mapping_id")
-	log.Println("  DELETE /api/v1/marketplace/tenant/category-mappings/:mapping_id")
-}
-
 // setupGlobalCatalogModule configura el módulo Global Catalog
 func setupGlobalCatalogModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("Configurando módulo Global Catalog...")
@@ -423,6 +306,9 @@ func setupGlobalCatalogModule(router *gin.RouterGroup, db *sql.DB) {
 		private.POST("/products", globalCatalogController.CreateProduct)
 		private.GET("/products", globalCatalogController.ListProducts)
 		private.GET("/products/search", globalCatalogController.SearchByEAN)
+		private.GET("/products/:id", globalCatalogController.GetProductByID)
+		private.PUT("/products/:id", globalCatalogController.UpdateProductByID)
+		private.DELETE("/products/:id", globalCatalogController.DeleteProductByID)
 	}
 
 	log.Println("Módulo Global Catalog configurado exitosamente")
@@ -435,4 +321,66 @@ func setupGlobalCatalogModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  POST   /api/v1/global-catalog/products")
 	log.Println("  GET    /api/v1/global-catalog/products")
 	log.Println("  GET    /api/v1/global-catalog/products/search?ean={ean}")
+	log.Println("  GET    /api/v1/global-catalog/products/:id")
+	log.Println("  PUT    /api/v1/global-catalog/products/:id")
+	log.Println("  DELETE /api/v1/global-catalog/products/:id")
+}
+
+// setupMarketplaceCategoriesModule configura el módulo Marketplace Categories
+func setupMarketplaceCategoriesModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Marketplace Categories...")
+
+	// Crear repositorio marketplace categories
+	marketplaceCategoryRepo := categoryPersistence.NewMarketplaceCategoryPostgresRepository(db)
+
+	// Crear casos de uso básicos (solo los que funcionan con un repositorio)
+	createMarketplaceCategoryUC := categoryUsecase.NewCreateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
+	getAllMarketplaceCategoriesUC := categoryUsecase.NewGetAllMarketplaceCategoriesUseCase(marketplaceCategoryRepo)
+	updateMarketplaceCategoryUC := categoryUsecase.NewUpdateMarketplaceCategoryUseCase(marketplaceCategoryRepo)
+	validateCategoryHierarchyUC := categoryUsecase.NewValidateCategoryHierarchyUseCase(marketplaceCategoryRepo)
+
+	// Crear handler con casos de uso básicos
+	marketplaceCategoryHandler := categoryController.NewMarketplaceCategoryHandler(
+		createMarketplaceCategoryUC,
+		getAllMarketplaceCategoriesUC,
+		updateMarketplaceCategoryUC,
+		nil, // getTenantTaxonomyUC - requiere múltiples repos
+		validateCategoryHierarchyUC,
+		nil,                     // syncMarketplaceChangesUC - requiere múltiples repos
+		marketplaceCategoryRepo, // Agregar el repositorio
+	)
+
+	// Registrar rutas
+	marketplaceCategoryHandler.RegisterRoutes(router)
+
+	log.Println("Módulo Marketplace Categories configurado exitosamente")
+	log.Println("Rutas Marketplace Categories disponibles:")
+	log.Println("  GET    /api/v1/marketplace/categories")
+	log.Println("  POST   /api/v1/marketplace/categories")
+	log.Println("  PUT    /api/v1/marketplace/categories/:id")
+	log.Println("  POST   /api/v1/marketplace/categories/validate-hierarchy")
+}
+
+// setupMarketplaceBrandModule configura el módulo Marketplace Brand
+func setupMarketplaceBrandModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Marketplace Brand...")
+
+	// Crear repositorio marketplace brands
+	marketplaceBrandRepo := brandRepository.NewMarketplacebrandPostgresRepository(db)
+
+	// Crear handler con repositorio
+	marketplaceBrandHandler := brandController.NewMarketplaceBrandHandler(marketplaceBrandRepo)
+
+	// Registrar rutas
+	marketplaceBrandHandler.RegisterRoutes(router)
+
+	log.Println("Módulo Marketplace Brand configurado exitosamente")
+	log.Println("Rutas Marketplace Brand disponibles:")
+	log.Println("  GET    /api/v1/marketplace-brands")
+	log.Println("  POST   /api/v1/marketplace-brands")
+	log.Println("  GET    /api/v1/marketplace-brands/:id")
+	log.Println("  PUT    /api/v1/marketplace-brands/:id")
+	log.Println("  DELETE /api/v1/marketplace-brands/:id")
+	log.Println("  PUT    /api/v1/marketplace-brands/:id/verify")
+	log.Println("  PUT    /api/v1/marketplace-brands/:id/unverify")
 }

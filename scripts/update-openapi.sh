@@ -1,0 +1,752 @@
+#!/bin/bash
+
+# Script para actualizar el OpenAPI con todos los endpoints implementados
+# Basado en el análisis de controladores del PIM Service
+
+set -e
+
+echo "🔄 Actualizando OpenAPI con endpoints implementados..."
+
+# Backup del OpenAPI actual
+cp api-docs/openapi.yaml api-docs/openapi.yaml.backup
+
+# Generar nuevo OpenAPI
+cat > api-docs/openapi-updated.yaml << 'EOF'
+openapi: 3.1.0
+info:
+  title: Multi-Tenant PIM API
+  version: 2.1.0
+  description: |
+    API para gestión de información de productos multi-tenant.
+    
+    ## 🏗️ Arquitectura Modular
+    
+    El sistema está organizado en módulos especializados:
+    - **Health**: Estado del sistema
+    - **Business Types**: Tipos de negocio
+    - **Brands**: Gestión de marcas
+    - **Products**: Gestión de productos y variantes
+    - **Categories**: Gestión de categorías
+    - **Attributes**: Gestión de atributos
+    - **Category-Attributes**: Relación categoría-atributo
+    - **Global Catalog**: Catálogo global público
+    - **Quickstart**: Configuración rápida
+    
+    ## 🔄 Actualizado v2.1.0
+    
+    - ✅ **Endpoints actualizados**: Reflejan implementación real
+    - 🛡️ **Seguridad consistente**: Headers y roles validados
+    - 📋 **Tests de integración**: Cobertura completa
+    - 🔍 **Filtros avanzados**: Criterios y paginación
+
+servers:
+  - url: /api/v1
+    description: Base URL para la API v1
+  - url: http://localhost:8080/api/v1
+    description: Servidor local de desarrollo
+  - url: http://localhost:8001/pim/api/v1
+    description: A través de Kong API Gateway
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT para autenticación
+    tenantId:
+      type: apiKey
+      in: header
+      name: X-Tenant-ID
+      description: ID del tenant para operaciones multi-tenant
+    userRole:
+      type: apiKey
+      in: header
+      name: X-User-Role
+      description: |
+        Rol del usuario para autorización:
+        - `super_admin`: Acceso completo
+        - `marketplace_admin`: Gestión de marketplace  
+        - `tenant_admin`: Administración del tenant
+        - `tenant_user`: Usuario del tenant
+
+  parameters:
+    # Parámetros básicos de paginación
+    PageParam:
+      name: page
+      in: query
+      description: "Número de página (default: 1)"
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    
+    PageSizeParam:
+      name: page_size
+      in: query
+      description: "Tamaño de página (default: 10, max: 100)"
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    
+    SortByParam:
+      name: sort_by
+      in: query
+      description: "Campo de ordenamiento (default: created_at)"
+      required: false
+      schema:
+        type: string
+        default: "created_at"
+    
+    SortDirParam:
+      name: sort_dir
+      in: query
+      description: "Dirección de ordenamiento (asc o desc, default: desc)"
+      required: false
+      schema:
+        type: string
+        enum: ["asc", "desc"]
+        default: "desc"
+
+    # Headers comunes
+    TenantIdHeader:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: ID del tenant
+
+    UserRoleHeader:
+      name: X-User-Role
+      in: header
+      required: false
+      schema:
+        type: string
+        enum: ["super_admin", "marketplace_admin", "tenant_admin", "tenant_user"]
+      description: Rol del usuario
+
+paths:
+  # ==========================================
+  # HEALTH ENDPOINTS
+  # ==========================================
+  /health:
+    get:
+      summary: Verificar el estado del sistema
+      tags: [Health]
+      description: Devuelve información sobre el estado de salud del sistema
+      responses:
+        '200':
+          description: Estado del sistema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  database:
+                    type: string
+                    example: "connected"
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # BUSINESS TYPES ENDPOINTS
+  # ==========================================
+  /business-types:
+    get:
+      summary: Listar tipos de negocio
+      tags: [Business Types]
+      description: Obtiene la lista de tipos de negocio disponibles
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: only_active
+          in: query
+          description: Solo tipos de negocio activos
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Lista de tipos de negocio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    code:
+                      type: string
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    icon:
+                      type: string
+                    color:
+                      type: string
+                    is_active:
+                      type: boolean
+                    sort_order:
+                      type: integer
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+    post:
+      summary: Crear tipo de negocio
+      tags: [Business Types]
+      description: Crea un nuevo tipo de negocio (solo administradores)
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name]
+              properties:
+                code:
+                  type: string
+                  example: "RESTAURANT"
+                name:
+                  type: string
+                  example: "Restaurante"
+                description:
+                  type: string
+                  example: "Tipo de negocio para restaurantes"
+                icon:
+                  type: string
+                  example: "restaurant"
+                color:
+                  type: string
+                  example: "#ff5722"
+                sort_order:
+                  type: integer
+                  example: 1
+      responses:
+        '201':
+          description: Tipo de negocio creado exitosamente
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '409':
+          description: Tipo de negocio ya existe
+        '500':
+          description: Error interno del servidor
+
+  /business-types/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID del tipo de negocio
+    
+    get:
+      summary: Obtener tipo de negocio por ID
+      tags: [Business Types]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Detalles del tipo de negocio
+        '404':
+          description: Tipo de negocio no encontrado
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar tipo de negocio
+      tags: [Business Types]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                icon:
+                  type: string
+                color:
+                  type: string
+                sort_order:
+                  type: integer
+      responses:
+        '200':
+          description: Tipo de negocio actualizado exitosamente
+        '400':
+          description: Datos de entrada inválidos
+        '404':
+          description: Tipo de negocio no encontrado
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      summary: Eliminar tipo de negocio
+      tags: [Business Types]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '204':
+          description: Tipo de negocio eliminado
+        '404':
+          description: Tipo de negocio no encontrado
+        '409':
+          description: No se puede eliminar (tiene datos asociados)
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # BRANDS ENDPOINTS
+  # ==========================================
+  /brands:
+    get:
+      summary: Listar marcas con filtros y paginación
+      tags: [Brands]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SortByParam'
+        - $ref: '#/components/parameters/SortDirParam'
+        - name: status
+          in: query
+          description: Estado de la marca
+          schema:
+            type: string
+            enum: ["active", "inactive", "deleted"]
+        - name: name
+          in: query
+          description: Búsqueda por nombre
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: Búsqueda por descripción
+          schema:
+            type: string
+        - name: active
+          in: query
+          description: Solo marcas activas
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Lista paginada de marcas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        website_url:
+                          type: string
+                        logo_url:
+                          type: string
+                        active:
+                          type: boolean
+                        created_at:
+                          type: string
+                          format: date-time
+                  total_count:
+                    type: integer
+                  page:
+                    type: integer
+                  page_size:
+                    type: integer
+                  total_pages:
+                    type: integer
+        '400':
+          description: Parámetros de filtrado inválidos
+        '401':
+          description: No autorizado
+
+    post:
+      summary: Crear nueva marca
+      tags: [Brands]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: "Samsung"
+                description:
+                  type: string
+                  example: "Marca de electrónicos"
+                website_url:
+                  type: string
+                  example: "https://samsung.com"
+                logo_url:
+                  type: string
+                  example: "https://logo.com/samsung.png"
+      responses:
+        '201':
+          description: Marca creada exitosamente
+        '400':
+          description: Datos de entrada inválidos
+        '409':
+          description: Marca ya existe
+        '500':
+          description: Error interno del servidor
+
+  /brands/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      summary: Obtener marca por ID
+      tags: [Brands]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Detalles de la marca
+        '404':
+          description: Marca no encontrada
+        '500':
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar marca
+      tags: [Brands]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                website_url:
+                  type: string
+                logo_url:
+                  type: string
+      responses:
+        '200':
+          description: Marca actualizada exitosamente
+        '400':
+          description: Datos de entrada inválidos
+        '404':
+          description: Marca no encontrada
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      summary: Eliminar marca
+      tags: [Brands]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '204':
+          description: Marca eliminada
+        '404':
+          description: Marca no encontrada
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # PRODUCTS ENDPOINTS
+  # ==========================================
+  /products:
+    get:
+      summary: Listar productos con filtros
+      tags: [Products]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/SortByParam'
+        - $ref: '#/components/parameters/SortDirParam'
+        - name: name
+          in: query
+          description: Filtrar por nombre
+          schema:
+            type: string
+        - name: sku
+          in: query
+          description: Filtrar por SKU
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filtrar por estado
+          schema:
+            type: string
+            enum: ["active", "inactive", "discontinued"]
+        - name: category_id
+          in: query
+          description: Filtrar por ID de categoría
+          schema:
+            type: string
+            format: uuid
+        - name: brand_id
+          in: query
+          description: Filtrar por ID de marca
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista paginada de productos
+        '400':
+          description: Parámetros inválidos
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+    post:
+      summary: Crear nuevo producto
+      tags: [Products]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, sku]
+              properties:
+                name:
+                  type: string
+                  example: "Smartphone Galaxy S23"
+                description:
+                  type: string
+                  example: "Smartphone de última generación"
+                sku:
+                  type: string
+                  example: "SAM-GAL-S23-001"
+                category_id:
+                  type: string
+                  format: uuid
+                brand_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Producto creado exitosamente
+        '400':
+          description: Datos de entrada inválidos
+        '409':
+          description: SKU ya existe
+        '500':
+          description: Error interno del servidor
+
+  /products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      summary: Obtener producto por ID
+      tags: [Products]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Detalles del producto
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar producto
+      tags: [Products]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                category_id:
+                  type: string
+                  format: uuid
+                brand_id:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Producto actualizado exitosamente
+        '400':
+          description: Datos de entrada inválidos
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      summary: Eliminar producto
+      tags: [Products]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '204':
+          description: Producto eliminado
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /products/{id}/status:
+    patch:
+      summary: Actualizar estado del producto
+      tags: [Products]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: ["active", "inactive", "discontinued"]
+                  example: "active"
+      responses:
+        '200':
+          description: Estado actualizado exitosamente
+        '400':
+          description: Estado inválido o transición no permitida
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /products/{id}/status/transitions:
+    get:
+      summary: Obtener transiciones de estado disponibles
+      tags: [Products]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transiciones disponibles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  product_id:
+                    type: string
+                    format: uuid
+                  available_transitions:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno del servidor
+
+EOF
+
+echo "✅ OpenAPI actualizado generado en api-docs/openapi-updated.yaml"
+echo "📋 Para aplicar los cambios:"
+echo "   mv api-docs/openapi-updated.yaml api-docs/openapi.yaml" 
