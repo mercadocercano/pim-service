@@ -99,7 +99,7 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 	// Construir criterios de filtrado
 	criteriaBuilder := domainCriteria.NewCriteriaBuilder()
 
-	// Paginación
+	// Paginación - convertir offset/limit a page/pageSize
 	offset := 0
 	limit := 20
 	if offsetStr := c.Query("offset"); offsetStr != "" {
@@ -112,7 +112,13 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 			limit = val
 		}
 	}
-	criteriaBuilder.SetPagination(offset, limit)
+
+	// Convertir offset/limit a page/pageSize para el CriteriaBuilder
+	page := (offset / limit) + 1
+	if offset == 0 {
+		page = 1
+	}
+	criteriaBuilder.SetPagination(page, limit)
 
 	// Filtros
 	if search := c.Query("search"); search != "" {
