@@ -70,8 +70,10 @@ func (h *MarketplaceBrandHandler) GetAllMarketplaceBrands(c *gin.Context) {
 		}
 	}
 
-	// Ordenamiento por defecto: calidad primero, luego nombre
-	criteriaBuilder.SetOrder("quality_score", "DESC")
+	// Ordenamiento por defecto solo si no se especificó uno
+	if c.Query("sort_by") == "" {
+		criteriaBuilder.SetOrder("quality_score", "DESC")
+	}
 
 	// Construir criteria final
 	builtCriteria := criteriaBuilder.Build()

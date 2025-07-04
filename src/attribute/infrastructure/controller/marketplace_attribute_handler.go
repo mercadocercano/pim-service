@@ -63,15 +63,22 @@ func (h *MarketplaceAttributeHandler) Create(c *gin.Context) {
 		return
 	}
 
+	// Convertir allowed values a validation rules
+	validationRules := make(map[string]interface{})
+	if len(req.AllowedValues) > 0 {
+		validationRules["allowed_values"] = req.AllowedValues
+	}
+
 	attribute, err := h.createUseCase.Execute(
 		c.Request.Context(),
 		req.Name,
+		"", // slug se genera automáticamente
 		req.Type,
-		req.Description,
-		req.IsRequired,
-		req.IsSearchable,
 		req.IsFilterable,
-		req.AllowedValues,
+		req.IsSearchable,
+		req.IsRequired,
+		validationRules,
+		0, // sortOrder por defecto
 	)
 	if err != nil {
 		if err == usecase.ErrInvalidAttributeName || err == usecase.ErrMarketplaceAttributeExists {
@@ -144,16 +151,23 @@ func (h *MarketplaceAttributeHandler) Update(c *gin.Context) {
 		return
 	}
 
+	// Convertir allowed values a validation rules
+	validationRules := make(map[string]interface{})
+	if len(req.AllowedValues) > 0 {
+		validationRules["allowed_values"] = req.AllowedValues
+	}
+
 	attribute, err := h.updateUseCase.Execute(
 		c.Request.Context(),
 		id,
 		req.Name,
+		"", // slug se genera automáticamente si no se proporciona
 		req.Type,
-		req.Description,
-		req.IsRequired,
-		req.IsSearchable,
 		req.IsFilterable,
-		req.AllowedValues,
+		req.IsSearchable,
+		req.IsRequired,
+		validationRules,
+		0, // sortOrder por defecto
 	)
 	if err != nil {
 		if err == usecase.ErrMarketplaceAttributeNotFound {

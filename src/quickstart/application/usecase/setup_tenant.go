@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"pim/src/quickstart/domain/entity"
@@ -66,7 +67,7 @@ func (uc *SetupTenantUseCase) Execute(ctx context.Context, tenantID string, setu
 		}
 
 		// Crear una respuesta mock de historial exitoso
-		history, err := entity.NewTenantQuickstartHistory(tenantID, setupData.BusinessType, setupDataJSON)
+		history, err := entity.NewTenantQuickstartHistory(tenantID, setupData.BusinessType, string(setupDataJSON))
 		if err != nil {
 			return nil, fmt.Errorf("error creando historial de configuración: %w", err)
 		}
@@ -105,7 +106,7 @@ func (uc *SetupTenantUseCase) Execute(ctx context.Context, tenantID string, setu
 	}
 
 	// Crear el historial de configuración
-	history, err := entity.NewTenantQuickstartHistory(tenantID, setupData.BusinessType, setupDataJSON)
+	history, err := entity.NewTenantQuickstartHistory(tenantID, setupData.BusinessType, string(setupDataJSON))
 	if err != nil {
 		return nil, fmt.Errorf("error creando historial de configuración: %w", err)
 	}
@@ -117,8 +118,13 @@ func (uc *SetupTenantUseCase) Execute(ctx context.Context, tenantID string, setu
 
 	// Ejecutar la configuración
 	if err := uc.executeSetup(ctx, tenantID, setupData); err != nil {
-		// Marcar como fallido
-		history.MarkAsFailed(err.Error())
+		// Nota: ya no tenemos MarkAsFailed, solo actualizamos datos
+		errorData := map[string]interface{}{
+			"error": err.Error(),
+			"status": "failed",
+		}
+		errorJSON, _ := json.Marshal(errorData)
+		history.UpdateSetupData(string(errorJSON))
 		uc.historyRepo.Update(ctx, history)
 		return history, fmt.Errorf("error ejecutando configuración: %w", err)
 	}

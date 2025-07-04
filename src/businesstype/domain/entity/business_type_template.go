@@ -28,32 +28,37 @@ type BusinessTypeTemplate struct {
 
 // CategoryTemplate representa una categoría en la plantilla
 type CategoryTemplate struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	ParentName  string   `json:"parent_name,omitempty"` // Nombre de la categoría padre
-	SortOrder   int      `json:"sort_order"`
-	Attributes  []string `json:"attributes"` // IDs de atributos aplicables
+	ID          string `json:"id"`                    // ID de la categoría del marketplace
+	Name        string `json:"name"`                  // Nombre legible de la categoría
+	Slug        string `json:"slug"`                  // Slug de la categoría
+	Description string `json:"description,omitempty"` // Descripción opcional
+	ParentID    string `json:"parent_id,omitempty"`   // ID de la categoría padre
+	Level       int    `json:"level"`                 // Nivel de jerarquía (0 = root)
 }
 
 // AttributeTemplate representa un atributo en la plantilla
 type AttributeTemplate struct {
-	Code         string   `json:"code"`        // Código único del atributo
-	Name         string   `json:"name"`        // Nombre del atributo
-	Type         string   `json:"type"`        // Tipo: text, number, select, etc
-	IsRequired   bool     `json:"is_required"` // Si es obligatorio
-	DefaultValue string   `json:"default_value,omitempty"`
-	Options      []string `json:"options,omitempty"` // Opciones para tipo select
+	ID           string   `json:"id"`                      // ID del atributo del marketplace
+	Code         string   `json:"code"`                    // Código único del atributo
+	Name         string   `json:"name"`                    // Nombre del atributo
+	Type         string   `json:"type"`                    // Tipo: text, number, select, etc
+	IsRequired   bool     `json:"is_required"`             // Si es obligatorio
+	DefaultValue string   `json:"default_value,omitempty"` // Valor por defecto
+	Options      []string `json:"options,omitempty"`       // Opciones para tipo select
 }
 
 // ProductTemplate representa un producto de ejemplo en la plantilla
 type ProductTemplate struct {
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Category    string                 `json:"category"`   // Nombre de la categoría
-	Brand       string                 `json:"brand"`      // Marca
-	SKU         string                 `json:"sku"`        // SKU de ejemplo
-	Price       float64                `json:"price"`      // Precio sugerido
-	Attributes  map[string]interface{} `json:"attributes"` // Valores de atributos
+	ID           string                 `json:"id,omitempty"`            // ID del producto (opcional para templates)
+	Name         string                 `json:"name"`                    // Nombre del producto
+	Description  string                 `json:"description,omitempty"`   // Descripción
+	CategoryID   string                 `json:"category_id"`             // ID de la categoría
+	CategoryName string                 `json:"category_name,omitempty"` // Nombre de la categoría (para display)
+	BrandID      string                 `json:"brand_id,omitempty"`      // ID de la marca
+	BrandName    string                 `json:"brand_name,omitempty"`    // Nombre de la marca
+	SKU          string                 `json:"sku"`                     // SKU de ejemplo
+	Price        float64                `json:"price"`                   // Precio sugerido
+	Attributes   map[string]interface{} `json:"attributes,omitempty"`    // Valores de atributos
 }
 
 // NewBusinessTypeTemplate crea una nueva instancia de BusinessTypeTemplate

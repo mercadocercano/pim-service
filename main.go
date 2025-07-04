@@ -24,6 +24,10 @@ import (
 	brandRepository "pim/src/brand/infrastructure/persistence/repository"
 
 	// Attribute imports
+	attributeConfig "pim/src/attribute/infrastructure/config"
+
+	// Business Type Template imports
+	businessTypeTemplateConfig "pim/src/businesstype/infrastructure/config"
 
 	// Category imports
 
@@ -136,9 +140,11 @@ func main() {
 	log.Println("  DELETE /api/v1/category-attributes/:id")
 	setupBrandModule(v1, db)
 	setupMarketplaceBrandModule(v1, db)
+	setupAttributeModule(v1, db)
 	setupProductModule(v1, db)
 	setupQuickstartModule(v1, db)
 	setupBusinessTypeModule(v1, db)
+	setupBusinessTypeTemplateModule(v1, db)
 	setupGlobalCatalogModule(v1, db)
 	setupMarketplaceCategoriesModule(v1, db)
 
@@ -231,11 +237,13 @@ func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB) {
 	// Crear configuración del módulo Quickstart con ProductService
 	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db, dataLoader, productCfg.QuickstartProductService)
 
-	// Obtener el handler
+	// Obtener los handlers
 	quickstartHandler := quickstartCfg.GetQuickstartHandler()
+	simpleWizardHandler := quickstartCfg.GetSimpleWizardHandler()
 
 	// Registrar rutas usando el método RegisterRoutes del handler
 	quickstartHandler.RegisterRoutes(router)
+	simpleWizardHandler.RegisterRoutes(router)
 
 	log.Println("Módulo Quickstart configurado exitosamente")
 	log.Println("Rutas Quickstart disponibles:")
@@ -246,6 +254,12 @@ func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  GET    /api/v1/quickstart/products/:businessType")
 	log.Println("  GET    /api/v1/quickstart/brands/:businessType")
 	log.Println("  POST   /api/v1/quickstart/setup")
+	log.Println("Rutas Wizard disponibles:")
+	log.Println("  GET    /api/v1/wizard/status")
+	log.Println("  POST   /api/v1/wizard/start")
+	log.Println("  PUT    /api/v1/wizard/step")
+	log.Println("  GET    /api/v1/wizard/template/:businessTypeId")
+	log.Println("  GET    /api/v1/wizard/template/:businessTypeId/:section")
 }
 
 // setupBusinessTypeModule configura el módulo BusinessType
@@ -279,6 +293,28 @@ func setupBusinessTypeModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  GET    /api/v1/business-types/:id")
 	log.Println("  PUT    /api/v1/business-types/:id")
 	log.Println("  DELETE /api/v1/business-types/:id")
+}
+
+// setupBusinessTypeTemplateModule configura el módulo BusinessTypeTemplate
+func setupBusinessTypeTemplateModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo BusinessTypeTemplate...")
+
+	// Crear configuración del módulo
+	templateCfg := businessTypeTemplateConfig.NewBusinessTypeTemplateModuleConfig(db)
+
+	// Obtener el handler
+	templateHandler := templateCfg.GetHandler()
+
+	// Registrar rutas
+	templateHandler.RegisterRoutes(router)
+
+	log.Println("Módulo BusinessTypeTemplate configurado exitosamente")
+	log.Println("Rutas BusinessTypeTemplate disponibles:")
+	log.Println("  POST   /api/v1/business-type-templates")
+	log.Println("  GET    /api/v1/business-type-templates")
+	log.Println("  GET    /api/v1/business-type-templates/:id")
+	log.Println("  PUT    /api/v1/business-type-templates/:id")
+	log.Println("  DELETE /api/v1/business-type-templates/:id")
 }
 
 // setupGlobalCatalogModule configura el módulo Global Catalog
@@ -383,4 +419,20 @@ func setupMarketplaceBrandModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  DELETE /api/v1/marketplace-brands/:id")
 	log.Println("  PUT    /api/v1/marketplace-brands/:id/verify")
 	log.Println("  PUT    /api/v1/marketplace-brands/:id/unverify")
+}
+
+// setupAttributeModule configura el módulo Attribute
+func setupAttributeModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Attribute...")
+
+	// Usar la función del config module
+	attributeConfig.SetupAttributeModule(router, db)
+
+	log.Println("Módulo Attribute configurado exitosamente")
+	log.Println("Rutas Marketplace Attributes disponibles:")
+	log.Println("  GET    /api/v1/marketplace/attributes")
+	log.Println("  POST   /api/v1/marketplace/attributes")
+	log.Println("  GET    /api/v1/marketplace/attributes/:id")
+	log.Println("  PUT    /api/v1/marketplace/attributes/:id")
+	log.Println("  DELETE /api/v1/marketplace/attributes/:id")
 }
