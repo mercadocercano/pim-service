@@ -25,12 +25,13 @@ func (uc *UpdateMarketplaceAttributeUseCase) Execute(
 	ctx context.Context,
 	id string,
 	name string,
+	slug string,
 	attributeType string,
-	description *string,
-	isRequired bool,
-	isSearchable bool,
 	isFilterable bool,
-	allowedValues []string,
+	isSearchable bool,
+	isRequiredForListing bool,
+	validationRules map[string]interface{},
+	sortOrder int,
 ) (*entity.MarketplaceAttribute, error) {
 	// Validaciones básicas
 	if id == "" {
@@ -39,6 +40,10 @@ func (uc *UpdateMarketplaceAttributeUseCase) Execute(
 
 	if name == "" {
 		return nil, ErrInvalidAttributeName
+	}
+
+	if slug == "" {
+		return nil, errors.New("slug es requerido")
 	}
 
 	if attributeType == "" {
@@ -56,16 +61,25 @@ func (uc *UpdateMarketplaceAttributeUseCase) Execute(
 	}
 
 	// Verificar que no existe otro atributo con el mismo nombre
-	existingAttribute, err := uc.marketplaceAttributeRepo.FindByName(ctx, name)
+	existingByName, err := uc.marketplaceAttributeRepo.FindByName(ctx, name)
 	if err != nil {
 		return nil, err
 	}
-	if existingAttribute != nil && existingAttribute.ID != id {
+	if existingByName != nil && existingByName.ID != id {
 		return nil, ErrMarketplaceAttributeExists
 	}
 
-	// Validar tipos permitidos
-	validTypes := []string{"string", "number", "boolean", "date", "enum", "text"}
+	// Verificar que no existe otro atributo con el mismo slug
+	existingBySlug, err := uc.marketplaceAttributeRepo.FindBySlug(ctx, slug)
+	if err != nil {
+		return nil, err
+	}
+	if existingBySlug != nil && existingBySlug.ID != id {
+		return nil, errors.New("ya existe un atributo con ese slug")
+	}
+
+	// Validar tipos permitidos según la constraint de la tabla
+	validTypes := []string{"text", "number", "boolean", "select", "multi_select"}
 	isValidType := false
 	for _, validType := range validTypes {
 		if attributeType == validType {
@@ -77,19 +91,15 @@ func (uc *UpdateMarketplaceAttributeUseCase) Execute(
 		return nil, errors.New("tipo de atributo inválido")
 	}
 
-	// Validar que tipo enum tenga valores permitidos
-	if attributeType == "enum" && len(allowedValues) == 0 {
-		return nil, errors.New("atributos de tipo enum deben tener valores permitidos")
-	}
-
 	// Actualizar los campos
 	attribute.Name = name
+	attribute.Slug = slug
 	attribute.Type = attributeType
-	attribute.Description = description
-	attribute.IsRequired = isRequired
-	attribute.IsSearchable = isSearchable
 	attribute.IsFilterable = isFilterable
-	attribute.AllowedValues = allowedValues
+	attribute.IsSearchable = isSearchable
+	attribute.IsRequiredForListing = isRequiredForListing
+	attribute.ValidationRules = validationRules
+	attribute.SortOrder = sortOrder
 	attribute.Update() // Actualiza el timestamp
 
 	// Guardar cambios

@@ -15,19 +15,18 @@ type MarketplaceAttributeMother struct{}
 // WithDefaults crea un atributo marketplace con valores por defecto
 func (MarketplaceAttributeMother) WithDefaults() *entity.MarketplaceAttribute {
 	now := time.Now()
-	description := "Descripción del atributo marketplace"
 	return &entity.MarketplaceAttribute{
-		ID:            uuid.New().String(),
-		Name:          "Atributo Marketplace",
-		Type:          "text",
-		Description:   &description,
-		IsRequired:    false,
-		IsFilterable:  true,
-		IsSearchable:  true,
-		AllowedValues: []string{},
-		IsActive:      true,
-		CreatedAt:     now,
-		UpdatedAt:     now,
+		ID:                   uuid.New().String(),
+		Name:                 "Atributo Marketplace",
+		Slug:                 "atributo-marketplace",
+		Type:                 "text",
+		IsFilterable:         true,
+		IsSearchable:         true,
+		IsRequiredForListing: false,
+		ValidationRules:      make(map[string]interface{}),
+		SortOrder:            0,
+		CreatedAt:            now,
+		UpdatedAt:            now,
 	}
 }
 
@@ -42,6 +41,14 @@ func (m MarketplaceAttributeMother) WithID(id string) *entity.MarketplaceAttribu
 func (m MarketplaceAttributeMother) WithName(name string) *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
 	attribute.Name = name
+	attribute.Slug = generateSlug(name)
+	return attribute
+}
+
+// WithSlug crea un atributo marketplace con un slug específico
+func (m MarketplaceAttributeMother) WithSlug(slug string) *entity.MarketplaceAttribute {
+	attribute := m.WithDefaults()
+	attribute.Slug = slug
 	return attribute
 }
 
@@ -52,17 +59,24 @@ func (m MarketplaceAttributeMother) WithType(attributeType string) *entity.Marke
 	return attribute
 }
 
-// WithAllowedValues crea un atributo marketplace con valores permitidos específicos
-func (m MarketplaceAttributeMother) WithAllowedValues(allowedValues []string) *entity.MarketplaceAttribute {
+// WithValidationRules crea un atributo marketplace con reglas de validación específicas
+func (m MarketplaceAttributeMother) WithValidationRules(rules map[string]interface{}) *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
-	attribute.AllowedValues = allowedValues
+	attribute.ValidationRules = rules
 	return attribute
 }
 
-// Required crea un atributo marketplace requerido
-func (m MarketplaceAttributeMother) Required() *entity.MarketplaceAttribute {
+// WithSortOrder crea un atributo marketplace con un orden específico
+func (m MarketplaceAttributeMother) WithSortOrder(sortOrder int) *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
-	attribute.IsRequired = true
+	attribute.SortOrder = sortOrder
+	return attribute
+}
+
+// RequiredForListing crea un atributo marketplace requerido para listar
+func (m MarketplaceAttributeMother) RequiredForListing() *entity.MarketplaceAttribute {
+	attribute := m.WithDefaults()
+	attribute.IsRequiredForListing = true
 	return attribute
 }
 
@@ -80,20 +94,16 @@ func (m MarketplaceAttributeMother) NotSearchable() *entity.MarketplaceAttribute
 	return attribute
 }
 
-// Inactive crea un atributo marketplace inactivo
-func (m MarketplaceAttributeMother) Inactive() *entity.MarketplaceAttribute {
-	attribute := m.WithDefaults()
-	attribute.IsActive = false
-	return attribute
-}
-
 // ColorAttribute crea un atributo de color para marketplace
 func (m MarketplaceAttributeMother) ColorAttribute() *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
 	attribute.Name = "Color"
-	attribute.Type = "enum"
-	attribute.AllowedValues = []string{"Rojo", "Azul", "Verde", "Negro", "Blanco"}
+	attribute.Slug = "color"
+	attribute.Type = "select"
 	attribute.IsFilterable = true
+	attribute.ValidationRules = map[string]interface{}{
+		"options": []string{"Rojo", "Azul", "Verde", "Negro", "Blanco"},
+	}
 	return attribute
 }
 
@@ -101,9 +111,12 @@ func (m MarketplaceAttributeMother) ColorAttribute() *entity.MarketplaceAttribut
 func (m MarketplaceAttributeMother) SizeAttribute() *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
 	attribute.Name = "Talla"
-	attribute.Type = "enum"
-	attribute.AllowedValues = []string{"XS", "S", "M", "L", "XL", "XXL"}
+	attribute.Slug = "talla"
+	attribute.Type = "select"
 	attribute.IsFilterable = true
+	attribute.ValidationRules = map[string]interface{}{
+		"options": []string{"XS", "S", "M", "L", "XL", "XXL"},
+	}
 	return attribute
 }
 
@@ -111,8 +124,9 @@ func (m MarketplaceAttributeMother) SizeAttribute() *entity.MarketplaceAttribute
 func (m MarketplaceAttributeMother) BrandAttribute() *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
 	attribute.Name = "Marca"
-	attribute.Type = "string"
-	attribute.IsRequired = true
+	attribute.Slug = "marca"
+	attribute.Type = "text"
+	attribute.IsRequiredForListing = true
 	attribute.IsFilterable = true
 	attribute.IsSearchable = true
 	return attribute
@@ -122,10 +136,15 @@ func (m MarketplaceAttributeMother) BrandAttribute() *entity.MarketplaceAttribut
 func (m MarketplaceAttributeMother) PriceAttribute() *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
 	attribute.Name = "Precio"
+	attribute.Slug = "precio"
 	attribute.Type = "number"
-	attribute.IsRequired = true
+	attribute.IsRequiredForListing = true
 	attribute.IsFilterable = true
 	attribute.IsSearchable = false
+	attribute.ValidationRules = map[string]interface{}{
+		"min": 0,
+		"max": 999999,
+	}
 	return attribute
 }
 
@@ -133,7 +152,6 @@ func (m MarketplaceAttributeMother) PriceAttribute() *entity.MarketplaceAttribut
 func (m MarketplaceAttributeMother) TextAttribute() *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
 	attribute.Type = "text"
-	attribute.AllowedValues = []string{}
 	return attribute
 }
 
@@ -141,7 +159,6 @@ func (m MarketplaceAttributeMother) TextAttribute() *entity.MarketplaceAttribute
 func (m MarketplaceAttributeMother) NumberAttribute() *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
 	attribute.Type = "number"
-	attribute.AllowedValues = []string{}
 	return attribute
 }
 
@@ -149,58 +166,61 @@ func (m MarketplaceAttributeMother) NumberAttribute() *entity.MarketplaceAttribu
 func (m MarketplaceAttributeMother) BooleanAttribute() *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
 	attribute.Type = "boolean"
-	attribute.AllowedValues = []string{}
 	return attribute
 }
 
-// EnumAttribute crea un atributo de enumeración para marketplace
-func (m MarketplaceAttributeMother) EnumAttribute() *entity.MarketplaceAttribute {
+// SelectAttribute crea un atributo de selección para marketplace
+func (m MarketplaceAttributeMother) SelectAttribute() *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
-	attribute.Type = "enum"
-	attribute.AllowedValues = []string{"Opción 1", "Opción 2", "Opción 3"}
+	attribute.Type = "select"
+	attribute.ValidationRules = map[string]interface{}{
+		"options": []string{"Opción 1", "Opción 2", "Opción 3"},
+	}
 	return attribute
 }
 
-// DateAttribute crea un atributo de fecha para marketplace
-func (m MarketplaceAttributeMother) DateAttribute() *entity.MarketplaceAttribute {
+// MultiSelectAttribute crea un atributo de selección múltiple para marketplace
+func (m MarketplaceAttributeMother) MultiSelectAttribute() *entity.MarketplaceAttribute {
 	attribute := m.WithDefaults()
-	attribute.Type = "date"
-	attribute.AllowedValues = []string{}
-	return attribute
-}
-
-// StringAttribute crea un atributo de cadena para marketplace
-func (m MarketplaceAttributeMother) StringAttribute() *entity.MarketplaceAttribute {
-	attribute := m.WithDefaults()
-	attribute.Type = "string"
-	attribute.AllowedValues = []string{}
+	attribute.Type = "multi_select"
+	attribute.ValidationRules = map[string]interface{}{
+		"options": []string{"Opción A", "Opción B", "Opción C"},
+	}
 	return attribute
 }
 
 // Complete crea un atributo marketplace con todos los parámetros especificados
 func (MarketplaceAttributeMother) Complete(
-	id, name, attributeType string,
-	description *string,
-	isRequired, isFilterable, isSearchable, isActive bool,
-	allowedValues []string,
+	id, name, slug, attributeType string,
+	isFilterable, isSearchable, isRequiredForListing bool,
+	validationRules map[string]interface{},
+	sortOrder int,
 ) *entity.MarketplaceAttribute {
 	now := time.Now()
 	return &entity.MarketplaceAttribute{
-		ID:            id,
-		Name:          name,
-		Type:          attributeType,
-		Description:   description,
-		IsRequired:    isRequired,
-		IsFilterable:  isFilterable,
-		IsSearchable:  isSearchable,
-		AllowedValues: allowedValues,
-		IsActive:      isActive,
-		CreatedAt:     now,
-		UpdatedAt:     now,
+		ID:                   id,
+		Name:                 name,
+		Slug:                 slug,
+		Type:                 attributeType,
+		IsFilterable:         isFilterable,
+		IsSearchable:         isSearchable,
+		IsRequiredForListing: isRequiredForListing,
+		ValidationRules:      validationRules,
+		SortOrder:            sortOrder,
+		CreatedAt:            now,
+		UpdatedAt:            now,
 	}
 }
 
-// Helper function to generate slug from name (not used but kept for compatibility)
+// generateSlug genera un slug a partir de un nombre
 func generateSlug(name string) string {
-	return strings.ToLower(strings.ReplaceAll(name, " ", "-"))
+	slug := strings.ToLower(name)
+	slug = strings.ReplaceAll(slug, " ", "-")
+	slug = strings.ReplaceAll(slug, "á", "a")
+	slug = strings.ReplaceAll(slug, "é", "e")
+	slug = strings.ReplaceAll(slug, "í", "i")
+	slug = strings.ReplaceAll(slug, "ó", "o")
+	slug = strings.ReplaceAll(slug, "ú", "u")
+	slug = strings.ReplaceAll(slug, "ñ", "n")
+	return slug
 }

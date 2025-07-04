@@ -13,6 +13,7 @@ type MarketplaceAttributeRepository interface {
 	FindByID(ctx context.Context, id string) (*entity.MarketplaceAttribute, error)
 	FindAll(ctx context.Context) ([]*entity.MarketplaceAttribute, error)
 	FindByName(ctx context.Context, name string) (*entity.MarketplaceAttribute, error)
+	FindBySlug(ctx context.Context, slug string) (*entity.MarketplaceAttribute, error)
 	Delete(ctx context.Context, id string) error
 	SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.MarketplaceAttribute, error)
 	CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error)
