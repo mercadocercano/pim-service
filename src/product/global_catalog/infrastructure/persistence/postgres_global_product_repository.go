@@ -12,6 +12,7 @@ import (
 	"pim/src/product/global_catalog/domain/port"
 	"pim/src/product/global_catalog/domain/value_object"
 	"pim/src/shared/domain/criteria"
+	sharedCriteria "pim/src/shared/infrastructure/criteria"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -19,13 +20,15 @@ import (
 
 // PostgresGlobalProductRepository implementa GlobalProductRepository usando PostgreSQL
 type PostgresGlobalProductRepository struct {
-	db *sql.DB
+	db        *sql.DB
+	converter *sharedCriteria.SQLCriteriaConverter
 }
 
 // NewPostgresGlobalProductRepository crea una nueva instancia del repositorio
 func NewPostgresGlobalProductRepository(db *sql.DB) port.GlobalProductRepository {
 	return &PostgresGlobalProductRepository{
-		db: db,
+		db:        db,
+		converter: sharedCriteria.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -565,15 +568,39 @@ func (r *PostgresGlobalProductRepository) CountArgentineProducts() (int, error) 
 	return count, err
 }
 
-// SearchByCriteria busca productos usando criterios (para compatibilidad)
+// SearchByCriteria busca productos usando criterios
 func (r *PostgresGlobalProductRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.GlobalProduct, error) {
-	// Implementación básica - se puede extender según necesidades
-	return r.FindAll(0, 100)
+	baseQuery := `
+		SELECT id, ean, name, description, brand, category, price, image_url, image_urls,
+			   source, source_url, source_reliability, quality_score, is_verified, is_active,
+			   business_type, tags, metadata, created_at, updated_at, scraped_at, last_scraped_at
+		FROM global_products
+	`
+	
+	query, params := r.converter.ToSelectSQL(baseQuery, crit)
+	
+	rows, err := r.db.QueryContext(ctx, query, params...)
+	if err != nil {
+		return nil, fmt.Errorf("error querying global products by criteria: %w", err)
+	}
+	defer rows.Close()
+	
+	return r.scanGlobalProducts(rows)
 }
 
-// CountByCriteria cuenta productos usando criterios (para compatibilidad)
+// CountByCriteria cuenta productos usando criterios
 func (r *PostgresGlobalProductRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
-	return r.CountTotal()
+	baseCountQuery := "SELECT COUNT(*) FROM global_products"
+	
+	query, params := r.converter.ToCountSQL(baseCountQuery, crit)
+	
+	var count int
+	err := r.db.QueryRowContext(ctx, query, params...).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("error counting global products by criteria: %w", err)
+	}
+	
+	return count, nil
 }
 
 // scanGlobalProduct escanea una fila en una entidad GlobalProduct

@@ -6,6 +6,7 @@ import (
 	"pim/src/attribute/application/request"
 	"pim/src/attribute/application/response"
 	"pim/src/attribute/application/usecase"
+	"pim/src/attribute/infrastructure/criteria"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,25 +15,31 @@ import (
 type MarketplaceAttributeHandler struct {
 	createUseCase  *usecase.CreateMarketplaceAttributeUseCase
 	listUseCase    *usecase.ListMarketplaceAttributesUseCase
+	listByCriteriaUseCase *usecase.ListMarketplaceAttributesByCriteriaUseCase
 	getByIDUseCase *usecase.GetMarketplaceAttributeByIDUseCase
 	updateUseCase  *usecase.UpdateMarketplaceAttributeUseCase
 	deleteUseCase  *usecase.DeleteMarketplaceAttributeUseCase
+	criteriaBuilder *criteria.MarketplaceAttributeCriteriaBuilder
 }
 
 // NewMarketplaceAttributeHandler crea una nueva instancia del manejador
 func NewMarketplaceAttributeHandler(
 	createUseCase *usecase.CreateMarketplaceAttributeUseCase,
 	listUseCase *usecase.ListMarketplaceAttributesUseCase,
+	listByCriteriaUseCase *usecase.ListMarketplaceAttributesByCriteriaUseCase,
 	getByIDUseCase *usecase.GetMarketplaceAttributeByIDUseCase,
 	updateUseCase *usecase.UpdateMarketplaceAttributeUseCase,
 	deleteUseCase *usecase.DeleteMarketplaceAttributeUseCase,
+	criteriaBuilder *criteria.MarketplaceAttributeCriteriaBuilder,
 ) *MarketplaceAttributeHandler {
 	return &MarketplaceAttributeHandler{
 		createUseCase:  createUseCase,
 		listUseCase:    listUseCase,
+		listByCriteriaUseCase: listByCriteriaUseCase,
 		getByIDUseCase: getByIDUseCase,
 		updateUseCase:  updateUseCase,
 		deleteUseCase:  deleteUseCase,
+		criteriaBuilder: criteriaBuilder,
 	}
 }
 
@@ -101,13 +108,17 @@ func (h *MarketplaceAttributeHandler) List(c *gin.Context) {
 		return
 	}
 
-	attributes, err := h.listUseCase.Execute(c.Request.Context())
+	// Construir criterios desde los query params
+	searchCriteria := h.criteriaBuilder.BuildValidated(c)
+
+	// Ejecutar la búsqueda con criterios
+	result, err := h.listByCriteriaUseCase.Execute(c.Request.Context(), searchCriteria)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, response.FromMarketplaceEntities(attributes))
+	c.JSON(http.StatusOK, result)
 }
 
 // GetByID maneja la solicitud para obtener un atributo marketplace por ID

@@ -3,7 +3,6 @@ package controller
 import (
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,15 +10,18 @@ import (
 	"pim/src/product/global_catalog/application/usecase"
 	"pim/src/product/global_catalog/domain/exception"
 	"pim/src/product/global_catalog/infrastructure/controller/dto"
+	"pim/src/product/global_catalog/infrastructure/criteria"
 )
 
 // GlobalCatalogController maneja las requests HTTP para el catálogo global
 type GlobalCatalogController struct {
-	createGlobalProduct     *usecase.CreateGlobalProduct
-	searchByEAN             *usecase.SearchByEAN
-	listGlobalProducts      *usecase.ListGlobalProducts
-	getGlobalProductByID    *usecase.GetGlobalProductByID
-	updateGlobalProductByID *usecase.UpdateGlobalProductByID
+	createGlobalProduct          *usecase.CreateGlobalProduct
+	searchByEAN                  *usecase.SearchByEAN
+	listGlobalProducts           *usecase.ListGlobalProducts
+	listGlobalProductsByCriteria *usecase.ListGlobalProductsByCriteriaUseCase
+	getGlobalProductByID         *usecase.GetGlobalProductByID
+	updateGlobalProductByID      *usecase.UpdateGlobalProductByID
+	criteriaBuilder              *criteria.GlobalProductCriteriaBuilder
 }
 
 // NewGlobalCatalogController crea una nueva instancia del controlador
@@ -27,15 +29,19 @@ func NewGlobalCatalogController(
 	createGlobalProduct *usecase.CreateGlobalProduct,
 	searchByEAN *usecase.SearchByEAN,
 	listGlobalProducts *usecase.ListGlobalProducts,
+	listGlobalProductsByCriteria *usecase.ListGlobalProductsByCriteriaUseCase,
 	getGlobalProductByID *usecase.GetGlobalProductByID,
 	updateGlobalProductByID *usecase.UpdateGlobalProductByID,
+	criteriaBuilder *criteria.GlobalProductCriteriaBuilder,
 ) *GlobalCatalogController {
 	return &GlobalCatalogController{
-		createGlobalProduct:     createGlobalProduct,
-		searchByEAN:             searchByEAN,
-		listGlobalProducts:      listGlobalProducts,
-		getGlobalProductByID:    getGlobalProductByID,
-		updateGlobalProductByID: updateGlobalProductByID,
+		createGlobalProduct:          createGlobalProduct,
+		searchByEAN:                  searchByEAN,
+		listGlobalProducts:           listGlobalProducts,
+		listGlobalProductsByCriteria: listGlobalProductsByCriteria,
+		getGlobalProductByID:         getGlobalProductByID,
+		updateGlobalProductByID:      updateGlobalProductByID,
+		criteriaBuilder:              criteriaBuilder,
 	}
 }
 
@@ -163,89 +169,38 @@ func (gc *GlobalCatalogController) GetProductByEAN(c *gin.Context) {
 // ListProducts lista productos del catálogo global con filtros
 // GET /api/v1/global-catalog/products
 func (gc *GlobalCatalogController) ListProducts(c *gin.Context) {
-	// Parámetros de paginación
-	offset := 0
-	limit := 20
+	// Construir criterios desde los query params
+	searchCriteria := gc.criteriaBuilder.BuildValidated(c)
 
-	if offsetStr := c.Query("offset"); offsetStr != "" {
-		if val, err := strconv.Atoi(offsetStr); err == nil && val >= 0 {
-			offset = val
-		}
-	}
-
-	if limitStr := c.Query("limit"); limitStr != "" {
-		if val, err := strconv.Atoi(limitStr); err == nil && val > 0 && val <= 100 {
-			limit = val
-		}
-	}
-
-	// Filtros booleanos - CORREGIR NOMBRES DE PARÁMETROS
-	onlyActive := c.Query("is_active") == "true"
-	onlyVerified := c.Query("is_verified") == "true"
-	onlyArgentine := c.Query("is_argentine") == "true"
-	onlyHighQuality := c.Query("only_high_quality") == "true"
-
-	// Filtros de calidad
-	var minQuality, maxQuality *int
-	if minQualityStr := c.Query("min_quality"); minQualityStr != "" {
-		if val, err := strconv.Atoi(minQualityStr); err == nil {
-			minQuality = &val
-		}
-	}
-	if maxQualityStr := c.Query("max_quality"); maxQualityStr != "" {
-		if val, err := strconv.Atoi(maxQualityStr); err == nil {
-			maxQuality = &val
-		}
-	}
-
-	// Filtros de texto - CORREGIR NOMBRES DE PARÁMETROS
-	var businessType, source, searchName, searchBrand, searchCategory *string
-	if bt := c.Query("business_type"); bt != "" {
-		businessType = &bt
-	}
-	if s := c.Query("source"); s != "" {
-		source = &s
-	}
-	if sn := c.Query("search"); sn != "" { // Cambiar de search_name a search
-		searchName = &sn
-	}
-	if sb := c.Query("brand"); sb != "" { // Cambiar de search_brand a brand
-		searchBrand = &sb
-	}
-	if sc := c.Query("category"); sc != "" { // Cambiar de search_category a category
-		searchCategory = &sc
-	}
-
-	// Tags de búsqueda (separados por comas)
-	var searchTags []string
-	if tagsStr := c.Query("tags"); tagsStr != "" {
-		searchTags = strings.Split(tagsStr, ",")
-	}
-
-	request := usecase.ListGlobalProductsRequest{
-		Offset:          offset,
-		Limit:           limit,
-		BusinessType:    businessType,
-		Source:          source,
-		MinQuality:      minQuality,
-		MaxQuality:      maxQuality,
-		OnlyActive:      onlyActive,
-		OnlyVerified:    onlyVerified,
-		OnlyArgentine:   onlyArgentine,
-		OnlyHighQuality: onlyHighQuality,
-		SearchName:      searchName,
-		SearchBrand:     searchBrand,
-		SearchCategory:  searchCategory,
-		SearchTags:      searchTags,
-	}
-
-	response, err := gc.listGlobalProducts.Execute(request)
+	// Ejecutar la búsqueda con criterios
+	response, err := gc.listGlobalProductsByCriteria.Execute(c.Request.Context(), searchCriteria)
 	if err != nil {
 		gc.handleUseCaseError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, response)
+	// Convertir entidades a DTOs para evitar objetos vacíos en JSON
+	dtoItems := make([]*dto.GlobalProductResponse, len(response.Items))
+	for i, product := range response.Items {
+		dtoItems[i] = dto.NewGlobalProductResponse(product)
+	}
+
+	// Crear respuesta con DTOs
+	finalResponse := struct {
+		Items      []*dto.GlobalProductResponse `json:"items"`
+		TotalCount int                          `json:"total_count"`
+		Page       int                          `json:"page"`
+		PageSize   int                          `json:"page_size"`
+		TotalPages int                          `json:"total_pages"`
+	}{
+		Items:      dtoItems,
+		TotalCount: response.TotalCount,
+		Page:       response.Page,
+		PageSize:   response.PageSize,
+		TotalPages: response.TotalPages,
+	}
+
+	c.JSON(http.StatusOK, finalResponse)
 }
 
 // GetProductsSuggestions obtiene productos sugeridos por tipo de negocio (público)

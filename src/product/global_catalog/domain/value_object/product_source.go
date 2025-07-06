@@ -23,6 +23,19 @@ const (
 	SourceCoto      = "coto"
 	SourceJumbo     = "jumbo"
 	SourceAPI       = "api"
+	// Nuevas fuentes agregadas
+	SourcePigmento             = "scraper_pigmento"
+	SourceFarmashop            = "scraper_farmashop"
+	SourceJuleriaque           = "scraper_juleriaque"
+	SourceAlmacenNatural       = "scraper_almacen_natural"
+	SourcePolirubroOnline      = "scraper_polirubro_online"
+	SourceWatchesWorld         = "scraper_watches_world"
+	SourceRelojeriaSuiza       = "scraper_relojeria_suiza"
+	SourceLubricentroOnline    = "scraper_lubricentro_online"
+	SourceLubricantesOnline    = "scraper_lubricantes_online"
+	SourceFerreteriaGeneralPaz = "scraper_ferreteria_general_paz"
+	SourceCasaDelTornillo      = "scraper_casa_del_tornillo"
+	SourceRelojeriaKronos      = "scraper_relojeria_kronos"
 )
 
 // NewProductSource crea un nuevo ProductSource
@@ -92,7 +105,14 @@ func (ps *ProductSource) IsManual() bool {
 
 // IsScraped indica si el producto fue obtenido via scraping
 func (ps *ProductSource) IsScraped() bool {
-	scraped := []string{SourceDisco, SourceCarrefour, SourceFravega, SourceCoto, SourceJumbo}
+	scraped := []string{
+		SourceDisco, SourceCarrefour, SourceFravega, SourceCoto, SourceJumbo,
+		// Nuevas fuentes de scraping
+		SourcePigmento, SourceFarmashop, SourceJuleriaque, SourceAlmacenNatural,
+		SourcePolirubroOnline, SourceWatchesWorld, SourceRelojeriaSuiza,
+		SourceLubricentroOnline, SourceLubricantesOnline, SourceFerreteriaGeneralPaz,
+		SourceCasaDelTornillo, SourceRelojeriaKronos,
+	}
 	for _, s := range scraped {
 		if ps.source == s {
 			return true
@@ -137,6 +157,31 @@ func (ps *ProductSource) GetSourceDisplayName() string {
 		return "Jumbo Argentina"
 	case SourceAPI:
 		return "API Externa"
+	// Nuevas fuentes agregadas
+	case SourcePigmento:
+		return "Pigmento Perfumería"
+	case SourceFarmashop:
+		return "Farmashop"
+	case SourceJuleriaque:
+		return "Juleriaque Belleza"
+	case SourceAlmacenNatural:
+		return "Almacén Natural"
+	case SourcePolirubroOnline:
+		return "Polirubro Online"
+	case SourceWatchesWorld:
+		return "Watches World"
+	case SourceRelojeriaSuiza:
+		return "Relojería Suiza"
+	case SourceLubricentroOnline:
+		return "Lubricentro Online"
+	case SourceLubricantesOnline:
+		return "Lubricantes Online"
+	case SourceFerreteriaGeneralPaz:
+		return "Ferretería General Paz"
+	case SourceCasaDelTornillo:
+		return "La Casa del Tornillo"
+	case SourceRelojeriaKronos:
+		return "Relojería Kronos"
 	default:
 		return "Desconocida"
 	}
@@ -147,6 +192,11 @@ func isValidSource(source string) bool {
 	validSources := []string{
 		SourceManual, SourceDisco, SourceCarrefour, SourceFravega,
 		SourceCoto, SourceJumbo, SourceAPI,
+		// Nuevas fuentes agregadas
+		SourcePigmento, SourceFarmashop, SourceJuleriaque, SourceAlmacenNatural,
+		SourcePolirubroOnline, SourceWatchesWorld, SourceRelojeriaSuiza,
+		SourceLubricentroOnline, SourceLubricantesOnline, SourceFerreteriaGeneralPaz,
+		SourceCasaDelTornillo, SourceRelojeriaKronos,
 	}
 
 	source = strings.ToLower(source)

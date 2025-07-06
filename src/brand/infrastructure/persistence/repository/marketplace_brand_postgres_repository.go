@@ -9,7 +9,6 @@ import (
 	"pim/src/brand/domain/exception"
 	"pim/src/shared/domain/criteria"
 	sharedCriteria "pim/src/shared/infrastructure/criteria"
-	"strconv"
 
 	"github.com/lib/pq"
 )
@@ -33,15 +32,15 @@ func (r *MarketplacebrandPostgresRepository) Create(ctx context.Context, marketp
 	query := `
 		INSERT INTO marketplace_brands (
 			name, description, logo_url, website, aliases, category_tags, 
-			quality_score, product_count, sources, is_verified, is_active,
+			quality_score, product_count, verification_status, is_active,
 			created_at, updated_at
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 		)
 		RETURNING id
 	`
 
-	var id int
+	var id string
 	err := r.db.QueryRowContext(ctx, query,
 		marketplace_brand.Name,
 		marketplace_brand.Description,
@@ -51,8 +50,7 @@ func (r *MarketplacebrandPostgresRepository) Create(ctx context.Context, marketp
 		pq.Array(marketplace_brand.CategoryTags),
 		marketplace_brand.QualityScore,
 		marketplace_brand.ProductCount,
-		pq.Array(marketplace_brand.Sources),
-		marketplace_brand.IsVerified,
+		marketplace_brand.VerificationStatus,
 		marketplace_brand.IsActive,
 		marketplace_brand.CreatedAt,
 		marketplace_brand.UpdatedAt,
@@ -64,7 +62,7 @@ func (r *MarketplacebrandPostgresRepository) Create(ctx context.Context, marketp
 	}
 
 	// Actualizar el ID en la entidad
-	marketplace_brand.ID = strconv.Itoa(id)
+	marketplace_brand.ID = id
 	return nil
 }
 
@@ -80,10 +78,9 @@ func (r *MarketplacebrandPostgresRepository) Update(ctx context.Context, marketp
 			category_tags = $7,
 			quality_score = $8,
 			product_count = $9,
-			sources = $10,
-			is_verified = $11,
-			is_active = $12,
-			updated_at = $13
+			verification_status = $10,
+			is_active = $11,
+			updated_at = $12
 		WHERE id = $1
 	`
 
@@ -97,8 +94,7 @@ func (r *MarketplacebrandPostgresRepository) Update(ctx context.Context, marketp
 		pq.Array(marketplace_brand.CategoryTags),
 		marketplace_brand.QualityScore,
 		marketplace_brand.ProductCount,
-		pq.Array(marketplace_brand.Sources),
-		marketplace_brand.IsVerified,
+		marketplace_brand.VerificationStatus,
 		marketplace_brand.IsActive,
 		marketplace_brand.UpdatedAt,
 	)
@@ -120,7 +116,7 @@ func (r *MarketplacebrandPostgresRepository) Update(ctx context.Context, marketp
 func (r *MarketplacebrandPostgresRepository) FindByID(ctx context.Context, id string) (*entity.Marketplacebrand, error) {
 	query := `
 		SELECT id, name, description, logo_url, website, aliases, category_tags,
-		       quality_score, product_count, sources, is_verified, is_active,
+		       quality_score, product_count, verification_status, is_active,
 		       created_at, updated_at
 		FROM marketplace_brands 
 		WHERE id = $1
@@ -134,7 +130,7 @@ func (r *MarketplacebrandPostgresRepository) FindByID(ctx context.Context, id st
 func (r *MarketplacebrandPostgresRepository) FindAll(ctx context.Context) ([]*entity.Marketplacebrand, error) {
 	query := `
 		SELECT id, name, description, logo_url, website, aliases, category_tags,
-		       quality_score, product_count, sources, is_verified, is_active,
+		       quality_score, product_count, verification_status, is_active,
 		       created_at, updated_at
 		FROM marketplace_brands 
 		ORDER BY quality_score DESC, name ASC
@@ -171,7 +167,7 @@ func (r *MarketplacebrandPostgresRepository) Delete(ctx context.Context, id stri
 func (r *MarketplacebrandPostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.Marketplacebrand, error) {
 	baseQuery := `
 		SELECT id, name, description, logo_url, website, aliases, category_tags,
-		       quality_score, product_count, sources, is_verified, is_active,
+		       quality_score, product_count, verification_status, is_active,
 		       created_at, updated_at
 		FROM marketplace_brands
 	`
@@ -203,12 +199,10 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrand(row *sql.Row) 
 	var marketplace_brand entity.Marketplacebrand
 	var aliases pq.StringArray
 	var categoryTags pq.StringArray
-	var sources pq.StringArray
-	var id int
 	var description, logoURL, website sql.NullString
 
 	err := row.Scan(
-		&id,
+		&marketplace_brand.ID,
 		&marketplace_brand.Name,
 		&description,
 		&logoURL,
@@ -217,8 +211,7 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrand(row *sql.Row) 
 		&categoryTags,
 		&marketplace_brand.QualityScore,
 		&marketplace_brand.ProductCount,
-		&sources,
-		&marketplace_brand.IsVerified,
+		&marketplace_brand.VerificationStatus,
 		&marketplace_brand.IsActive,
 		&marketplace_brand.CreatedAt,
 		&marketplace_brand.UpdatedAt,
@@ -232,20 +225,13 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrand(row *sql.Row) 
 	}
 
 	// Convertir arrays de PostgreSQL a slices de Go
-	marketplace_brand.ID = strconv.Itoa(id)
 	marketplace_brand.Description = description.String
 	marketplace_brand.LogoURL = logoURL.String
 	marketplace_brand.Website = website.String
 	marketplace_brand.Aliases = []string(aliases)
 	marketplace_brand.CategoryTags = []string(categoryTags)
-	marketplace_brand.Sources = []string(sources)
-
-	// Actualizar verification status basado en is_verified
-	if marketplace_brand.IsVerified {
-		marketplace_brand.VerificationStatus = "verified"
-	} else {
-		marketplace_brand.VerificationStatus = "unverified"
-	}
+	marketplace_brand.Sources = []string{} // Campo no existe en DB, inicializar vacío
+	marketplace_brand.IsVerified = marketplace_brand.VerificationStatus == "verified" // Derivar de verification_status
 
 	return &marketplace_brand, nil
 }
@@ -258,12 +244,10 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrands(rows *sql.Row
 		var marketplace_brand entity.Marketplacebrand
 		var aliases pq.StringArray
 		var categoryTags pq.StringArray
-		var sources pq.StringArray
-		var id int
 		var description, logoURL, website sql.NullString
 
 		err := rows.Scan(
-			&id,
+			&marketplace_brand.ID,
 			&marketplace_brand.Name,
 			&description,
 			&logoURL,
@@ -272,8 +256,7 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrands(rows *sql.Row
 			&categoryTags,
 			&marketplace_brand.QualityScore,
 			&marketplace_brand.ProductCount,
-			&sources,
-			&marketplace_brand.IsVerified,
+			&marketplace_brand.VerificationStatus,
 			&marketplace_brand.IsActive,
 			&marketplace_brand.CreatedAt,
 			&marketplace_brand.UpdatedAt,
@@ -284,13 +267,13 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrands(rows *sql.Row
 		}
 
 		// Convertir arrays de PostgreSQL a slices de Go
-		marketplace_brand.ID = strconv.Itoa(id)
 		marketplace_brand.Description = description.String
 		marketplace_brand.LogoURL = logoURL.String
 		marketplace_brand.Website = website.String
 		marketplace_brand.Aliases = []string(aliases)
 		marketplace_brand.CategoryTags = []string(categoryTags)
-		marketplace_brand.Sources = []string(sources)
+		marketplace_brand.Sources = []string{} // Campo no existe en DB, inicializar vacío
+		marketplace_brand.IsVerified = marketplace_brand.VerificationStatus == "verified" // Derivar de verification_status
 
 		// Actualizar verification status basado en is_verified
 		if marketplace_brand.IsVerified {

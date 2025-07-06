@@ -145,8 +145,37 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 		}
 	}
 
-	// Ordenamiento por defecto
-	criteriaBuilder.SetOrder("sort_order", "ASC")
+	// Ordenamiento
+	sortBy := c.DefaultQuery("sort_by", "sort_order")
+	sortDir := c.DefaultQuery("sort_dir", "ASC")
+	
+	// Validar dirección de ordenamiento
+	if sortDir != "ASC" && sortDir != "DESC" && sortDir != "asc" && sortDir != "desc" {
+		sortDir = "ASC"
+	}
+	
+	// Convertir a mayúsculas
+	if sortDir == "asc" {
+		sortDir = "ASC"
+	} else if sortDir == "desc" {
+		sortDir = "DESC"
+	}
+	
+	// Validar campos permitidos para ordenamiento
+	allowedSortFields := map[string]bool{
+		"name":       true,
+		"slug":       true,
+		"level":      true,
+		"sort_order": true,
+		"created_at": true,
+		"updated_at": true,
+	}
+	
+	if !allowedSortFields[sortBy] {
+		sortBy = "sort_order"
+	}
+	
+	criteriaBuilder.SetOrder(sortBy, sortDir)
 
 	criteria := criteriaBuilder.Build()
 

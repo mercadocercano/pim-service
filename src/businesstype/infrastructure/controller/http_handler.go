@@ -3,6 +3,8 @@ package controller
 import (
 	"net/http"
 	"pim/src/businesstype/application/usecase"
+	"pim/src/businesstype/domain/port"
+	"pim/src/shared/domain/criteria"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +15,7 @@ type BusinessTypeHandler struct {
 	listUseCase   *usecase.ListBusinessTypesUseCase
 	getUseCase    *usecase.GetBusinessTypeUseCase
 	updateUseCase *usecase.UpdateBusinessTypeUseCase
+	repository    port.BusinessTypeRepository
 }
 
 // NewBusinessTypeHandler crea una nueva instancia del handler
@@ -21,12 +24,14 @@ func NewBusinessTypeHandler(
 	listUseCase *usecase.ListBusinessTypesUseCase,
 	getUseCase *usecase.GetBusinessTypeUseCase,
 	updateUseCase *usecase.UpdateBusinessTypeUseCase,
+	repository port.BusinessTypeRepository,
 ) *BusinessTypeHandler {
 	return &BusinessTypeHandler{
 		createUseCase: createUseCase,
 		listUseCase:   listUseCase,
 		getUseCase:    getUseCase,
 		updateUseCase: updateUseCase,
+		repository:    repository,
 	}
 }
 
@@ -68,20 +73,71 @@ func (h *BusinessTypeHandler) CreateBusinessType(c *gin.Context) {
 
 // ListBusinessTypes maneja el listado de business types
 func (h *BusinessTypeHandler) ListBusinessTypes(c *gin.Context) {
-	var req usecase.ListBusinessTypesRequest
+	// Construir criterios usando el builder correcto
+	criteriaBuilder := criteria.NewCriteriaBuilder()
 
-	// Parsear query params
+	// Poblar desde query parameters (paginación, ordenamiento básico)
+	criteriaBuilder.FromURLValues(c.Request.URL.Query())
+
+	// Filtro only_active
 	if c.Query("only_active") == "true" {
-		req.OnlyActive = true
+		criteriaBuilder.AddEqualFilter("is_active", true)
 	}
 
-	result, err := h.listUseCase.Execute(c.Request.Context(), req)
+	// Filtros adicionales que pueden venir del frontend
+	if search := c.Query("search"); search != "" {
+		criteriaBuilder.AddLikeFilter("name", search)
+	}
+
+	if code := c.Query("code"); code != "" {
+		criteriaBuilder.AddLikeFilter("code", code)
+	}
+
+	if isActive := c.Query("is_active"); isActive != "" {
+		if isActive == "true" {
+			criteriaBuilder.AddEqualFilter("is_active", true)
+		} else if isActive == "false" {
+			criteriaBuilder.AddEqualFilter("is_active", false)
+		}
+	}
+
+	// Establecer valores por defecto si no se especifican
+	if c.Query("sort_by") == "" {
+		criteriaBuilder.SetOrder("sort_order", "ASC")
+	}
+
+	// Construir criterios finales
+	searchCriteria := criteriaBuilder.Build()
+
+	// Buscar usando criterios
+	businessTypes, err := h.repository.SearchByCriteria(c.Request.Context(), searchCriteria)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listando business types: " + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	// Contar total usando criterios (sin paginación)
+	countCriteria := criteria.NewCriteria(
+		searchCriteria.Filters,
+		criteria.Order{},      // Sin ordenamiento para conteo
+		criteria.Pagination{}, // Sin paginación para conteo
+	)
+
+	total, err := h.repository.CountByCriteria(c.Request.Context(), countCriteria)
+	if err != nil {
+		total = len(businessTypes) // Fallback
+	}
+
+	// Respuesta con formato compatible con frontend
+	response := map[string]interface{}{
+		"items":       businessTypes,
+		"total_count": total,
+		"page":        searchCriteria.Pagination.Page,
+		"page_size":   searchCriteria.Pagination.Limit,
+		"total_pages": (total + searchCriteria.Pagination.Limit - 1) / searchCriteria.Pagination.Limit,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // GetBusinessType obtiene un business type por ID
