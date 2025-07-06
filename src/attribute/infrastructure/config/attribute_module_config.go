@@ -19,6 +19,7 @@ type AttributeModuleConfig struct {
 	// Use Cases
 	CreateMarketplaceAttributeUseCase  *usecase.CreateMarketplaceAttributeUseCase
 	ListMarketplaceAttributesUseCase   *usecase.ListMarketplaceAttributesUseCase
+	ListMarketplaceAttributesByCriteriaUseCase *usecase.ListMarketplaceAttributesByCriteriaUseCase
 	GetMarketplaceAttributeByIDUseCase *usecase.GetMarketplaceAttributeByIDUseCase
 	UpdateMarketplaceAttributeUseCase  *usecase.UpdateMarketplaceAttributeUseCase
 	DeleteMarketplaceAttributeUseCase  *usecase.DeleteMarketplaceAttributeUseCase
@@ -41,6 +42,7 @@ func NewAttributeModuleConfig(db *sql.DB) *AttributeModuleConfig {
 	// Use Cases para Marketplace Attributes
 	createMarketplaceAttributeUseCase := usecase.NewCreateMarketplaceAttributeUseCase(marketplaceAttributeRepo)
 	listMarketplaceAttributesUseCase := usecase.NewListMarketplaceAttributesUseCase(marketplaceAttributeRepo)
+	listMarketplaceAttributesByCriteriaUseCase := usecase.NewListMarketplaceAttributesByCriteriaUseCase(marketplaceAttributeRepo)
 	getMarketplaceAttributeByIDUseCase := usecase.NewGetMarketplaceAttributeByIDUseCase(marketplaceAttributeRepo)
 	updateMarketplaceAttributeUseCase := usecase.NewUpdateMarketplaceAttributeUseCase(marketplaceAttributeRepo)
 	deleteMarketplaceAttributeUseCase := usecase.NewDeleteMarketplaceAttributeUseCase(marketplaceAttributeRepo)
@@ -49,15 +51,18 @@ func NewAttributeModuleConfig(db *sql.DB) *AttributeModuleConfig {
 	marketplaceAttributeHandler := controller.NewMarketplaceAttributeHandler(
 		createMarketplaceAttributeUseCase,
 		listMarketplaceAttributesUseCase,
+		listMarketplaceAttributesByCriteriaUseCase,
 		getMarketplaceAttributeByIDUseCase,
 		updateMarketplaceAttributeUseCase,
 		deleteMarketplaceAttributeUseCase,
+		marketplaceAttributeCriteriaBuilder,
 	)
 
 	return &AttributeModuleConfig{
 		MarketplaceAttributeRepository:      marketplaceAttributeRepo,
 		CreateMarketplaceAttributeUseCase:   createMarketplaceAttributeUseCase,
 		ListMarketplaceAttributesUseCase:    listMarketplaceAttributesUseCase,
+		ListMarketplaceAttributesByCriteriaUseCase: listMarketplaceAttributesByCriteriaUseCase,
 		GetMarketplaceAttributeByIDUseCase:  getMarketplaceAttributeByIDUseCase,
 		UpdateMarketplaceAttributeUseCase:   updateMarketplaceAttributeUseCase,
 		DeleteMarketplaceAttributeUseCase:   deleteMarketplaceAttributeUseCase,

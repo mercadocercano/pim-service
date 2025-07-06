@@ -281,6 +281,7 @@ func setupBusinessTypeModule(router *gin.RouterGroup, db *sql.DB) {
 		listBusinessTypesUC,
 		getBusinessTypeUC,
 		updateBusinessTypeUC,
+		businessTypeRepo,
 	)
 
 	// Registrar rutas

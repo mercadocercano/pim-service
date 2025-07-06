@@ -54,15 +54,6 @@ func (b *MarketplaceAttributeCriteriaBuilder) addMarketplaceAttributeFilters(c *
 		b.builder.AddLikeFilter("name", name)
 	}
 
-	// Filtro por estado activo/inactivo
-	if isActive := c.Query("is_active"); isActive != "" {
-		if isActive == "true" {
-			b.builder.AddEqualFilter("is_active", true)
-		} else if isActive == "false" {
-			b.builder.AddEqualFilter("is_active", false)
-		}
-	}
-
 	// Filtro por atributos requeridos
 	if isRequired := c.Query("is_required"); isRequired != "" {
 		if isRequired == "true" {
@@ -90,20 +81,6 @@ func (b *MarketplaceAttributeCriteriaBuilder) addMarketplaceAttributeFilters(c *
 		}
 	}
 
-	// Filtro por descripción (búsqueda LIKE)
-	if description := c.Query("description"); description != "" {
-		b.builder.AddLikeFilter("description", description)
-	}
-
-	// Filtro por group_name si existe en la tabla
-	if groupName := c.Query("group_name"); groupName != "" {
-		b.builder.AddEqualFilter("group_name", groupName)
-	}
-
-	// Por defecto, solo mostrar atributos activos (a menos que se especifique lo contrario)
-	if includeInactive := c.Query("include_inactive"); includeInactive != "true" {
-		b.builder.AddEqualFilter("is_active", true)
-	}
 }
 
 // GetAllowedFields retorna los campos permitidos para filtrado y ordenamiento
@@ -111,13 +88,11 @@ func (b *MarketplaceAttributeCriteriaBuilder) GetAllowedFields() []string {
 	return []string{
 		"id",
 		"name",
+		"slug",
 		"type",
-		"description",
 		"is_required_for_listing",
 		"is_searchable",
 		"is_filterable",
-		"is_active",
-		"group_name",
 		"sort_order",
 		"created_at",
 		"updated_at",
