@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 
-	"pim/src/category/domain/entity"
-	"pim/src/category/domain/port"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // ListCategoriesByCriteriaUseCase maneja el listado de categorías con filtros y paginación

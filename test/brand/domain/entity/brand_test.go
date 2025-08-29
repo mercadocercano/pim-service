@@ -3,9 +3,9 @@ package entity
 import (
 	"testing"
 
-	"pim/src/brand/domain/entity"
-	"pim/src/brand/domain/exception"
-	"pim/src/brand/domain/value_object"
+	"saas-mt-pim-service/src/brand/domain/entity"
+	"saas-mt-pim-service/src/brand/domain/exception"
+	"saas-mt-pim-service/src/brand/domain/value_object"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

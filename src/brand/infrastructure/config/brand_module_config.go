@@ -3,12 +3,12 @@ package config
 import (
 	"database/sql"
 
-	"pim/src/brand/application/mapper"
-	"pim/src/brand/application/usecase"
-	"pim/src/brand/domain/service"
-	"pim/src/brand/infrastructure/controller"
-	"pim/src/brand/infrastructure/criteria"
-	"pim/src/brand/infrastructure/persistence"
+	"saas-mt-pim-service/src/brand/application/mapper"
+	"saas-mt-pim-service/src/brand/application/usecase"
+	"saas-mt-pim-service/src/brand/domain/service"
+	"saas-mt-pim-service/src/brand/infrastructure/controller"
+	"saas-mt-pim-service/src/brand/infrastructure/criteria"
+	"saas-mt-pim-service/src/brand/infrastructure/persistence"
 
 	"github.com/gin-gonic/gin"
 )

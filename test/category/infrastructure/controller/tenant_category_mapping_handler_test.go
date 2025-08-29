@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
-	"pim/src/marketplace/application/request"
-	"pim/src/marketplace/infrastructure/controller"
+	"saas-mt-pim-service/src/category/application/request"
+	"saas-mt-pim-service/src/category/infrastructure/controller"
 )
 
 func TestTenantCategoryMappingHandler_MapTenantCategory_Validation(t *testing.T) {

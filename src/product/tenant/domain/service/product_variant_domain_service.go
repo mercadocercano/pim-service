@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"pim/src/product/tenant/domain/entity"
-	"pim/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
 
 	"github.com/google/uuid"
 )

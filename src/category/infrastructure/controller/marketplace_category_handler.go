@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"pim/src/category/application/request"
-	"pim/src/category/application/response"
-	"pim/src/category/application/usecase"
-	"pim/src/category/domain/port"
-	domainCriteria "pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/category/application/request"
+	"saas-mt-pim-service/src/category/application/response"
+	"saas-mt-pim-service/src/category/application/usecase"
+	"saas-mt-pim-service/src/category/domain/port"
+	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,9 +18,7 @@ type MarketplaceCategoryHandler struct {
 	createMarketplaceCategoryUseCase   *usecase.CreateMarketplaceCategoryUseCase
 	getAllMarketplaceCategoriesUseCase *usecase.GetAllMarketplaceCategoriesUseCase
 	updateMarketplaceCategoryUseCase   *usecase.UpdateMarketplaceCategoryUseCase
-	getTenantTaxonomyUseCase           *usecase.GetTenantTaxonomyUseCase
 	validateCategoryHierarchyUseCase   *usecase.ValidateCategoryHierarchyUseCase
-	syncMarketplaceChangesUseCase      *usecase.SyncMarketplaceChangesUseCase
 	categoryRepository                 port.MarketplaceCategoryRepository
 }
 
@@ -29,18 +27,14 @@ func NewMarketplaceCategoryHandler(
 	createMarketplaceCategoryUseCase *usecase.CreateMarketplaceCategoryUseCase,
 	getAllMarketplaceCategoriesUseCase *usecase.GetAllMarketplaceCategoriesUseCase,
 	updateMarketplaceCategoryUseCase *usecase.UpdateMarketplaceCategoryUseCase,
-	getTenantTaxonomyUseCase *usecase.GetTenantTaxonomyUseCase,
 	validateCategoryHierarchyUseCase *usecase.ValidateCategoryHierarchyUseCase,
-	syncMarketplaceChangesUseCase *usecase.SyncMarketplaceChangesUseCase,
 	categoryRepository port.MarketplaceCategoryRepository,
 ) *MarketplaceCategoryHandler {
 	return &MarketplaceCategoryHandler{
 		createMarketplaceCategoryUseCase:   createMarketplaceCategoryUseCase,
 		getAllMarketplaceCategoriesUseCase: getAllMarketplaceCategoriesUseCase,
 		updateMarketplaceCategoryUseCase:   updateMarketplaceCategoryUseCase,
-		getTenantTaxonomyUseCase:           getTenantTaxonomyUseCase,
 		validateCategoryHierarchyUseCase:   validateCategoryHierarchyUseCase,
-		syncMarketplaceChangesUseCase:      syncMarketplaceChangesUseCase,
 		categoryRepository:                 categoryRepository,
 	}
 }
@@ -51,13 +45,14 @@ func (h *MarketplaceCategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
 	{
 		// Rutas para administradores (crear y obtener categorías globales)
 		marketplace.GET("/categories", h.GetAllMarketplaceCategories)
+		marketplace.GET("/categories/tree", h.GetMarketplaceCategoriesTree)
 		marketplace.POST("/categories", h.CreateMarketplaceCategory)
 		marketplace.PUT("/categories/:id", h.UpdateMarketplaceCategory)
 		marketplace.POST("/categories/validate-hierarchy", h.ValidateCategoryHierarchy)
-		marketplace.POST("/sync-changes", h.SyncMarketplaceChanges)
-
-		// Rutas para tenants (obtener taxonomía personalizada)
-		marketplace.GET("/taxonomy", h.GetTenantTaxonomy)
+		
+		// RUTAS TEMPORALMENTE DESHABILITADAS - casos de uso eliminados
+		// marketplace.POST("/sync-changes", h.SyncMarketplaceChanges)
+		// marketplace.GET("/taxonomy", h.GetTenantTaxonomy)
 	}
 }
 
@@ -231,6 +226,61 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 	c.JSON(http.StatusOK, response)
 }
 
+// GetMarketplaceCategoriesTree devuelve las categorías en formato de árbol jerárquico
+func (h *MarketplaceCategoryHandler) GetMarketplaceCategoriesTree(c *gin.Context) {
+	// Obtener todas las categorías
+	filters := domainCriteria.NewFilters(
+		domainCriteria.NewFilter("is_active", domainCriteria.OpEqual, true),
+	)
+	
+	// Solo podemos tener un orden, usar el más importante
+	order := domainCriteria.NewOrder("level", "ASC")
+	
+	// Sin paginación (obtener todas)
+	pagination := domainCriteria.NewPagination(0, 0)
+	
+	criteria := domainCriteria.NewCriteria(filters, order, pagination)
+
+	categories, err := h.categoryRepository.FindByCriteria(c.Request.Context(), criteria)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener categorías: " + err.Error()})
+		return
+	}
+
+	// Construir estructura de árbol
+	categoryMap := make(map[string]*response.MarketplaceCategoryTree)
+	var rootCategories []*response.MarketplaceCategoryTree
+
+	// Primero, crear todos los nodos
+	for _, cat := range categories {
+		node := &response.MarketplaceCategoryTree{
+			ID:       cat.ID,
+			Name:     cat.Name,
+			Slug:     cat.Slug,
+			Level:    cat.Level,
+			ParentID: cat.ParentID,
+			Children: []*response.MarketplaceCategoryTree{},
+		}
+		categoryMap[cat.ID] = node
+	}
+
+	// Luego, construir la jerarquía
+	for _, cat := range categories {
+		node := categoryMap[cat.ID]
+		if cat.ParentID == nil || *cat.ParentID == "" {
+			rootCategories = append(rootCategories, node)
+		} else {
+			if parent, exists := categoryMap[*cat.ParentID]; exists {
+				parent.Children = append(parent.Children, node)
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"categories": rootCategories,
+	})
+}
+
 // UpdateMarketplaceCategory maneja la solicitud para actualizar una categoría marketplace
 // Solo disponible para administradores del marketplace
 func (h *MarketplaceCategoryHandler) UpdateMarketplaceCategory(c *gin.Context) {
@@ -264,6 +314,8 @@ func (h *MarketplaceCategoryHandler) UpdateMarketplaceCategory(c *gin.Context) {
 }
 
 // GetTenantTaxonomy maneja la solicitud para obtener la taxonomía personalizada de un tenant
+// TEMPORALMENTE COMENTADO - caso de uso eliminado
+/*
 func (h *MarketplaceCategoryHandler) GetTenantTaxonomy(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
@@ -297,6 +349,7 @@ func (h *MarketplaceCategoryHandler) GetTenantTaxonomy(c *gin.Context) {
 
 	c.JSON(http.StatusOK, taxonomy)
 }
+*/
 
 // ValidateCategoryHierarchy maneja la solicitud para validar una jerarquía de categorías
 func (h *MarketplaceCategoryHandler) ValidateCategoryHierarchy(c *gin.Context) {
@@ -323,6 +376,8 @@ func (h *MarketplaceCategoryHandler) ValidateCategoryHierarchy(c *gin.Context) {
 }
 
 // SyncMarketplaceChanges maneja la solicitud para sincronizar cambios del marketplace
+// TEMPORALMENTE COMENTADO - caso de uso eliminado
+/*
 func (h *MarketplaceCategoryHandler) SyncMarketplaceChanges(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
@@ -345,3 +400,4 @@ func (h *MarketplaceCategoryHandler) SyncMarketplaceChanges(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
+*/

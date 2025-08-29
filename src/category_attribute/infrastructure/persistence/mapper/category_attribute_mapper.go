@@ -1,8 +1,8 @@
 package mapper
 
 import (
-	"pim/src/category_attribute/domain/entity"
-	"pim/src/category_attribute/infrastructure/persistence/model"
+	"saas-mt-pim-service/src/category_attribute/domain/entity"
+	"saas-mt-pim-service/src/category_attribute/infrastructure/persistence/model"
 )
 
 // CategoryAttributeMapper maneja las conversiones entre entidad y modelo

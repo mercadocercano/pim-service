@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"pim/src/category/domain/entity"
-	"pim/src/category/domain/port"
-	domainCriteria "pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/port"
+	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"pim/src/brand/domain/entity"
-	"pim/src/brand/domain/exception"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/brand/domain/entity"
+	"saas-mt-pim-service/src/brand/domain/exception"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 
 	"github.com/lib/pq"
 )

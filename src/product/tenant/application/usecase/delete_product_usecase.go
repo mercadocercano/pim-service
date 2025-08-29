@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 
-	"pim/src/product/tenant/domain/port"
-	"pim/src/product/tenant/domain/service"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/domain/service"
 
 	"github.com/google/uuid"
 )

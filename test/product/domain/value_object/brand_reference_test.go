@@ -4,7 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"pim/src/product/domain/value_object"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
 	"testing"
 )
 

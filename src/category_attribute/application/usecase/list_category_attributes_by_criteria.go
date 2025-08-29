@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 
-	"pim/src/category_attribute/domain/entity"
-	"pim/src/category_attribute/domain/port"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/category_attribute/domain/entity"
+	"saas-mt-pim-service/src/category_attribute/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // ListCategoryAttributesByCriteriaUseCase maneja el listado de atributos de categoría con filtros y paginación

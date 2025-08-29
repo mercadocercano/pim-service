@@ -3,8 +3,8 @@ package port
 import (
 	"context"
 
-	"pim/src/brand/domain/entity"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/brand/domain/entity"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // BrandRepository define el contrato para acceder a los datos de marcas

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"pim/src/category/application/request"
-	"pim/src/category/application/response"
-	"pim/src/category/domain/port"
+	"saas-mt-pim-service/src/category/application/request"
+	"saas-mt-pim-service/src/category/application/response"
+	"saas-mt-pim-service/src/category/domain/port"
 )
 
 // UpdateMarketplaceCategoryUseCase maneja la actualización de categorías marketplace

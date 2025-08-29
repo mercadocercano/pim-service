@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"pim/src/attribute/domain/entity"
+	"saas-mt-pim-service/src/attribute/domain/entity"
 
 	"github.com/google/uuid"
 )

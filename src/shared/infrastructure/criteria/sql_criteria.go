@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	domainCriteria "pim/src/shared/domain/criteria"
+	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // SQLCriteriaConverter convierte un objeto Criteria en una consulta SQL
@@ -119,11 +119,26 @@ func (s *SQLCriteriaConverter) buildWhereClause(filters domainCriteria.Filters) 
 
 	paramIndex := 1
 	for _, filter := range filters.Items {
-		condition, value := s.processFilterWithIndex(filter, paramIndex)
-		conditions = append(conditions, condition)
-		if value != nil {
-			params = append(params, value)
-			paramIndex++
+		if filter.Operator == domainCriteria.OpIn {
+			// Manejo especial para operador IN
+			if values, ok := filter.Value.([]interface{}); ok && len(values) > 0 {
+				placeholders := make([]string, len(values))
+				for i, value := range values {
+					placeholders[i] = "$" + strconv.Itoa(paramIndex)
+					params = append(params, value)
+					paramIndex++
+				}
+				condition := fmt.Sprintf("%s IN (%s)", filter.Field, strings.Join(placeholders, ", "))
+				conditions = append(conditions, condition)
+			}
+		} else {
+			// Manejo normal para otros operadores
+			condition, value := s.processFilterWithIndex(filter, paramIndex)
+			conditions = append(conditions, condition)
+			if value != nil {
+				params = append(params, value)
+				paramIndex++
+			}
 		}
 	}
 
@@ -154,7 +169,7 @@ func (s *SQLCriteriaConverter) processFilterWithIndex(filter domainCriteria.Filt
 		domainCriteria.OpGreaterThanOrEqual, domainCriteria.OpLessThan, domainCriteria.OpLessThanOrEqual:
 		condition = fmt.Sprintf("%s %s %s", filter.Field, filter.Operator, placeholder)
 	case domainCriteria.OpLike:
-		condition = fmt.Sprintf("%s LIKE %s", filter.Field, placeholder)
+		condition = fmt.Sprintf("%s ILIKE %s", filter.Field, placeholder)
 		// Asegurar que el valor sea compatible con LIKE
 		if str, ok := filter.Value.(string); ok {
 			if !strings.Contains(str, "%") {
@@ -162,8 +177,19 @@ func (s *SQLCriteriaConverter) processFilterWithIndex(filter domainCriteria.Filt
 			}
 		}
 	case domainCriteria.OpIn:
-		// Manejar arrays para cláusulas IN
-		condition = fmt.Sprintf("%s IN (%s)", filter.Field, placeholder)
+		// Manejar arrays para cláusulas IN - generar múltiples placeholders
+		if values, ok := filter.Value.([]interface{}); ok && len(values) > 0 {
+			placeholders := make([]string, len(values))
+			for i := range values {
+				placeholders[i] = "$" + strconv.Itoa(paramIndex+i)
+			}
+			condition = fmt.Sprintf("%s IN (%s)", filter.Field, strings.Join(placeholders, ", "))
+			// Retornar el primer valor, el resto se manejarán por separado
+			return condition, values[0]
+		} else {
+			// Si no es un array válido, usar filtro igual
+			condition = fmt.Sprintf("%s = %s", filter.Field, placeholder)
+		}
 	case domainCriteria.OpIsNull:
 		condition = fmt.Sprintf("%s IS NULL", filter.Field)
 		return condition, nil
@@ -188,7 +214,7 @@ func (s *SQLCriteriaConverter) processFilter(filter domainCriteria.Filter) (stri
 	case "=", "!=", ">", ">=", "<", "<=":
 		condition = fmt.Sprintf("%s %s $?", filter.Field, filter.Operator)
 	case "LIKE":
-		condition = fmt.Sprintf("%s LIKE $?", filter.Field)
+		condition = fmt.Sprintf("%s ILIKE $?", filter.Field)
 		// Asegurar que el valor sea compatible con LIKE
 		if str, ok := filter.Value.(string); ok {
 			if !strings.Contains(str, "%") {

@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"pim/src/product/global_catalog/domain/entity"
-	"pim/src/product/global_catalog/domain/port"
-	"pim/src/product/global_catalog/domain/value_object"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
+	"saas-mt-pim-service/src/product/global_catalog/domain/port"
+	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -61,9 +61,15 @@ func (r *PostgresGlobalProductRepository) Save(globalProduct *entity.GlobalProdu
 		tagsArray = pq.StringArray(tags)
 	}
 
+	var eanValue *string
+	if globalProduct.EAN() != nil {
+		ean := globalProduct.EAN().Value()
+		eanValue = &ean
+	}
+	
 	row := r.db.QueryRow(query,
 		globalProduct.ID(),
-		globalProduct.EAN().Value(),
+		eanValue,
 		globalProduct.Name(),
 		globalProduct.Description(),
 		globalProduct.Brand(),
@@ -606,7 +612,8 @@ func (r *PostgresGlobalProductRepository) CountByCriteria(ctx context.Context, c
 // scanGlobalProduct escanea una fila en una entidad GlobalProduct
 func (r *PostgresGlobalProductRepository) scanGlobalProduct(row *sql.Row) (*entity.GlobalProduct, error) {
 	var (
-		idStr, ean, name, source                             string
+		idStr, name, source                                  string
+		ean                                                  *string
 		description, brand, category, imageURL, businessType *string
 		price, sourceReliability                             *float64
 		sourceURL                                            *string
@@ -643,7 +650,8 @@ func (r *PostgresGlobalProductRepository) scanGlobalProducts(rows *sql.Rows) ([]
 
 	for rows.Next() {
 		var (
-			idStr, ean, name, source                             string
+			idStr, name, source                                  string
+		ean                                                  *string
 			description, brand, category, imageURL, businessType *string
 			price, sourceReliability                             *float64
 			sourceURL                                            *string
@@ -689,7 +697,7 @@ func (r *PostgresGlobalProductRepository) scanGlobalProducts(rows *sql.Rows) ([]
 
 // buildGlobalProductFromScan construye una entidad GlobalProduct desde datos escaneados
 func (r *PostgresGlobalProductRepository) buildGlobalProductFromScan(
-	idStr, ean, name string,
+	idStr string, ean *string, name string,
 	description, brand, category *string,
 	price, sourceReliability *float64,
 	source, sourceURL *string,
@@ -709,10 +717,14 @@ func (r *PostgresGlobalProductRepository) buildGlobalProductFromScan(
 		return nil, fmt.Errorf("ID inválido: %w", err)
 	}
 
-	// Crear EAN
-	eanVO, err := value_object.NewEAN13(ean)
-	if err != nil {
-		return nil, fmt.Errorf("EAN inválido: %w", err)
+	// Crear EAN si existe
+	var eanVO *value_object.EAN13
+	if ean != nil && *ean != "" {
+		var err error
+		eanVO, err = value_object.NewEAN13(*ean)
+		if err != nil {
+			return nil, fmt.Errorf("EAN inválido: %w", err)
+		}
 	}
 
 	// Crear QualityScore

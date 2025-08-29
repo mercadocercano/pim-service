@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"errors"
 
-	"pim/src/category/domain/entity"
-	"pim/src/category/domain/exception"
-	"pim/src/category/infrastructure/persistence/mapper"
-	"pim/src/category/infrastructure/persistence/model"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/exception"
+	"saas-mt-pim-service/src/category/infrastructure/persistence/mapper"
+	"saas-mt-pim-service/src/category/infrastructure/persistence/model"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 )
 
 // CategoryPostgresRepository implementa el repositorio de categorías usando PostgreSQL

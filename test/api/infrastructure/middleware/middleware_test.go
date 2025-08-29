@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
-	"pim/src/api/infrastructure/middleware"
+	"saas-mt-pim-service/src/api/infrastructure/middleware"
 )
 
 func TestMarketplaceAuthMiddleware(t *testing.T) {

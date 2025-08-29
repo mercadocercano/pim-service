@@ -3,10 +3,10 @@ package config
 import (
 	"database/sql"
 
-	"pim/src/category/application/usecase"
-	"pim/src/category/domain/port"
-	"pim/src/category/infrastructure/controller"
-	"pim/src/category/infrastructure/persistence/repository"
+	"saas-mt-pim-service/src/category/application/usecase"
+	"saas-mt-pim-service/src/category/domain/port"
+	"saas-mt-pim-service/src/category/infrastructure/controller"
+	"saas-mt-pim-service/src/category/infrastructure/persistence/repository"
 
 	"github.com/gin-gonic/gin"
 )

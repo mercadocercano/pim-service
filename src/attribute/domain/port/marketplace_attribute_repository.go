@@ -2,8 +2,8 @@ package port
 
 import (
 	"context"
-	"pim/src/attribute/domain/entity"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/attribute/domain/entity"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // MarketplaceAttributeRepository define los métodos para persistir MarketplaceAttribute

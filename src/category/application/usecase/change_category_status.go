@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 
-	"pim/src/category/domain/entity"
-	"pim/src/category/domain/port"
+	"saas-mt-pim-service/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/port"
 )
 
 // ChangeCategoryStatusUseCase implementa el caso de uso para cambiar el estado de una categoría

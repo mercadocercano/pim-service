@@ -3,10 +3,10 @@ package config
 import (
 	"database/sql"
 
-	"pim/src/category_attribute/application/usecase"
-	"pim/src/category_attribute/domain/port"
-	"pim/src/category_attribute/infrastructure/controller"
-	"pim/src/category_attribute/infrastructure/persistence/repository"
+	"saas-mt-pim-service/src/category_attribute/application/usecase"
+	"saas-mt-pim-service/src/category_attribute/domain/port"
+	"saas-mt-pim-service/src/category_attribute/infrastructure/controller"
+	"saas-mt-pim-service/src/category_attribute/infrastructure/persistence/repository"
 
 	"log"
 

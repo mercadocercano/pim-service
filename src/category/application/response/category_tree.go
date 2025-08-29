@@ -1,7 +1,7 @@
 package response
 
 import (
-	"pim/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/entity"
 )
 
 // CategoryTreeResponse representa una categoría en formato de árbol con hijos

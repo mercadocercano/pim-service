@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"pim/src/product/tenant/domain/entity"
-	"pim/src/product/tenant/domain/port"
-	"pim/src/product/tenant/domain/value_object"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
 )
 
 // CreateFromTemplateUseCase implementa la creación de productos desde templates del global catalog

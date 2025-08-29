@@ -6,11 +6,11 @@ import (
 	"errors"
 	"time"
 
-	"pim/src/product/tenant/domain/entity"
-	"pim/src/product/tenant/domain/port"
-	"pim/src/product/tenant/domain/value_object"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 
 	"github.com/google/uuid"
 )
@@ -350,7 +350,7 @@ func (r *PostgresProductRepository) buildProductFromScan(
 
 	// Crear referencia de categoría si existe
 	var categoryRef *value_object.CategoryReference
-	if categoryID != nil && *categoryID != "" {
+	if categoryID != nil && *categoryID != "" && categoryName != nil && *categoryName != "" {
 		categoryRef, err = value_object.NewCategoryReference(*categoryID, *categoryName)
 		if err != nil {
 			return nil, err
@@ -359,7 +359,7 @@ func (r *PostgresProductRepository) buildProductFromScan(
 
 	// Crear referencia de marca si existe
 	var brandRef *value_object.BrandReference
-	if brandID != nil && *brandID != "" {
+	if brandID != nil && *brandID != "" && brandName != nil && *brandName != "" {
 		brandRef, err = value_object.NewBrandReference(*brandID, *brandName)
 		if err != nil {
 			return nil, err

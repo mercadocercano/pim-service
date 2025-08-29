@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"pim/src/marketplace/application/request"
+	"saas-mt-pim-service/src/category/application/request"
 )
 
 // TestMapTenantCategoryBasic tests básicos para mapeo de categorías tenant

@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"pim/src/brand/domain/exception"
-	"pim/src/brand/domain/port"
+	"saas-mt-pim-service/src/brand/domain/exception"
+	"saas-mt-pim-service/src/brand/domain/port"
 )
 
 // BrandDomainService contiene la lógica de negocio compleja del dominio Brand

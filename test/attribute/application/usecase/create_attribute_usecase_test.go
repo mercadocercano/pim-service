@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"pim/src/attribute/application/usecase"
-	testentity "pim/test/attribute/domain/entity"
+	"saas-mt-pim-service/src/attribute/application/usecase"
+	testentity "saas-mt-pim-service/test/attribute/domain/entity"
 )
 
 func TestCreateAttributeUseCase_Execute_Success(t *testing.T) {

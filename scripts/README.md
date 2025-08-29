@@ -1,45 +1,48 @@
 # 🛠️ Scripts de Utilidades - PIM Service
 
-Este directorio contiene scripts de utilidades para el servicio PIM.
+Este directorio contiene scripts de utilidad para el servicio PIM.
 
-## 📁 Archivos
+## 📦 Scripts de Migración y Seeds
 
-- `migrate.sh` - Script de migración de base de datos
-- `wait-for-db.sh` - Script para esperar que la base de datos esté lista
-- `README.md` - Este archivo
+### `migrate.sh`
+Script principal de migración de base de datos PostgreSQL.
+
+### `run_migration.sh`
+Ejecuta migraciones específicas del servicio.
+
+### `run_migration_docker.sh`
+Ejecuta migraciones en el entorno Docker.
+
+### Seeds de Datos
+- `seed_business_types_argentina.sh` - Carga datos de tipos de negocio para Argentina
+- `seed_business_types_docker.sh` - Ejecuta seeds de business types en Docker
+- `seed_complete_marketplace_docker.sh` - Carga completa de datos del marketplace en Docker
+- `run-marketplace-seeders.sh` - Ejecuta todos los seeders del marketplace
+
+## 🔧 Scripts de Utilidad
+
+### `wait-for-db.sh`
+Script que espera a que PostgreSQL esté disponible antes de continuar. Usado en Docker Compose.
+
+### `update-openapi.sh`
+Actualiza la documentación OpenAPI del servicio.
+
+### `setup-ai-templates-e2e.sh`
+Configura el entorno para pruebas E2E de templates AI.
 
 ## 📦 Tests de Integración
 
-**⚠️ IMPORTANTE**: Los tests de integración se han movido al directorio `test-integration/`
+**⚠️ IMPORTANTE**: Los tests de integración están en el directorio `test-integration/`
 
-Para ejecutar tests de integración, usa:
+Para ejecutar tests de integración:
 
 ```bash
-# Desde el directorio raíz del proyecto
-./run_tests.sh
-
-# O desde el directorio de tests
+# Desde el directorio de tests
 cd test-integration/
 ./run_integration_tests.sh
 ```
 
 Ver documentación completa en: [`test-integration/README.md`](../test-integration/README.md)
-
-## 🚀 Scripts Disponibles
-
-### migrate.sh
-Script para ejecutar migraciones de base de datos.
-
-```bash
-./scripts/migrate.sh
-```
-
-### wait-for-db.sh
-Script para esperar que la base de datos esté lista antes de iniciar el servicio.
-
-```bash
-./scripts/wait-for-db.sh
-```
 
 ## 📋 Uso en Docker
 

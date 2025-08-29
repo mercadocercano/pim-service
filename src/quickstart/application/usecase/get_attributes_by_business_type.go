@@ -2,23 +2,28 @@ package usecase
 
 import (
 	"context"
-
-	"pim/src/quickstart/domain/service"
 )
 
-// GetAttributesByBusinessTypeUseCase implementa el caso de uso para obtener atributos por tipo de negocio
+// GetAttributesByBusinessTypeUseCase obtiene atributos por tipo de negocio
 type GetAttributesByBusinessTypeUseCase struct {
-	quickstartService *service.QuickstartService
+	// Por ahora retorna datos mock
 }
 
-// NewGetAttributesByBusinessTypeUseCase crea una nueva instancia del caso de uso
-func NewGetAttributesByBusinessTypeUseCase(quickstartService *service.QuickstartService) *GetAttributesByBusinessTypeUseCase {
-	return &GetAttributesByBusinessTypeUseCase{
-		quickstartService: quickstartService,
-	}
+// NewGetAttributesByBusinessTypeUseCase crea una nueva instancia
+func NewGetAttributesByBusinessTypeUseCase() *GetAttributesByBusinessTypeUseCase {
+	return &GetAttributesByBusinessTypeUseCase{}
 }
 
-// Execute ejecuta el caso de uso para obtener atributos por tipo de negocio
+// Execute ejecuta el caso de uso
 func (uc *GetAttributesByBusinessTypeUseCase) Execute(ctx context.Context, businessType string) (interface{}, error) {
-	return uc.quickstartService.GetAttributesByBusinessType(ctx, businessType)
+	// Mock data temporal
+	attributes := []map[string]interface{}{
+		{"id": 1, "name": "Precio", "type": "number"},
+		{"id": 2, "name": "Stock", "type": "number"},
+		{"id": 3, "name": "Código de barras", "type": "text"},
+	}
+	
+	return map[string]interface{}{
+		"attributes": attributes,
+	}, nil
 }

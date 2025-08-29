@@ -1,7 +1,8 @@
 package config
 
 import (
-	"pim/src/shared/infrastructure/middleware"
+	"saas-mt-pim-service/src/api/infrastructure/middleware"
+	sharedMiddleware "saas-mt-pim-service/src/shared/infrastructure/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,27 +31,30 @@ func DefaultSharedConfig() SharedConfig {
 
 // SetupSharedMiddleware configura los middlewares compartidos
 func SetupSharedMiddleware(router *gin.Engine, config SharedConfig) {
+	// Aplicar middleware CORS para todas las rutas
+	router.Use(middleware.CORSMiddleware())
+
 	// Aplicar middleware para intentar descomprimir todas las solicitudes entrantes si está habilitado
 	if config.AlwaysTryDecompress {
-		router.Use(middleware.GzipReader())
+		router.Use(sharedMiddleware.GzipReader())
 	}
 
 	// Aplicar middleware de compresión gzip si está habilitado
 	if config.EnableGzip {
-		gzipOpts := middleware.GzipOptions{
+		gzipOpts := sharedMiddleware.GzipOptions{
 			ExcludedPaths: config.GzipExcludedPaths,
 		}
-		router.Use(middleware.GzipMiddleware(gzipOpts))
+		router.Use(sharedMiddleware.GzipMiddleware(gzipOpts))
 
 		// Configurar rutas que siempre deben usar compresión gzip
 		if config.ForceGzipCompression && len(config.ForceGzipPaths) > 0 {
-			forceGzipOpts := middleware.ForceGzipOptions{
+			forceGzipOpts := sharedMiddleware.ForceGzipOptions{
 				CheckClientSupport: config.ForceGzipCheckSupport,
 			}
 
 			// Ejemplo de cómo aplicar compresión forzada a rutas específicas
 			for _, path := range config.ForceGzipPaths {
-				router.Group(path).Use(middleware.ForceGzipMiddleware(forceGzipOpts))
+				router.Group(path).Use(sharedMiddleware.ForceGzipMiddleware(forceGzipOpts))
 			}
 		}
 	}

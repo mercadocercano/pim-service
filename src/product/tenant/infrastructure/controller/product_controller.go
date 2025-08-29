@@ -2,13 +2,17 @@ package controller
 
 import (
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"pim/src/product/tenant/application/request"
-	"pim/src/product/tenant/application/usecase"
-	"pim/src/product/tenant/infrastructure/criteria"
+	"saas-mt-pim-service/src/product/tenant/application/request"
+	"saas-mt-pim-service/src/product/tenant/application/response"
+	"saas-mt-pim-service/src/product/tenant/application/usecase"
+	"saas-mt-pim-service/src/product/tenant/infrastructure/criteria"
+	"saas-mt-pim-service/src/shared/infrastructure/metrics"
 )
 
 // ProductController maneja las peticiones HTTP para productos
@@ -19,6 +23,9 @@ type ProductController struct {
 	updateProductStatusUseCase    *usecase.UpdateProductStatusUseCase
 	deleteProductUseCase          *usecase.DeleteProductUseCase
 	listProductsByCriteriaUseCase *usecase.ListProductsByCriteriaUseCase
+	importProductsFromCSVUseCase  *usecase.ImportProductsFromCSVUseCase
+	importProductsAsyncUseCase    *usecase.ImportProductsAsyncUseCase
+	validateSKUsUseCase           *usecase.ValidateSKUsUseCase
 	criteriaBuilder               *criteria.ProductCriteriaBuilder
 }
 
@@ -30,6 +37,9 @@ func NewProductController(
 	updateProductStatusUseCase *usecase.UpdateProductStatusUseCase,
 	deleteProductUseCase *usecase.DeleteProductUseCase,
 	listProductsByCriteriaUseCase *usecase.ListProductsByCriteriaUseCase,
+	importProductsFromCSVUseCase *usecase.ImportProductsFromCSVUseCase,
+	importProductsAsyncUseCase *usecase.ImportProductsAsyncUseCase,
+	validateSKUsUseCase *usecase.ValidateSKUsUseCase,
 	criteriaBuilder *criteria.ProductCriteriaBuilder,
 ) *ProductController {
 	return &ProductController{
@@ -39,6 +49,9 @@ func NewProductController(
 		updateProductStatusUseCase:    updateProductStatusUseCase,
 		deleteProductUseCase:          deleteProductUseCase,
 		listProductsByCriteriaUseCase: listProductsByCriteriaUseCase,
+		importProductsFromCSVUseCase:  importProductsFromCSVUseCase,
+		importProductsAsyncUseCase:    importProductsAsyncUseCase,
+		validateSKUsUseCase:           validateSKUsUseCase,
 		criteriaBuilder:               criteriaBuilder,
 	}
 }
@@ -376,6 +389,244 @@ func (ctrl *ProductController) GetAvailableStatusTransitions(c *gin.Context) {
 	})
 }
 
+// ImportProductsCSV godoc
+// @Summary Importar productos desde archivo CSV
+// @Description Importa múltiples productos desde un archivo CSV
+// @Tags products
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "Archivo CSV con productos"
+// @Param create_variants formData bool false "Crear variantes por defecto"
+// @Success 200 {object} response.ImportProductsCSVResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /products/import-csv [post]
+// @Security BearerAuth
+func (ctrl *ProductController) ImportProductsCSV(c *gin.Context) {
+	// Obtener tenant ID del header
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		return
+	}
+
+	// Obtener archivo del form
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No se pudo obtener el archivo", "details": err.Error()})
+		return
+	}
+	defer file.Close()
+
+	// Validar extensión del archivo
+	if !strings.HasSuffix(strings.ToLower(header.Filename), ".csv") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El archivo debe ser CSV"})
+		return
+	}
+
+	// Registrar tamaño del archivo
+	metrics.RecordFileSize(tenantID, "csv_products", header.Size)
+
+	// Ejecutar caso de uso
+	result, err := ctrl.importProductsFromCSVUseCase.Execute(c.Request.Context(), file, tenantID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al procesar archivo", "details": err.Error()})
+		return
+	}
+
+	// Crear respuesta
+	response := response.NewImportProductsCSVResponse(
+		result.ImportResult,
+		result.SavedProducts,
+		result.ProcessingErrors,
+	)
+
+	c.JSON(http.StatusOK, response)
+}
+
+// ValidateSKUs godoc
+// @Summary Validar SKUs existentes
+// @Description Verifica qué SKUs ya existen en el sistema del tenant
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param body body request.ValidateSKUsRequest true "Lista de SKUs a validar"
+// @Success 200 {object} response.ValidateSKUsResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /products/validate-skus [post]
+// @Security BearerAuth
+func (ctrl *ProductController) ValidateSKUs(c *gin.Context) {
+	startTime := time.Now()
+	
+	// Obtener tenant ID del header
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		return
+	}
+
+	// Parsear request
+	var req request.ValidateSKUsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		return
+	}
+
+	// Ejecutar caso de uso
+	result, err := ctrl.validateSKUsUseCase.Execute(c.Request.Context(), &req, tenantID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar SKUs", "details": err.Error()})
+		return
+	}
+
+	// Registrar métricas
+	duration := time.Since(startTime).Seconds()
+	metrics.RecordSKUValidation(tenantID, len(req.SKUs), duration)
+
+	c.JSON(http.StatusOK, result)
+}
+
+// ImportProductsCSVAsync godoc
+// @Summary Importar productos desde archivo CSV de forma asíncrona
+// @Description Inicia una importación asíncrona de productos desde un archivo CSV
+// @Tags products
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "Archivo CSV con productos"
+// @Param webhook_url formData string false "URL para notificación webhook"
+// @Param email_notify formData string false "Email para notificación"
+// @Success 202 {object} usecase.ImportAsyncResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /products/import-csv/async [post]
+// @Security BearerAuth
+func (ctrl *ProductController) ImportProductsCSVAsync(c *gin.Context) {
+	// Obtener tenant ID del header
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		return
+	}
+
+	// Obtener user ID del contexto o header
+	userID := c.GetHeader("X-User-ID")
+	if userID == "" {
+		userID = "system"
+	}
+
+	// Obtener archivo del form
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No se pudo obtener el archivo", "details": err.Error()})
+		return
+	}
+	defer file.Close()
+
+	// Validar extensión del archivo
+	if !strings.HasSuffix(strings.ToLower(header.Filename), ".csv") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El archivo debe ser CSV"})
+		return
+	}
+
+	// Obtener parámetros opcionales
+	var webhookURL *string
+	if webhook := c.PostForm("webhook_url"); webhook != "" {
+		webhookURL = &webhook
+	}
+
+	var emailNotify *string
+	if email := c.PostForm("email_notify"); email != "" {
+		emailNotify = &email
+	}
+
+	// Crear request
+	req := &usecase.ImportAsyncRequest{
+		FileName:    header.Filename,
+		FileReader:  file,
+		FileSize:    header.Size,
+		TenantID:    tenantID,
+		UserID:      userID,
+		WebhookURL:  webhookURL,
+		EmailNotify: emailNotify,
+	}
+
+	// Ejecutar caso de uso
+	result, err := ctrl.importProductsAsyncUseCase.StartImport(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al iniciar importación", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, result)
+}
+
+// GetImportJobStatus godoc
+// @Summary Obtener estado de trabajo de importación
+// @Description Obtiene el estado actual de un trabajo de importación
+// @Tags import-jobs
+// @Accept json
+// @Produce json
+// @Param id path string true "ID del trabajo"
+// @Success 200 {object} entity.ImportJob
+// @Failure 404 {object} map[string]interface{}
+// @Router /import-jobs/{id} [get]
+// @Security BearerAuth
+func (ctrl *ProductController) GetImportJobStatus(c *gin.Context) {
+	jobIDStr := c.Param("id")
+	if jobIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del trabajo es requerido"})
+		return
+	}
+
+	jobID, err := uuid.Parse(jobIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del trabajo debe ser un UUID válido"})
+		return
+	}
+
+	job, err := ctrl.importProductsAsyncUseCase.GetImportJobStatus(c.Request.Context(), jobID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Trabajo no encontrado"})
+		return
+	}
+
+	c.JSON(http.StatusOK, job)
+}
+
+// CancelImportJob godoc
+// @Summary Cancelar trabajo de importación
+// @Description Cancela un trabajo de importación en progreso
+// @Tags import-jobs
+// @Accept json
+// @Produce json
+// @Param id path string true "ID del trabajo"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /import-jobs/{id}/cancel [post]
+// @Security BearerAuth
+func (ctrl *ProductController) CancelImportJob(c *gin.Context) {
+	jobIDStr := c.Param("id")
+	if jobIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del trabajo es requerido"})
+		return
+	}
+
+	jobID, err := uuid.Parse(jobIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del trabajo debe ser un UUID válido"})
+		return
+	}
+
+	if err := ctrl.importProductsAsyncUseCase.CancelImportJob(c.Request.Context(), jobID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Trabajo cancelado exitosamente"})
+}
+
 // RegisterRoutes registra las rutas del controller
 func (ctrl *ProductController) RegisterRoutes(router *gin.RouterGroup) {
 	products := router.Group("/products")
@@ -387,5 +638,15 @@ func (ctrl *ProductController) RegisterRoutes(router *gin.RouterGroup) {
 		products.PATCH("/:id/status", ctrl.UpdateProductStatus)
 		products.GET("/:id/status/transitions", ctrl.GetAvailableStatusTransitions)
 		products.DELETE("/:id", ctrl.DeleteProduct)
+		products.POST("/import-csv", ctrl.ImportProductsCSV)
+		products.POST("/import-csv/async", ctrl.ImportProductsCSVAsync)
+		products.POST("/validate-skus", ctrl.ValidateSKUs)
+	}
+
+	// Rutas de trabajos de importación
+	importJobs := router.Group("/import-jobs")
+	{
+		importJobs.GET("/:id", ctrl.GetImportJobStatus)
+		importJobs.POST("/:id/cancel", ctrl.CancelImportJob)
 	}
 }

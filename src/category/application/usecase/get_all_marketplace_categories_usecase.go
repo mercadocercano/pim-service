@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 
-	"pim/src/category/application/response"
-	"pim/src/category/domain/port"
+	"saas-mt-pim-service/src/category/application/response"
+	"saas-mt-pim-service/src/category/domain/port"
 )
 
 // GetAllMarketplaceCategoriesUseCase maneja la obtención de todas las categorías marketplace

@@ -2,8 +2,8 @@ package port
 
 import (
 	"context"
-	"pim/src/product/global_catalog/domain/entity"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // GlobalProductRepository define los métodos para persistir GlobalProduct

@@ -3,10 +3,10 @@ package controller
 import (
 	"net/http"
 
-	"pim/src/attribute/application/request"
-	"pim/src/attribute/application/response"
-	"pim/src/attribute/application/usecase"
-	"pim/src/attribute/infrastructure/criteria"
+	"saas-mt-pim-service/src/attribute/application/request"
+	"saas-mt-pim-service/src/attribute/application/response"
+	"saas-mt-pim-service/src/attribute/application/usecase"
+	"saas-mt-pim-service/src/attribute/infrastructure/criteria"
 
 	"github.com/gin-gonic/gin"
 )

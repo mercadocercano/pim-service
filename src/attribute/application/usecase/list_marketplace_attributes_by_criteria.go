@@ -2,9 +2,9 @@ package usecase
 
 import (
 	"context"
-	"pim/src/shared/domain/criteria"
-	"pim/src/attribute/domain/entity"
-	"pim/src/attribute/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/attribute/domain/entity"
+	"saas-mt-pim-service/src/attribute/domain/port"
 )
 
 // ListMarketplaceAttributesByCriteriaUseCase lista atributos marketplace usando criterios

@@ -2,8 +2,8 @@ package port
 
 import (
 	"context"
-	"pim/src/brand/domain/entity"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/brand/domain/entity"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // MarketplacebrandRepository define los métodos para persistir Marketplacebrand (tabla global)

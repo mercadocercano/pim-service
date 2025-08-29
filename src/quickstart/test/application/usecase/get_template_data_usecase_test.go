@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"pim/src/quickstart/application/usecase"
-	"pim/src/quickstart/domain/service"
-	businessTypeTestEntity "pim/src/quickstart/test/domain/entity"
+	"saas-mt-pim-service/src/quickstart/application/usecase"
+	"saas-mt-pim-service/src/quickstart/domain/service"
+	businessTypeTestEntity "saas-mt-pim-service/src/quickstart/test/domain/entity"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

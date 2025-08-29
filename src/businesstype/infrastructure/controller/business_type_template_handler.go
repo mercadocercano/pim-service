@@ -3,8 +3,8 @@ package controller
 import (
 	"net/http"
 
-	"pim/src/businesstype/application/usecase"
-	templateCriteria "pim/src/businesstype/infrastructure/criteria"
+	"saas-mt-pim-service/src/businesstype/application/usecase"
+	templateCriteria "saas-mt-pim-service/src/businesstype/infrastructure/criteria"
 
 	"github.com/gin-gonic/gin"
 )

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"pim/src/quickstart/domain/entity"
+	"saas-mt-pim-service/src/quickstart/domain/entity"
 )
 
 // SetupResponse representa la respuesta de la configuración del tenant

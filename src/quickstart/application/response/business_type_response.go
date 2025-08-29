@@ -3,7 +3,7 @@ package response
 import (
 	"time"
 
-	"pim/src/quickstart/domain/entity"
+	"saas-mt-pim-service/src/quickstart/domain/entity"
 )
 
 // BusinessTypeResponse representa la respuesta para un tipo de negocio

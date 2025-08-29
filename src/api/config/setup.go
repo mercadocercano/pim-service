@@ -2,8 +2,8 @@ package config
 
 import (
 	"database/sql"
-	"pim/src/api/docs"
-	"pim/src/api/health"
+	"saas-mt-pim-service/src/api/docs"
+	"saas-mt-pim-service/src/api/health"
 
 	"github.com/gin-gonic/gin"
 )

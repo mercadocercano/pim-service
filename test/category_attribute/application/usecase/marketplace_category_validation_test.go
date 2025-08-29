@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"pim/src/marketplace/application/request"
+	"saas-mt-pim-service/src/category/application/request"
 )
 
 // TestMarketplaceCategoryValidation tests para validaciones de categorías marketplace

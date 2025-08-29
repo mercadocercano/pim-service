@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"pim/src/category_attribute/domain/entity"
-	"pim/src/category_attribute/domain/port"
+	"saas-mt-pim-service/src/category_attribute/domain/entity"
+	"saas-mt-pim-service/src/category_attribute/domain/port"
 )
 
 // CreateCategoryAttributeUseCase implementa el caso de uso para crear un nuevo atributo de categoría

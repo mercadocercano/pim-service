@@ -3,16 +3,17 @@ package config
 import (
 	"database/sql"
 
-	quickstartUseCase "pim/src/product/quickstart/application/usecase"
-	quickstartCtrl "pim/src/product/quickstart/infrastructure/controller"
-	quickstartService "pim/src/product/quickstart/infrastructure/service"
-	"pim/src/product/tenant/application/mapper"
-	"pim/src/product/tenant/application/usecase"
-	tenantService "pim/src/product/tenant/domain/service"
-	"pim/src/product/tenant/infrastructure/controller"
-	"pim/src/product/tenant/infrastructure/criteria"
-	"pim/src/product/tenant/infrastructure/persistence"
-	"pim/src/quickstart/domain/port"
+	quickstartUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
+	quickstartCtrl "saas-mt-pim-service/src/product/quickstart/infrastructure/controller"
+	quickstartService "saas-mt-pim-service/src/product/quickstart/infrastructure/service"
+	"saas-mt-pim-service/src/product/tenant/application/mapper"
+	"saas-mt-pim-service/src/product/tenant/application/usecase"
+	tenantService "saas-mt-pim-service/src/product/tenant/domain/service"
+	"saas-mt-pim-service/src/product/tenant/infrastructure/adapters"
+	"saas-mt-pim-service/src/product/tenant/infrastructure/controller"
+	"saas-mt-pim-service/src/product/tenant/infrastructure/criteria"
+	"saas-mt-pim-service/src/product/tenant/infrastructure/persistence"
+	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
 // ProductConfig contiene todas las dependencias del módulo Product
@@ -24,10 +25,6 @@ type ProductConfig struct {
 	ProductDomainService *tenantService.ProductDomainService
 	ProductStatusService *tenantService.ProductStatusService
 
-	// Mappers
-	ProductMapper        *mapper.ProductMapper
-	ProductVariantMapper *mapper.ProductVariantMapper
-
 	// Use Cases - Productos
 	CreateProductUseCase          *usecase.CreateProductUseCase
 	GetProductByIDUseCase         *usecase.GetProductByIDUseCase
@@ -35,6 +32,9 @@ type ProductConfig struct {
 	UpdateProductStatusUseCase    *usecase.UpdateProductStatusUseCase
 	DeleteProductUseCase          *usecase.DeleteProductUseCase
 	ListProductsByCriteriaUseCase *usecase.ListProductsByCriteriaUseCase
+	ImportProductsFromCSVUseCase  *usecase.ImportProductsFromCSVUseCase
+	ImportProductsAsyncUseCase    *usecase.ImportProductsAsyncUseCase
+	ValidateSKUsUseCase           *usecase.ValidateSKUsUseCase
 
 	// Use Cases - Variantes
 	CreateProductVariantUseCase          *usecase.CreateProductVariantUseCase
@@ -71,7 +71,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 
 	// Mappers
 	productMapper := mapper.NewProductMapper()
-	productVariantMapper := mapper.NewProductVariantMapper()
+	variantMapper := mapper.NewProductVariantMapper()
 
 	// Criteria Builders
 	productCriteriaBuilder := criteria.NewProductCriteriaBuilder()
@@ -109,20 +109,42 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		productStatusService,
 	)
 
+	// CSV File Importer
+	// TODO: Pasar servicios reales de categoría y marca cuando estén disponibles
+	productCSVFileImporter := adapters.NewProductCSVFileImporter(nil, nil)
+
+	// Use Case de importación CSV
+	importProductsFromCSVUseCase := usecase.NewImportProductsFromCSVUseCase(
+		productRepo,
+		productCSVFileImporter,
+	)
+
+	// Use Case de validación de SKUs
+	validateSKUsUseCase := usecase.NewValidateSKUsUseCase(productRepo)
+
+	// TODO: Agregar ImportProductsAsyncUseCase cuando las dependencias estén disponibles
+	// importProductsAsyncUseCase := usecase.NewImportProductsAsyncUseCase(
+	//     productRepo,
+	//     fileImporter,
+	//     importJobRepo,
+	//     notificationSvc,
+	//     fileStorage,
+	// )
+
 	// Use Cases - Variantes
 	createProductVariantUseCase := usecase.NewCreateProductVariantUseCase(
 		productRepo,
-		productVariantMapper,
+		variantMapper,
 	)
 
 	getProductVariantByIDUseCase := usecase.NewGetProductVariantByIDUseCase(
 		productRepo,
-		productVariantMapper,
+		variantMapper,
 	)
 
 	updateProductVariantUseCase := usecase.NewUpdateProductVariantUseCase(
 		productRepo,
-		productVariantMapper,
+		variantMapper,
 	)
 
 	deleteProductVariantUseCase := usecase.NewDeleteProductVariantUseCase(
@@ -131,7 +153,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 
 	listProductVariantsByCriteriaUseCase := usecase.NewListProductVariantsByCriteriaUseCase(
 		productRepo,
-		productVariantMapper,
+		variantMapper,
 	)
 
 	// Use Cases - Quickstart
@@ -150,6 +172,9 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		updateProductStatusUseCase,
 		deleteProductUseCase,
 		listProductsByCriteriaUseCase,
+		importProductsFromCSVUseCase,
+		nil, // importProductsAsyncUseCase - TODO: implementar cuando las dependencias estén disponibles
+		validateSKUsUseCase,
 		productCriteriaBuilder,
 	)
 
@@ -171,14 +196,15 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		ProductRepository:                    *productRepo.(*persistence.PostgresProductRepository),
 		ProductDomainService:                 productDomainService,
 		ProductStatusService:                 productStatusService,
-		ProductMapper:                        productMapper,
-		ProductVariantMapper:                 productVariantMapper,
 		CreateProductUseCase:                 createProductUseCase,
 		GetProductByIDUseCase:                getProductByIDUseCase,
 		UpdateProductUseCase:                 updateProductUseCase,
 		UpdateProductStatusUseCase:           updateProductStatusUseCase,
 		DeleteProductUseCase:                 deleteProductUseCase,
 		ListProductsByCriteriaUseCase:        listProductsByCriteriaUseCase,
+		ImportProductsFromCSVUseCase:         importProductsFromCSVUseCase,
+		ImportProductsAsyncUseCase:           nil, // TODO: implementar cuando las dependencias estén disponibles
+		ValidateSKUsUseCase:                  validateSKUsUseCase,
 		CreateProductVariantUseCase:          createProductVariantUseCase,
 		GetProductVariantByIDUseCase:         getProductVariantByIDUseCase,
 		UpdateProductVariantUseCase:          updateProductVariantUseCase,

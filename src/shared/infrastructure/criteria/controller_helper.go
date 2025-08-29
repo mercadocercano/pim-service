@@ -3,7 +3,7 @@ package criteria
 import (
 	"net/url"
 
-	domainCriteria "pim/src/shared/domain/criteria"
+	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
 
 	"github.com/gin-gonic/gin"
 )

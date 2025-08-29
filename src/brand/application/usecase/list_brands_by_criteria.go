@@ -3,10 +3,10 @@ package usecase
 import (
 	"context"
 
-	"pim/src/brand/application/mapper"
-	"pim/src/brand/application/response"
-	"pim/src/brand/domain/port"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/brand/application/mapper"
+	"saas-mt-pim-service/src/brand/application/response"
+	"saas-mt-pim-service/src/brand/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // ListBrandsByCriteriaUseCase maneja la obtención de marcas con filtros y paginación

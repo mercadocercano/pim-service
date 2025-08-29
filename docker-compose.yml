@@ -1,51 +1,50 @@
 version: '3.8'
 
 services:
-  # PostgreSQL for pim service
-  postgres:
-    image: postgres:15-alpine
-    container_name: pim-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: pim_db
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - pim-network
-
-  # pim Service
+  # PIM Service
   pim-service:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pim-service
+      target: development
+    container_name: tv-pim-service
     environment:
+      # PostgreSQL configuration (using shared postgres)
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: pim_db
       DB_SSLMODE: disable
+      # MongoDB configuration (using shared mongodb)
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_USER: admin
+      MONGO_PASSWORD: admin123
+      MONGO_DATABASE: pim_marketplace
+      # Development environment
+      GIN_MODE: debug
+      LOG_LEVEL: debug
     ports:
-      - "8090:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
+      - "8090:8090"
+    volumes:
+      - ./src:/app/src:ro
+      - ./migrations:/app/migrations:ro
+    # Dependencies are handled externally via docker-compose.infra.yml
     networks:
-      - pim-network
+      - saas-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "logging=promtail"
+      - "service_name=pim-service"
 
-volumes:
-  postgres_data:
 
 networks:
-  pim-network:
-    driver: bridge
+  saas-network:
+    external: true

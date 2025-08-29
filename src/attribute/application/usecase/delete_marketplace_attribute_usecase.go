@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"pim/src/attribute/domain/port"
+	"saas-mt-pim-service/src/attribute/domain/port"
 )
 
 // DeleteMarketplaceAttributeUseCase maneja la eliminación de atributos marketplace

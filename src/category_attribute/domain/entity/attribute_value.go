@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	sharedEntity "pim/src/shared/domain/entity"
+	sharedEntity "saas-mt-pim-service/src/shared/domain/entity"
 )
 
 // ErrInvalidAttributeValue representa errores relacionados con valores de atributos

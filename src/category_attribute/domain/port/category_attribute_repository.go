@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"pim/src/category_attribute/domain/entity"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/category_attribute/domain/entity"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // CategoryAttributeRepository define el contrato para acceder a los datos de atributos de categoría

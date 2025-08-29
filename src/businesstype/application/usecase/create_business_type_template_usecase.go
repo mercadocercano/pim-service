@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"pim/src/businesstype/domain/entity"
-	"pim/src/businesstype/domain/port"
+	"saas-mt-pim-service/src/businesstype/domain/entity"
+	"saas-mt-pim-service/src/businesstype/domain/port"
 )
 
 // CreateBusinessTypeTemplateUseCase maneja la creación de templates de business type

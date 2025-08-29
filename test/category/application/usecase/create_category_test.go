@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"pim/src/category/application/usecase"
-	"pim/src/category/domain/value_object"
-	"pim/test/category/infrastructure/persistence/repository"
+	"saas-mt-pim-service/src/category/application/usecase"
+	"saas-mt-pim-service/src/category/domain/value_object"
+	"saas-mt-pim-service/test/category/infrastructure/persistence/repository"
 )
 
 func TestCreateCategoryUseCase_Execute(t *testing.T) {

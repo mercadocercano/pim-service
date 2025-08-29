@@ -3,8 +3,8 @@ package response
 import (
 	"time"
 
-	"pim/src/category_attribute/domain/entity"
-	"pim/src/category_attribute/domain/port"
+	"saas-mt-pim-service/src/category_attribute/domain/entity"
+	"saas-mt-pim-service/src/category_attribute/domain/port"
 )
 
 // CategoryAttributeResponse representa la respuesta con datos de un atributo de categoría

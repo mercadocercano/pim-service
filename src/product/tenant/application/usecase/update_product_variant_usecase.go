@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"pim/src/product/tenant/application/mapper"
-	"pim/src/product/tenant/application/request"
-	"pim/src/product/tenant/application/response"
-	"pim/src/product/tenant/domain/port"
-	"pim/src/product/tenant/domain/value_object"
+	"saas-mt-pim-service/src/product/tenant/application/mapper"
+	"saas-mt-pim-service/src/product/tenant/application/request"
+	"saas-mt-pim-service/src/product/tenant/application/response"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
 
 	"github.com/google/uuid"
 )
@@ -22,11 +22,11 @@ type UpdateProductVariantUseCase struct {
 // NewUpdateProductVariantUseCase crea una nueva instancia del use case
 func NewUpdateProductVariantUseCase(
 	productRepo port.ProductCriteriaRepository,
-	mapper *mapper.ProductVariantMapper,
+	variantMapper *mapper.ProductVariantMapper,
 ) *UpdateProductVariantUseCase {
 	return &UpdateProductVariantUseCase{
 		productRepo: productRepo,
-		mapper:      mapper,
+		mapper:      variantMapper,
 	}
 }
 

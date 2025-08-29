@@ -2,8 +2,8 @@ package port
 
 import (
 	"context"
-	"pim/src/businesstype/domain/entity"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/businesstype/domain/entity"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // BusinessTypeTemplateRepository define los métodos para persistir BusinessTypeTemplate

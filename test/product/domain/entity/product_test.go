@@ -2,7 +2,7 @@ package entity
 
 import (
 	"github.com/stretchr/testify/assert"
-	"pim/src/product/domain/entity"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	"testing"
 )
 

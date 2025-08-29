@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 
-	"pim/src/category/domain/entity"
-	"pim/src/category/domain/port"
-	domainCriteria "pim/src/shared/domain/criteria"
-	infraCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/port"
+	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
+	infraCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 
 	"github.com/google/uuid"
 )

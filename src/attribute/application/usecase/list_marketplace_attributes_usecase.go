@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 
-	"pim/src/attribute/domain/entity"
-	"pim/src/attribute/domain/port"
+	"saas-mt-pim-service/src/attribute/domain/entity"
+	"saas-mt-pim-service/src/attribute/domain/port"
 )
 
 // ListMarketplaceAttributesUseCase maneja la obtención de atributos marketplace

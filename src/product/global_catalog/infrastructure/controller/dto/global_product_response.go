@@ -1,14 +1,14 @@
 package dto
 
 import (
-	"pim/src/product/global_catalog/domain/entity"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	"time"
 )
 
 // GlobalProductResponse representa la respuesta JSON de un producto global
 type GlobalProductResponse struct {
 	ID            string                 `json:"id"`
-	EAN           string                 `json:"ean"`
+	EAN           *string                `json:"ean,omitempty"`
 	Name          string                 `json:"name"`
 	Description   *string                `json:"description"`
 	Brand         *string                `json:"brand"`
@@ -48,9 +48,10 @@ func (dto *GlobalProductResponse) FromEntity(product *entity.GlobalProduct) *Glo
 		qualityScore = product.QualityScore().Value()
 	}
 
-	var ean string
+	var ean *string
 	if product.EAN() != nil {
-		ean = product.EAN().Value()
+		eanValue := product.EAN().Value()
+		ean = &eanValue
 	}
 
 	var source string

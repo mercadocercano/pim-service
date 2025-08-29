@@ -2,23 +2,21 @@ package usecase
 
 import (
 	"context"
-
-	"pim/src/quickstart/domain/service"
 )
 
-// GetVariantsByBusinessTypeUseCase implementa el caso de uso para obtener variantes por tipo de negocio
+// GetVariantsByBusinessTypeUseCase obtiene variantes por tipo de negocio
 type GetVariantsByBusinessTypeUseCase struct {
-	quickstartService *service.QuickstartService
 }
 
-// NewGetVariantsByBusinessTypeUseCase crea una nueva instancia del caso de uso
-func NewGetVariantsByBusinessTypeUseCase(quickstartService *service.QuickstartService) *GetVariantsByBusinessTypeUseCase {
-	return &GetVariantsByBusinessTypeUseCase{
-		quickstartService: quickstartService,
-	}
+// NewGetVariantsByBusinessTypeUseCase crea una nueva instancia
+func NewGetVariantsByBusinessTypeUseCase() *GetVariantsByBusinessTypeUseCase {
+	return &GetVariantsByBusinessTypeUseCase{}
 }
 
-// Execute ejecuta el caso de uso para obtener variantes por tipo de negocio
+// Execute ejecuta el caso de uso
 func (uc *GetVariantsByBusinessTypeUseCase) Execute(ctx context.Context, businessType string) (interface{}, error) {
-	return uc.quickstartService.GetVariantsByBusinessType(ctx, businessType)
+	// Mock data temporal
+	return map[string]interface{}{
+		"variants": []interface{}{},
+	}, nil
 }

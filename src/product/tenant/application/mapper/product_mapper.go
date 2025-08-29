@@ -1,8 +1,8 @@
 package mapper
 
 import (
-	"pim/src/product/tenant/application/response"
-	"pim/src/product/tenant/domain/entity"
+	"saas-mt-pim-service/src/product/tenant/application/response"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
 )
 
 // ProductMapper maneja la conversión entre entidades de dominio y DTOs

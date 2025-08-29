@@ -2,23 +2,27 @@ package usecase
 
 import (
 	"context"
-
-	"pim/src/quickstart/domain/service"
 )
 
-// GetProductsByBusinessTypeUseCase implementa el caso de uso para obtener productos por tipo de negocio
+// GetProductsByBusinessTypeUseCase obtiene productos por tipo de negocio
 type GetProductsByBusinessTypeUseCase struct {
-	quickstartService *service.QuickstartService
 }
 
-// NewGetProductsByBusinessTypeUseCase crea una nueva instancia del caso de uso
-func NewGetProductsByBusinessTypeUseCase(quickstartService *service.QuickstartService) *GetProductsByBusinessTypeUseCase {
-	return &GetProductsByBusinessTypeUseCase{
-		quickstartService: quickstartService,
-	}
+// NewGetProductsByBusinessTypeUseCase crea una nueva instancia
+func NewGetProductsByBusinessTypeUseCase() *GetProductsByBusinessTypeUseCase {
+	return &GetProductsByBusinessTypeUseCase{}
 }
 
-// Execute ejecuta el caso de uso para obtener productos por tipo de negocio
+// Execute ejecuta el caso de uso
 func (uc *GetProductsByBusinessTypeUseCase) Execute(ctx context.Context, businessType string) (interface{}, error) {
-	return uc.quickstartService.GetProductsByBusinessType(ctx, businessType)
+	// Mock data temporal
+	products := []map[string]interface{}{
+		{"id": 1, "name": "Coca-Cola 2.5L", "category": "beverages"},
+		{"id": 2, "name": "Leche Entera 1L", "category": "dairy"},
+		{"id": 3, "name": "Pan Blanco", "category": "bakery"},
+	}
+	
+	return map[string]interface{}{
+		"products": products,
+	}, nil
 }

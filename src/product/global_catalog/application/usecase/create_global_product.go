@@ -1,15 +1,15 @@
 package usecase
 
 import (
-	"pim/src/product/global_catalog/domain/entity"
-	"pim/src/product/global_catalog/domain/exception"
-	"pim/src/product/global_catalog/domain/port"
-	"pim/src/product/global_catalog/domain/value_object"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
+	"saas-mt-pim-service/src/product/global_catalog/domain/exception"
+	"saas-mt-pim-service/src/product/global_catalog/domain/port"
+	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
 )
 
 // CreateGlobalProductRequest contiene los datos para crear un producto global
 type CreateGlobalProductRequest struct {
-	EAN          string                 `json:"ean" validate:"required,len=13"`
+	EAN          string                 `json:"ean" validate:"omitempty,len=13"`
 	Name         string                 `json:"name" validate:"required,min=3,max=500"`
 	Description  *string                `json:"description,omitempty"`
 	Brand        *string                `json:"brand,omitempty"`
@@ -27,7 +27,7 @@ type CreateGlobalProductRequest struct {
 // CreateGlobalProductResponse contiene la respuesta del caso de uso
 type CreateGlobalProductResponse struct {
 	ID           string                 `json:"id"`
-	EAN          string                 `json:"ean"`
+	EAN          *string                `json:"ean,omitempty"`
 	Name         string                 `json:"name"`
 	Description  *string                `json:"description"`
 	Brand        *string                `json:"brand"`
@@ -60,19 +60,23 @@ func NewCreateGlobalProduct(globalProductRepository port.GlobalProductRepository
 
 // Execute ejecuta el caso de uso
 func (uc *CreateGlobalProduct) Execute(request CreateGlobalProductRequest) (*CreateGlobalProductResponse, error) {
-	// Validar y crear EAN
-	ean, err := value_object.NewEAN13(request.EAN)
-	if err != nil {
-		return nil, exception.NewValidationError("EAN inválido", err)
-	}
+	// Validar y crear EAN si se proporciona
+	var ean *value_object.EAN13
+	if request.EAN != "" {
+		var err error
+		ean, err = value_object.NewEAN13(request.EAN)
+		if err != nil {
+			return nil, exception.NewValidationError("EAN inválido", err)
+		}
 
-	// Verificar que no exista un producto con el mismo EAN
-	existingProduct, err := uc.globalProductRepository.FindByEAN(ean.Value())
-	if err != nil {
-		return nil, exception.NewInternalError("Error al verificar EAN existente", err)
-	}
-	if existingProduct != nil {
-		return nil, exception.NewConflictError("Ya existe un producto con el EAN " + request.EAN)
+		// Verificar que no exista un producto con el mismo EAN
+		existingProduct, err := uc.globalProductRepository.FindByEAN(ean.Value())
+		if err != nil {
+			return nil, exception.NewInternalError("Error al verificar EAN existente", err)
+		}
+		if existingProduct != nil {
+			return nil, exception.NewConflictError("Ya existe un producto con el EAN " + request.EAN)
+		}
 	}
 
 	// Crear ProductSource
@@ -82,6 +86,7 @@ func (uc *CreateGlobalProduct) Execute(request CreateGlobalProductRequest) (*Cre
 	}
 
 	var productSource *value_object.ProductSource
+	var err error
 	if request.SourceURL != nil {
 		productSource, err = value_object.NewScrapingSource(request.Source, *request.SourceURL, reliability)
 	} else {
@@ -134,7 +139,6 @@ func (uc *CreateGlobalProduct) Execute(request CreateGlobalProductRequest) (*Cre
 	// Mapear a respuesta
 	response := &CreateGlobalProductResponse{
 		ID:           savedProduct.IDString(),
-		EAN:          savedProduct.EAN().Value(),
 		Name:         savedProduct.Name(),
 		Description:  savedProduct.Description(),
 		Brand:        savedProduct.Brand(),
@@ -151,6 +155,12 @@ func (uc *CreateGlobalProduct) Execute(request CreateGlobalProductRequest) (*Cre
 		Metadata:     savedProduct.Metadata(),
 		CreatedAt:    savedProduct.CreatedAt().Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:    savedProduct.UpdatedAt().Format("2006-01-02T15:04:05Z07:00"),
+	}
+	
+	// Agregar EAN solo si existe
+	if savedProduct.EAN() != nil {
+		eanValue := savedProduct.EAN().Value()
+		response.EAN = &eanValue
 	}
 
 	return response, nil

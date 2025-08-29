@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	domainCriteria "pim/src/shared/domain/criteria"
+	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // Ejemplo que muestra cómo utilizar el criteria pattern con una base de datos SQL
@@ -53,7 +53,7 @@ Ejemplo de uso:
 
 import (
 	"database/sql"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 func searchProducts(db *sql.DB) {

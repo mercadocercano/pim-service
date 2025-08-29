@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"pim/src/product/tenant/application/usecase"
-	"pim/src/quickstart/domain/port"
+	"saas-mt-pim-service/src/product/tenant/application/usecase"
+	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
 // QuickstartProductService implementa la interfaz ProductService del quickstart

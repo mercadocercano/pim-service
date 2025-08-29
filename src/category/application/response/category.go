@@ -3,7 +3,7 @@ package response
 import (
 	"time"
 
-	"pim/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/entity"
 )
 
 // CategoryResponse representa la respuesta con datos de una categoría
