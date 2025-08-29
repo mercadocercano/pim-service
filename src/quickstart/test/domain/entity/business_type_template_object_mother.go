@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	businessTypeEntity "pim/src/businesstype/domain/entity"
+	businessTypeEntity "saas-mt-pim-service/src/businesstype/domain/entity"
 
 	"github.com/google/uuid"
 )
@@ -29,22 +29,25 @@ func (om *BusinessTypeTemplateObjectMother) Default() *businessTypeEntity.Busine
 		Region:         "AR",
 		Categories: []businessTypeEntity.CategoryTemplate{
 			{
+				ID:          "cat-1",
 				Name:        "Electrónicos",
+				Slug:        "electronicos",
 				Description: "Productos electrónicos y tecnología",
-				ParentName:  "",
-				SortOrder:   1,
-				Attributes:  []string{"marca", "modelo", "garantia"},
+				ParentID:    "",
+				Level:       0,
 			},
 			{
+				ID:          "cat-2",
 				Name:        "Hogar",
+				Slug:        "hogar",
 				Description: "Artículos para el hogar",
-				ParentName:  "",
-				SortOrder:   2,
-				Attributes:  []string{"material", "color", "tamaño"},
+				ParentID:    "",
+				Level:       0,
 			},
 		},
 		Attributes: []businessTypeEntity.AttributeTemplate{
 			{
+				ID:           "attr-1",
 				Code:         "marca",
 				Name:         "Marca",
 				Type:         "select",
@@ -53,6 +56,7 @@ func (om *BusinessTypeTemplateObjectMother) Default() *businessTypeEntity.Busine
 				Options:      []string{"Samsung", "LG", "Sony", "Philips"},
 			},
 			{
+				ID:           "attr-2",
 				Code:         "color",
 				Name:         "Color",
 				Type:         "select",
@@ -63,10 +67,13 @@ func (om *BusinessTypeTemplateObjectMother) Default() *businessTypeEntity.Busine
 		},
 		Products: []businessTypeEntity.ProductTemplate{
 			{
+				ID:           "prod-1",
 				Name:        "Televisor LED 32\"",
 				Description: "Televisor LED de 32 pulgadas",
-				Category:    "Electrónicos",
-				Brand:       "Samsung",
+				CategoryID:   "cat-1",
+				CategoryName: "Electrónicos",
+				BrandID:      "brand-1",
+				BrandName:    "Samsung",
 				SKU:         "TV-SAM-32-001",
 				Price:       45000.0,
 				Attributes: map[string]interface{}{
@@ -76,10 +83,13 @@ func (om *BusinessTypeTemplateObjectMother) Default() *businessTypeEntity.Busine
 				},
 			},
 			{
+				ID:           "prod-2",
 				Name:        "Silla de Oficina",
 				Description: "Silla ergonómica para oficina",
-				Category:    "Hogar",
-				Brand:       "Genérica",
+				CategoryID:   "cat-2",
+				CategoryName: "Hogar",
+				BrandID:      "brand-2",
+				BrandName:    "Genérica",
 				SKU:         "SILLA-OFF-001",
 				Price:       25000.0,
 				Attributes: map[string]interface{}{
@@ -147,6 +157,7 @@ func (om *BusinessTypeTemplateObjectMother) SimpleTemplate() *businessTypeEntity
 	}
 	template.Attributes = []businessTypeEntity.AttributeTemplate{
 		{
+			ID:           "attr-nom-1",
 			Code:         "nombre",
 			Name:         "Nombre",
 			Type:         "text",
@@ -157,10 +168,13 @@ func (om *BusinessTypeTemplateObjectMother) SimpleTemplate() *businessTypeEntity
 	}
 	template.Products = []businessTypeEntity.ProductTemplate{
 		{
+			ID:           "prod-test-1",
 			Name:        "Producto de Prueba",
 			Description: "Producto para testing",
-			Category:    "General",
-			Brand:       "Test",
+			CategoryID:   "cat-gen-1",
+			CategoryName: "General",
+			BrandID:      "brand-test-1",
+			BrandName:    "Test",
 			SKU:         "TEST-001",
 			Price:       100.0,
 			Attributes: map[string]interface{}{

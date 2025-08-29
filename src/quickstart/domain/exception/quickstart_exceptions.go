@@ -19,12 +19,6 @@ var (
 	// ErrQuickstartInProgress se produce cuando hay un quickstart en progreso para un tenant
 	ErrQuickstartInProgress = errors.New("hay un quickstart en progreso para este tenant")
 
-	// ErrYamlFileNotFound se produce cuando no se encuentra un archivo YAML
-	ErrYamlFileNotFound = errors.New("archivo YAML no encontrado")
-
-	// ErrInvalidYamlFormat se produce cuando el formato del archivo YAML es inválido
-	ErrInvalidYamlFormat = errors.New("formato de archivo YAML inválido")
-
 	// ErrSetupFailed se produce cuando falla la configuración del tenant
 	ErrSetupFailed = errors.New("falló la configuración del tenant")
 

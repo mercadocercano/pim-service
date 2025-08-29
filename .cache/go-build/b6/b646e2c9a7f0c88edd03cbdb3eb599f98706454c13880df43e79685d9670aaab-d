@@ -1,0 +1,3 @@
+./http_handler.go
+./marketplace_category_handler.go
+./tenant_category_mapping_handler.go

@@ -3,13 +3,13 @@ package usecase
 import (
 	"context"
 
-	"pim/src/product/tenant/application/mapper"
-	"pim/src/product/tenant/application/request"
-	"pim/src/product/tenant/application/response"
-	"pim/src/product/tenant/domain/entity"
-	"pim/src/product/tenant/domain/port"
-	"pim/src/product/tenant/domain/service"
-	"pim/src/product/tenant/domain/value_object"
+	"saas-mt-pim-service/src/product/tenant/application/mapper"
+	"saas-mt-pim-service/src/product/tenant/application/request"
+	"saas-mt-pim-service/src/product/tenant/application/response"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/domain/service"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
 )
 
 // CreateProductUseCase maneja la creación de productos
@@ -23,12 +23,12 @@ type CreateProductUseCase struct {
 func NewCreateProductUseCase(
 	productRepo port.ProductRepository,
 	domainService *service.ProductDomainService,
-	mapper *mapper.ProductMapper,
+	productMapper *mapper.ProductMapper,
 ) *CreateProductUseCase {
 	return &CreateProductUseCase{
 		productRepo:   productRepo,
 		domainService: domainService,
-		mapper:        mapper,
+		mapper:        productMapper,
 	}
 }
 

@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"pim/src/brand/application/request"
-	"pim/src/brand/application/response"
-	"pim/src/brand/application/usecase"
-	"pim/src/brand/domain/port"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/brand/application/request"
+	"saas-mt-pim-service/src/brand/application/response"
+	"saas-mt-pim-service/src/brand/application/usecase"
+	"saas-mt-pim-service/src/brand/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,10 +54,35 @@ func (h *MarketplaceBrandHandler) GetAllMarketplaceBrands(c *gin.Context) {
 	// Construir criterios de filtrado desde query parameters
 	criteriaBuilder := criteria.NewCriteriaBuilder().FromURLValues(c.Request.URL.Query())
 
-	// Paginación por defecto si no se especifica
-	if c.Query("page") == "" {
-		criteriaBuilder.SetPagination(1, 20)
+	// Configurar paginación personalizada para marcas (sin límite de 100)
+	page := 1
+	pageSize := 20
+
+	if pageStr := c.Query("page"); pageStr != "" {
+		if pageInt, err := strconv.Atoi(pageStr); err == nil && pageInt > 0 {
+			page = pageInt
+		}
 	}
+
+	if pageSizeStr := c.Query("page_size"); pageSizeStr != "" {
+		if pageSizeInt, err := strconv.Atoi(pageSizeStr); err == nil && pageSizeInt > 0 {
+			pageSize = pageSizeInt
+		}
+	}
+
+	if limitStr := c.Query("limit"); limitStr != "" {
+		if limitInt, err := strconv.Atoi(limitStr); err == nil && limitInt > 0 {
+			pageSize = limitInt
+		}
+	}
+
+	// Limitar solo para seguridad (1000 marcas máximo)
+	if pageSize > 1000 {
+		pageSize = 1000
+	}
+
+	// Establecer paginación manualmente
+	criteriaBuilder.SetPagination(page, pageSize)
 
 	// Filtros
 	if search := c.Query("search"); search != "" {
@@ -72,7 +97,7 @@ func (h *MarketplaceBrandHandler) GetAllMarketplaceBrands(c *gin.Context) {
 
 	// Ordenamiento por defecto solo si no se especificó uno
 	if c.Query("sort_by") == "" {
-		criteriaBuilder.SetOrder("quality_score", "DESC")
+		criteriaBuilder.SetOrder("name", "ASC") // Cambiar a orden alfabético por defecto
 	}
 
 	// Construir criteria final

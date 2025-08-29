@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"pim/src/businesstype/domain/entity"
-	"pim/src/businesstype/domain/port"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/businesstype/domain/entity"
+	"saas-mt-pim-service/src/businesstype/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // ListBusinessTypeTemplatesUseCase maneja la listado de templates con criterios

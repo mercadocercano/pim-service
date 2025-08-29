@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"errors"
 
-	"pim/src/category_attribute/domain/entity"
-	"pim/src/category_attribute/domain/port"
-	"pim/src/category_attribute/infrastructure/persistence/mapper"
-	"pim/src/category_attribute/infrastructure/persistence/model"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/category_attribute/domain/entity"
+	"saas-mt-pim-service/src/category_attribute/domain/port"
+	"saas-mt-pim-service/src/category_attribute/infrastructure/persistence/mapper"
+	"saas-mt-pim-service/src/category_attribute/infrastructure/persistence/model"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 
 	"github.com/lib/pq"
 )

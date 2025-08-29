@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"pim/src/quickstart/domain/service"
-	"pim/src/quickstart/test/domain/entity"
-	businessTypeTestEntity "pim/src/quickstart/test/domain/entity"
+	"saas-mt-pim-service/src/quickstart/domain/service"
+	"saas-mt-pim-service/src/quickstart/test/domain/entity"
+	businessTypeTestEntity "saas-mt-pim-service/src/quickstart/test/domain/entity"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

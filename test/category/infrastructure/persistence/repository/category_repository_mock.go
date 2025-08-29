@@ -5,7 +5,7 @@ import (
 	"errors"
 	"sync"
 
-	"pim/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/entity"
 )
 
 // Errores mock

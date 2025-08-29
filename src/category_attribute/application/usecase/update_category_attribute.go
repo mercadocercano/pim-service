@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"pim/src/category_attribute/domain/port"
+	"saas-mt-pim-service/src/category_attribute/domain/port"
 )
 
 // UpdateCategoryAttributeUseCase implementa el caso de uso para actualizar un atributo de categoría

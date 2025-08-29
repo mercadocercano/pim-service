@@ -528,4 +528,89 @@ legal_compliance:
 - 💼 **Ventaja competitiva** - Funcionalidad única en Argentina
 - 📊 **Data intelligence** - Insights de productos y precios
 
+## 🤖 Integración con AI Templates
+
+### Flujo de Generación Inteligente
+
+El catálogo global es la fuente principal para el sistema de Templates Inteligentes con AI:
+
+```mermaid
+graph LR
+    A[Global Catalog] --> B[AI Template Engine]
+    B --> C[Business Analysis]
+    C --> D[Product Selection]
+    D --> E[Optimized Template]
+    E --> F[Tenant Catalog]
+```
+
+### Características de la Integración
+
+#### 1. **Selección Inteligente de Productos**
+- AI analiza el catálogo global completo
+- Selecciona productos óptimos según:
+  - Tipo de negocio
+  - Ubicación geográfica
+  - Preferencias del usuario
+  - Datos históricos de éxito
+
+#### 2. **Scoring y Priorización**
+```sql
+-- Ejemplo de query para scoring
+SELECT 
+    gp.*,
+    CASE 
+        WHEN gp.popularity_rank < 100 THEN 3  -- Essential
+        WHEN gp.popularity_rank < 500 THEN 2  -- Recommended
+        ELSE 1                                 -- Optional
+    END as priority,
+    (gp.quality_score * 0.4 + 
+     (1000 - gp.popularity_rank)/1000 * 0.6) as ai_score
+FROM global_products gp
+WHERE gp.business_type = 'almacen'
+AND gp.is_active = true
+ORDER BY ai_score DESC;
+```
+
+#### 3. **Enriquecimiento con AI**
+- Categorización automática mejorada
+- Sugerencias de productos complementarios
+- Detección de tendencias regionales
+- Predicción de demanda
+
+### Beneficios de la Integración
+
+1. **Para Nuevos Tenants**
+   - Setup completo en minutos
+   - Catálogo optimizado desde el día 1
+   - Reducción de curva de aprendizaje
+
+2. **Para el Sistema**
+   - Mayor adopción del catálogo global
+   - Datos de feedback para mejora continua
+   - Reducción de duplicados
+
+3. **Para el Negocio**
+   - Diferenciador competitivo
+   - Mayor valor agregado
+   - Insights de mercado
+
+### Métricas de Éxito
+
+- **Tiempo de onboarding**: < 5 minutos
+- **Productos por template**: 50-150 optimizados
+- **Tasa de retención**: > 85% de productos sugeridos
+- **Satisfacción**: > 4.5/5 en templates generados
+
+### Próximas Mejoras
+
+1. **Machine Learning Avanzado**
+   - Predicción de ventas por producto
+   - Recomendaciones personalizadas
+   - Ajuste dinámico de inventario
+
+2. **Integración con Proveedores**
+   - Sugerencias basadas en disponibilidad
+   - Precios actualizados en tiempo real
+   - Alertas de nuevos productos
+
 ¡El catálogo global sería un game-changer para el marketplace argentino! 🚀🇦🇷 

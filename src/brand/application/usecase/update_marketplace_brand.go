@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"pim/src/brand/application/request"
-	"pim/src/brand/domain/port"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/brand/application/request"
+	"saas-mt-pim-service/src/brand/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // UpdateMarketplaceBrandUseCase maneja la lógica de negocio para actualizar una marca marketplace

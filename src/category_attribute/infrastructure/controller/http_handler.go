@@ -3,10 +3,10 @@ package controller
 import (
 	"net/http"
 
-	"pim/src/category_attribute/application/request"
-	"pim/src/category_attribute/application/response"
-	"pim/src/category_attribute/application/usecase"
-	categoryAttributeCriteria "pim/src/category_attribute/infrastructure/criteria"
+	"saas-mt-pim-service/src/category_attribute/application/request"
+	"saas-mt-pim-service/src/category_attribute/application/response"
+	"saas-mt-pim-service/src/category_attribute/application/usecase"
+	categoryAttributeCriteria "saas-mt-pim-service/src/category_attribute/infrastructure/criteria"
 
 	"log"
 

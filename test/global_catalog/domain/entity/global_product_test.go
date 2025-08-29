@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"pim/src/global_catalog/domain/entity"
-	"pim/src/global_catalog/domain/value_object"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
+	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
 )
 
 func TestNewGlobalProduct(t *testing.T) {

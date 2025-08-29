@@ -3,8 +3,8 @@ package criteria
 import (
 	"github.com/gin-gonic/gin"
 
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 )
 
 // GlobalProductCriteriaBuilder construye criterios específicos para productos globales
@@ -27,32 +27,90 @@ func (b *GlobalProductCriteriaBuilder) FromContext(c *gin.Context) *GlobalProduc
 	// Filtros específicos de productos globales
 	b.builder.AddEqualFilter("source", c.Query("source"))
 	b.builder.AddEqualFilter("business_type", c.Query("business_type"))
-	b.builder.AddLikeFilter("name", c.Query("search_name"))
-	b.builder.AddLikeFilter("brand", c.Query("search_brand"))
-	b.builder.AddLikeFilter("category", c.Query("search_category"))
+	b.builder.AddLikeFilter("name", c.Query("search"))
+
+	// Filtros múltiples para marcas
+	if brands := c.QueryArray("brand"); len(brands) > 0 {
+		// Filtrar valores vacíos
+		validBrands := make([]interface{}, 0)
+		for _, brand := range brands {
+			if brand != "" && brand != "all" {
+				validBrands = append(validBrands, brand)
+			}
+		}
+		if len(validBrands) > 0 {
+			b.builder.AddInFilter("brand", validBrands)
+		}
+	} else if brand := c.Query("brand"); brand != "" && brand != "all" {
+		// Compatibilidad con filtro único
+		b.builder.AddLikeFilter("brand", brand)
+	}
+
+	// Filtros múltiples para categorías
+	if categories := c.QueryArray("category"); len(categories) > 0 {
+		// Filtrar valores vacíos
+		validCategories := make([]interface{}, 0)
+		for _, category := range categories {
+			if category != "" && category != "all" {
+				validCategories = append(validCategories, category)
+			}
+		}
+		if len(validCategories) > 0 {
+			b.builder.AddInFilter("category", validCategories)
+		}
+	} else if category := c.Query("category"); category != "" && category != "all" {
+		// Compatibilidad con filtro único
+		b.builder.AddLikeFilter("category", category)
+	}
+
+	// Filtros múltiples para fuentes
+	if sources := c.QueryArray("source"); len(sources) > 0 {
+		// Filtrar valores vacíos
+		validSources := make([]interface{}, 0)
+		for _, source := range sources {
+			if source != "" && source != "all" {
+				validSources = append(validSources, source)
+			}
+		}
+		if len(validSources) > 0 {
+			b.builder.AddInFilter("source", validSources)
+		}
+	}
+
 	b.builder.AddEqualFilter("ean", c.Query("ean"))
-	
+
 	// Filtros booleanos
-	if c.Query("is_active") == "true" {
-		b.builder.AddEqualFilter("is_active", "true")
+	if isVerified := c.Query("is_verified"); isVerified != "" && isVerified != "all" {
+		if isVerified == "true" {
+			b.builder.AddEqualFilter("is_verified", true)
+		} else if isVerified == "false" {
+			b.builder.AddEqualFilter("is_verified", false)
+		}
 	}
-	if c.Query("is_verified") == "true" {
-		b.builder.AddEqualFilter("is_verified", "true")
+
+	if isActive := c.Query("is_active"); isActive != "" && isActive != "all" {
+		if isActive == "true" {
+			b.builder.AddEqualFilter("is_active", true)
+		} else if isActive == "false" {
+			b.builder.AddEqualFilter("is_active", false)
+		}
 	}
-	
-	// Filtros de calidad
+
+	if isArgentine := c.Query("is_argentine"); isArgentine != "" && isArgentine != "all" {
+		if isArgentine == "true" {
+			b.builder.AddEqualFilter("is_argentine_product", true)
+		} else if isArgentine == "false" {
+			b.builder.AddEqualFilter("is_argentine_product", false)
+		}
+	}
+
+	// Filtros numéricos
 	if minQuality := c.Query("min_quality"); minQuality != "" {
-		b.builder.AddFilter("quality_score", criteria.OpGreaterThanOrEqual, minQuality)
+		b.builder.AddGreaterThanOrEqualFilter("quality_score", minQuality)
 	}
+
 	if maxQuality := c.Query("max_quality"); maxQuality != "" {
-		b.builder.AddFilter("quality_score", criteria.OpLessThanOrEqual, maxQuality)
-	}
-	
-	// Filtro de productos argentinos (si existe columna is_argentine)
-	if c.Query("is_argentine") == "true" {
-		// Esto podría requerir un filtro especial basado en el campo metadata
-		// o una columna calculada, dependiendo de la implementación
-		b.builder.AddEqualFilter("metadata->>'is_argentine'", "true")
+		b.builder.AddLessThanOrEqualFilter("quality_score", maxQuality)
 	}
 
 	return b
@@ -70,7 +128,7 @@ func (b *GlobalProductCriteriaBuilder) Build() criteria.Criteria {
 // GetAllowedFields retorna los campos permitidos para filtrado de productos globales
 func (b *GlobalProductCriteriaBuilder) GetAllowedFields() []string {
 	return []string{
-		"id", "ean", "name", "description", "brand", "category", 
+		"id", "ean", "name", "description", "brand", "category",
 		"price", "source", "quality_score", "is_verified", "is_active",
 		"business_type", "created_at", "updated_at",
 	}

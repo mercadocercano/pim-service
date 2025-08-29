@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"pim/src/category/application/usecase"
-	"pim/src/category/domain/entity"
-	"pim/src/category/domain/value_object"
-	testentity "pim/test/category/domain/entity"
-	"pim/test/category/infrastructure/persistence/repository"
+	"saas-mt-pim-service/src/category/application/usecase"
+	"saas-mt-pim-service/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/value_object"
+	testentity "saas-mt-pim-service/test/category/domain/entity"
+	"saas-mt-pim-service/test/category/infrastructure/persistence/repository"
 
 	"github.com/stretchr/testify/assert"
 )

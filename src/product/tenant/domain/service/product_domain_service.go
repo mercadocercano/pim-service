@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"pim/src/product/tenant/domain/entity"
-	"pim/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
 )
 
 // ProductDomainService maneja las reglas de negocio del dominio Product

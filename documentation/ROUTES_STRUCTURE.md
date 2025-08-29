@@ -135,6 +135,27 @@ X-Tenant-ID: tenant-123
 
 ---
 
+### **9. AI Templates** (`/api/v1/templates`)
+**Módulo**: `template_ai`  
+**Propósito**: Templates inteligentes con AI para catálogos optimizados
+
+```
+POST   /api/v1/templates/generate                    # Generar template con AI
+POST   /api/v1/templates/{id}/apply                  # Aplicar template al catálogo
+GET    /api/v1/templates/{id}/performance            # Métricas de rendimiento
+POST   /api/v1/templates/update-from-feedback        # Actualizar con feedback
+```
+
+**Headers requeridos**: `X-Tenant-ID`, `Authorization`
+
+**Características**:
+- Generación basada en tipo de negocio y preferencias
+- Integración con catálogo global
+- Análisis de performance y ROI
+- Aprendizaje continuo con feedback
+
+---
+
 ## 🚀 Próximas Mejoras
 
 1. **Autenticación**: Implementar JWT/OAuth para rutas privadas

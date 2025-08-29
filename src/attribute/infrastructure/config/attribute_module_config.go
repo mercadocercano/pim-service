@@ -3,10 +3,10 @@ package config
 import (
 	"database/sql"
 
-	"pim/src/attribute/application/usecase"
-	"pim/src/attribute/infrastructure/controller"
-	"pim/src/attribute/infrastructure/criteria"
-	"pim/src/attribute/infrastructure/persistence/repository"
+	"saas-mt-pim-service/src/attribute/application/usecase"
+	"saas-mt-pim-service/src/attribute/infrastructure/controller"
+	"saas-mt-pim-service/src/attribute/infrastructure/criteria"
+	"saas-mt-pim-service/src/attribute/infrastructure/persistence/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +16,7 @@ type AttributeModuleConfig struct {
 	// Repositories
 	MarketplaceAttributeRepository *repository.MarketplaceAttributePostgresRepository
 
-	// Use Cases
+	// Use Cases - Marketplace
 	CreateMarketplaceAttributeUseCase  *usecase.CreateMarketplaceAttributeUseCase
 	ListMarketplaceAttributesUseCase   *usecase.ListMarketplaceAttributesUseCase
 	ListMarketplaceAttributesByCriteriaUseCase *usecase.ListMarketplaceAttributesByCriteriaUseCase

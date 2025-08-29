@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	"pim/src/product/global_catalog/domain/entity"
-	"pim/src/product/global_catalog/domain/exception"
-	"pim/src/product/global_catalog/domain/port"
-	"pim/src/product/global_catalog/domain/value_object"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
+	"saas-mt-pim-service/src/product/global_catalog/domain/exception"
+	"saas-mt-pim-service/src/product/global_catalog/domain/port"
+	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
 )
 
 // SearchByEANRequest contiene los datos para buscar por EAN

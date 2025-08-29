@@ -15,7 +15,7 @@ type EAN13 struct {
 // NewEAN13 crea un nuevo EAN13 validando el formato y el checksum
 func NewEAN13(value string) (*EAN13, error) {
 	if value == "" {
-		return nil, errors.New("el código EAN-13 es obligatorio")
+		return nil, errors.New("EAN-13 es obligatorio")
 	}
 
 	// Validar formato (13 dígitos)

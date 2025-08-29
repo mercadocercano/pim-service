@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"pim/src/product/tenant/application/mapper"
-	"pim/src/product/tenant/application/request"
-	"pim/src/product/tenant/application/response"
-	"pim/src/product/tenant/domain/port"
-	"pim/src/product/tenant/domain/value_object"
+	"saas-mt-pim-service/src/product/tenant/application/mapper"
+	"saas-mt-pim-service/src/product/tenant/application/request"
+	"saas-mt-pim-service/src/product/tenant/application/response"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
 )
 
 // CreateProductVariantUseCase maneja la creación de variantes de productos a través del agregado Product
@@ -20,11 +20,11 @@ type CreateProductVariantUseCase struct {
 // NewCreateProductVariantUseCase crea una nueva instancia del use case
 func NewCreateProductVariantUseCase(
 	productRepo port.ProductCriteriaRepository,
-	mapper *mapper.ProductVariantMapper,
+	variantMapper *mapper.ProductVariantMapper,
 ) *CreateProductVariantUseCase {
 	return &CreateProductVariantUseCase{
 		productRepo: productRepo,
-		mapper:      mapper,
+		mapper:      variantMapper,
 	}
 }
 

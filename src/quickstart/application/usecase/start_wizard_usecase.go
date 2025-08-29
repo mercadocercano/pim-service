@@ -3,8 +3,8 @@ package usecase
 import (
 	"context"
 
-	"pim/src/quickstart/domain/entity"
-	"pim/src/quickstart/domain/service"
+	"saas-mt-pim-service/src/quickstart/domain/entity"
+	"saas-mt-pim-service/src/quickstart/domain/service"
 )
 
 // StartWizardUseCase inicia el wizard de configuración para un tenant

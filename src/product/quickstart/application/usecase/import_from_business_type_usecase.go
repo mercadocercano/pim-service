@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	tenantPort "pim/src/product/tenant/domain/port"
+	tenantPort "saas-mt-pim-service/src/product/tenant/domain/port"
 )
 
 // ImportFromBusinessTypeUseCase caso de uso para importar productos masivamente

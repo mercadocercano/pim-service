@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 	"github.com/stretchr/testify/assert"
-	"pim/src/product/application/mapper"
-	"pim/src/product/application/request"
-	"pim/src/product/application/usecase"
+	"saas-mt-pim-service/src/product/tenant/application/mapper"
+	"saas-mt-pim-service/src/product/application/request"
+	"saas-mt-pim-service/src/product/application/usecase"
 	"testing"
 )
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"pim/src/quickstart/domain/port"
+	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
 // AttributeServiceImpl implementa AttributeService para crear atributos desde el quickstart

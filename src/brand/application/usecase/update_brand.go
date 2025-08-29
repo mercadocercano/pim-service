@@ -3,12 +3,12 @@ package usecase
 import (
 	"context"
 
-	"pim/src/brand/application/mapper"
-	"pim/src/brand/application/request"
-	"pim/src/brand/application/response"
-	"pim/src/brand/domain/exception"
-	"pim/src/brand/domain/port"
-	"pim/src/brand/domain/service"
+	"saas-mt-pim-service/src/brand/application/mapper"
+	"saas-mt-pim-service/src/brand/application/request"
+	"saas-mt-pim-service/src/brand/application/response"
+	"saas-mt-pim-service/src/brand/domain/exception"
+	"saas-mt-pim-service/src/brand/domain/port"
+	"saas-mt-pim-service/src/brand/domain/service"
 )
 
 // UpdateBrandUseCase maneja la actualización de marcas

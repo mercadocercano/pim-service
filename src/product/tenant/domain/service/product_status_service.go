@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"pim/src/product/tenant/domain/entity"
-	"pim/src/product/tenant/domain/value_object"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
 )
 
 // ProductStatusService maneja las transiciones de estado de productos

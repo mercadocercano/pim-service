@@ -3,10 +3,10 @@ package mapper
 import (
 	"math"
 
-	"pim/src/product/tenant/application/request"
-	"pim/src/product/tenant/application/response"
-	"pim/src/product/tenant/domain/entity"
-	"pim/src/product/tenant/domain/value_object"
+	"saas-mt-pim-service/src/product/tenant/application/request"
+	"saas-mt-pim-service/src/product/tenant/application/response"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
 )
 
 // ProductVariantMapper maneja la conversión entre entidades de dominio y DTOs

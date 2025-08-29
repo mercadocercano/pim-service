@@ -1,49 +1,118 @@
-# Build stage
-FROM golang:1.22-alpine AS builder
+# ==============================================
+# PIM Service - Optimized Multi-stage Dockerfile
+# ==============================================
 
+# ==============================================
+# Stage 1: Dependencies and cache optimization
+# ==============================================
+FROM golang:1.22-alpine AS deps
 WORKDIR /app
 
-# Instalar dependencias de compilación
-RUN apk add --no-cache git
+# Install build dependencies
+RUN apk add --no-cache git ca-certificates tzdata
 
-# Copiar archivos de dependencias
+# Copy dependency files and download modules
 COPY go.mod go.sum ./
-RUN go mod download
+RUN go mod download && go mod verify
 
-# Copiar el código fuente
+# ==============================================
+# Stage 2: Build stage
+# ==============================================
+FROM deps AS builder
+
+# Copy source code
 COPY . .
 
-# Compilar la aplicación desde la raíz
-RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+# Build optimized binary with security hardening
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags='-w -s -extldflags "-static"' \
+    -a -installsuffix cgo \
+    -trimpath \
+    -o pim-service .
 
-# Final stage
-FROM alpine:3.18
+# Verify binary (skip on ARM64 Mac)
+# RUN file pim-service && \
+#     ldd pim-service 2>&1 | grep -q "not a dynamic executable" || exit 1
+
+# ==============================================
+# Stage 3: Development stage (with Air hot reload)
+# ==============================================
+FROM golang:1.22-alpine AS development
+
+# Security: Create non-root user first
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S -D -h /app -s /bin/sh -G appgroup -u 1001 appuser
+
+# Install runtime dependencies including Air
+RUN apk add --no-cache \
+    ca-certificates \
+    tzdata \
+    curl \
+    postgresql-client \
+    git \
+    && cp /usr/share/zoneinfo/UTC /etc/localtime \
+    && echo "UTC" > /etc/timezone \
+    && apk del tzdata
+
+# Install Air for hot reload (compatible with Go 1.22)
+RUN go install github.com/cosmtrek/air@v1.49.0
 
 WORKDIR /app
 
-# Instalar PostgreSQL client
-RUN apk add --no-cache postgresql-client
+# Copy go mod files first (for better caching)
+COPY go.mod go.sum ./
 
-# Crear directorios necesarios
-RUN mkdir -p /app/scripts /app/migrations
+# Download dependencies as root to avoid permission issues
+RUN go mod download
 
-# Copiar el binario compilado
-COPY --from=builder /app/main .
+# Create necessary directories and set permissions
+RUN mkdir -p tmp scripts uploads logs /go/pkg/mod && \
+    chmod -R 777 /go/pkg && \
+    chown -R appuser:appgroup /app tmp scripts uploads logs
 
-# Copiar las plantillas HTML
-COPY --from=builder /app/templates /app/templates
+# Copy source code with correct ownership
+COPY --chown=appuser:appgroup . .
 
-# Copiar la documentación OpenAPI
-COPY --from=builder /app/api-docs /app/api-docs
+# Switch to non-root user
+# USER appuser
+# Temporarily run as root to fix permission issues
 
-# Copiar los datos YAML del módulo quickstart
-COPY --from=builder /app/src/quickstart/data /app/src/quickstart/data
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
 
-# Copiar las migraciones de todos los módulos
-COPY --from=builder /app/migrations/*.sql /app/migrations/
-
-# Exponer el puerto
 EXPOSE 8080
 
-# Ejecutar la aplicación directamente
-CMD ["./main"] 
+# Use go run directly (simple fix)
+CMD ["go", "run", "."]
+
+# ==============================================
+# Stage 4: Production stage (Distroless)
+# ==============================================
+FROM gcr.io/distroless/static-debian12:nonroot AS production
+
+# Metadata
+LABEL org.opencontainers.image.title="PIM Service" \
+      org.opencontainers.image.description="Product Information Management Service" \
+      org.opencontainers.image.source="https://github.com/saas-mt/pim-service" \
+      org.opencontainers.image.vendor="SaaS MT Team" \
+      org.opencontainers.image.licenses="MIT"
+
+WORKDIR /app
+
+# Copy binary and essential files only
+COPY --from=builder --chown=nonroot:nonroot /app/pim-service ./
+COPY --from=builder --chown=nonroot:nonroot /app/templates ./templates/
+COPY --from=builder --chown=nonroot:nonroot /app/migrations ./migrations/
+
+# Use distroless nonroot user (uid=65532)
+USER nonroot
+
+EXPOSE 8080
+
+ENTRYPOINT ["./pim-service"]
+
+# ==============================================
+# Default stage: Development
+# ==============================================
+FROM development 

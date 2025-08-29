@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"pim/src/product/global_catalog/domain/value_object"
+	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
 
 	"github.com/google/uuid"
 )
@@ -45,7 +45,7 @@ func NewGlobalProduct(
 	source *value_object.ProductSource,
 ) (*GlobalProduct, error) {
 	if ean == nil {
-		return nil, errors.New("el código EAN-13 es obligatorio")
+		return nil, errors.New("EAN-13 es obligatorio")
 	}
 
 	if name == "" {
@@ -113,9 +113,8 @@ func NewGlobalProductFromRepository(
 	updatedAt time.Time,
 	lastScrapedAt *time.Time,
 ) (*GlobalProduct, error) {
-	if ean == nil {
-		return nil, errors.New("el código EAN-13 es obligatorio")
-	}
+	// EAN es opcional para productos del catálogo global
+	// ya que algunos productos scrapeados no tienen EAN disponible
 
 	if name == "" {
 		return nil, errors.New("el nombre del producto es obligatorio")

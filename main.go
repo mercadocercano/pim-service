@@ -6,35 +6,54 @@ import (
 	"log"
 	"os"
 
-	apiConfig "pim/src/api/config"
-	brandConfig "pim/src/brand/infrastructure/config"
-	businesstypeUsecase "pim/src/businesstype/application/usecase"
-	businesstypeController "pim/src/businesstype/infrastructure/controller"
-	businesstypeRepository "pim/src/businesstype/infrastructure/persistence/repository"
-	categoryConfig "pim/src/category/infrastructure/config"
-	categoryAttributeConfig "pim/src/category_attribute/infrastructure/config"
-	globalCatalogConfig "pim/src/product/global_catalog/infrastructure/config"
-	productConfig "pim/src/product/tenant/infrastructure/config"
-	quickstartConfig "pim/src/quickstart/infrastructure/config"
-	sharedConfig "pim/src/shared/infrastructure/config"
-	"pim/src/shared/infrastructure/database"
+	apiConfig "saas-mt-pim-service/src/api/config"
+	brandConfig "saas-mt-pim-service/src/brand/infrastructure/config"
+	businesstypeUsecase "saas-mt-pim-service/src/businesstype/application/usecase"
+	businesstypeController "saas-mt-pim-service/src/businesstype/infrastructure/controller"
+	businesstypeRepository "saas-mt-pim-service/src/businesstype/infrastructure/persistence/repository"
+	categoryConfig "saas-mt-pim-service/src/category/infrastructure/config"
+	categoryAttributeConfig "saas-mt-pim-service/src/category_attribute/infrastructure/config"
+	globalCatalogConfig "saas-mt-pim-service/src/product/global_catalog/infrastructure/config"
+	productConfig "saas-mt-pim-service/src/product/tenant/infrastructure/config"
+	quickstartConfig "saas-mt-pim-service/src/quickstart/infrastructure/config"
+	sharedConfig "saas-mt-pim-service/src/shared/infrastructure/config"
+	"saas-mt-pim-service/src/shared/infrastructure/database"
 
 	// Brand imports
-	brandController "pim/src/brand/infrastructure/controller"
-	brandRepository "pim/src/brand/infrastructure/persistence/repository"
+	brandController "saas-mt-pim-service/src/brand/infrastructure/controller"
+	brandRepository "saas-mt-pim-service/src/brand/infrastructure/persistence/repository"
+	brandPersistence "saas-mt-pim-service/src/brand/infrastructure/persistence"
 
 	// Attribute imports
-	attributeConfig "pim/src/attribute/infrastructure/config"
+	attributeConfig "saas-mt-pim-service/src/attribute/infrastructure/config"
 
 	// Business Type Template imports
-	businessTypeTemplateConfig "pim/src/businesstype/infrastructure/config"
+	businessTypeTemplateConfig "saas-mt-pim-service/src/businesstype/infrastructure/config"
 
 	// Category imports
 
 	// Marketplace Categories imports
-	categoryUsecase "pim/src/category/application/usecase"
-	categoryController "pim/src/category/infrastructure/controller"
-	categoryPersistence "pim/src/category/infrastructure/persistence"
+	categoryUsecase "saas-mt-pim-service/src/category/application/usecase"
+	categoryController "saas-mt-pim-service/src/category/infrastructure/controller"
+	categoryPersistence "saas-mt-pim-service/src/category/infrastructure/persistence"
+	categoryRepository "saas-mt-pim-service/src/category/infrastructure/persistence/repository"
+
+	// Batch imports
+	batchUseCase "saas-mt-pim-service/src/batch/application/usecase"
+	batchController "saas-mt-pim-service/src/batch/infrastructure/controller"
+
+	// Product persistence
+	persistence "saas-mt-pim-service/src/product/tenant/infrastructure/persistence"
+
+	// Schema validation imports
+	schemaValidationConfig "saas-mt-pim-service/src/schema_validation/infrastructure/config"
+
+	// AI Template imports
+	aiTemplateConfig "saas-mt-pim-service/src/template_ai/infrastructure/config"
+	
+	// Overview module imports (commented until fixed)
+	// overviewDI "saas-mt-pim-service/src/overview/infrastructure/di"
+	// globalCatalogRepo "saas-mt-pim-service/src/product/global_catalog/domain/port"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // Driver de PostgreSQL
@@ -147,12 +166,16 @@ func main() {
 	setupBusinessTypeTemplateModule(v1, db)
 	setupGlobalCatalogModule(v1, db)
 	setupMarketplaceCategoriesModule(v1, db)
+	setupBatchModule(v1, db)
+	setupSchemaValidationModule(v1, db)
+	setupAITemplateModule(v1, db)
+	// setupOverviewModule(v1, db) // TODO: Fix overview module
 
 	// Aquí se agregarían más módulos:
 	// - Ubicaciones de Stock
 
 	// Iniciar el servidor
-	port := getEnv("PORT", "8090")
+	port := getEnv("PORT", "8080")
 	log.Printf("Servidor iniciando en http://localhost:%s", port)
 	router.Run(":" + port)
 }
@@ -228,38 +251,23 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
 func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("Configurando módulo Quickstart...")
 
-	// Crear configuración del módulo Product para obtener el ProductService
-	productCfg := productConfig.NewProductConfig(db)
+	// Crear configuración del módulo Quickstart
+	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db)
 
-	// Crear el loader de datos YAML
-	dataLoader := quickstartConfig.NewYAMLDataLoader("src/quickstart/data")
-
-	// Crear configuración del módulo Quickstart con ProductService
-	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db, dataLoader, productCfg.QuickstartProductService)
-
-	// Obtener los handlers
-	quickstartHandler := quickstartCfg.GetQuickstartHandler()
+	// Obtener el handler simplificado del wizard
 	simpleWizardHandler := quickstartCfg.GetSimpleWizardHandler()
 
-	// Registrar rutas usando el método RegisterRoutes del handler
-	quickstartHandler.RegisterRoutes(router)
+	// Registrar rutas del wizard simplificado
 	simpleWizardHandler.RegisterRoutes(router)
 
 	log.Println("Módulo Quickstart configurado exitosamente")
-	log.Println("Rutas Quickstart disponibles:")
-	log.Println("  GET    /api/v1/quickstart/business-types")
-	log.Println("  GET    /api/v1/quickstart/categories/:businessType")
-	log.Println("  GET    /api/v1/quickstart/attributes/:businessType")
-	log.Println("  GET    /api/v1/quickstart/variants/:businessType")
-	log.Println("  GET    /api/v1/quickstart/products/:businessType")
-	log.Println("  GET    /api/v1/quickstart/brands/:businessType")
-	log.Println("  POST   /api/v1/quickstart/setup")
 	log.Println("Rutas Wizard disponibles:")
 	log.Println("  GET    /api/v1/wizard/status")
 	log.Println("  POST   /api/v1/wizard/start")
 	log.Println("  PUT    /api/v1/wizard/step")
 	log.Println("  GET    /api/v1/wizard/template/:businessTypeId")
 	log.Println("  GET    /api/v1/wizard/template/:businessTypeId/:section")
+	log.Println("  DELETE /api/v1/wizard/reset (⚠️ TEMPORAL - BORRAR DESPUÉS)")
 }
 
 // setupBusinessTypeModule configura el módulo BusinessType
@@ -381,10 +389,8 @@ func setupMarketplaceCategoriesModule(router *gin.RouterGroup, db *sql.DB) {
 		createMarketplaceCategoryUC,
 		getAllMarketplaceCategoriesUC,
 		updateMarketplaceCategoryUC,
-		nil, // getTenantTaxonomyUC - requiere múltiples repos
 		validateCategoryHierarchyUC,
-		nil,                     // syncMarketplaceChangesUC - requiere múltiples repos
-		marketplaceCategoryRepo, // Agregar el repositorio
+		marketplaceCategoryRepo,
 	)
 
 	// Registrar rutas
@@ -436,4 +442,123 @@ func setupAttributeModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  GET    /api/v1/marketplace/attributes/:id")
 	log.Println("  PUT    /api/v1/marketplace/attributes/:id")
 	log.Println("  DELETE /api/v1/marketplace/attributes/:id")
+	log.Println("Rutas Tenant Attributes disponibles:")
+	log.Println("  Nota: Los atributos custom del tenant se manejan a través de la tabla 'attributes'")
 }
+
+// setupBatchModule configura el módulo Batch
+func setupBatchModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Batch...")
+
+	// Importar dependencias necesarias
+	// TODO: Mejorar importaciones cuando se refactorice
+	categoryRepo := categoryRepository.NewCategoryPostgresRepository(db)
+	brandRepo := brandPersistence.NewPostgresBrandRepository(db)
+	productRepo := persistence.NewPostgresProductRepository(db)
+	
+	// Repository para mapeo de categorías
+	categoryMappingRepo := categoryPersistence.NewTenantCategoryMappingPostgresRepository(db)
+
+	// Crear caso de uso batch
+	batchUseCase := batchUseCase.NewBatchCreateUseCase(
+		db,
+		categoryRepo,
+		brandRepo,
+		productRepo,
+		categoryMappingRepo,
+	)
+
+	// Crear controller
+	batchController := batchController.NewBatchController(batchUseCase)
+
+	// Registrar rutas
+	batchController.RegisterRoutes(router)
+
+	log.Println("Módulo Batch configurado exitosamente")
+	log.Println("Rutas Batch disponibles:")
+	log.Println("  POST   /api/v1/batch/create")
+}
+
+// setupSchemaValidationModule configura el módulo de validación de schema
+func setupSchemaValidationModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Schema Validation...")
+	
+	// Usar la función del config module
+	schemaValidationConfig.SetupSchemaValidationModule(router, db)
+	
+	log.Println("Módulo Schema Validation configurado exitosamente")
+	log.Println("Rutas Schema Validation disponibles:")
+	log.Println("  POST   /api/v1/products/validate-schema")
+	log.Println("  POST   /api/v1/products/apply-mapping")
+	log.Println("  GET    /api/v1/products/csv-template")
+}
+
+// setupAITemplateModule configura el módulo de AI Templates
+func setupAITemplateModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo AI Template...")
+	
+	// Crear configuración y obtener controller
+	config := aiTemplateConfig.NewAITemplateConfig(db)
+	controller := config.GetController()
+	
+	// Registrar rutas
+	controller.RegisterRoutes(router)
+	
+	log.Println("Módulo AI Template configurado exitosamente")
+	log.Println("Rutas AI Template disponibles:")
+	log.Println("  POST   /api/v1/templates/generate")
+	log.Println("  POST   /api/v1/templates/:id/apply")
+	log.Println("  GET    /api/v1/templates/:id/performance")
+	log.Println("  POST   /api/v1/templates/update-from-feedback")
+}
+
+// setupOverviewModule configura el módulo Overview para el dashboard
+// TODO: Fix overview module implementation
+/*
+func setupOverviewModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Overview...")
+	
+	// Obtener repositorios existentes para reutilizar
+	// Brand repositories
+	brandDB := brandPersistence.NewBrandDB(db)
+	brandRepo := brandRepository.NewBrandPostgresRepository(brandDB)
+	
+	marketplaceBrandDB := brandPersistence.NewMarketplaceBrandDB(db)
+	marketplaceBrandRepo := brandRepository.NewMarketplaceBrandPostgresRepository(marketplaceBrandDB)
+	
+	// Category repositories  
+	categoryDB := categoryPersistence.NewCategoryDB(db)
+	categoryRepo := categoryRepository.NewCategoryPostgresRepository(categoryDB)
+	
+	marketplaceCategoryDB := categoryPersistence.NewMarketplaceCategoryDB(db)
+	marketplaceCategoryRepo := categoryRepository.NewMarketplaceCategoryPostgresRepository(marketplaceCategoryDB)
+	
+	// Product repositories
+	productDB := persistence.NewProductDB(db)
+	productRepo := persistence.NewProductPostgresRepository(productDB)
+	
+	// Global catalog repository (usando nil por ahora, se puede conectar a MongoDB después)
+	var globalProductRepo globalCatalogRepo.GlobalProductRepository
+	
+	// Crear dependencias para el módulo overview
+	overviewDeps := overviewDI.OverviewDependencies{
+		ProductRepo:             productRepo,
+		CategoryRepo:            categoryRepo,
+		BrandRepo:               brandRepo,
+		GlobalProductRepo:       globalProductRepo,
+		MarketplaceCategoryRepo: marketplaceCategoryRepo,
+		MarketplaceBrandRepo:    marketplaceBrandRepo,
+	}
+	
+	// Crear el módulo
+	overviewModule := overviewDI.NewOverviewModule(overviewDeps)
+	
+	// Registrar rutas
+	overviewModule.RegisterRoutes(router)
+	
+	log.Println("Módulo Overview configurado exitosamente")
+	log.Println("Rutas Overview disponibles:")
+	log.Println("  GET    /api/v1/marketplace/overview")
+	log.Println("  GET    /api/v1/marketplace/overview/sections")
+}
+*/

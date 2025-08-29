@@ -3,10 +3,10 @@ package config
 import (
 	"database/sql"
 
-	"pim/src/businesstype/application/usecase"
-	"pim/src/businesstype/infrastructure/controller"
-	"pim/src/businesstype/infrastructure/persistence/repository"
-	businessTypeRepository "pim/src/businesstype/infrastructure/persistence/repository"
+	"saas-mt-pim-service/src/businesstype/application/usecase"
+	"saas-mt-pim-service/src/businesstype/infrastructure/controller"
+	"saas-mt-pim-service/src/businesstype/infrastructure/persistence/repository"
+	businessTypeRepository "saas-mt-pim-service/src/businesstype/infrastructure/persistence/repository"
 )
 
 // BusinessTypeTemplateModuleConfig contiene la configuración del módulo de templates

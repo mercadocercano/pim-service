@@ -3,10 +3,10 @@ package usecase
 import (
 	"context"
 
-	"pim/src/product/tenant/application/mapper"
-	"pim/src/product/tenant/application/response"
-	"pim/src/product/tenant/domain/port"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/product/tenant/application/mapper"
+	"saas-mt-pim-service/src/product/tenant/application/response"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // ListProductsByCriteriaUseCase maneja la búsqueda de productos con criterios
@@ -18,11 +18,11 @@ type ListProductsByCriteriaUseCase struct {
 // NewListProductsByCriteriaUseCase crea una nueva instancia del caso de uso
 func NewListProductsByCriteriaUseCase(
 	productRepo port.ProductCriteriaRepository,
-	mapper *mapper.ProductMapper,
+	productMapper *mapper.ProductMapper,
 ) *ListProductsByCriteriaUseCase {
 	return &ListProductsByCriteriaUseCase{
 		productRepo: productRepo,
-		mapper:      mapper,
+		mapper:      productMapper,
 	}
 }
 

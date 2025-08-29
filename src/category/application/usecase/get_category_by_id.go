@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"pim/src/category/domain/entity"
-	"pim/src/category/domain/port"
+	"saas-mt-pim-service/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/port"
 )
 
 // ErrInvalidUUID representa un error cuando el ID no es un UUID válido

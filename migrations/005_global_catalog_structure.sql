@@ -8,7 +8,7 @@ CREATE TABLE global_products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
     -- Identificadores únicos
-    ean VARCHAR(13) UNIQUE,                     -- Código EAN-13 (obligatorio)
+    ean VARCHAR(13) UNIQUE,                     -- Código EAN-13 (opcional)
     gtin VARCHAR(14),                           -- GTIN alternativo
     sku_global VARCHAR(100) UNIQUE,             -- SKU interno global
     

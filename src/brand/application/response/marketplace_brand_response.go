@@ -1,7 +1,7 @@
 package response
 
 import (
-	"pim/src/brand/domain/entity"
+	"saas-mt-pim-service/src/brand/domain/entity"
 	"time"
 )
 

@@ -6,10 +6,10 @@ import (
 	"io"
 	"net/http"
 
-	"pim/src/category/application/request"
-	"pim/src/category/application/response"
-	"pim/src/category/application/usecase"
-	categoryCriteria "pim/src/category/infrastructure/criteria"
+	"saas-mt-pim-service/src/category/application/request"
+	"saas-mt-pim-service/src/category/application/response"
+	"saas-mt-pim-service/src/category/application/usecase"
+	categoryCriteria "saas-mt-pim-service/src/category/infrastructure/criteria"
 
 	"github.com/gin-gonic/gin"
 )

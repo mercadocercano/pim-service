@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"pim/src/product/tenant/application/request"
-	"pim/src/product/tenant/application/usecase"
+	"saas-mt-pim-service/src/product/tenant/application/request"
+	"saas-mt-pim-service/src/product/tenant/application/usecase"
 )
 
 // ProductVariantController maneja las peticiones HTTP para variantes de productos

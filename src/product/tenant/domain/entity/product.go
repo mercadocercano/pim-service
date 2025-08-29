@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"pim/src/product/tenant/domain/value_object"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
 
 	"github.com/google/uuid"
 )

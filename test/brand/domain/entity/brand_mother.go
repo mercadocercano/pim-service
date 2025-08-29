@@ -3,8 +3,8 @@ package entity
 import (
 	"time"
 
-	"pim/src/brand/domain/entity"
-	"pim/src/brand/domain/value_object"
+	"saas-mt-pim-service/src/brand/domain/entity"
+	"saas-mt-pim-service/src/brand/domain/value_object"
 
 	"github.com/google/uuid"
 )

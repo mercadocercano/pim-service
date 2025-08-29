@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 
-	"pim/src/brand/domain/entity"
-	"pim/src/brand/domain/exception"
-	"pim/src/brand/domain/value_object"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/brand/domain/entity"
+	"saas-mt-pim-service/src/brand/domain/exception"
+	"saas-mt-pim-service/src/brand/domain/value_object"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 )
 
 // PostgresBrandRepository implementa BrandCriteriaRepository usando PostgreSQL

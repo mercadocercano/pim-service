@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"pim/src/global_catalog/application/usecase"
-	"pim/src/global_catalog/domain/entity"
-	"pim/src/global_catalog/domain/value_object"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/product/global_catalog/application/usecase"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
+	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // MockGlobalProductRepository es un mock del repositorio
@@ -199,7 +199,8 @@ func TestCreateGlobalProduct_ValidRequest_Success(t *testing.T) {
 	// Assert
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, "1234567890128", result.EAN)
+	assert.NotNil(t, result.EAN)
+	assert.Equal(t, "1234567890128", *result.EAN)
 	assert.Equal(t, "Test Product", result.Name)
 	assert.Equal(t, "Test Description", *result.Description)
 	assert.Equal(t, "Test Brand", *result.Brand)
@@ -220,6 +221,9 @@ func TestCreateGlobalProduct_InvalidEAN_ReturnsError(t *testing.T) {
 		Name:   "Test Product",
 		Source: "test_source",
 	}
+
+	// Mock que no existe producto con este EAN inválido
+	mockRepo.On("FindByEAN", "invalid_ean").Return(nil, nil)
 
 	// Act
 	result, err := uc.Execute(request)

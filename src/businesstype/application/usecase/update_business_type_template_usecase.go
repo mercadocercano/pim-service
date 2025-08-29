@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"pim/src/businesstype/domain/entity"
-	"pim/src/businesstype/domain/port"
+	"saas-mt-pim-service/src/businesstype/domain/entity"
+	"saas-mt-pim-service/src/businesstype/domain/port"
 )
 
 // UpdateBusinessTypeTemplateUseCase maneja la actualización de templates de business type

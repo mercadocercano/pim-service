@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"pim/src/product/quickstart/application/usecase"
+	"saas-mt-pim-service/src/product/quickstart/application/usecase"
 )
 
 // QuickstartController maneja las peticiones HTTP para quickstart

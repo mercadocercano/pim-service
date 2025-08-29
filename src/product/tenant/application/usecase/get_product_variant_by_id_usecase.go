@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"pim/src/product/tenant/application/mapper"
-	"pim/src/product/tenant/application/response"
-	"pim/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/application/mapper"
+	"saas-mt-pim-service/src/product/tenant/application/response"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
 
 	"github.com/google/uuid"
 )
@@ -20,11 +20,11 @@ type GetProductVariantByIDUseCase struct {
 // NewGetProductVariantByIDUseCase crea una nueva instancia del use case
 func NewGetProductVariantByIDUseCase(
 	productRepo port.ProductCriteriaRepository,
-	mapper *mapper.ProductVariantMapper,
+	variantMapper *mapper.ProductVariantMapper,
 ) *GetProductVariantByIDUseCase {
 	return &GetProductVariantByIDUseCase{
 		productRepo: productRepo,
-		mapper:      mapper,
+		mapper:      variantMapper,
 	}
 }
 

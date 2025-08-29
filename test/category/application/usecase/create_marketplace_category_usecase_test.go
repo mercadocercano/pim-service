@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"pim/src/marketplace/application/request"
-	"pim/src/marketplace/application/usecase"
-	"pim/src/marketplace/domain/entity"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/category/application/request"
+	"saas-mt-pim-service/src/category/application/usecase"
+	"saas-mt-pim-service/src/category/domain/entity"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // MockMarketplaceCategoryRepository es un mock del repositorio
@@ -373,6 +373,6 @@ func TestCreateMarketplaceCategoryUseCase_Execute_ParentNotFound(t *testing.T) {
 	assert.Nil(t, response)
 	assert.Contains(t, err.Error(), "parent category not found")
 
-git status	mockRepo.AssertExpectations(t)
+	mockRepo.AssertExpectations(t)
 	mockRepo.AssertNotCalled(t, "Save")
 }

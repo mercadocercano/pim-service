@@ -24,7 +24,7 @@ func (h *OpenAPIHandler) RegisterRoutes(router *gin.Engine) {
 	router.GET("/api-docs", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "swagger.html", gin.H{
 			"title": "PIM API Documentation",
-			"url":   "http://localhost:8080/openapi.yaml",
+			"url":   "http://localhost:8090/openapi.yaml",
 		})
 	})
 

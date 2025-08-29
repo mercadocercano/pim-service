@@ -2,10 +2,10 @@ package usecase
 
 import (
 	"context"
-	"pim/src/product/global_catalog/domain/entity"
-	"pim/src/product/global_catalog/domain/exception"
-	"pim/src/product/global_catalog/domain/port"
-	"pim/src/product/global_catalog/domain/value_object"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
+	"saas-mt-pim-service/src/product/global_catalog/domain/exception"
+	"saas-mt-pim-service/src/product/global_catalog/domain/port"
+	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
 )
 
 // UpdateGlobalProductByIDRequest contiene los datos para actualizar un producto global
@@ -32,7 +32,7 @@ type UpdateGlobalProductByIDRequest struct {
 // UpdateGlobalProductByIDResponse contiene la respuesta del caso de uso
 type UpdateGlobalProductByIDResponse struct {
 	ID           string                 `json:"id"`
-	EAN          string                 `json:"ean"`
+	EAN          *string                `json:"ean,omitempty"`
 	Name         string                 `json:"name"`
 	Description  *string                `json:"description"`
 	Brand        *string                `json:"brand"`
@@ -81,7 +81,11 @@ func (uc *UpdateGlobalProductByID) Execute(ctx context.Context, request UpdateGl
 	}
 
 	// Verificar si se está cambiando el EAN y si ya existe otro producto con ese EAN
-	if request.EAN != nil && *request.EAN != existingProduct.EAN().Value() {
+	currentEAN := ""
+	if existingProduct.EAN() != nil {
+		currentEAN = existingProduct.EAN().Value()
+	}
+	if request.EAN != nil && *request.EAN != currentEAN {
 		// Validar nuevo EAN
 		_, err := value_object.NewEAN13(*request.EAN)
 		if err != nil {
@@ -169,7 +173,7 @@ func (uc *UpdateGlobalProductByID) Execute(ctx context.Context, request UpdateGl
 
 	// Si se cambió el EAN, necesitamos crear un nuevo producto con el EAN actualizado
 	// ya que UpdateFromScraping no permite cambiar el EAN
-	if request.EAN != nil && *request.EAN != existingProduct.EAN().Value() {
+	if request.EAN != nil && *request.EAN != currentEAN {
 		newEAN, _ := value_object.NewEAN13(*request.EAN)
 
 		// Crear nuevo producto con el EAN actualizado
@@ -255,7 +259,6 @@ func (uc *UpdateGlobalProductByID) Execute(ctx context.Context, request UpdateGl
 	// Mapear a respuesta
 	response := &UpdateGlobalProductByIDResponse{
 		ID:           updatedProduct.IDString(),
-		EAN:          updatedProduct.EAN().Value(),
 		Name:         updatedProduct.Name(),
 		Description:  updatedProduct.Description(),
 		Brand:        updatedProduct.Brand(),
@@ -273,6 +276,12 @@ func (uc *UpdateGlobalProductByID) Execute(ctx context.Context, request UpdateGl
 		Metadata:     updatedProduct.Metadata(),
 		CreatedAt:    updatedProduct.CreatedAt().Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:    updatedProduct.UpdatedAt().Format("2006-01-02T15:04:05Z07:00"),
+	}
+	
+	// Agregar EAN solo si existe
+	if updatedProduct.EAN() != nil {
+		eanValue := updatedProduct.EAN().Value()
+		response.EAN = &eanValue
 	}
 
 	return response, nil

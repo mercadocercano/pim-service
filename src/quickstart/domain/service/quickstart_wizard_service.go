@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	businessTypePort "pim/src/businesstype/domain/port"
-	"pim/src/quickstart/domain/entity"
-	"pim/src/quickstart/domain/port"
+	businessTypePort "saas-mt-pim-service/src/businesstype/domain/port"
+	"saas-mt-pim-service/src/quickstart/domain/entity"
+	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
 // QuickstartWizardService maneja la lógica del wizard de configuración inicial

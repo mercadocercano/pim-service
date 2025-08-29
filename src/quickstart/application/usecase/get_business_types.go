@@ -2,24 +2,42 @@ package usecase
 
 import (
 	"context"
-
-	"pim/src/quickstart/domain/entity"
-	"pim/src/quickstart/domain/service"
+	businessTypePort "saas-mt-pim-service/src/businesstype/domain/port"
+	"saas-mt-pim-service/src/quickstart/domain/entity"
 )
 
-// GetBusinessTypesUseCase implementa el caso de uso para obtener tipos de negocio
+// GetBusinessTypesUseCase obtiene todos los tipos de negocio
 type GetBusinessTypesUseCase struct {
-	quickstartService *service.QuickstartService
+	businessTypeRepo businessTypePort.BusinessTypeRepository
 }
 
 // NewGetBusinessTypesUseCase crea una nueva instancia del caso de uso
-func NewGetBusinessTypesUseCase(quickstartService *service.QuickstartService) *GetBusinessTypesUseCase {
+func NewGetBusinessTypesUseCase(repo businessTypePort.BusinessTypeRepository) *GetBusinessTypesUseCase {
 	return &GetBusinessTypesUseCase{
-		quickstartService: quickstartService,
+		businessTypeRepo: repo,
 	}
 }
 
-// Execute ejecuta el caso de uso para obtener todos los tipos de negocio disponibles
+// Execute ejecuta el caso de uso
 func (uc *GetBusinessTypesUseCase) Execute(ctx context.Context) ([]*entity.BusinessType, error) {
-	return uc.quickstartService.GetBusinessTypes(ctx)
+	// Obtener tipos de negocio desde la base de datos usando FindAll
+	businessTypes, err := uc.businessTypeRepo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convertir a entidades del dominio quickstart
+	result := make([]*entity.BusinessType, 0, len(businessTypes))
+	for _, bt := range businessTypes {
+		if bt.IsActive {
+			result = append(result, &entity.BusinessType{
+				ID:          bt.ID,
+				Name:        bt.Name,
+				Description: bt.Description,
+				Icon:        bt.Icon,
+			})
+		}
+	}
+
+	return result, nil
 }

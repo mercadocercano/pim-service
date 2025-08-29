@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log"
 
-	tenantEntity "pim/src/product/tenant/domain/entity"
-	tenantPort "pim/src/product/tenant/domain/port"
-	tenantValueObject "pim/src/product/tenant/domain/value_object"
+	tenantEntity "saas-mt-pim-service/src/product/tenant/domain/entity"
+	tenantPort "saas-mt-pim-service/src/product/tenant/domain/port"
+	tenantValueObject "saas-mt-pim-service/src/product/tenant/domain/value_object"
 )
 
 // CreateFromTemplateUseCase caso de uso para crear productos desde template del catálogo global

@@ -3,9 +3,9 @@ package config
 import (
 	"database/sql"
 
-	"pim/src/product/quickstart/application/usecase"
-	"pim/src/product/quickstart/infrastructure/controller"
-	"pim/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/quickstart/application/usecase"
+	"saas-mt-pim-service/src/product/quickstart/infrastructure/controller"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
 )
 
 // QuickstartConfig contiene todas las dependencias del módulo quickstart

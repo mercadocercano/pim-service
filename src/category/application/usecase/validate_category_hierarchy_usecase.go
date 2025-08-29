@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"pim/src/category/application/request"
-	"pim/src/category/application/response"
-	"pim/src/category/domain/entity"
-	"pim/src/category/domain/port"
+	"saas-mt-pim-service/src/category/application/request"
+	"saas-mt-pim-service/src/category/application/response"
+	"saas-mt-pim-service/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/port"
 )
 
 // ValidateCategoryHierarchyUseCase maneja la validación de jerarquías de categorías

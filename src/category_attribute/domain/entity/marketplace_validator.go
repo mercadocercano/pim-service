@@ -6,9 +6,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	attributeEntity "pim/src/attribute/domain/entity"
-	categoryEntity "pim/src/category/domain/entity"
-	sharedEntity "pim/src/shared/domain/entity"
+	attributeEntity "saas-mt-pim-service/src/attribute/domain/entity"
+	categoryEntity "saas-mt-pim-service/src/category/domain/entity"
+	sharedEntity "saas-mt-pim-service/src/shared/domain/entity"
 )
 
 // MarketplaceValidator contiene todas las validaciones de negocio del dominio marketplace

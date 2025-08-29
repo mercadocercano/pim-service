@@ -2,9 +2,9 @@ package controller
 
 import (
 	"net/http"
-	"pim/src/businesstype/application/usecase"
-	"pim/src/businesstype/domain/port"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/businesstype/application/usecase"
+	"saas-mt-pim-service/src/businesstype/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 
 	"github.com/gin-gonic/gin"
 )

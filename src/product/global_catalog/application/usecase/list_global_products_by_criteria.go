@@ -2,9 +2,9 @@ package usecase
 
 import (
 	"context"
-	"pim/src/shared/domain/criteria"
-	"pim/src/product/global_catalog/domain/entity"
-	"pim/src/product/global_catalog/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
+	"saas-mt-pim-service/src/product/global_catalog/domain/port"
 )
 
 // ListGlobalProductsByCriteriaUseCase lista productos globales usando criterios

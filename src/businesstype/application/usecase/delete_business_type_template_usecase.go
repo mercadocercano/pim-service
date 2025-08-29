@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"pim/src/businesstype/domain/port"
+	"saas-mt-pim-service/src/businesstype/domain/port"
 )
 
 // DeleteBusinessTypeTemplateUseCase maneja la eliminación de templates

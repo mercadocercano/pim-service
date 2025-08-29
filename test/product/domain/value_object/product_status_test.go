@@ -2,7 +2,7 @@ package value_object
 
 import (
 	"github.com/stretchr/testify/assert"
-	"pim/src/product/domain/value_object"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
 	"testing"
 )
 

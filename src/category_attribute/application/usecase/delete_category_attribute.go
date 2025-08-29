@@ -3,7 +3,7 @@ package usecase
 import (
 	"context"
 
-	"pim/src/category_attribute/domain/port"
+	"saas-mt-pim-service/src/category_attribute/domain/port"
 )
 
 // DeleteCategoryAttributeUseCase implementa el caso de uso para eliminar un atributo de categoría

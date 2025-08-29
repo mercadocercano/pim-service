@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 
-	"pim/src/quickstart/domain/entity"
+	"saas-mt-pim-service/src/quickstart/domain/entity"
 )
 
 // QuickstartTemplateRepository define las operaciones de persistencia para plantillas de quickstart
@@ -24,12 +24,3 @@ type TenantQuickstartHistoryRepository interface {
 	GetLatestByTenantID(ctx context.Context, tenantID string) (*entity.TenantQuickstartHistory, error)
 }
 
-// YamlDataLoader define las operaciones para cargar datos desde archivos YAML
-type YamlDataLoader interface {
-	LoadBusinessTypes(ctx context.Context) ([]*entity.BusinessType, error)
-	LoadCategoriesByBusinessType(ctx context.Context, businessType string) (interface{}, error)
-	LoadAttributesByBusinessType(ctx context.Context, businessType string) (interface{}, error)
-	LoadVariantsByBusinessType(ctx context.Context, businessType string) (interface{}, error)
-	LoadProductsByBusinessType(ctx context.Context, businessType string) (interface{}, error)
-	LoadBrandsByBusinessType(ctx context.Context, businessType string) (interface{}, error)
-}

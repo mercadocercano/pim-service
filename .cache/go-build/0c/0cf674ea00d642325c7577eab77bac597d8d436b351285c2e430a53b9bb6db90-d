@@ -1,0 +1,7 @@
+./category.go
+./category_hierarchy_validation_response.go
+./category_tree.go
+./marketplace_category_response.go
+./marketplace_category_tree_response.go
+./sync_marketplace_changes_response.go
+./tenant_category_mapping_response.go

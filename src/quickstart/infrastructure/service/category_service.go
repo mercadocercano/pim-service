@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"pim/src/quickstart/domain/port"
+	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
 // CategoryServiceImpl implementa CategoryService para crear categorías desde el quickstart

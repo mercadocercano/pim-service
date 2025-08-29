@@ -28,6 +28,7 @@ src/
 ├── 🌐 /global_catalog/        # Catálogo global
 ├── 🏢 /businesstype/          # Tipos de negocio
 ├── 🚀 /quickstart/            # Configuración rápida
+├── 🤖 /template_ai/           # Templates inteligentes con AI
 ├── 🛠️ /shared/               # Componentes compartidos
 └── 🌐 /api/                   # Configuración general de API
 ```
@@ -93,6 +94,83 @@ api/
 | **Archivo** | **Origen** | **Razón de Migración** |
 |-------------|------------|------------------------|
 | `middleware.go` | `/marketplace/infrastructure/controller/` | Middleware general de API |
+
+---
+
+## **🤖 Módulo template_ai - Templates Inteligentes con AI**
+
+### **📋 Responsabilidades**
+- ✅ Generar templates optimizados con inteligencia artificial
+- ✅ Aplicar templates al catálogo del tenant
+- ✅ Analizar performance y métricas de uso
+- ✅ Aprender de feedback para mejora continua
+- ✅ Integración con catálogo global
+
+### **📂 Estructura**
+```
+template_ai/
+├── domain/
+│   ├── entity/
+│   │   ├── ai_template.go              # Entidad principal de template AI
+│   │   ├── template_global_product.go  # Relación template-producto global
+│   │   └── performance_metric.go       # Métricas de rendimiento
+│   ├── value_object/
+│   │   └── generation_status.go        # Estados de generación
+│   ├── port/
+│   │   ├── ai_template_repository.go   # Interface repositorio
+│   │   └── ai_generation_service.go    # Interface servicio AI
+│   ├── service/
+│   │   ├── template_engine.go          # Motor de templates
+│   │   └── ai_template_domain_service.go
+│   └── exception/
+│       └── errors.go                   # Errores específicos del dominio
+├── application/
+│   ├── usecase/
+│   │   ├── generate_smart_template_usecase.go
+│   │   ├── apply_dynamic_template_usecase.go
+│   │   ├── analyze_template_performance_usecase.go
+│   │   └── update_template_from_feedback_usecase.go
+│   ├── request/                        # DTOs de entrada
+│   ├── response/                       # DTOs de salida
+│   └── mapper/                         # Mappers entre capas
+└── infrastructure/
+    ├── controller/
+    │   └── ai_template_controller.go   # Endpoints HTTP
+    ├── persistence/
+    │   └── repository/                 # Implementaciones PostgreSQL
+    ├── client/
+    │   └── ai_gateway_client.go        # Cliente para AI Gateway
+    ├── service/
+    │   └── ai_template_engine_impl.go  # Implementación del engine
+    └── config/
+        └── wire.go                     # Dependency injection
+```
+
+### **🎯 Características Principales**
+
+1. **Generación Inteligente**
+   - Analiza tipo de negocio y preferencias
+   - Selecciona productos del catálogo global
+   - Optimiza por región y demografía
+   - Balancea marcas y categorías
+
+2. **Aplicación Flexible**
+   - Customización de precios
+   - Ajuste de cantidades
+   - Exclusión de productos
+   - Creación automática de entidades
+
+3. **Análisis Continuo**
+   - Métricas de adopción
+   - Satisfacción del usuario
+   - Modificaciones comunes
+   - ROI y crecimiento
+
+4. **Aprendizaje Adaptativo**
+   - Feedback de usuarios
+   - Optimización automática
+   - Mejora continua
+   - Adaptación regional
 
 ---
 
@@ -245,6 +323,15 @@ Base: /api/v1/quickstart
 ├── GET    /products/:businessType      # Productos por tipo
 ├── GET    /brands/:businessType        # Marcas por tipo
 └── POST   /setup               # Configuración completa
+```
+
+### **🤖 AI Templates Module**
+```
+Base: /api/v1/templates
+├── POST   /generate            # Generar template inteligente con AI
+├── POST   /:id/apply           # Aplicar template al catálogo
+├── GET    /:id/performance     # Obtener métricas de rendimiento
+└── POST   /update-from-feedback # Actualizar template con feedback
 ```
 
 ---

@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"pim/src/businesstype/domain/entity"
-	"pim/src/businesstype/domain/port"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/businesstype/domain/entity"
+	"saas-mt-pim-service/src/businesstype/domain/port"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 )
 
 // BusinessTypePostgresRepository implementa el repositorio usando PostgreSQL

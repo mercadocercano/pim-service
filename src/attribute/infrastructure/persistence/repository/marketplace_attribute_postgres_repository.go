@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"pim/src/attribute/domain/entity"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/attribute/domain/entity"
+	"saas-mt-pim-service/src/shared/domain/criteria"
+	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 	"time"
 )
 

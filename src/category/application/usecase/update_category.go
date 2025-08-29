@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"pim/src/category/domain/entity"
-	"pim/src/category/domain/port"
-	"pim/src/category/domain/value_object"
+	"saas-mt-pim-service/src/category/domain/entity"
+	"saas-mt-pim-service/src/category/domain/port"
+	"saas-mt-pim-service/src/category/domain/value_object"
 )
 
 // ErrCategoryNotFound error cuando la categoría no se encuentra

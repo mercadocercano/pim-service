@@ -1,11 +1,11 @@
 package mapper
 
 import (
-	"pim/src/brand/application/request"
-	"pim/src/brand/application/response"
-	"pim/src/brand/domain/entity"
-	"pim/src/brand/domain/value_object"
-	"pim/src/shared/domain/criteria"
+	"saas-mt-pim-service/src/brand/application/request"
+	"saas-mt-pim-service/src/brand/application/response"
+	"saas-mt-pim-service/src/brand/domain/entity"
+	"saas-mt-pim-service/src/brand/domain/value_object"
+	"saas-mt-pim-service/src/shared/domain/criteria"
 )
 
 // BrandMapper maneja las conversiones entre entidades y DTOs

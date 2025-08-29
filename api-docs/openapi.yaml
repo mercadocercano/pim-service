@@ -117,6 +117,228 @@ components:
         enum: ["super_admin", "marketplace_admin", "tenant_admin", "tenant_user"]
       description: Rol del usuario
 
+  # ==========================================
+  # SCHEMAS
+  # ==========================================
+  schemas:
+    SchemaValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la validación
+        is_valid:
+          type: boolean
+          description: Indica si el schema es completamente válido
+        can_import:
+          type: boolean
+          description: Indica si se puede proceder con la importación
+        columns:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ColumnValidation'
+          description: Validación detallada por columna
+        table_preview:
+          $ref: '#/components/schemas/TablePreview'
+          description: Vista previa de la tabla con colores de validación
+        summary:
+          $ref: '#/components/schemas/ValidationSummary'
+          description: Resumen estadístico de la validación
+        recommendations:
+          type: array
+          items:
+            type: string
+          description: Recomendaciones para mejorar el archivo
+        suggested_mappings:
+          type: object
+          additionalProperties:
+            type: string
+          description: Mapeos sugeridos automáticamente
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación de la validación
+        expires_at:
+          type: string
+          format: date-time
+          description: Fecha de expiración (30 minutos)
+
+    ColumnValidation:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de la columna
+        index:
+          type: integer
+          description: Índice de la columna (0-based)
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado de validación (valid=verde, warning=amarillo, error=rojo, info=azul)
+        type_expected:
+          type: string
+          description: Tipo de dato esperado según el schema
+        type_detected:
+          type: string
+          description: Tipo de dato detectado automáticamente
+        required:
+          type: boolean
+          description: Indica si la columna es requerida
+        mapped_to:
+          type: string
+          description: Campo del producto al que está mapeada
+        statistics:
+          $ref: '#/components/schemas/ColumnStatistics'
+        issues:
+          type: array
+          items:
+            type: string
+          description: Lista de problemas encontrados
+        sample_values:
+          type: array
+          items:
+            type: string
+          description: Valores de muestra
+        invalid_examples:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvalidExample'
+          description: Ejemplos de valores inválidos
+
+    ColumnStatistics:
+      type: object
+      properties:
+        valid_count:
+          type: integer
+          description: Cantidad de valores válidos
+        invalid_count:
+          type: integer
+          description: Cantidad de valores inválidos
+        null_count:
+          type: integer
+          description: Cantidad de valores nulos/vacíos
+        unique_count:
+          type: integer
+          description: Cantidad de valores únicos
+        total_count:
+          type: integer
+          description: Total de valores analizados
+        valid_rate:
+          type: number
+          format: float
+          description: Porcentaje de valores válidos (0-100)
+
+    InvalidExample:
+      type: object
+      properties:
+        row:
+          type: integer
+          description: Número de fila (1-based)
+        value:
+          type: string
+          description: Valor inválido
+        reason:
+          type: string
+          description: Razón de la invalidez
+
+    TablePreview:
+      type: object
+      properties:
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/HeaderInfo'
+          description: Información de los encabezados
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RowPreview'
+          description: Filas de preview con validación
+
+    HeaderInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del header
+        index:
+          type: integer
+          description: Índice de la columna
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado visual del header
+        mapped_to:
+          type: string
+          description: Campo mapeado
+
+    RowPreview:
+      type: object
+      properties:
+        row_number:
+          type: integer
+          description: Número de fila (1-based)
+        cells:
+          type: array
+          items:
+            $ref: '#/components/schemas/CellValidation'
+          description: Celdas de la fila
+        row_status:
+          type: string
+          enum: ["valid", "warning", "error"]
+          description: Estado general de la fila
+
+    CellValidation:
+      type: object
+      properties:
+        value:
+          type: string
+          description: Valor de la celda
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado visual de la celda
+        message:
+          type: string
+          description: Mensaje de error/advertencia
+        corrected_value:
+          type: string
+          description: Valor corregido sugerido
+        column_index:
+          type: integer
+          description: Índice de la columna
+
+    ValidationSummary:
+      type: object
+      properties:
+        total_rows:
+          type: integer
+          description: Total de filas analizadas
+        valid_rows:
+          type: integer
+          description: Filas completamente válidas
+        rows_with_errors:
+          type: integer
+          description: Filas con errores
+        rows_with_warnings:
+          type: integer
+          description: Filas con advertencias
+        estimated_success_rate:
+          type: number
+          format: float
+          description: Tasa de éxito estimada (0-100)
+        total_columns:
+          type: integer
+          description: Total de columnas encontradas
+        mapped_columns:
+          type: integer
+          description: Columnas mapeadas correctamente
+        required_columns:
+          type: integer
+          description: Columnas requeridas según el schema
+
 paths:
   # ==========================================
   # HEALTH ENDPOINTS
@@ -197,6 +419,225 @@ paths:
         '500':
           description: Error interno del servidor
 
+  schemas:
+    SchemaValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la validación
+        is_valid:
+          type: boolean
+          description: Indica si el schema es completamente válido
+        can_import:
+          type: boolean
+          description: Indica si se puede proceder con la importación
+        columns:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ColumnValidation'
+          description: Validación detallada por columna
+        table_preview:
+          $ref: '#/components/schemas/TablePreview'
+          description: Vista previa de la tabla con colores de validación
+        summary:
+          $ref: '#/components/schemas/ValidationSummary'
+          description: Resumen estadístico de la validación
+        recommendations:
+          type: array
+          items:
+            type: string
+          description: Recomendaciones para mejorar el archivo
+        suggested_mappings:
+          type: object
+          additionalProperties:
+            type: string
+          description: Mapeos sugeridos automáticamente
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación de la validación
+        expires_at:
+          type: string
+          format: date-time
+          description: Fecha de expiración (30 minutos)
+
+    ColumnValidation:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de la columna
+        index:
+          type: integer
+          description: Índice de la columna (0-based)
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado de validación (valid=verde, warning=amarillo, error=rojo, info=azul)
+        type_expected:
+          type: string
+          description: Tipo de dato esperado según el schema
+        type_detected:
+          type: string
+          description: Tipo de dato detectado automáticamente
+        required:
+          type: boolean
+          description: Indica si la columna es requerida
+        mapped_to:
+          type: string
+          description: Campo del producto al que está mapeada
+        statistics:
+          $ref: '#/components/schemas/ColumnStatistics'
+        issues:
+          type: array
+          items:
+            type: string
+          description: Lista de problemas encontrados
+        sample_values:
+          type: array
+          items:
+            type: string
+          description: Valores de muestra
+        invalid_examples:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvalidExample'
+          description: Ejemplos de valores inválidos
+
+    ColumnStatistics:
+      type: object
+      properties:
+        valid_count:
+          type: integer
+          description: Cantidad de valores válidos
+        invalid_count:
+          type: integer
+          description: Cantidad de valores inválidos
+        null_count:
+          type: integer
+          description: Cantidad de valores nulos/vacíos
+        unique_count:
+          type: integer
+          description: Cantidad de valores únicos
+        total_count:
+          type: integer
+          description: Total de valores analizados
+        valid_rate:
+          type: number
+          format: float
+          description: Porcentaje de valores válidos (0-100)
+
+    InvalidExample:
+      type: object
+      properties:
+        row:
+          type: integer
+          description: Número de fila (1-based)
+        value:
+          type: string
+          description: Valor inválido
+        reason:
+          type: string
+          description: Razón de la invalidez
+
+    TablePreview:
+      type: object
+      properties:
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/HeaderInfo'
+          description: Información de los encabezados
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RowPreview'
+          description: Filas de preview con validación
+
+    HeaderInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del header
+        index:
+          type: integer
+          description: Índice de la columna
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado visual del header
+        mapped_to:
+          type: string
+          description: Campo mapeado
+
+    RowPreview:
+      type: object
+      properties:
+        row_number:
+          type: integer
+          description: Número de fila (1-based)
+        cells:
+          type: array
+          items:
+            $ref: '#/components/schemas/CellValidation'
+          description: Celdas de la fila
+        row_status:
+          type: string
+          enum: ["valid", "warning", "error"]
+          description: Estado general de la fila
+
+    CellValidation:
+      type: object
+      properties:
+        value:
+          type: string
+          description: Valor de la celda
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado visual de la celda
+        message:
+          type: string
+          description: Mensaje de error/advertencia
+        corrected_value:
+          type: string
+          description: Valor corregido sugerido
+        column_index:
+          type: integer
+          description: Índice de la columna
+
+    ValidationSummary:
+      type: object
+      properties:
+        total_rows:
+          type: integer
+          description: Total de filas analizadas
+        valid_rows:
+          type: integer
+          description: Filas completamente válidas
+        rows_with_errors:
+          type: integer
+          description: Filas con errores
+        rows_with_warnings:
+          type: integer
+          description: Filas con advertencias
+        estimated_success_rate:
+          type: number
+          format: float
+          description: Tasa de éxito estimada (0-100)
+        total_columns:
+          type: integer
+          description: Total de columnas encontradas
+        mapped_columns:
+          type: integer
+          description: Columnas mapeadas correctamente
+        required_columns:
+          type: integer
+          description: Columnas requeridas según el schema
+
     post:
       summary: Crear tipo de negocio
       tags: [Business Types]
@@ -267,6 +708,225 @@ paths:
           description: No autorizado
         '500':
           description: Error interno del servidor
+
+  schemas:
+    SchemaValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la validación
+        is_valid:
+          type: boolean
+          description: Indica si el schema es completamente válido
+        can_import:
+          type: boolean
+          description: Indica si se puede proceder con la importación
+        columns:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ColumnValidation'
+          description: Validación detallada por columna
+        table_preview:
+          $ref: '#/components/schemas/TablePreview'
+          description: Vista previa de la tabla con colores de validación
+        summary:
+          $ref: '#/components/schemas/ValidationSummary'
+          description: Resumen estadístico de la validación
+        recommendations:
+          type: array
+          items:
+            type: string
+          description: Recomendaciones para mejorar el archivo
+        suggested_mappings:
+          type: object
+          additionalProperties:
+            type: string
+          description: Mapeos sugeridos automáticamente
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación de la validación
+        expires_at:
+          type: string
+          format: date-time
+          description: Fecha de expiración (30 minutos)
+
+    ColumnValidation:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de la columna
+        index:
+          type: integer
+          description: Índice de la columna (0-based)
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado de validación (valid=verde, warning=amarillo, error=rojo, info=azul)
+        type_expected:
+          type: string
+          description: Tipo de dato esperado según el schema
+        type_detected:
+          type: string
+          description: Tipo de dato detectado automáticamente
+        required:
+          type: boolean
+          description: Indica si la columna es requerida
+        mapped_to:
+          type: string
+          description: Campo del producto al que está mapeada
+        statistics:
+          $ref: '#/components/schemas/ColumnStatistics'
+        issues:
+          type: array
+          items:
+            type: string
+          description: Lista de problemas encontrados
+        sample_values:
+          type: array
+          items:
+            type: string
+          description: Valores de muestra
+        invalid_examples:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvalidExample'
+          description: Ejemplos de valores inválidos
+
+    ColumnStatistics:
+      type: object
+      properties:
+        valid_count:
+          type: integer
+          description: Cantidad de valores válidos
+        invalid_count:
+          type: integer
+          description: Cantidad de valores inválidos
+        null_count:
+          type: integer
+          description: Cantidad de valores nulos/vacíos
+        unique_count:
+          type: integer
+          description: Cantidad de valores únicos
+        total_count:
+          type: integer
+          description: Total de valores analizados
+        valid_rate:
+          type: number
+          format: float
+          description: Porcentaje de valores válidos (0-100)
+
+    InvalidExample:
+      type: object
+      properties:
+        row:
+          type: integer
+          description: Número de fila (1-based)
+        value:
+          type: string
+          description: Valor inválido
+        reason:
+          type: string
+          description: Razón de la invalidez
+
+    TablePreview:
+      type: object
+      properties:
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/HeaderInfo'
+          description: Información de los encabezados
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RowPreview'
+          description: Filas de preview con validación
+
+    HeaderInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del header
+        index:
+          type: integer
+          description: Índice de la columna
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado visual del header
+        mapped_to:
+          type: string
+          description: Campo mapeado
+
+    RowPreview:
+      type: object
+      properties:
+        row_number:
+          type: integer
+          description: Número de fila (1-based)
+        cells:
+          type: array
+          items:
+            $ref: '#/components/schemas/CellValidation'
+          description: Celdas de la fila
+        row_status:
+          type: string
+          enum: ["valid", "warning", "error"]
+          description: Estado general de la fila
+
+    CellValidation:
+      type: object
+      properties:
+        value:
+          type: string
+          description: Valor de la celda
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado visual de la celda
+        message:
+          type: string
+          description: Mensaje de error/advertencia
+        corrected_value:
+          type: string
+          description: Valor corregido sugerido
+        column_index:
+          type: integer
+          description: Índice de la columna
+
+    ValidationSummary:
+      type: object
+      properties:
+        total_rows:
+          type: integer
+          description: Total de filas analizadas
+        valid_rows:
+          type: integer
+          description: Filas completamente válidas
+        rows_with_errors:
+          type: integer
+          description: Filas con errores
+        rows_with_warnings:
+          type: integer
+          description: Filas con advertencias
+        estimated_success_rate:
+          type: number
+          format: float
+          description: Tasa de éxito estimada (0-100)
+        total_columns:
+          type: integer
+          description: Total de columnas encontradas
+        mapped_columns:
+          type: integer
+          description: Columnas mapeadas correctamente
+        required_columns:
+          type: integer
+          description: Columnas requeridas según el schema
 
     put:
       summary: Actualizar tipo de negocio
@@ -552,6 +1212,225 @@ paths:
         '500':
           description: Error interno del servidor
 
+  schemas:
+    SchemaValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la validación
+        is_valid:
+          type: boolean
+          description: Indica si el schema es completamente válido
+        can_import:
+          type: boolean
+          description: Indica si se puede proceder con la importación
+        columns:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ColumnValidation'
+          description: Validación detallada por columna
+        table_preview:
+          $ref: '#/components/schemas/TablePreview'
+          description: Vista previa de la tabla con colores de validación
+        summary:
+          $ref: '#/components/schemas/ValidationSummary'
+          description: Resumen estadístico de la validación
+        recommendations:
+          type: array
+          items:
+            type: string
+          description: Recomendaciones para mejorar el archivo
+        suggested_mappings:
+          type: object
+          additionalProperties:
+            type: string
+          description: Mapeos sugeridos automáticamente
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación de la validación
+        expires_at:
+          type: string
+          format: date-time
+          description: Fecha de expiración (30 minutos)
+
+    ColumnValidation:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de la columna
+        index:
+          type: integer
+          description: Índice de la columna (0-based)
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado de validación (valid=verde, warning=amarillo, error=rojo, info=azul)
+        type_expected:
+          type: string
+          description: Tipo de dato esperado según el schema
+        type_detected:
+          type: string
+          description: Tipo de dato detectado automáticamente
+        required:
+          type: boolean
+          description: Indica si la columna es requerida
+        mapped_to:
+          type: string
+          description: Campo del producto al que está mapeada
+        statistics:
+          $ref: '#/components/schemas/ColumnStatistics'
+        issues:
+          type: array
+          items:
+            type: string
+          description: Lista de problemas encontrados
+        sample_values:
+          type: array
+          items:
+            type: string
+          description: Valores de muestra
+        invalid_examples:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvalidExample'
+          description: Ejemplos de valores inválidos
+
+    ColumnStatistics:
+      type: object
+      properties:
+        valid_count:
+          type: integer
+          description: Cantidad de valores válidos
+        invalid_count:
+          type: integer
+          description: Cantidad de valores inválidos
+        null_count:
+          type: integer
+          description: Cantidad de valores nulos/vacíos
+        unique_count:
+          type: integer
+          description: Cantidad de valores únicos
+        total_count:
+          type: integer
+          description: Total de valores analizados
+        valid_rate:
+          type: number
+          format: float
+          description: Porcentaje de valores válidos (0-100)
+
+    InvalidExample:
+      type: object
+      properties:
+        row:
+          type: integer
+          description: Número de fila (1-based)
+        value:
+          type: string
+          description: Valor inválido
+        reason:
+          type: string
+          description: Razón de la invalidez
+
+    TablePreview:
+      type: object
+      properties:
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/HeaderInfo'
+          description: Información de los encabezados
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RowPreview'
+          description: Filas de preview con validación
+
+    HeaderInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del header
+        index:
+          type: integer
+          description: Índice de la columna
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado visual del header
+        mapped_to:
+          type: string
+          description: Campo mapeado
+
+    RowPreview:
+      type: object
+      properties:
+        row_number:
+          type: integer
+          description: Número de fila (1-based)
+        cells:
+          type: array
+          items:
+            $ref: '#/components/schemas/CellValidation'
+          description: Celdas de la fila
+        row_status:
+          type: string
+          enum: ["valid", "warning", "error"]
+          description: Estado general de la fila
+
+    CellValidation:
+      type: object
+      properties:
+        value:
+          type: string
+          description: Valor de la celda
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado visual de la celda
+        message:
+          type: string
+          description: Mensaje de error/advertencia
+        corrected_value:
+          type: string
+          description: Valor corregido sugerido
+        column_index:
+          type: integer
+          description: Índice de la columna
+
+    ValidationSummary:
+      type: object
+      properties:
+        total_rows:
+          type: integer
+          description: Total de filas analizadas
+        valid_rows:
+          type: integer
+          description: Filas completamente válidas
+        rows_with_errors:
+          type: integer
+          description: Filas con errores
+        rows_with_warnings:
+          type: integer
+          description: Filas con advertencias
+        estimated_success_rate:
+          type: number
+          format: float
+          description: Tasa de éxito estimada (0-100)
+        total_columns:
+          type: integer
+          description: Total de columnas encontradas
+        mapped_columns:
+          type: integer
+          description: Columnas mapeadas correctamente
+        required_columns:
+          type: integer
+          description: Columnas requeridas según el schema
+
     post:
       summary: Crear nuevo producto
       tags: [Products]
@@ -731,3 +1610,742 @@ paths:
         '500':
           description: Error interno del servidor
 
+  # ==========================================
+  # SCHEMA VALIDATION ENDPOINTS
+  # ==========================================
+  /products/validate-schema:
+    post:
+      summary: Validar schema de archivo CSV
+      tags: [Products]
+      description: |
+        Valida el schema de un archivo CSV antes de importar productos.
+        Retorna una vista previa con visualización tipo Excel/Google Sheets
+        mostrando errores, advertencias y sugerencias de mapeo.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Archivo CSV a validar
+                max_rows:
+                  type: integer
+                  description: Número máximo de filas a analizar (default 10)
+                  minimum: 1
+                  maximum: 100
+                  default: 10
+                use_ai:
+                  type: boolean
+                  description: Usar IA para sugerencias inteligentes (futuro)
+                  default: false
+      responses:
+        '200':
+          description: Resultado de la validación del schema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaValidationResponse'
+        '400':
+          description: Archivo inválido o formato incorrecto
+        '401':
+          description: No autorizado
+        '413':
+          description: Archivo demasiado grande
+        '500':
+          description: Error interno del servidor
+
+  /products/apply-mapping:
+    post:
+      summary: Aplicar mapeo manual y re-validar
+      tags: [Products]
+      description: |
+        Aplica mapeos manuales de columnas a una validación existente
+        y actualiza el estado de validación.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [validation_id, mappings]
+              properties:
+                validation_id:
+                  type: string
+                  format: uuid
+                  description: ID de la validación previa
+                mappings:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Mapeo de columnas CSV a campos del producto
+                  example:
+                    "Producto": "name"
+                    "Codigo": "sku"
+                    "Precio": "price"
+      responses:
+        '200':
+          description: Validación actualizada con nuevos mapeos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaValidationResponse'
+        '400':
+          description: Datos inválidos o mapeos incorrectos
+        '404':
+          description: Validación no encontrada o expirada
+        '500':
+          description: Error interno del servidor
+
+  /products/csv-template:
+    get:
+      summary: Descargar plantilla CSV
+      tags: [Products]
+      description: |
+        Descarga una plantilla CSV con el formato correcto para importar productos.
+        Incluye ejemplos de datos y todas las columnas disponibles.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: include_optional
+          in: query
+          description: Incluir columnas opcionales en la plantilla
+          schema:
+            type: boolean
+            default: true
+        - name: lang
+          in: query
+          description: Idioma de los headers (es, en)
+          schema:
+            type: string
+            enum: ["es", "en"]
+            default: "es"
+      responses:
+        '200':
+          description: Archivo CSV de plantilla
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: Nombre del archivo
+              schema:
+                type: string
+                example: 'attachment; filename="product_template.csv"'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  schemas:
+    SchemaValidationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la validación
+        is_valid:
+          type: boolean
+          description: Indica si el schema es completamente válido
+        can_import:
+          type: boolean
+          description: Indica si se puede proceder con la importación
+        columns:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ColumnValidation'
+          description: Validación detallada por columna
+        table_preview:
+          $ref: '#/components/schemas/TablePreview'
+          description: Vista previa de la tabla con colores de validación
+        summary:
+          $ref: '#/components/schemas/ValidationSummary'
+          description: Resumen estadístico de la validación
+        recommendations:
+          type: array
+          items:
+            type: string
+          description: Recomendaciones para mejorar el archivo
+        suggested_mappings:
+          type: object
+          additionalProperties:
+            type: string
+          description: Mapeos sugeridos automáticamente
+        created_at:
+          type: string
+          format: date-time
+          description: Fecha de creación de la validación
+        expires_at:
+          type: string
+          format: date-time
+          description: Fecha de expiración (30 minutos)
+
+    ColumnValidation:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de la columna
+        index:
+          type: integer
+          description: Índice de la columna (0-based)
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado de validación (valid=verde, warning=amarillo, error=rojo, info=azul)
+        type_expected:
+          type: string
+          description: Tipo de dato esperado según el schema
+        type_detected:
+          type: string
+          description: Tipo de dato detectado automáticamente
+        required:
+          type: boolean
+          description: Indica si la columna es requerida
+        mapped_to:
+          type: string
+          description: Campo del producto al que está mapeada
+        statistics:
+          $ref: '#/components/schemas/ColumnStatistics'
+        issues:
+          type: array
+          items:
+            type: string
+          description: Lista de problemas encontrados
+        sample_values:
+          type: array
+          items:
+            type: string
+          description: Valores de muestra
+        invalid_examples:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvalidExample'
+          description: Ejemplos de valores inválidos
+
+    ColumnStatistics:
+      type: object
+      properties:
+        valid_count:
+          type: integer
+          description: Cantidad de valores válidos
+        invalid_count:
+          type: integer
+          description: Cantidad de valores inválidos
+        null_count:
+          type: integer
+          description: Cantidad de valores nulos/vacíos
+        unique_count:
+          type: integer
+          description: Cantidad de valores únicos
+        total_count:
+          type: integer
+          description: Total de valores analizados
+        valid_rate:
+          type: number
+          format: float
+          description: Porcentaje de valores válidos (0-100)
+
+    InvalidExample:
+      type: object
+      properties:
+        row:
+          type: integer
+          description: Número de fila (1-based)
+        value:
+          type: string
+          description: Valor inválido
+        reason:
+          type: string
+          description: Razón de la invalidez
+
+    TablePreview:
+      type: object
+      properties:
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/HeaderInfo'
+          description: Información de los encabezados
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RowPreview'
+          description: Filas de preview con validación
+
+    HeaderInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del header
+        index:
+          type: integer
+          description: Índice de la columna
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado visual del header
+        mapped_to:
+          type: string
+          description: Campo mapeado
+
+    RowPreview:
+      type: object
+      properties:
+        row_number:
+          type: integer
+          description: Número de fila (1-based)
+        cells:
+          type: array
+          items:
+            $ref: '#/components/schemas/CellValidation'
+          description: Celdas de la fila
+        row_status:
+          type: string
+          enum: ["valid", "warning", "error"]
+          description: Estado general de la fila
+
+    CellValidation:
+      type: object
+      properties:
+        value:
+          type: string
+          description: Valor de la celda
+        status:
+          type: string
+          enum: ["valid", "warning", "error", "info"]
+          description: Estado visual de la celda
+        message:
+          type: string
+          description: Mensaje de error/advertencia
+        corrected_value:
+          type: string
+          description: Valor corregido sugerido
+        column_index:
+          type: integer
+          description: Índice de la columna
+
+    ValidationSummary:
+      type: object
+      properties:
+        total_rows:
+          type: integer
+          description: Total de filas analizadas
+        valid_rows:
+          type: integer
+          description: Filas completamente válidas
+        rows_with_errors:
+          type: integer
+          description: Filas con errores
+        rows_with_warnings:
+          type: integer
+          description: Filas con advertencias
+        estimated_success_rate:
+          type: number
+          format: float
+          description: Tasa de éxito estimada (0-100)
+        total_columns:
+          type: integer
+          description: Total de columnas encontradas
+        mapped_columns:
+          type: integer
+          description: Columnas mapeadas correctamente
+        required_columns:
+          type: integer
+          description: Columnas requeridas según el schema
+
+
+
+  /products/json-template:
+    get:
+      summary: Descargar plantilla JSON
+      tags: [Products]
+      description: |
+        Descarga una plantilla JSON con el formato correcto para importar productos.
+        Incluye un array de objetos con todos los campos disponibles y ejemplos.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Array de productos de ejemplo en formato JSON
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: "Laptop Dell XPS 13"
+                    sku:
+                      type: string
+                      example: "DELL-XPS-001"
+                    price:
+                      type: number
+                      example: 1299.99
+                    description:
+                      type: string
+                      example: "Ultrabook profesional"
+                    category_name:
+                      type: string
+                      example: "Laptops"
+                    brand_name:
+                      type: string
+                      example: "Dell"
+                    stock:
+                      type: integer
+                      example: 25
+                    barcode:
+                      type: string
+                      example: "1234567890123"
+          headers:
+            Content-Disposition:
+              description: Nombre del archivo
+              schema:
+                type: string
+                example: 'attachment; filename="product_template.json"'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # AI TEMPLATE ENDPOINTS
+  # ==========================================
+  /templates/generate:
+    post:
+      summary: Generar template inteligente con AI
+      tags: [AI Templates]
+      description: |
+        Genera un template optimizado usando inteligencia artificial basándose en:
+        - Tipo de negocio seleccionado
+        - Tamaño objetivo del negocio
+        - Preferencias y restricciones específicas
+        - Catálogo global de productos
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - business_type_id
+                - name
+                - target_size
+              properties:
+                business_type_id:
+                  type: string
+                  format: uuid
+                  description: ID del tipo de negocio
+                  example: "4f4e9b9e-7b8a-4c6a-9c5a-3e5f7a8b9c1d"
+                name:
+                  type: string
+                  description: Nombre del template
+                  example: "Mi Almacén Premium"
+                target_size:
+                  type: string
+                  enum: [small, medium, large]
+                  description: Tamaño objetivo del negocio
+                  example: "medium"
+                preferences:
+                  type: object
+                  properties:
+                    price_range:
+                      type: string
+                      enum: [economy, standard, premium]
+                      default: "standard"
+                    include_generics:
+                      type: boolean
+                      default: true
+                    generic_percentage:
+                      type: integer
+                      minimum: 0
+                      maximum: 100
+                      default: 25
+                    categories_focus:
+                      type: array
+                      items:
+                        type: string
+                      example: ["bebidas", "snacks", "limpieza"]
+                    exclude_brands:
+                      type: array
+                      items:
+                        type: string
+                      example: ["marca_x"]
+                    regional_preferences:
+                      type: string
+                      example: "buenos_aires"
+      responses:
+        '200':
+          description: Template generado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  template_id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  version:
+                    type: integer
+                  generated_by:
+                    type: string
+                    enum: [ai, manual, hybrid]
+                  business_type:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      name:
+                        type: string
+                  products:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        global_product_id:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        category:
+                          type: string
+                        brand:
+                          type: string
+                        priority:
+                          type: integer
+                          description: "1=esencial, 2=recomendado, 3=opcional"
+                        quantity_suggestion:
+                          type: integer
+                        price:
+                          type: number
+                  summary:
+                    type: object
+                    properties:
+                      total_products:
+                        type: integer
+                      categories:
+                        type: integer
+                      brands:
+                        type: integer
+                      estimated_investment:
+                        type: number
+                      brand_distribution:
+                        type: object
+                        additionalProperties:
+                          type: integer
+        '400':
+          description: Parámetros inválidos
+        '401':
+          description: No autorizado
+        '500':
+          description: Error del servidor
+
+  /templates/{id}/apply:
+    post:
+      summary: Aplicar template al catálogo del tenant
+      tags: [AI Templates]
+      description: |
+        Aplica un template generado al catálogo del tenant con opciones de customización:
+        - Ajuste de precios y cantidades
+        - Exclusión de productos específicos
+        - Creación de categorías y marcas necesarias
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del template a aplicar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customizations:
+                  type: object
+                  properties:
+                    exclude_products:
+                      type: array
+                      items:
+                        type: string
+                        format: uuid
+                    price_multiplier:
+                      type: number
+                      minimum: 0.1
+                      maximum: 10
+                      default: 1.0
+                    quantity_adjustments:
+                      type: object
+                      additionalProperties:
+                        type: integer
+                apply_options:
+                  type: object
+                  properties:
+                    create_categories:
+                      type: boolean
+                      default: true
+                    create_brands:
+                      type: boolean
+                      default: true
+                    create_products:
+                      type: boolean
+                      default: true
+                    initial_stock:
+                      type: boolean
+                      default: true
+      responses:
+        '200':
+          description: Template aplicado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  application_id:
+                    type: string
+                    format: uuid
+                  results:
+                    type: object
+                    properties:
+                      categories_created:
+                        type: integer
+                      brands_created:
+                        type: integer
+                      products_created:
+                        type: integer
+                      products_skipped:
+                        type: integer
+                      initial_stock_created:
+                        type: boolean
+                  summary:
+                    type: object
+                    properties:
+                      total_value:
+                        type: number
+                      setup_time:
+                        type: string
+                      customizations_applied:
+                        type: array
+                        items:
+                          type: string
+        '400':
+          description: Parámetros inválidos
+        '404':
+          description: Template no encontrado
+        '500':
+          description: Error del servidor
+
+  /templates/{id}/performance:
+    get:
+      summary: Obtener métricas de rendimiento del template
+      tags: [AI Templates]
+      description: |
+        Obtiene análisis de rendimiento y métricas de uso del template:
+        - Tasa de adopción y satisfacción
+        - Modificaciones comunes realizadas
+        - Rendimiento por región
+        - Recomendaciones de mejora
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del template
+      responses:
+        '200':
+          description: Métricas de rendimiento
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  template_id:
+                    type: string
+                    format: uuid
+                  performance_metrics:
+                    type: object
+                    properties:
+                      usage_count:
+                        type: integer
+                      average_satisfaction:
+                        type: number
+                        minimum: 0
+                        maximum: 5
+                      modification_rate:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                      average_products_kept:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                      revenue_impact:
+                        type: object
+                        properties:
+                          average_first_month:
+                            type: number
+                          average_growth_rate:
+                            type: number
+                  common_modifications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        action:
+                          type: string
+                          enum: [remove_product, add_category, change_quantity]
+                        product:
+                          type: string
+                        category:
+                          type: string
+                        frequency:
+                          type: number
+                  regional_performance:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        usage:
+                          type: integer
+                        satisfaction:
+                          type: number
+        '404':
+          description: Template no encontrado
+        '500':
+          description: Error interno del servidor

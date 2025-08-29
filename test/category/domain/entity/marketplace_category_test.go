@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	marketplaceEntity "pim/src/marketplace/domain/entity"
+	marketplaceEntity "saas-mt-pim-service/src/category/domain/entity"
 )
 
 func TestNewMarketplaceCategory(t *testing.T) {

@@ -3,10 +3,10 @@ package config
 import (
 	"database/sql"
 
-	"pim/src/product/global_catalog/application/usecase"
-	"pim/src/product/global_catalog/infrastructure/controller"
-	"pim/src/product/global_catalog/infrastructure/criteria"
-	"pim/src/product/global_catalog/infrastructure/persistence"
+	"saas-mt-pim-service/src/product/global_catalog/application/usecase"
+	"saas-mt-pim-service/src/product/global_catalog/infrastructure/controller"
+	"saas-mt-pim-service/src/product/global_catalog/infrastructure/criteria"
+	"saas-mt-pim-service/src/product/global_catalog/infrastructure/persistence"
 )
 
 // GlobalCatalogConfig contiene la configuración del módulo global catalog

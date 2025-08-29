@@ -1,0 +1,6 @@
+./create_product_request.go
+./create_product_variant_request.go
+./import_products_csv_request.go
+./update_product_request.go
+./update_product_variant_request.go
+./validate_skus_request.go

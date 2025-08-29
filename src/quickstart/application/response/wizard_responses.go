@@ -3,7 +3,7 @@ package response
 import (
 	"time"
 
-	"pim/src/quickstart/domain/entity"
+	"saas-mt-pim-service/src/quickstart/domain/entity"
 )
 
 // WizardStatusResponse representa la respuesta del estado del wizard

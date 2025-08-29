@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 
-	"pim/src/product/tenant/application/mapper"
-	"pim/src/product/tenant/application/response"
-	"pim/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/application/mapper"
+	"saas-mt-pim-service/src/product/tenant/application/response"
+	"saas-mt-pim-service/src/product/tenant/domain/port"
 
 	"github.com/google/uuid"
 )
@@ -19,11 +19,11 @@ type GetProductByIDUseCase struct {
 // NewGetProductByIDUseCase crea una nueva instancia del caso de uso
 func NewGetProductByIDUseCase(
 	productRepo port.ProductRepository,
-	mapper *mapper.ProductMapper,
+	productMapper *mapper.ProductMapper,
 ) *GetProductByIDUseCase {
 	return &GetProductByIDUseCase{
 		productRepo: productRepo,
-		mapper:      mapper,
+		mapper:      productMapper,
 	}
 }
 

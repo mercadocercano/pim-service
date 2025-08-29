@@ -7,10 +7,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"pim/src/product/global_catalog/application/usecase"
-	"pim/src/product/global_catalog/domain/exception"
-	"pim/src/product/global_catalog/infrastructure/controller/dto"
-	"pim/src/product/global_catalog/infrastructure/criteria"
+	"saas-mt-pim-service/src/product/global_catalog/application/usecase"
+	"saas-mt-pim-service/src/product/global_catalog/domain/exception"
+	"saas-mt-pim-service/src/product/global_catalog/infrastructure/controller/dto"
+	"saas-mt-pim-service/src/product/global_catalog/infrastructure/criteria"
 )
 
 // GlobalCatalogController maneja las requests HTTP para el catálogo global
