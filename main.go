@@ -21,8 +21,8 @@ import (
 
 	// Brand imports
 	brandController "saas-mt-pim-service/src/brand/infrastructure/controller"
-	brandRepository "saas-mt-pim-service/src/brand/infrastructure/persistence/repository"
 	brandPersistence "saas-mt-pim-service/src/brand/infrastructure/persistence"
+	brandRepository "saas-mt-pim-service/src/brand/infrastructure/persistence/repository"
 
 	// Attribute imports
 	attributeConfig "saas-mt-pim-service/src/attribute/infrastructure/config"
@@ -50,10 +50,9 @@ import (
 
 	// AI Template imports
 	aiTemplateConfig "saas-mt-pim-service/src/template_ai/infrastructure/config"
-	
-	// Overview module imports (commented until fixed)
-	// overviewDI "saas-mt-pim-service/src/overview/infrastructure/di"
-	// globalCatalogRepo "saas-mt-pim-service/src/product/global_catalog/domain/port"
+
+	// Overview module imports
+	overviewConfig "saas-mt-pim-service/src/overview/infrastructure/config"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // Driver de PostgreSQL
@@ -169,7 +168,7 @@ func main() {
 	setupBatchModule(v1, db)
 	setupSchemaValidationModule(v1, db)
 	setupAITemplateModule(v1, db)
-	// setupOverviewModule(v1, db) // TODO: Fix overview module
+	overviewConfig.SetupOverviewModule(v1, db)
 
 	// Aquí se agregarían más módulos:
 	// - Ubicaciones de Stock
@@ -455,7 +454,7 @@ func setupBatchModule(router *gin.RouterGroup, db *sql.DB) {
 	categoryRepo := categoryRepository.NewCategoryPostgresRepository(db)
 	brandRepo := brandPersistence.NewPostgresBrandRepository(db)
 	productRepo := persistence.NewPostgresProductRepository(db)
-	
+
 	// Repository para mapeo de categorías
 	categoryMappingRepo := categoryPersistence.NewTenantCategoryMappingPostgresRepository(db)
 
@@ -482,10 +481,10 @@ func setupBatchModule(router *gin.RouterGroup, db *sql.DB) {
 // setupSchemaValidationModule configura el módulo de validación de schema
 func setupSchemaValidationModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("Configurando módulo Schema Validation...")
-	
+
 	// Usar la función del config module
 	schemaValidationConfig.SetupSchemaValidationModule(router, db)
-	
+
 	log.Println("Módulo Schema Validation configurado exitosamente")
 	log.Println("Rutas Schema Validation disponibles:")
 	log.Println("  POST   /api/v1/products/validate-schema")
@@ -496,14 +495,14 @@ func setupSchemaValidationModule(router *gin.RouterGroup, db *sql.DB) {
 // setupAITemplateModule configura el módulo de AI Templates
 func setupAITemplateModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("Configurando módulo AI Template...")
-	
+
 	// Crear configuración y obtener controller
 	config := aiTemplateConfig.NewAITemplateConfig(db)
 	controller := config.GetController()
-	
+
 	// Registrar rutas
 	controller.RegisterRoutes(router)
-	
+
 	log.Println("Módulo AI Template configurado exitosamente")
 	log.Println("Rutas AI Template disponibles:")
 	log.Println("  POST   /api/v1/templates/generate")
@@ -511,54 +510,3 @@ func setupAITemplateModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  GET    /api/v1/templates/:id/performance")
 	log.Println("  POST   /api/v1/templates/update-from-feedback")
 }
-
-// setupOverviewModule configura el módulo Overview para el dashboard
-// TODO: Fix overview module implementation
-/*
-func setupOverviewModule(router *gin.RouterGroup, db *sql.DB) {
-	log.Println("Configurando módulo Overview...")
-	
-	// Obtener repositorios existentes para reutilizar
-	// Brand repositories
-	brandDB := brandPersistence.NewBrandDB(db)
-	brandRepo := brandRepository.NewBrandPostgresRepository(brandDB)
-	
-	marketplaceBrandDB := brandPersistence.NewMarketplaceBrandDB(db)
-	marketplaceBrandRepo := brandRepository.NewMarketplaceBrandPostgresRepository(marketplaceBrandDB)
-	
-	// Category repositories  
-	categoryDB := categoryPersistence.NewCategoryDB(db)
-	categoryRepo := categoryRepository.NewCategoryPostgresRepository(categoryDB)
-	
-	marketplaceCategoryDB := categoryPersistence.NewMarketplaceCategoryDB(db)
-	marketplaceCategoryRepo := categoryRepository.NewMarketplaceCategoryPostgresRepository(marketplaceCategoryDB)
-	
-	// Product repositories
-	productDB := persistence.NewProductDB(db)
-	productRepo := persistence.NewProductPostgresRepository(productDB)
-	
-	// Global catalog repository (usando nil por ahora, se puede conectar a MongoDB después)
-	var globalProductRepo globalCatalogRepo.GlobalProductRepository
-	
-	// Crear dependencias para el módulo overview
-	overviewDeps := overviewDI.OverviewDependencies{
-		ProductRepo:             productRepo,
-		CategoryRepo:            categoryRepo,
-		BrandRepo:               brandRepo,
-		GlobalProductRepo:       globalProductRepo,
-		MarketplaceCategoryRepo: marketplaceCategoryRepo,
-		MarketplaceBrandRepo:    marketplaceBrandRepo,
-	}
-	
-	// Crear el módulo
-	overviewModule := overviewDI.NewOverviewModule(overviewDeps)
-	
-	// Registrar rutas
-	overviewModule.RegisterRoutes(router)
-	
-	log.Println("Módulo Overview configurado exitosamente")
-	log.Println("Rutas Overview disponibles:")
-	log.Println("  GET    /api/v1/marketplace/overview")
-	log.Println("  GET    /api/v1/marketplace/overview/sections")
-}
-*/
