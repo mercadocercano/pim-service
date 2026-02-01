@@ -44,9 +44,8 @@ func NewGlobalProduct(
 	imageURL *string,
 	source *value_object.ProductSource,
 ) (*GlobalProduct, error) {
-	if ean == nil {
-		return nil, errors.New("EAN-13 es obligatorio")
-	}
+	// EAN es opcional - permitir productos sin EAN (ej: productos scrapeados)
+	// Si no hay EAN, el producto se identificará por nombre+marca+fuente
 
 	if name == "" {
 		return nil, errors.New("el nombre del producto es obligatorio")

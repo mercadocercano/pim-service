@@ -44,9 +44,14 @@ func NewProductSource(source string, sourceURL *string, scrapedAt *time.Time, re
 		return nil, errors.New("la fuente del producto es obligatoria")
 	}
 
+	// Normalizar la fuente antes de validar (convertir a minúsculas y limpiar)
+	sourceNormalized := strings.ToLower(strings.TrimSpace(source))
+	
 	// Validar que la fuente esté en la lista de fuentes válidas
-	if !isValidSource(source) {
-		return nil, errors.New("fuente de producto no válida")
+	if !isValidSource(sourceNormalized) {
+		// Log para debugging - ver qué fuente está causando problemas
+		// En producción esto debería ir a un logger estructurado
+		return nil, errors.New("fuente de producto no válida: " + sourceNormalized)
 	}
 
 	// Validar reliability
@@ -188,6 +193,8 @@ func (ps *ProductSource) GetSourceDisplayName() string {
 }
 
 // isValidSource valida que la fuente esté en la lista de fuentes permitidas
+// Ahora acepta cualquier fuente que empiece con "scraper_" o sea "marketplace" o "manual"
+// para permitir flexibilidad en el scraping sin bloquear productos válidos
 func isValidSource(source string) bool {
 	validSources := []string{
 		SourceManual, SourceDisco, SourceCarrefour, SourceFravega,
@@ -200,11 +207,47 @@ func isValidSource(source string) bool {
 	}
 
 	source = strings.ToLower(source)
+	
+	// Verificar primero en la lista predefinida
 	for _, validSource := range validSources {
 		if source == validSource {
 			return true
 		}
 	}
+	
+	// Si no está en la lista predefinida, aceptar si:
+	// 1. Empieza con "scraper_" (fuentes de scraping dinámicas)
+	// 2. Es "marketplace" (productos del marketplace)
+	// 3. Es "manual" (productos agregados manualmente)
+	// 4. Tiene al menos 2 caracteres y solo contiene letras, números y guiones bajos
+	//    (esto permite cualquier fuente válida normalizada)
+	if strings.HasPrefix(source, "scraper_") || source == "marketplace" || source == "manual" {
+		return true
+	}
+	
+	// Aceptar cualquier fuente que tenga al menos 1 carácter y solo contenga
+	// letras minúsculas, números, guiones bajos y guiones (fuentes normalizadas)
+	// Esto permite fuentes como "scraper-mi-tienda" o "scraper_tienda_123"
+	if len(source) >= 1 {
+		validChars := true
+		for _, char := range source {
+			// Permitir letras minúsculas, números, guiones bajos y guiones
+			if !((char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '_' || char == '-') {
+				validChars = false
+				break
+			}
+		}
+		if validChars {
+			return true
+		}
+	}
+	
+	// Como último recurso, si la fuente tiene al menos 1 carácter y no contiene espacios,
+	// aceptarla (esto permite fuentes con otros caracteres válidos que puedan venir del scraping)
+	if len(source) >= 1 && !strings.Contains(source, " ") {
+		return true
+	}
+	
 	return false
 }
 

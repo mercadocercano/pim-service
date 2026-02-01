@@ -7,6 +7,7 @@ import (
 	"saas-mt-pim-service/src/brand/application/request"
 	"saas-mt-pim-service/src/brand/application/response"
 	"saas-mt-pim-service/src/brand/application/usecase"
+	"saas-mt-pim-service/src/brand/domain/entity"
 	"saas-mt-pim-service/src/brand/domain/port"
 	"saas-mt-pim-service/src/shared/domain/criteria"
 
@@ -153,8 +154,71 @@ func (h *MarketplaceBrandHandler) CreateMarketplaceBrand(c *gin.Context) {
 		return
 	}
 
-	// TODO: Implementar binding de request y casos de uso
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Crear marca marketplace - pendiente implementación completa"})
+	// Estructura para recibir los datos de creación
+	var createData struct {
+		Name        string   `json:"name" binding:"required"`
+		Description string   `json:"description"`
+		LogoURL     string   `json:"logo_url"`
+		Website     string   `json:"website"`
+		Aliases     []string `json:"aliases"`
+		CategoryTags []string `json:"category_tags"`
+	}
+
+	if err := c.ShouldBindJSON(&createData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		return
+	}
+
+	// Validar que el nombre no esté vacío
+	if createData.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "El nombre de la marca es requerido"})
+		return
+	}
+
+	// Crear la entidad Marketplacebrand usando el constructor
+	brand, err := entity.NewMarketplacebrand(createData.Name)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error al crear la marca: " + err.Error()})
+		return
+	}
+
+	// Actualizar campos adicionales si se proporcionaron
+	if createData.Description != "" {
+		brand.Description = createData.Description
+	}
+	// LogoURL debe ser NULL si está vacío (por restricción de BD)
+	if createData.LogoURL != "" {
+		brand.LogoURL = createData.LogoURL
+	} else {
+		brand.LogoURL = "" // Se convertirá a NULL en el repositorio si está vacío
+	}
+	// Website debe ser NULL si está vacío (por restricción de BD)
+	if createData.Website != "" {
+		brand.Website = createData.Website
+	} else {
+		brand.Website = "" // Se convertirá a NULL en el repositorio si está vacío
+	}
+	if len(createData.Aliases) > 0 {
+		brand.Aliases = createData.Aliases
+	}
+	if len(createData.CategoryTags) > 0 {
+		brand.CategoryTags = createData.CategoryTags
+	}
+
+	// Guardar en el repositorio
+	if err := h.repository.Create(c.Request.Context(), brand); err != nil {
+		// Verificar si es un error de duplicado
+		if err.Error() == "marca ya existe" || err.Error() == "duplicate key" {
+			c.JSON(http.StatusConflict, gin.H{"error": "Una marca con ese nombre ya existe"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear la marca: " + err.Error()})
+		return
+	}
+
+	// Convertir a response y retornar
+	brandResponse := response.NewMarketplaceBrandResponse(brand)
+	c.JSON(http.StatusCreated, brandResponse)
 }
 
 // GetMarketplaceBrandByID maneja la solicitud para obtener una marca marketplace por ID

@@ -1,0 +1,45 @@
+{
+  "version": "1.0.0",
+  "source": {
+    "mongo_db": "scraper_db",
+    "mongo_collection": "scraped_products",
+    "mongo_field": "curated_data.category"
+  },
+  "policy": {
+    "strategy": "hybrid",
+    "default_behavior": "reuse_if_exists_else_create",
+    "notes": "Este mapping define cómo se integran slugs de curación con marketplace_categories. Si el slug ya existe, se reutiliza. Si no existe, se crea colgándolo del parent indicado."
+  },
+  "mappings": [
+    { "curation_slug": "alimentos-envasados", "marketplace_slug": "alimentos-envasados", "parent_slug": "alimentos-bebidas", "name": "Alimentos Envasados" },
+    { "curation_slug": "frutas-verduras", "marketplace_slug": "frutas-verduras", "parent_slug": "alimentos-frescos", "name": "Frutas y Verduras" },
+    { "curation_slug": "carnes-pescados", "marketplace_slug": "carnes-pescados", "parent_slug": "alimentos-frescos", "name": "Carnes y Pescados" },
+    { "curation_slug": "panificados", "marketplace_slug": "panificados", "parent_slug": "alimentos-frescos", "name": "Panificados" },
+    { "curation_slug": "pastas-cereales", "marketplace_slug": "pastas-cereales", "parent_slug": "productos-secos", "name": "Pastas y Cereales" },
+    { "curation_slug": "conservas", "marketplace_slug": "conservas", "parent_slug": "productos-secos", "name": "Conservas" },
+    { "curation_slug": "galletas", "marketplace_slug": "galletas", "parent_slug": "snacks-dulces", "name": "Galletas" },
+    { "curation_slug": "golosinas", "marketplace_slug": "golosinas", "parent_slug": "snacks-dulces", "name": "Golosinas" },
+    { "curation_slug": "snacks-salados", "marketplace_slug": "snacks-salados", "parent_slug": "snacks-dulces", "name": "Snacks Salados" },
+    { "curation_slug": "snacks-dulces", "marketplace_slug": "snacks-dulces", "parent_slug": "alimentos-bebidas", "name": "Snacks y Dulces" },
+    { "curation_slug": "bebidas-sin-alcohol", "marketplace_slug": "bebidas-sin-alcohol", "parent_slug": "bebidas", "name": "Bebidas sin Alcohol" },
+    { "curation_slug": "bebidas-con-alcohol", "marketplace_slug": "bebidas-con-alcohol", "parent_slug": "bebidas", "name": "Bebidas con Alcohol" },
+    { "curation_slug": "lacteos-liquidos", "marketplace_slug": "lacteos-liquidos", "parent_slug": "lacteos", "name": "Lácteos Líquidos" },
+    { "curation_slug": "lacteos-fiambres", "marketplace_slug": "lacteos-fiambres", "parent_slug": "lacteos", "name": "Lácteos y Fiambres" },
+    { "curation_slug": "higiene-personal", "marketplace_slug": "higiene-personal", "parent_slug": "belleza-cuidado-personal", "name": "Higiene Personal" },
+    { "curation_slug": "cuidado-cabello", "marketplace_slug": "cuidado-cabello", "parent_slug": "belleza-cuidado-personal", "name": "Cuidado del Cabello" },
+    { "curation_slug": "cuidado-facial", "marketplace_slug": "cuidado-facial", "parent_slug": "belleza-cuidado-personal", "name": "Cuidado Facial" },
+    { "curation_slug": "cuidado-corporal", "marketplace_slug": "cuidado-corporal", "parent_slug": "belleza-cuidado-personal", "name": "Cuidado Corporal" },
+    { "curation_slug": "cuidado-bucal", "marketplace_slug": "cuidado-bucal", "parent_slug": "belleza-cuidado-personal", "name": "Cuidado Bucal" },
+    { "curation_slug": "salud-belleza", "marketplace_slug": "salud-belleza", "parent_slug": null, "name": "Salud y Belleza" },
+    { "curation_slug": "tecnologia", "marketplace_slug": "tecnologia", "parent_slug": null, "name": "Tecnología" },
+    { "curation_slug": "hogar-jardin", "marketplace_slug": "hogar-jardin", "parent_slug": null, "name": "Hogar y Jardín" },
+    { "curation_slug": "moda-accesorios", "marketplace_slug": "moda-accesorios", "parent_slug": null, "name": "Moda y Accesorios" },
+    { "curation_slug": "bebes-ninos", "marketplace_slug": "bebes-ninos", "parent_slug": null, "name": "Bebés y Niños" },
+    { "curation_slug": "bebes-0-2", "marketplace_slug": "bebes-0-2", "parent_slug": "bebes-ninos", "name": "Bebés (0-2 años)" },
+    { "curation_slug": "alimentacion-bebe", "marketplace_slug": "alimentacion-bebe", "parent_slug": "bebes-ninos", "name": "Alimentación Bebé" },
+    { "curation_slug": "alimentos-frescos", "marketplace_slug": "alimentos-frescos", "parent_slug": "alimentos-bebidas", "name": "Alimentos Frescos" },
+    { "curation_slug": "cereales-desayuno", "marketplace_slug": "cereales-desayuno", "parent_slug": "pastas-cereales", "name": "Cereales de Desayuno" }
+  ]
+}
+
+
