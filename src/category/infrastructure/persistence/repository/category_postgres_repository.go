@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/google/uuid"
+
 	"saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/category/domain/exception"
 	"saas-mt-pim-service/src/category/infrastructure/persistence/mapper"
@@ -38,7 +40,7 @@ func NewCategoryPostgresRepository(db *sql.DB) *CategoryPostgresRepository {
 // SearchByCriteria implementa la búsqueda usando criteria
 func (r *CategoryPostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.Category, error) {
 	baseQuery := `
-		SELECT id, tenant_id, name, description, parent_id, status, created_at, updated_at
+		SELECT id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at
 		FROM categories
 	`
 
@@ -57,6 +59,7 @@ func (r *CategoryPostgresRepository) SearchByCriteria(ctx context.Context, crit 
 			&category.ID,
 			&category.TenantID,
 			&category.Name,
+			&category.Slug,
 			&category.Description,
 			&category.ParentID,
 			&category.Status,
@@ -104,10 +107,10 @@ func (r *CategoryPostgresRepository) Update(ctx context.Context, category *entit
 // Save guarda una categoría en la base de datos
 func (r *CategoryPostgresRepository) Save(ctx context.Context, category *entity.Category) error {
 	query := `
-		INSERT INTO categories (id, tenant_id, name, description, parent_id, status, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO categories (id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		ON CONFLICT (id) DO UPDATE
-		SET name = $3, description = $4, parent_id = $5, status = $6, updated_at = $8
+		SET name = $3, slug = $4, description = $5, parent_id = $6, status = $7, updated_at = $9
 	`
 
 	categoryModel := r.mapper.ToModel(category)
@@ -123,6 +126,7 @@ func (r *CategoryPostgresRepository) Save(ctx context.Context, category *entity.
 		categoryModel.ID,
 		categoryModel.TenantID,
 		categoryModel.Name,
+		categoryModel.Slug,
 		categoryModel.Description,
 		parentIDValue,
 		categoryModel.Status,
@@ -136,7 +140,7 @@ func (r *CategoryPostgresRepository) Save(ctx context.Context, category *entity.
 // FindByID busca una categoría por su ID
 func (r *CategoryPostgresRepository) FindByID(ctx context.Context, id string, tenantID string) (*entity.Category, error) {
 	query := `
-		SELECT id, tenant_id, name, description, parent_id, status, created_at, updated_at
+		SELECT id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at
 		FROM categories
 		WHERE id = $1 AND tenant_id = $2
 	`
@@ -146,6 +150,7 @@ func (r *CategoryPostgresRepository) FindByID(ctx context.Context, id string, te
 		&categoryModel.ID,
 		&categoryModel.TenantID,
 		&categoryModel.Name,
+		&categoryModel.Slug,
 		&categoryModel.Description,
 		&categoryModel.ParentID,
 		&categoryModel.Status,
@@ -166,7 +171,7 @@ func (r *CategoryPostgresRepository) FindByID(ctx context.Context, id string, te
 // FindAll retorna todas las categorías de un tenant
 func (r *CategoryPostgresRepository) FindAll(ctx context.Context, tenantID string) ([]*entity.Category, error) {
 	query := `
-		SELECT id, tenant_id, name, description, parent_id, status, created_at, updated_at
+		SELECT id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at
 		FROM categories
 		WHERE tenant_id = $1
 		ORDER BY name
@@ -185,6 +190,7 @@ func (r *CategoryPostgresRepository) FindAll(ctx context.Context, tenantID strin
 			&category.ID,
 			&category.TenantID,
 			&category.Name,
+			&category.Slug,
 			&category.Description,
 			&category.ParentID,
 			&category.Status,
@@ -222,4 +228,67 @@ func (r *CategoryPostgresRepository) Delete(ctx context.Context, id string, tena
 	}
 
 	return nil
+}
+
+// FindBySlug busca una categoría por su slug (HITO 2)
+func (r *CategoryPostgresRepository) FindBySlug(ctx context.Context, tenantID uuid.UUID, slug string) (*entity.Category, error) {
+	query := `
+		SELECT id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at
+		FROM categories
+		WHERE tenant_id = $1 AND slug = $2
+	`
+
+	var categoryModel model.Category
+	err := r.db.QueryRowContext(ctx, query, tenantID.String(), slug).Scan(
+		&categoryModel.ID,
+		&categoryModel.TenantID,
+		&categoryModel.Name,
+		&categoryModel.Slug,
+		&categoryModel.Description,
+		&categoryModel.ParentID,
+		&categoryModel.Status,
+		&categoryModel.CreatedAt,
+		&categoryModel.UpdatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, exception.ErrCategoryNotFound
+		}
+		return nil, err
+	}
+
+	return r.mapper.ToEntity(&categoryModel), nil
+}
+
+// FindByName busca una categoría por su nombre exacto (HITO 2)
+func (r *CategoryPostgresRepository) FindByName(ctx context.Context, tenantID uuid.UUID, name string) (*entity.Category, error) {
+	query := `
+		SELECT id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at
+		FROM categories
+		WHERE tenant_id = $1 AND LOWER(name) = LOWER($2)
+		LIMIT 1
+	`
+
+	var categoryModel model.Category
+	err := r.db.QueryRowContext(ctx, query, tenantID.String(), name).Scan(
+		&categoryModel.ID,
+		&categoryModel.TenantID,
+		&categoryModel.Name,
+		&categoryModel.Slug,
+		&categoryModel.Description,
+		&categoryModel.ParentID,
+		&categoryModel.Status,
+		&categoryModel.CreatedAt,
+		&categoryModel.UpdatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, exception.ErrCategoryNotFound
+		}
+		return nil, err
+	}
+
+	return r.mapper.ToEntity(&categoryModel), nil
 }

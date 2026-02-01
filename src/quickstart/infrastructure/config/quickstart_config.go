@@ -38,6 +38,10 @@ func NewQuickstartModuleConfig(db *sql.DB) *QuickstartModuleConfig {
 	getBrandsByBusinessTypeUseCase := usecase.NewGetBrandsByBusinessTypeUseCase()
 	setupTenantUseCase := usecase.NewSetupTenantUseCase()
 	
+	// HITO 2: Nuevos casos de uso para templates
+	listTemplatesUseCase := usecase.NewListTemplatesUseCase(db)
+	applyTemplateUseCase := usecase.NewApplyTemplateUseCase(db)
+	
 	// Crear handler principal de quickstart
 	quickstartHandler := controller.NewQuickstartHandler(
 		getBusinessTypesUseCase,
@@ -47,6 +51,8 @@ func NewQuickstartModuleConfig(db *sql.DB) *QuickstartModuleConfig {
 		getProductsByBusinessTypeUseCase,
 		getBrandsByBusinessTypeUseCase,
 		setupTenantUseCase,
+		listTemplatesUseCase,
+		applyTemplateUseCase,
 	)
 	
 	// Crear handler simplificado del wizard
