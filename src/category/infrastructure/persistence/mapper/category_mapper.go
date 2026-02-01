@@ -1,6 +1,8 @@
 package mapper
 
 import (
+	"strings"
+	
 	"saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/category/infrastructure/persistence/model"
 )
@@ -37,16 +39,35 @@ func (m *CategoryMapper) ToModel(entity *entity.Category) *model.Category {
 		return nil
 	}
 
+	// Generar slug desde el nombre si no existe
+	slug := generateSlug(entity.Name)
+
 	return &model.Category{
 		ID:          entity.ID,
 		TenantID:    entity.TenantID,
 		Name:        entity.Name,
+		Slug:        slug,
 		Description: entity.Description,
 		ParentID:    entity.ParentID,
 		Status:      entity.Status,
 		CreatedAt:   entity.CreatedAt,
 		UpdatedAt:   entity.UpdatedAt,
 	}
+}
+
+// generateSlug genera un slug desde un nombre
+func generateSlug(name string) string {
+	// Simplificado: lowercase y reemplazar espacios por guiones
+	slug := name
+	slug = strings.ToLower(slug)
+	slug = strings.ReplaceAll(slug, " ", "-")
+	slug = strings.ReplaceAll(slug, "á", "a")
+	slug = strings.ReplaceAll(slug, "é", "e")
+	slug = strings.ReplaceAll(slug, "í", "i")
+	slug = strings.ReplaceAll(slug, "ó", "o")
+	slug = strings.ReplaceAll(slug, "ú", "u")
+	slug = strings.ReplaceAll(slug, "ñ", "n")
+	return slug
 }
 
 // ToEntityList convierte una lista de modelos a una lista de entidades

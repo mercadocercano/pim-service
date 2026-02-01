@@ -15,6 +15,8 @@ type QuickstartHandler struct {
 	getProductsByBusinessTypeUseCase   *usecase.GetProductsByBusinessTypeUseCase
 	getBrandsByBusinessTypeUseCase     *usecase.GetBrandsByBusinessTypeUseCase
 	setupTenantUseCase                 *usecase.SetupTenantUseCase
+	listTemplatesUseCase               *usecase.ListTemplatesUseCase
+	applyTemplateUseCase               *usecase.ApplyTemplateUseCase
 }
 
 // NewQuickstartHandler crea una nueva instancia del handler
@@ -26,6 +28,8 @@ func NewQuickstartHandler(
 	getProductsByBusinessTypeUseCase *usecase.GetProductsByBusinessTypeUseCase,
 	getBrandsByBusinessTypeUseCase *usecase.GetBrandsByBusinessTypeUseCase,
 	setupTenantUseCase *usecase.SetupTenantUseCase,
+	listTemplatesUseCase *usecase.ListTemplatesUseCase,
+	applyTemplateUseCase *usecase.ApplyTemplateUseCase,
 ) *QuickstartHandler {
 	return &QuickstartHandler{
 		getBusinessTypesUseCase:            getBusinessTypesUseCase,
@@ -35,6 +39,8 @@ func NewQuickstartHandler(
 		getProductsByBusinessTypeUseCase:   getProductsByBusinessTypeUseCase,
 		getBrandsByBusinessTypeUseCase:     getBrandsByBusinessTypeUseCase,
 		setupTenantUseCase:                 setupTenantUseCase,
+		listTemplatesUseCase:               listTemplatesUseCase,
+		applyTemplateUseCase:               applyTemplateUseCase,
 	}
 }
 
@@ -49,6 +55,10 @@ func (h *QuickstartHandler) RegisterRoutes(router *gin.RouterGroup) {
 		quickstart.GET("/products/:businessType", h.GetProductsByBusinessType)
 		quickstart.GET("/brands/:businessType", h.GetBrandsByBusinessType)
 		quickstart.POST("/setup", h.SetupTenant)
+		
+		// HITO 2: Nuevos endpoints para templates
+		quickstart.GET("/templates", h.ListTemplates)
+		quickstart.POST("/apply", h.ApplyTemplate)
 	}
 }
 
@@ -138,4 +148,45 @@ func (h *QuickstartHandler) SetupTenant(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, history)
+}
+
+// ListTemplates obtiene la lista de templates disponibles
+func (h *QuickstartHandler) ListTemplates(c *gin.Context) {
+	templates, err := h.listTemplatesUseCase.Execute(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, templates)
+}
+
+// ApplyTemplate aplica un template de quickstart al tenant
+func (h *QuickstartHandler) ApplyTemplate(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header is required"})
+		return
+	}
+
+	var req struct {
+		TemplateID string `json:"template_id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	applyReq := usecase.ApplyTemplateRequest{
+		TemplateID: req.TemplateID,
+		TenantID:   tenantID,
+	}
+
+	response, err := h.applyTemplateUseCase.Execute(c.Request.Context(), applyReq)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, response)
 }

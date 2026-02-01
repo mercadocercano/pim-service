@@ -13,6 +13,7 @@ import (
 	"saas-mt-pim-service/src/product/tenant/infrastructure/controller"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/criteria"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/persistence"
+	categoryRepository "saas-mt-pim-service/src/category/infrastructure/persistence/repository"
 	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
@@ -55,6 +56,7 @@ type ProductConfig struct {
 	ProductController        *controller.ProductController
 	ProductVariantController *controller.ProductVariantController
 	QuickstartController     *quickstartCtrl.QuickstartController
+	BulkImportController     *controller.BulkImportController  // HITO 2
 
 	// Criteria Builders
 	ProductCriteriaBuilder *criteria.ProductCriteriaBuilder
@@ -192,6 +194,11 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		getQuickstartProgressUseCase,
 	)
 
+	// HITO 2: Configurar BulkImportController
+	categoryRepo := repository.NewCategoryPostgresRepository(db)
+	bulkImportUseCase := usecase.NewBulkImportProductsUseCase(productRepo, categoryRepo)
+	bulkImportController := controller.NewBulkImportController(bulkImportUseCase)
+
 	return &ProductConfig{
 		ProductRepository:                    *productRepo.(*persistence.PostgresProductRepository),
 		ProductDomainService:                 productDomainService,
@@ -217,6 +224,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		ProductController:                    productController,
 		ProductVariantController:             productVariantController,
 		QuickstartController:                 quickstartController,
+		BulkImportController:                 bulkImportController,
 		ProductCriteriaBuilder:               productCriteriaBuilder,
 	}
 }

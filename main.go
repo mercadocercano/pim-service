@@ -224,6 +224,12 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
 	// Registrar rutas del Quickstart
 	productCfg.QuickstartController.RegisterRoutes(router)
 
+	// HITO 2: Registrar rutas de importación bulk
+	if productCfg.BulkImportController != nil {
+		productCfg.BulkImportController.RegisterRoutes(router)
+		log.Println("  POST   /api/v1/products/import (HITO 2)")
+	}
+
 	log.Println("Módulo Product configurado exitosamente")
 	log.Println("Rutas Product disponibles:")
 	log.Println("  POST   /api/v1/products")
