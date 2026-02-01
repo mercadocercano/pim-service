@@ -60,7 +60,7 @@ func NewCreateGlobalProduct(globalProductRepository port.GlobalProductRepository
 
 // Execute ejecuta el caso de uso
 func (uc *CreateGlobalProduct) Execute(request CreateGlobalProductRequest) (*CreateGlobalProductResponse, error) {
-	// Validar y crear EAN si se proporciona
+	// Validar y crear EAN si se proporciona (EAN es opcional)
 	var ean *value_object.EAN13
 	if request.EAN != "" {
 		var err error
@@ -78,6 +78,7 @@ func (uc *CreateGlobalProduct) Execute(request CreateGlobalProductRequest) (*Cre
 			return nil, exception.NewConflictError("Ya existe un producto con el EAN " + request.EAN)
 		}
 	}
+	// Si no hay EAN, permitir creación - el producto se identificará por nombre+marca+fuente
 
 	// Crear ProductSource
 	reliability := 0.5 // Valor por defecto

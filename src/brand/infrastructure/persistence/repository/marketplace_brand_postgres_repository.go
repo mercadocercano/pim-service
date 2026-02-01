@@ -40,12 +40,23 @@ func (r *MarketplacebrandPostgresRepository) Create(ctx context.Context, marketp
 		RETURNING id
 	`
 
+	// Convertir strings vacíos a NULL para logo_url y website (requerido por restricciones de BD)
+	var logoURL interface{} = nil
+	if marketplace_brand.LogoURL != "" {
+		logoURL = marketplace_brand.LogoURL
+	}
+	
+	var website interface{} = nil
+	if marketplace_brand.Website != "" {
+		website = marketplace_brand.Website
+	}
+
 	var id string
 	err := r.db.QueryRowContext(ctx, query,
 		marketplace_brand.Name,
 		marketplace_brand.Description,
-		marketplace_brand.LogoURL,
-		marketplace_brand.Website,
+		logoURL,
+		website,
 		pq.Array(marketplace_brand.Aliases),
 		pq.Array(marketplace_brand.CategoryTags),
 		marketplace_brand.QualityScore,
@@ -84,12 +95,23 @@ func (r *MarketplacebrandPostgresRepository) Update(ctx context.Context, marketp
 		WHERE id = $1
 	`
 
+	// Convertir strings vacíos a NULL para logo_url y website (requerido por restricciones de BD)
+	var logoURL interface{} = nil
+	if marketplace_brand.LogoURL != "" {
+		logoURL = marketplace_brand.LogoURL
+	}
+	
+	var website interface{} = nil
+	if marketplace_brand.Website != "" {
+		website = marketplace_brand.Website
+	}
+
 	result, err := r.db.ExecContext(ctx, query,
 		marketplace_brand.ID,
 		marketplace_brand.Name,
 		marketplace_brand.Description,
-		marketplace_brand.LogoURL,
-		marketplace_brand.Website,
+		logoURL,
+		website,
 		pq.Array(marketplace_brand.Aliases),
 		pq.Array(marketplace_brand.CategoryTags),
 		marketplace_brand.QualityScore,
