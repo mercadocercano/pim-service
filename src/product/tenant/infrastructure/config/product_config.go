@@ -195,7 +195,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 	)
 
 	// HITO 2: Configurar BulkImportController
-	categoryRepo := repository.NewCategoryPostgresRepository(db)
+	categoryRepo := categoryRepository.NewCategoryPostgresRepository(db)
 	bulkImportUseCase := usecase.NewBulkImportProductsUseCase(productRepo, categoryRepo)
 	bulkImportController := controller.NewBulkImportController(bulkImportUseCase)
 

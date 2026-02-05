@@ -27,9 +27,32 @@ func NewPostgresProductRepository(db *sql.DB) port.ProductCriteriaRepository {
 	}
 }
 
-// Save guarda un nuevo producto
+// WithTransaction ejecuta una función dentro de una transacción
+func (r *PostgresProductRepository) WithTransaction(ctx context.Context, fn func(tx *sql.Tx) error) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	if err := fn(tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// Save guarda un nuevo producto y sus variantes en una transacción
 func (r *PostgresProductRepository) Save(ctx context.Context, product *entity.Product) error {
-	query := `
+	// Iniciar transacción
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Guardar el producto
+	productQuery := `
 		INSERT INTO products (
 			id, tenant_id, name, description, sku, 
 			category_id, category_name, brand_id, brand_name,
@@ -59,7 +82,7 @@ func (r *PostgresProductRepository) Save(ctx context.Context, product *entity.Pr
 		brandName = &brName
 	}
 
-	_, err := r.db.ExecContext(ctx, query,
+	_, err = tx.ExecContext(ctx, productQuery,
 		product.ID(),
 		product.TenantID(),
 		product.Name(),
@@ -73,8 +96,21 @@ func (r *PostgresProductRepository) Save(ctx context.Context, product *entity.Pr
 		product.CreatedAt(),
 		product.UpdatedAt(),
 	)
+	if err != nil {
+		return err
+	}
 
-	return err
+	// Guardar todas las variantes asociadas
+	variants := product.Variants()
+	for _, variant := range variants {
+		err = r.saveVariantInTx(ctx, tx, variant)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Confirmar transacción
+	return tx.Commit()
 }
 
 // FindByID busca un producto por ID
@@ -401,8 +437,8 @@ func (r *PostgresProductRepository) SaveVariant(ctx context.Context, productID u
 	variantQuery := `
 		INSERT INTO product_variants (
 			id, tenant_id, product_id, name, sku, status, 
-			is_default, sort_order, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			is_default, sort_order, price, stock, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 	`
 
 	var sku *string
@@ -420,6 +456,8 @@ func (r *PostgresProductRepository) SaveVariant(ctx context.Context, productID u
 		variant.Status().Value(),
 		variant.IsDefault(),
 		variant.SortOrder(),
+		variant.Price(),
+		variant.Stock(),
 		variant.CreatedAt(),
 		variant.UpdatedAt(),
 	)
@@ -437,7 +475,7 @@ func (r *PostgresProductRepository) UpdateVariant(ctx context.Context, variant *
 	variantQuery := `
 		UPDATE product_variants SET 
 			name = $3, sku = $4, status = $5, 
-			is_default = $6, sort_order = $7, updated_at = $8
+			is_default = $6, sort_order = $7, price = $8, stock = $9, updated_at = $10
 		WHERE id = $1 AND tenant_id = $2
 	`
 
@@ -455,6 +493,8 @@ func (r *PostgresProductRepository) UpdateVariant(ctx context.Context, variant *
 		variant.Status().Value(),
 		variant.IsDefault(),
 		variant.SortOrder(),
+		variant.Price(),
+		variant.Stock(),
 		variant.UpdatedAt(),
 	)
 	if err != nil {
@@ -483,11 +523,63 @@ func (r *PostgresProductRepository) DeleteVariant(ctx context.Context, variantID
 	return err
 }
 
+// FindByProduct busca todas las variantes de un producto por tenant
+func (r *PostgresProductRepository) FindByProduct(ctx context.Context, tenantID string, productID uuid.UUID) ([]*entity.ProductVariant, error) {
+	query := `
+		SELECT id, tenant_id, product_id, name, sku, status,
+			   is_default, sort_order, price, stock, created_at, updated_at
+		FROM product_variants 
+		WHERE tenant_id = $1 AND product_id = $2 AND status != 'deleted'
+		ORDER BY is_default DESC, created_at ASC
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, tenantID, productID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var variants []*entity.ProductVariant
+	for rows.Next() {
+		variant, err := r.scanVariant(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		// Cargar atributos para cada variante
+		attributes, err := r.loadVariantAttributes(ctx, variant.ID())
+		if err != nil {
+			return nil, err
+		}
+
+		// Crear nueva variante con atributos
+		variantWithAttrs := entity.NewProductVariantFromRepository(
+			variant.ID(),
+			variant.TenantID(),
+			variant.ProductID(),
+			variant.Name(),
+			variant.SKU(),
+			variant.Status(),
+			variant.IsDefault(),
+			variant.SortOrder(),
+			variant.Price(),
+			variant.Stock(),
+			attributes,
+			variant.CreatedAt(),
+			variant.UpdatedAt(),
+		)
+
+		variants = append(variants, variantWithAttrs)
+	}
+
+	return variants, rows.Err()
+}
+
 // LoadVariantsForProduct carga todas las variantes de un producto
 func (r *PostgresProductRepository) LoadVariantsForProduct(ctx context.Context, productID uuid.UUID) ([]*entity.ProductVariant, error) {
 	query := `
 		SELECT id, tenant_id, product_id, name, sku, status,
-			   is_default, sort_order, created_at, updated_at
+			   is_default, sort_order, price, stock, created_at, updated_at
 		FROM product_variants 
 		WHERE product_id = $1 AND status != 'deleted'
 		ORDER BY sort_order, created_at
@@ -522,6 +614,8 @@ func (r *PostgresProductRepository) LoadVariantsForProduct(ctx context.Context, 
 			variant.Status(),
 			variant.IsDefault(),
 			variant.SortOrder(),
+			variant.Price(),
+			variant.Stock(),
 			attributes,
 			variant.CreatedAt(),
 			variant.UpdatedAt(),
@@ -566,23 +660,50 @@ func (r *PostgresProductRepository) VariantExistsBySKUExcludingID(ctx context.Co
 	return exists, err
 }
 
-// FindVariantsByCriteria busca variantes por criterios
-func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, criteria *criteria.Criteria) ([]*entity.ProductVariant, error) {
-	// Por ahora implementamos una búsqueda básica sin el CriteriaBuilder
-	// TODO: Implementar CriteriaBuilder para variantes
+// FindBySKUs busca variantes por múltiples SKUs dentro de un tenant
+func (r *PostgresProductRepository) FindBySKUs(ctx context.Context, tenantID string, skus []string) ([]*entity.ProductVariant, error) {
+	if len(skus) == 0 {
+		return []*entity.ProductVariant{}, nil
+	}
+
 	query := `
 		SELECT id, tenant_id, product_id, name, sku, status,
-			   is_default, sort_order, created_at, updated_at
+			   is_default, sort_order, price, stock, created_at, updated_at
 		FROM product_variants 
-		WHERE status != 'deleted'
-		ORDER BY sort_order, created_at
-		LIMIT $1 OFFSET $2
+		WHERE tenant_id = $1 AND sku = ANY($2) AND status != 'deleted'
 	`
 
-	limit := criteria.Pagination.PageSize
-	offset := (criteria.Pagination.Page - 1) * criteria.Pagination.PageSize
+	rows, err := r.db.QueryContext(ctx, query, tenantID, skus)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-	rows, err := r.db.QueryContext(ctx, query, limit, offset)
+	var variants []*entity.ProductVariant
+	for rows.Next() {
+		variant, err := r.scanVariant(rows)
+		if err != nil {
+			return nil, err
+		}
+		variants = append(variants, variant)
+	}
+
+	return variants, rows.Err()
+}
+
+// FindVariantsByCriteria busca variantes por criterios
+func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, crit *criteria.Criteria) ([]*entity.ProductVariant, error) {
+	baseQuery := `
+		SELECT id, tenant_id, product_id, name, sku, status,
+			   is_default, sort_order, price, stock, created_at, updated_at
+		FROM product_variants
+	`
+
+	// Usar el convertidor de criterios para generar la query con filtros
+	converter := sharedCriteria.NewSQLCriteriaConverter()
+	query, params := converter.ToSelectSQL(baseQuery, *crit)
+
+	rows, err := r.db.QueryContext(ctx, query, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -611,6 +732,8 @@ func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, 
 			variant.Status(),
 			variant.IsDefault(),
 			variant.SortOrder(),
+			variant.Price(),
+			variant.Stock(),
 			attributes,
 			variant.CreatedAt(),
 			variant.UpdatedAt(),
@@ -623,17 +746,83 @@ func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, 
 }
 
 // CountVariantsByCriteria cuenta variantes por criterios
-func (r *PostgresProductRepository) CountVariantsByCriteria(ctx context.Context, criteria *criteria.Criteria) (int, error) {
-	// Por ahora implementamos un conteo básico
-	// TODO: Implementar CriteriaBuilder para variantes
-	query := `SELECT COUNT(*) FROM product_variants WHERE status != 'deleted'`
+func (r *PostgresProductRepository) CountVariantsByCriteria(ctx context.Context, crit *criteria.Criteria) (int, error) {
+	baseQuery := "SELECT COUNT(*) FROM product_variants"
+
+	// Usar el convertidor de criterios para generar la query con filtros
+	converter := sharedCriteria.NewSQLCriteriaConverter()
+	query, params := converter.ToCountSQL(baseQuery, *crit)
 
 	var count int
-	err := r.db.QueryRowContext(ctx, query).Scan(&count)
+	err := r.db.QueryRowContext(ctx, query, params...).Scan(&count)
 	return count, err
 }
 
 // Métodos auxiliares para variantes
+
+// saveVariantInTx guarda una variante en una transacción existente
+func (r *PostgresProductRepository) saveVariantInTx(ctx context.Context, tx *sql.Tx, variant *entity.ProductVariant) error {
+	// Insertar la variante
+	variantQuery := `
+		INSERT INTO product_variants (
+			id, tenant_id, product_id, name, sku, status, 
+			is_default, sort_order, price, stock, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+	`
+
+	var sku *string
+	if variant.HasSKU() {
+		skuValue := variant.SKU().Value()
+		sku = &skuValue
+	}
+
+	_, err := tx.ExecContext(ctx, variantQuery,
+		variant.ID(),
+		variant.TenantID(),
+		variant.ProductID(),
+		variant.Name(),
+		sku,
+		variant.Status().Value(),
+		variant.IsDefault(),
+		variant.SortOrder(),
+		variant.Price(),
+		variant.Stock(),
+		variant.CreatedAt(),
+		variant.UpdatedAt(),
+	)
+	if err != nil {
+		return err
+	}
+
+	// Guardar los atributos de la variante
+	return r.saveVariantAttributesInTx(ctx, tx, variant)
+}
+
+// saveVariantAttributesInTx guarda los atributos de una variante en una transacción existente
+func (r *PostgresProductRepository) saveVariantAttributesInTx(ctx context.Context, tx *sql.Tx, variant *entity.ProductVariant) error {
+	if !variant.HasAttributes() {
+		return nil
+	}
+
+	query := `
+		INSERT INTO variant_attributes (tenant_id, variant_id, attribute_name, attribute_value)
+		VALUES ($1, $2, $3, $4)
+	`
+
+	for _, attr := range variant.Attributes().Attributes() {
+		_, err := tx.ExecContext(ctx, query,
+			variant.TenantID(),
+			variant.ID(),
+			attr.Name(),
+			attr.Value(),
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
 
 // saveVariantAttributes guarda los atributos de una variante
 func (r *PostgresProductRepository) saveVariantAttributes(ctx context.Context, variant *entity.ProductVariant) error {
@@ -705,14 +894,16 @@ func (r *PostgresProductRepository) scanVariant(rows interface{}) (*entity.Produ
 	var sku *string
 	var isDefault bool
 	var sortOrder int
+	var price float64
+	var stock int
 	var createdAt, updatedAt time.Time
 
 	var err error
 	switch v := rows.(type) {
 	case *sql.Rows:
-		err = v.Scan(&id, &tenantID, &productID, &name, &sku, &statusStr, &isDefault, &sortOrder, &createdAt, &updatedAt)
+		err = v.Scan(&id, &tenantID, &productID, &name, &sku, &statusStr, &isDefault, &sortOrder, &price, &stock, &createdAt, &updatedAt)
 	case *sql.Row:
-		err = v.Scan(&id, &tenantID, &productID, &name, &sku, &statusStr, &isDefault, &sortOrder, &createdAt, &updatedAt)
+		err = v.Scan(&id, &tenantID, &productID, &name, &sku, &statusStr, &isDefault, &sortOrder, &price, &stock, &createdAt, &updatedAt)
 	default:
 		return nil, errors.New("tipo de scanner no soportado")
 	}
@@ -751,6 +942,8 @@ func (r *PostgresProductRepository) scanVariant(rows interface{}) (*entity.Produ
 		status,
 		isDefault,
 		sortOrder,
+		price,
+		stock,
 		attributes,
 		createdAt,
 		updatedAt,

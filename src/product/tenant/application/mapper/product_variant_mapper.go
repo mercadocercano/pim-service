@@ -39,6 +39,8 @@ func (m *ProductVariantMapper) ToResponse(variant *entity.ProductVariant) *respo
 		Status:     variant.Status().Value(),
 		IsDefault:  variant.IsDefault(),
 		SortOrder:  variant.SortOrder(),
+		Price:      variant.Price(),
+		Stock:      variant.Stock(),
 		Attributes: attributes,
 		CreatedAt:  variant.CreatedAt(),
 		UpdatedAt:  variant.UpdatedAt(),

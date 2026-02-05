@@ -19,6 +19,8 @@ type ProductVariant struct {
 	status     *value_object.VariantStatus
 	isDefault  bool
 	sortOrder  int
+	price      float64
+	stock      int
 	attributes *value_object.VariantAttributeCollection
 	createdAt  time.Time
 	updatedAt  time.Time
@@ -55,6 +57,8 @@ func NewProductVariant(
 		status:     status,
 		isDefault:  isDefault,
 		sortOrder:  sortOrder,
+		price:      0,
+		stock:      0,
 		attributes: attributes,
 		createdAt:  now,
 		updatedAt:  now,
@@ -71,6 +75,8 @@ func NewProductVariantFromRepository(
 	status *value_object.VariantStatus,
 	isDefault bool,
 	sortOrder int,
+	price float64,
+	stock int,
 	attributes *value_object.VariantAttributeCollection,
 	createdAt, updatedAt time.Time,
 ) *ProductVariant {
@@ -87,6 +93,8 @@ func NewProductVariantFromRepository(
 		status:     status,
 		isDefault:  isDefault,
 		sortOrder:  sortOrder,
+		price:      price,
+		stock:      stock,
 		attributes: attributes,
 		createdAt:  createdAt,
 		updatedAt:  updatedAt,
@@ -148,8 +156,28 @@ func (pv *ProductVariant) SKU() *value_object.ProductSKU {
 	return pv.sku
 }
 
+func (pv *ProductVariant) Price() float64 {
+	return pv.price
+}
+
+func (pv *ProductVariant) Stock() int {
+	return pv.stock
+}
+
 func (pv *ProductVariant) Status() *value_object.VariantStatus {
 	return pv.status
+}
+
+// UpdatePrice actualiza el precio de la variante
+func (pv *ProductVariant) UpdatePrice(price float64) {
+	pv.price = price
+	pv.updatedAt = time.Now()
+}
+
+// UpdateStock actualiza el stock de la variante
+func (pv *ProductVariant) UpdateStock(stock int) {
+	pv.stock = stock
+	pv.updatedAt = time.Now()
 }
 
 func (pv *ProductVariant) IsDefault() bool {

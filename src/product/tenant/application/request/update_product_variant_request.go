@@ -4,6 +4,8 @@ package request
 type UpdateProductVariantRequest struct {
 	Name       *string                         `json:"name,omitempty" binding:"omitempty,min=2,max=255"`
 	SKU        *string                         `json:"sku,omitempty" binding:"omitempty,min=3,max=50"`
+	Price      *float64                        `json:"price,omitempty" binding:"omitempty,min=0"`
+	Stock      *int                            `json:"stock,omitempty" binding:"omitempty,min=0"`
 	SortOrder  *int                            `json:"sort_order,omitempty" binding:"omitempty,min=0"`
 	Attributes []UpdateVariantAttributeRequest `json:"attributes,omitempty"`
 }
@@ -56,4 +58,30 @@ func (r *UpdateProductVariantRequest) HasSortOrder() bool {
 // HasAttributes verifica si se proporcionaron atributos
 func (r *UpdateProductVariantRequest) HasAttributes() bool {
 	return len(r.Attributes) > 0
+}
+
+// GetPrice devuelve el precio si está presente
+func (r *UpdateProductVariantRequest) GetPrice() float64 {
+	if r.Price == nil {
+		return 0
+	}
+	return *r.Price
+}
+
+// GetStock devuelve el stock si está presente
+func (r *UpdateProductVariantRequest) GetStock() int {
+	if r.Stock == nil {
+		return 0
+	}
+	return *r.Stock
+}
+
+// HasPrice verifica si se proporcionó un precio
+func (r *UpdateProductVariantRequest) HasPrice() bool {
+	return r.Price != nil
+}
+
+// HasStock verifica si se proporcionó un stock
+func (r *UpdateProductVariantRequest) HasStock() bool {
+	return r.Stock != nil
 }

@@ -218,8 +218,16 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
 	// Registrar rutas del Product
 	productCfg.ProductController.RegisterRoutes(router)
 
-	// Registrar rutas de Product Variants
+	// Registrar rutas de Product Variants (standalone)
 	productCfg.ProductVariantController.RegisterRoutes(router)
+	
+	// Registrar rutas anidadas de variantes bajo productos (DESPUÉS de las rutas de productos)
+	productVariantCtrl := productCfg.ProductVariantController
+	router.POST("/products/:id/variants", productVariantCtrl.CreateProductVariant)
+	router.GET("/products/:id/variants", productVariantCtrl.ListProductVariants)
+	router.GET("/products/:id/variants/:variant_id", productVariantCtrl.GetProductVariant)
+	router.PUT("/products/:id/variants/:variant_id", productVariantCtrl.UpdateProductVariant)
+	router.DELETE("/products/:id/variants/:variant_id", productVariantCtrl.DeleteProductVariant)
 
 	// Registrar rutas del Quickstart
 	productCfg.QuickstartController.RegisterRoutes(router)
@@ -259,6 +267,10 @@ func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB) {
 	// Crear configuración del módulo Quickstart
 	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db)
 
+	// Obtener el handler principal de quickstart (incluye /templates)
+	quickstartHandler := quickstartCfg.GetQuickstartHandler()
+	quickstartHandler.RegisterRoutes(router)
+
 	// Obtener el handler simplificado del wizard
 	simpleWizardHandler := quickstartCfg.GetSimpleWizardHandler()
 
@@ -266,6 +278,9 @@ func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB) {
 	simpleWizardHandler.RegisterRoutes(router)
 
 	log.Println("Módulo Quickstart configurado exitosamente")
+	log.Println("Rutas Quickstart disponibles:")
+	log.Println("  GET    /api/v1/quickstart/templates")
+	log.Println("  POST   /api/v1/quickstart/apply")
 	log.Println("Rutas Wizard disponibles:")
 	log.Println("  GET    /api/v1/wizard/status")
 	log.Println("  POST   /api/v1/wizard/start")

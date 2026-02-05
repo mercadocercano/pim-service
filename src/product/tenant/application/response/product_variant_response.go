@@ -15,6 +15,8 @@ type ProductVariantResponse struct {
 	Status     string                     `json:"status"`
 	IsDefault  bool                       `json:"is_default"`
 	SortOrder  int                        `json:"sort_order"`
+	Price      float64                    `json:"price"`
+	Stock      int                        `json:"stock"`
 	Attributes []VariantAttributeResponse `json:"attributes"`
 	CreatedAt  time.Time                  `json:"created_at"`
 	UpdatedAt  time.Time                  `json:"updated_at"`

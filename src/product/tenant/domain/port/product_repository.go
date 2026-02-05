@@ -37,6 +37,10 @@ type ProductRepository interface {
 	VariantExistsBySKU(ctx context.Context, sku, tenantID string) (bool, error)
 	VariantExistsByNameExcludingID(ctx context.Context, name string, productID uuid.UUID, tenantID string, excludeID uuid.UUID) (bool, error)
 	VariantExistsBySKUExcludingID(ctx context.Context, sku, tenantID string, excludeID uuid.UUID) (bool, error)
+	
+	// Búsqueda de variantes
+	FindBySKUs(ctx context.Context, tenantID string, skus []string) ([]*entity.ProductVariant, error)
+	FindByProduct(ctx context.Context, tenantID string, productID uuid.UUID) ([]*entity.ProductVariant, error)
 }
 
 // ProductCriteriaRepository extiende ProductRepository con capacidades de búsqueda por criterios
