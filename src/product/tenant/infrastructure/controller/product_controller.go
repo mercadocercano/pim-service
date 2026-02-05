@@ -631,16 +631,19 @@ func (ctrl *ProductController) CancelImportJob(c *gin.Context) {
 func (ctrl *ProductController) RegisterRoutes(router *gin.RouterGroup) {
 	products := router.Group("/products")
 	{
+		// Rutas sin parámetros primero
 		products.POST("", ctrl.CreateProduct)
 		products.GET("", ctrl.ListProducts)
+		products.POST("/import-csv", ctrl.ImportProductsCSV)
+		products.POST("/import-csv/async", ctrl.ImportProductsCSVAsync)
+		products.POST("/validate-skus", ctrl.ValidateSKUs)
+		
+		// Luego rutas con /:id
 		products.GET("/:id", ctrl.GetProduct)
 		products.PUT("/:id", ctrl.UpdateProduct)
 		products.PATCH("/:id/status", ctrl.UpdateProductStatus)
 		products.GET("/:id/status/transitions", ctrl.GetAvailableStatusTransitions)
 		products.DELETE("/:id", ctrl.DeleteProduct)
-		products.POST("/import-csv", ctrl.ImportProductsCSV)
-		products.POST("/import-csv/async", ctrl.ImportProductsCSVAsync)
-		products.POST("/validate-skus", ctrl.ValidateSKUs)
 	}
 
 	// Rutas de trabajos de importación

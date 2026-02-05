@@ -75,7 +75,7 @@ func (ctrl *ProductVariantController) CreateProductVariant(c *gin.Context) {
 // @Router /products/{product_id}/variants/{variant_id} [get]
 // @Security BearerAuth
 func (ctrl *ProductVariantController) GetProductVariant(c *gin.Context) {
-	productIDStr := c.Param("product_id")
+	productIDStr := c.Param("id")  // Cambiado de product_id a id
 	variantIDStr := c.Param("variant_id")
 
 	if productIDStr == "" || variantIDStr == "" {
@@ -129,7 +129,7 @@ func (ctrl *ProductVariantController) GetProductVariant(c *gin.Context) {
 // @Router /products/{product_id}/variants/{variant_id} [put]
 // @Security BearerAuth
 func (ctrl *ProductVariantController) UpdateProductVariant(c *gin.Context) {
-	productIDStr := c.Param("product_id")
+	productIDStr := c.Param("id")  // Cambiado de product_id a id
 	variantIDStr := c.Param("variant_id")
 
 	if productIDStr == "" || variantIDStr == "" {
@@ -187,7 +187,7 @@ func (ctrl *ProductVariantController) UpdateProductVariant(c *gin.Context) {
 // @Router /products/{product_id}/variants/{variant_id} [delete]
 // @Security BearerAuth
 func (ctrl *ProductVariantController) DeleteProductVariant(c *gin.Context) {
-	productIDStr := c.Param("product_id")
+	productIDStr := c.Param("id")  // Cambiado de product_id a id
 	variantIDStr := c.Param("variant_id")
 
 	if productIDStr == "" || variantIDStr == "" {
@@ -243,7 +243,7 @@ func (ctrl *ProductVariantController) DeleteProductVariant(c *gin.Context) {
 // @Router /products/{product_id}/variants [get]
 // @Security BearerAuth
 func (ctrl *ProductVariantController) ListProductVariants(c *gin.Context) {
-	productIDStr := c.Param("product_id")
+	productIDStr := c.Param("id")  // Usar :id para consistencia con /products/:id
 	if productIDStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto es requerido"})
 		return
@@ -316,12 +316,15 @@ func (ctrl *ProductVariantController) ListAllVariants(c *gin.Context) {
 
 // RegisterRoutes registra las rutas del controlador
 func (ctrl *ProductVariantController) RegisterRoutes(router *gin.RouterGroup) {
-	// Rutas específicas para variantes de productos
+	// Rutas específicas para variantes de productos (standalone)
 	router.POST("/product-variants", ctrl.CreateProductVariant)
 	router.GET("/product-variants", ctrl.ListAllVariants)
 	router.GET("/product-variants/:variant_id", ctrl.GetProductVariantByID)
 	router.PUT("/product-variants/:variant_id", ctrl.UpdateProductVariantByID)
 	router.DELETE("/product-variants/:variant_id", ctrl.DeleteProductVariantByID)
+	
+	// Rutas anidadas bajo productos (usando :id en lugar de :product_id para evitar conflicto con /products/:id)
+	// Estas se registran en el setup del módulo Product, DESPUÉS de las rutas de ProductController
 }
 
 // GetProductVariantByID obtiene una variante por su ID directamente

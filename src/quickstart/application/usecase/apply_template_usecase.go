@@ -73,19 +73,21 @@ func (uc *ApplyTemplateUseCase) Execute(ctx context.Context, req ApplyTemplateRe
 	response.CategoriesCreated = categoriesCreated
 	response.CreatedCategories = categoryIDs
 
-	// PASO 2: Crear atributos del tenant desde marketplace_attributes
-	attributesCreated, err := uc.createTenantAttributes(ctx, tx, tenantUUID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create attributes: %w", err)
-	}
-	response.AttributesCreated = attributesCreated
+	// PASO 2: Crear atributos del tenant desde marketplace_attributes (SKIP por ahora - no hay seed)
+	// attributesCreated, err := uc.createTenantAttributes(ctx, tx, tenantUUID)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to create attributes: %w", err)
+	// }
+	// response.AttributesCreated = attributesCreated
+	response.AttributesCreated = 0
 
-	// PASO 3: Crear relaciones categoría-atributo
-	relationsCreated, err := uc.createCategoryAttributeRelations(ctx, tx, tenantUUID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create category-attribute relations: %w", err)
-	}
-	response.CategoryAttributes = relationsCreated
+	// PASO 3: Crear relaciones categoría-atributo (SKIP por ahora - no hay seed)
+	// relationsCreated, err := uc.createCategoryAttributeRelations(ctx, tx, tenantUUID)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to create category-attribute relations: %w", err)
+	// }
+	// response.CategoryAttributes = relationsCreated
+	response.CategoryAttributes = 0
 
 	// Commit de la transacción
 	if err := tx.Commit(); err != nil {
@@ -93,8 +95,8 @@ func (uc *ApplyTemplateUseCase) Execute(ctx context.Context, req ApplyTemplateRe
 	}
 
 	response.Message = fmt.Sprintf(
-		"Template aplicado exitosamente: %d categorías, %d atributos, %d relaciones",
-		categoriesCreated, attributesCreated, relationsCreated,
+		"Template aplicado exitosamente: %d categorías creadas",
+		categoriesCreated,
 	)
 
 	return response, nil
@@ -104,7 +106,7 @@ func (uc *ApplyTemplateUseCase) Execute(ctx context.Context, req ApplyTemplateRe
 func (uc *ApplyTemplateUseCase) createTenantCategories(ctx context.Context, tx *sql.Tx, tenantID uuid.UUID) (int, []string, error) {
 	// Obtener categorías del template de ferretería desde marketplace_categories
 	query := `
-		INSERT INTO categories (id, tenant_id, name, slug, description, parent_id, level, sort_order, status, created_at, updated_at)
+		INSERT INTO categories (id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at)
 		SELECT 
 			gen_random_uuid()::text,
 			$1,
@@ -112,15 +114,12 @@ func (uc *ApplyTemplateUseCase) createTenantCategories(ctx context.Context, tx *
 			slug,
 			description,
 			NULL,  -- Por ahora sin jerarquía, todas al mismo nivel
-			0,
-			sort_order,
 			'active',
 			$2,
 			$2
 		FROM marketplace_categories
 		WHERE parent_id = 'f1e8f2a3-4b6c-4d5e-8f9a-1b2c3d4e5f00'
 		  AND is_active = true
-		ON CONFLICT (tenant_id, slug) DO NOTHING
 		RETURNING id, name
 	`
 
@@ -156,14 +155,13 @@ func (uc *ApplyTemplateUseCase) createTenantCategories(ctx context.Context, tx *
 func (uc *ApplyTemplateUseCase) createTenantAttributes(ctx context.Context, tx *sql.Tx, tenantID uuid.UUID) (int, error) {
 	// Crear atributos del tenant desde marketplace_attributes relacionados con ferretería
 	query := `
-		INSERT INTO attributes (id, tenant_id, name, description, type, required, options, status, created_at, updated_at)
+		INSERT INTO attributes (id, tenant_id, name, type, required, options, status, created_at, updated_at)
 		SELECT 
 			gen_random_uuid()::text,
 			$1,
 			ma.name,
-			ma.description,
-			ma.attribute_type::text,  -- Cast del tipo enum a texto
-			ma.is_required,
+			ma.type,
+			ma.is_required_for_listing,
 			COALESCE(
 				ARRAY(
 					SELECT mav.value 
@@ -177,7 +175,7 @@ func (uc *ApplyTemplateUseCase) createTenantAttributes(ctx context.Context, tx *
 			$2,
 			$2
 		FROM marketplace_attributes ma
-		WHERE ma.id LIKE 'fa1e8f2a-%'
+		WHERE ma.id::text LIKE 'fa1e8f2a-%'
 		  AND NOT EXISTS (
 			SELECT 1 FROM attributes a 
 			WHERE a.tenant_id = $1 

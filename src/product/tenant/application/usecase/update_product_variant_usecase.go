@@ -91,6 +91,14 @@ func (uc *UpdateProductVariantUseCase) Execute(
 		return nil, fmt.Errorf("error actualizando variante: %w", err)
 	}
 
+	// Actualizar price y stock directamente en la variante (A2)
+	if req.HasPrice() {
+		variant.UpdatePrice(req.GetPrice())
+	}
+	if req.HasStock() {
+		variant.UpdateStock(req.GetStock())
+	}
+
 	// Guardar los cambios a través del repositorio
 	err = uc.productRepo.UpdateVariant(ctx, variant)
 	if err != nil {

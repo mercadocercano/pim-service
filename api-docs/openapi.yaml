@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Multi-Tenant PIM API
-  version: 2.1.0
+  version: 2.2.0
   description: |
     API para gestión de información de productos multi-tenant.
     
@@ -12,15 +12,20 @@ info:
     - **Business Types**: Tipos de negocio
     - **Brands**: Gestión de marcas
     - **Products**: Gestión de productos y variantes
+    - **Variants**: Gestión de variantes de productos ✨ HITO 2.1
     - **Categories**: Gestión de categorías
     - **Attributes**: Gestión de atributos
     - **Category-Attributes**: Relación categoría-atributo
     - **Global Catalog**: Catálogo global público
-    - **Quickstart**: Configuración rápida
+    - **Quickstart**: Configuración rápida ✨ HITO 2
+    - **Import**: Importación masiva con variantes ✨ HITO 2.1
     
-    ## 🔄 Actualizado v2.1.0
+    ## 🔄 Actualizado v2.2.0 (HITO 2 + 2.1)
     
-    - ✅ **Endpoints actualizados**: Reflejan implementación real
+    - ✅ **Variantes de productos**: Product → Variants con SKU único
+    - ✅ **Templates Quickstart**: Configuración rápida por tipo de negocio
+    - ✅ **Importación con variantes**: CSV/JSON con atributos dinámicos
+    - ✅ **Parser CSV genérico**: Detecta atributos automáticamente
     - 🛡️ **Seguridad consistente**: Headers y roles validados
     - 📋 **Tests de integración**: Cobertura completa
     - 🔍 **Filtros avanzados**: Criterios y paginación
@@ -2345,6 +2350,436 @@ paths:
                           type: integer
                         satisfaction:
                           type: number
+        '404':
+          description: Template no encontrado
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # VARIANTS ENDPOINTS (HITO 2.1)
+  # ==========================================
+  /products/{id}/variants:
+    get:
+      summary: Listar variantes de un producto
+      tags: [Variants]
+      description: |
+        Obtiene todas las variantes de un producto.
+        Las variantes tienen SKU único y atributos dinámicos.
+        
+        **Implementado en HITO 2.1**
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del producto padre
+      responses:
+        '200':
+          description: Lista de variantes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        product_id:
+                          type: string
+                          format: uuid
+                        sku:
+                          type: string
+                          example: "TALADRO-BOSCH-750W"
+                        name:
+                          type: string
+                          example: "Taladro Bosch 750W"
+                        attributes:
+                          type: object
+                          additionalProperties: true
+                          example:
+                            potencia: "750W"
+                            voltaje: "220V"
+                        price:
+                          type: number
+                          example: 45000
+                        status:
+                          type: string
+                          enum: ["active", "inactive", "discontinued"]
+                        created_at:
+                          type: string
+                          format: date-time
+                  total_count:
+                    type: integer
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno del servidor
+
+    post:
+      summary: Crear variante de producto
+      tags: [Variants]
+      description: Crea una nueva variante para un producto
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sku
+                - name
+              properties:
+                sku:
+                  type: string
+                  example: "TALADRO-BOSCH-1000W"
+                name:
+                  type: string
+                  example: "Taladro Bosch 1000W"
+                attributes:
+                  type: object
+                  additionalProperties: true
+                  example:
+                    potencia: "1000W"
+                    voltaje: "220V"
+                price:
+                  type: number
+                  example: 65000
+      responses:
+        '201':
+          description: Variante creada
+        '400':
+          description: Datos inválidos
+        '404':
+          description: Producto no encontrado
+        '409':
+          description: SKU ya existe
+        '500':
+          description: Error interno del servidor
+
+  /variants/{variant_id}:
+    parameters:
+      - name: variant_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      summary: Obtener variante por ID
+      tags: [Variants]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Detalles de la variante
+        '404':
+          description: Variante no encontrada
+        '500':
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar variante
+      tags: [Variants]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                attributes:
+                  type: object
+                  additionalProperties: true
+                price:
+                  type: number
+                status:
+                  type: string
+                  enum: ["active", "inactive", "discontinued"]
+      responses:
+        '200':
+          description: Variante actualizada
+        '400':
+          description: Datos inválidos
+        '404':
+          description: Variante no encontrada
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      summary: Eliminar variante
+      tags: [Variants]
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '204':
+          description: Variante eliminada
+        '404':
+          description: Variante no encontrada
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # IMPORT WITH VARIANTS ENDPOINTS (HITO 2.1)
+  # ==========================================
+  /products/import:
+    post:
+      summary: Importar productos con variantes
+      tags: [Import]
+      description: |
+        Importa productos con sus variantes desde CSV o JSON.
+        
+        **Implementado en HITO 2.1**
+        
+        El parser detecta automáticamente:
+        - Columnas estándar (name, sku, price, category, brand)
+        - Atributos dinámicos (potencia, voltaje, color, etc.)
+        - Agrupa filas por product_name para crear variantes
+        
+        Formato CSV esperado:
+        ```
+        product_name,variant_sku,category,brand,potencia,voltaje,price
+        Taladro Bosch,TALADRO-750W,Herramientas,Bosch,750W,220V,45000
+        Taladro Bosch,TALADRO-1000W,Herramientas,Bosch,1000W,220V,65000
+        ```
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Archivo CSV o JSON
+                create_categories:
+                  type: boolean
+                  default: true
+                  description: Crear categorías automáticamente si no existen
+                create_brands:
+                  type: boolean
+                  default: true
+                  description: Crear marcas automáticamente si no existen
+          application/json:
+            schema:
+              type: object
+              required:
+                - products
+              properties:
+                products:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product_name:
+                        type: string
+                      category_name:
+                        type: string
+                      brand_name:
+                        type: string
+                      variants:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            sku:
+                              type: string
+                            attributes:
+                              type: object
+                            price:
+                              type: number
+                create_categories:
+                  type: boolean
+                  default: true
+                create_brands:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Resultado de la importación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  summary:
+                    type: object
+                    properties:
+                      products_created:
+                        type: integer
+                      variants_created:
+                        type: integer
+                      categories_created:
+                        type: integer
+                      brands_created:
+                        type: integer
+                      products_skipped:
+                        type: integer
+                      errors:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            row:
+                              type: integer
+                            error:
+                              type: string
+        '400':
+          description: Archivo inválido o formato incorrecto
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # QUICKSTART TEMPLATES ENDPOINTS (HITO 2)
+  # ==========================================
+  /quickstart/templates:
+    get:
+      summary: Listar templates de quickstart disponibles
+      tags: [Quickstart]
+      description: |
+        Obtiene la lista de templates predefinidos para configuración rápida.
+        Cada template incluye categorías, marcas y estructura de catálogo
+        para un tipo de negocio específico.
+        
+        **Implementado en HITO 2** - Template Ferretería disponible
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: business_type
+          in: query
+          description: Filtrar por tipo de negocio
+          schema:
+            type: string
+            example: "ferreteria"
+      responses:
+        '200':
+          description: Lista de templates
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                          example: "Ferretería Básica"
+                        business_type:
+                          type: string
+                          example: "ferreteria"
+                        description:
+                          type: string
+                        categories_count:
+                          type: integer
+                          example: 6
+                        brands_count:
+                          type: integer
+                          example: 12
+                        is_active:
+                          type: boolean
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/templates/{id}/apply:
+    post:
+      summary: Aplicar template de quickstart
+      tags: [Quickstart]
+      description: |
+        Aplica un template predefinido al catálogo del tenant.
+        Crea automáticamente categorías, marcas y estructura base.
+        
+        **Implementado en HITO 2** para el flujo de Quickstart
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del template a aplicar
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                skip_existing:
+                  type: boolean
+                  default: true
+                  description: No crear si ya existe
+      responses:
+        '200':
+          description: Template aplicado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  results:
+                    type: object
+                    properties:
+                      categories_created:
+                        type: integer
+                      brands_created:
+                        type: integer
+                      categories_skipped:
+                        type: integer
+                      brands_skipped:
+                        type: integer
+        '400':
+          description: Error al aplicar template
         '404':
           description: Template no encontrado
         '500':

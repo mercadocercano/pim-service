@@ -56,6 +56,19 @@ func (uc *CreateProductVariantUseCase) Execute(
 		if err != nil {
 			return nil, fmt.Errorf("error creando SKU: %w", err)
 		}
+		
+		// VALIDACIÓN: Verificar que el SKU no exista en el tenant
+		if sku != nil {
+			existing, err := uc.productRepo.FindBySKUs(ctx, tenantID, []string{sku.Value()})
+			if err != nil {
+				return nil, fmt.Errorf("error validando SKU: %w", err)
+			}
+			if len(existing) > 0 {
+				return nil, fmt.Errorf("ya existe una variante con el SKU '%s' en este tenant", sku.Value())
+			}
+		}
+	} else {
+		return nil, fmt.Errorf("el SKU es obligatorio para crear una variante")
 	}
 
 	// Agregar la variante al producto (el agregado maneja la lógica de negocio)

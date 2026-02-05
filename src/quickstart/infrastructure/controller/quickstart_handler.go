@@ -58,7 +58,8 @@ func (h *QuickstartHandler) RegisterRoutes(router *gin.RouterGroup) {
 		
 		// HITO 2: Nuevos endpoints para templates
 		quickstart.GET("/templates", h.ListTemplates)
-		quickstart.POST("/apply", h.ApplyTemplate)
+		quickstart.POST("/apply", h.ApplyTemplate) // Body: {"template_id": "xxx"}
+		quickstart.POST("/templates/:id/apply", h.ApplyTemplateByID) // Path param: /templates/xxx/apply
 	}
 }
 
@@ -160,7 +161,7 @@ func (h *QuickstartHandler) ListTemplates(c *gin.Context) {
 	c.JSON(http.StatusOK, templates)
 }
 
-// ApplyTemplate aplica un template de quickstart al tenant
+// ApplyTemplate aplica un template de quickstart al tenant (template_id en body)
 func (h *QuickstartHandler) ApplyTemplate(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
@@ -179,6 +180,34 @@ func (h *QuickstartHandler) ApplyTemplate(c *gin.Context) {
 
 	applyReq := usecase.ApplyTemplateRequest{
 		TemplateID: req.TemplateID,
+		TenantID:   tenantID,
+	}
+
+	response, err := h.applyTemplateUseCase.Execute(c.Request.Context(), applyReq)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, response)
+}
+
+// ApplyTemplateByID aplica un template de quickstart al tenant (template_id en URL)
+func (h *QuickstartHandler) ApplyTemplateByID(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header is required"})
+		return
+	}
+
+	templateID := c.Param("id")
+	if templateID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "template_id is required in path"})
+		return
+	}
+
+	applyReq := usecase.ApplyTemplateRequest{
+		TemplateID: templateID,
 		TenantID:   tenantID,
 	}
 
