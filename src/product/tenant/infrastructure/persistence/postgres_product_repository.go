@@ -13,6 +13,7 @@ import (
 	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 // PostgresProductRepository implementa ProductCriteriaRepository usando PostgreSQL
@@ -670,10 +671,10 @@ func (r *PostgresProductRepository) FindBySKUs(ctx context.Context, tenantID str
 		SELECT id, tenant_id, product_id, name, sku, status,
 			   is_default, sort_order, price, stock, created_at, updated_at
 		FROM product_variants 
-		WHERE tenant_id = $1 AND sku = ANY($2) AND status != 'deleted'
+		WHERE tenant_id = $1 AND sku = ANY($2::text[]) AND status != 'deleted'
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, tenantID, skus)
+	rows, err := r.db.QueryContext(ctx, query, tenantID, pq.Array(skus))
 	if err != nil {
 		return nil, err
 	}

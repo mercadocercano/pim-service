@@ -1,0 +1,217 @@
+{
+  "info": {
+    "_postman_id": "pim-api-collection-001",
+    "name": "PIM API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección completa de endpoints para el sistema PIM"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Verificar estado del sistema",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Verifica el estado de salud del sistema, incluyendo la conexión a la base de datos"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Listar todas las categorías",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pim/api/v1/categories",
+              "host": ["{{base_url}}"],
+              "path": ["pim", "api", "v1", "categories"]
+            },
+            "description": "Obtiene una lista de todas las categorías disponibles"
+          }
+        },
+        {
+          "name": "Crear nueva categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenant_id}}\",\n  \"name\": \"Electrónica\",\n  \"description\": \"Productos electrónicos y dispositivos\",\n  \"parent_id\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories"]
+            },
+            "description": "Crea una nueva categoría en el sistema"
+          }
+        },
+        {
+          "name": "Obtener categoría por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123e4567-e89b-12d3-a456-426614174000",
+                  "description": "UUID de la categoría"
+                }
+              ]
+            },
+            "description": "Obtiene los detalles de una categoría específica por su ID"
+          }
+        },
+        {
+          "name": "Actualizar categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenant_id}}\",\n  \"name\": \"Electrodomésticos\",\n  \"description\": \"Productos para el hogar\",\n  \"parent_id\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123e4567-e89b-12d3-a456-426614174000",
+                  "description": "UUID de la categoría"
+                }
+              ]
+            },
+            "description": "Actualiza los datos de una categoría existente"
+          }
+        },
+        {
+          "name": "Activar categoría",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/:id/activate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", ":id", "activate"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123e4567-e89b-12d3-a456-426614174000",
+                  "description": "UUID de la categoría"
+                }
+              ]
+            },
+            "description": "Activa una categoría previamente desactivada"
+          }
+        },
+        {
+          "name": "Desactivar categoría",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/:id/deactivate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", ":id", "deactivate"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123e4567-e89b-12d3-a456-426614174000",
+                  "description": "UUID de la categoría"
+                }
+              ]
+            },
+            "description": "Desactiva una categoría activa"
+          }
+        },
+        {
+          "name": "Mover categoría",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenant_id\": \"{{tenant_id}}\",\n  \"parent_id\": \"123e4567-e89b-12d3-a456-426614174000\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/:id/move",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", ":id", "move"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123e4567-e89b-12d3-a456-426614174000",
+                  "description": "UUID de la categoría"
+                }
+              ]
+            },
+            "description": "Mueve una categoría a un nuevo padre"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documentación",
+      "item": [
+        {
+          "name": "Obtener documentación OpenAPI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api-docs",
+              "host": ["{{base_url}}"],
+              "path": ["api-docs"]
+            },
+            "description": "Obtiene la documentación OpenAPI en formato HTML"
+          }
+        },
+        {
+          "name": "Obtener especificación OpenAPI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/openapi.yaml",
+              "host": ["{{base_url}}"],
+              "path": ["openapi.yaml"]
+            },
+            "description": "Obtiene la especificación OpenAPI en formato YAML"
+          }
+        }
+      ]
+    }
+  ]
+} 
