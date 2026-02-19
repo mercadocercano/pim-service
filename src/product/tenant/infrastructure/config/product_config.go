@@ -158,6 +158,9 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		variantMapper,
 	)
 
+	// HITO A - Use Case para buscar variante por SKU
+	getVariantBySKUUseCase := usecase.NewGetVariantBySKUUseCase(productRepo, variantMapper)
+
 	// Use Cases - Quickstart
 	createFromTemplateUseCase := quickstartUseCase.NewCreateFromTemplateUseCase(productRepo)
 	importFromBusinessTypeUseCase := quickstartUseCase.NewImportFromBusinessTypeUseCase(productRepo)
@@ -183,6 +186,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 	productVariantController := controller.NewProductVariantController(
 		createProductVariantUseCase,
 		getProductVariantByIDUseCase,
+		getVariantBySKUUseCase,
 		updateProductVariantUseCase,
 		deleteProductVariantUseCase,
 		listProductVariantsByCriteriaUseCase,

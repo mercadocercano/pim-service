@@ -14,6 +14,7 @@ import (
 type ProductVariantController struct {
 	createProductVariantUseCase          *usecase.CreateProductVariantUseCase
 	getProductVariantByIDUseCase         *usecase.GetProductVariantByIDUseCase
+	getVariantBySKUUseCase               *usecase.GetVariantBySKUUseCase
 	updateProductVariantUseCase          *usecase.UpdateProductVariantUseCase
 	deleteProductVariantUseCase          *usecase.DeleteProductVariantUseCase
 	listProductVariantsByCriteriaUseCase *usecase.ListProductVariantsByCriteriaUseCase
@@ -23,6 +24,7 @@ type ProductVariantController struct {
 func NewProductVariantController(
 	createProductVariantUseCase *usecase.CreateProductVariantUseCase,
 	getProductVariantByIDUseCase *usecase.GetProductVariantByIDUseCase,
+	getVariantBySKUUseCase *usecase.GetVariantBySKUUseCase,
 	updateProductVariantUseCase *usecase.UpdateProductVariantUseCase,
 	deleteProductVariantUseCase *usecase.DeleteProductVariantUseCase,
 	listProductVariantsByCriteriaUseCase *usecase.ListProductVariantsByCriteriaUseCase,
@@ -30,6 +32,7 @@ func NewProductVariantController(
 	return &ProductVariantController{
 		createProductVariantUseCase:          createProductVariantUseCase,
 		getProductVariantByIDUseCase:         getProductVariantByIDUseCase,
+		getVariantBySKUUseCase:               getVariantBySKUUseCase,
 		updateProductVariantUseCase:          updateProductVariantUseCase,
 		deleteProductVariantUseCase:          deleteProductVariantUseCase,
 		listProductVariantsByCriteriaUseCase: listProductVariantsByCriteriaUseCase,
@@ -323,6 +326,9 @@ func (ctrl *ProductVariantController) RegisterRoutes(router *gin.RouterGroup) {
 	router.PUT("/product-variants/:variant_id", ctrl.UpdateProductVariantByID)
 	router.DELETE("/product-variants/:variant_id", ctrl.DeleteProductVariantByID)
 	
+	// HITO A - Endpoint para buscar variante por SKU
+	router.GET("/variants/by-sku/:sku", ctrl.GetVariantBySKU)
+	
 	// Rutas anidadas bajo productos (usando :id en lugar de :product_id para evitar conflicto con /products/:id)
 	// Estas se registran en el setup del módulo Product, DESPUÉS de las rutas de ProductController
 }
@@ -463,4 +469,31 @@ func (ctrl *ProductVariantController) DeleteProductVariantByID(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+// GetVariantBySKU busca una variante por su SKU
+// HITO A - Endpoint requerido por order-service para obtener snapshots
+func (ctrl *ProductVariantController) GetVariantBySKU(c *gin.Context) {
+	sku := c.Param("sku")
+	if sku == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "SKU es requerido"})
+		return
+	}
+
+	// Obtener tenant ID del header
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		return
+	}
+
+	// Ejecutar caso de uso
+	variant, err := ctrl.getVariantBySKUUseCase.Execute(c.Request.Context(), sku, tenantID)
+	if err != nil {
+		// Si no se encuentra, retornar 404
+		c.JSON(http.StatusNotFound, gin.H{"error": "variant not found: " + sku})
+		return
+	}
+
+	c.JSON(http.StatusOK, variant)
 }
