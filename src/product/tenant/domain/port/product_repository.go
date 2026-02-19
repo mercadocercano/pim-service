@@ -41,6 +41,7 @@ type ProductRepository interface {
 	// Búsqueda de variantes
 	FindBySKUs(ctx context.Context, tenantID string, skus []string) ([]*entity.ProductVariant, error)
 	FindByProduct(ctx context.Context, tenantID string, productID uuid.UUID) ([]*entity.ProductVariant, error)
+	GetBySKU(ctx context.Context, sku string, tenantID uuid.UUID) (*entity.ProductVariant, error) // HITO A
 }
 
 // ProductCriteriaRepository extiende ProductRepository con capacidades de búsqueda por criterios

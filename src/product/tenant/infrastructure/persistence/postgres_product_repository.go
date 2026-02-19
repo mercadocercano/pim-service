@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
@@ -643,6 +644,29 @@ func (r *PostgresProductRepository) VariantExistsBySKU(ctx context.Context, sku,
 	var exists bool
 	err := r.db.QueryRowContext(ctx, query, sku, tenantID).Scan(&exists)
 	return exists, err
+}
+
+// GetBySKU busca una variante por SKU dentro de un tenant
+// HITO A - Requerido por order-service para obtener snapshots
+func (r *PostgresProductRepository) GetBySKU(ctx context.Context, sku string, tenantID uuid.UUID) (*entity.ProductVariant, error) {
+	query := `
+		SELECT id, tenant_id, product_id, name, sku, status,
+			   is_default, sort_order, price, stock, created_at, updated_at
+		FROM product_variants 
+		WHERE sku = $1 AND tenant_id = $2 AND status != 'deleted'
+		LIMIT 1
+	`
+
+	row := r.db.QueryRowContext(ctx, query, sku, tenantID.String())
+	variant, err := r.scanVariant(row)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("variant not found with sku: %s", sku)
+		}
+		return nil, fmt.Errorf("error scanning variant: %w", err)
+	}
+
+	return variant, nil
 }
 
 func (r *PostgresProductRepository) VariantExistsByNameExcludingID(ctx context.Context, name string, productID uuid.UUID, tenantID string, excludeID uuid.UUID) (bool, error) {

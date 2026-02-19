@@ -2,7 +2,9 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
 
@@ -398,26 +400,59 @@ func (uc *GetMarketplaceOverviewUseCase) getAttributesStats(
 	return stats, nil
 }
 
-// getCurationStats obtiene estadísticas de curación
+// getCurationStats obtiene estadísticas de curación desde Catalog BFF
 func (uc *GetMarketplaceOverviewUseCase) getCurationStats(
 	ctx context.Context,
 	req *request.GetMarketplaceOverviewRequest,
 ) (map[string]interface{}, error) {
 	stats := map[string]interface{}{
-		"total_products":    0,
-		"pending_curation":  0,
-		"curated_products":  0,
-		"rejected_products": 0,
-		"avg_quality":       0,
-		"recent_activity":   []interface{}{},
+		"pending":        0,
+		"approved_today": 0,
+		"rejected_today": 0,
+		"total_scraped":  0,
 	}
 
-	// TODO: Implementar consultas reales cuando tengamos acceso al scraper service
-	stats["total_products"] = 15000
-	stats["pending_curation"] = 2500
-	stats["curated_products"] = 10000
-	stats["rejected_products"] = 2500
-	stats["avg_quality"] = 0.78
+	// Llamar al Catalog BFF para obtener stats de curación
+	catalogBFFURL := "http://catalog-bff-service:8085" // URL interna de Docker
+	dashboardURL := fmt.Sprintf("%s/api/v1/admin/dashboard/stats", catalogBFFURL)
+	
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", dashboardURL, nil)
+	if err != nil {
+		// Retornar stats vacíos en caso de error
+		return stats, nil
+	}
+	
+	client := &http.Client{Timeout: 3 * time.Second}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		// Retornar stats vacíos si BFF no está disponible
+		return stats, nil
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != http.StatusOK {
+		// Retornar stats vacíos si hubo error
+		return stats, nil
+	}
+	
+	var bffResponse struct {
+		Curation struct {
+			Pending       int `json:"pending"`
+			ApprovedToday int `json:"approved_today"`
+			RejectedToday int `json:"rejected_today"`
+			TotalScraped  int `json:"total_scraped"`
+		} `json:"curation"`
+	}
+	
+	if err := json.NewDecoder(resp.Body).Decode(&bffResponse); err != nil {
+		// Retornar stats vacíos si no se puede parsear
+		return stats, nil
+	}
+	
+	stats["pending"] = bffResponse.Curation.Pending
+	stats["approved_today"] = bffResponse.Curation.ApprovedToday
+	stats["rejected_today"] = bffResponse.Curation.RejectedToday
+	stats["total_scraped"] = bffResponse.Curation.TotalScraped
 
 	return stats, nil
 }
