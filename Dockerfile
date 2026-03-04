@@ -87,6 +87,17 @@ EXPOSE 8080
 CMD ["go", "run", "."]
 
 # ==============================================
+# Stage 3b: Migrate stage (para Job de migraciones)
+# ==============================================
+FROM alpine:3.18 AS migrate
+RUN apk add --no-cache postgresql-client bash
+WORKDIR /app
+COPY migrations /migrations
+COPY scripts/migrate.sh /migrate.sh
+RUN chmod +x /migrate.sh
+ENTRYPOINT ["/migrate.sh"]
+
+# ==============================================
 # Stage 4: Production stage (Distroless)
 # ==============================================
 FROM gcr.io/distroless/static-debian12:nonroot AS production

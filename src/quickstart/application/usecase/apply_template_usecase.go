@@ -4,9 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
+	"strings"
 
 	"github.com/google/uuid"
+
+	"saas-mt-pim-service/src/quickstart/domain/port"
+	"saas-mt-pim-service/src/shared/infrastructure/database"
 )
 
 // ApplyTemplateRequest es la petición para aplicar un template
@@ -21,21 +24,33 @@ type ApplyTemplateResponse struct {
 	TemplateID         string   `json:"template_id"`
 	TenantID           string   `json:"tenant_id"`
 	CategoriesCreated  int      `json:"categories_created"`
+	BrandsCreated      int      `json:"brands_created"`
+	ProductsCreated    int      `json:"products_created"`
+	VariantsCreated    int      `json:"variants_created"`
 	AttributesCreated  int      `json:"attributes_created"`
 	CategoryAttributes int      `json:"category_attributes_created"`
 	Message            string   `json:"message"`
 	CreatedCategories  []string `json:"created_categories,omitempty"`
+	CreatedBrands      []string `json:"created_brands,omitempty"`
+	CreatedProducts    []string `json:"created_products,omitempty"`
 }
 
 // ApplyTemplateUseCase aplica un template de quickstart a un tenant
 type ApplyTemplateUseCase struct {
-	db *sql.DB
+	db   *sql.DB
+	repo port.ApplyTemplateRepository
 }
 
+const (
+	legacyQuickstartTemplateID = "ferreteria-corralon"
+	legacyQuickstartParentID   = "f1e8f2a3-4b6c-4d5e-8f9a-1b2c3d4e5f00"
+)
+
 // NewApplyTemplateUseCase crea una nueva instancia del caso de uso
-func NewApplyTemplateUseCase(db *sql.DB) *ApplyTemplateUseCase {
+func NewApplyTemplateUseCase(db *sql.DB, repo port.ApplyTemplateRepository) *ApplyTemplateUseCase {
 	return &ApplyTemplateUseCase{
-		db: db,
+		db:   db,
+		repo: repo,
 	}
 }
 
@@ -47,8 +62,13 @@ func (uc *ApplyTemplateUseCase) Execute(ctx context.Context, req ApplyTemplateRe
 		return nil, fmt.Errorf("invalid tenant_id format: %w", err)
 	}
 
-	// Verificar que el template existe
-	if req.TemplateID != "ferreteria-corralon" {
+	// Verificar que el template existe (fuera de tx)
+	templateCategories, marketplaceCategoryIDs, categorySlugByMarketplaceID, err := uc.repo.LoadTemplateCategories(ctx, req.TemplateID)
+	if err != nil {
+		return nil, err
+	}
+	useLegacy := len(templateCategories) == 0 && req.TemplateID == legacyQuickstartTemplateID
+	if !useLegacy && len(templateCategories) == 0 {
 		return nil, fmt.Errorf("template not found: %s", req.TemplateID)
 	}
 
@@ -65,28 +85,69 @@ func (uc *ApplyTemplateUseCase) Execute(ctx context.Context, req ApplyTemplateRe
 		TenantID:   req.TenantID,
 	}
 
-	// PASO 1: Crear categorías del tenant desde marketplace_categories
-	categoriesCreated, categoryIDs, err := uc.createTenantCategories(ctx, tx, tenantUUID)
+	// PASO 1: Crear categorias del tenant desde el template
+	var categoriesCreated int
+	var createdCategories []port.CreatedCategory
+	if useLegacy {
+		categoriesCreated, createdCategories, err = uc.repo.CreateTenantCategoriesLegacy(ctx, tx, tenantUUID, legacyQuickstartParentID)
+	} else {
+		categoriesCreated, createdCategories, err = uc.repo.CreateTenantCategoriesFromTemplate(ctx, tx, tenantUUID, templateCategories)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to create categories: %w", err)
 	}
 	response.CategoriesCreated = categoriesCreated
-	response.CreatedCategories = categoryIDs
+	response.CreatedCategories = createdCategoryList(createdCategories).Names()
 
-	// PASO 2: Crear atributos del tenant desde marketplace_attributes (SKIP por ahora - no hay seed)
-	// attributesCreated, err := uc.createTenantAttributes(ctx, tx, tenantUUID)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to create attributes: %w", err)
-	// }
-	// response.AttributesCreated = attributesCreated
+	if useLegacy {
+		marketplaceCategoryIDs, err = uc.repo.GetMarketplaceCategoryIDsBySlug(ctx, tx, createdCategoryList(createdCategories).Slugs())
+		if err != nil {
+			return nil, fmt.Errorf("failed to load marketplace categories: %w", err)
+		}
+	}
+
+	useMarketplaceCategoryID := uc.repo.GlobalProductsHasMarketplaceCategoryID(ctx, tx)
+
+	categorySlugs := createdCategoryList(createdCategories).Slugs()
+	if !useLegacy {
+		categorySlugs = templateCategoriesSlugs(templateCategories)
+	}
+
+	// PASO 1.5: Crear marcas base desde global_products (datos reales)
+	brandsCreated, createdBrands, err := uc.repo.CreateTenantBrandsFromGlobalProducts(
+		ctx,
+		tx,
+		tenantUUID,
+		marketplaceCategoryIDs,
+		categorySlugs,
+		useMarketplaceCategoryID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create brands: %w", err)
+	}
+	response.BrandsCreated = brandsCreated
+	response.CreatedBrands = createdBrands
+
+	// PASO 1.6: Crear 1 producto + 1 variante con datos reales
+	productsCreated, variantsCreated, createdProducts, err := uc.createTenantProductFromGlobalProducts(
+		ctx,
+		tx,
+		tenantUUID,
+		marketplaceCategoryIDs,
+		categorySlugs,
+		useMarketplaceCategoryID,
+		createdCategories,
+		categorySlugByMarketplaceID,
+		createdBrands,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create product: %w", err)
+	}
+	response.ProductsCreated = productsCreated
+	response.VariantsCreated = variantsCreated
+	response.CreatedProducts = createdProducts
+
 	response.AttributesCreated = 0
-
-	// PASO 3: Crear relaciones categoría-atributo (SKIP por ahora - no hay seed)
-	// relationsCreated, err := uc.createCategoryAttributeRelations(ctx, tx, tenantUUID)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to create category-attribute relations: %w", err)
-	// }
-	// response.CategoryAttributes = relationsCreated
 	response.CategoryAttributes = 0
 
 	// Commit de la transacción
@@ -95,143 +156,142 @@ func (uc *ApplyTemplateUseCase) Execute(ctx context.Context, req ApplyTemplateRe
 	}
 
 	response.Message = fmt.Sprintf(
-		"Template aplicado exitosamente: %d categorías creadas",
+		"Template aplicado exitosamente: %d categorías, %d marcas, %d productos, %d variantes",
 		categoriesCreated,
+		response.BrandsCreated,
+		response.ProductsCreated,
+		response.VariantsCreated,
 	)
 
 	return response, nil
 }
 
-// createTenantCategories crea las categorías del tenant desde marketplace_categories
-func (uc *ApplyTemplateUseCase) createTenantCategories(ctx context.Context, tx *sql.Tx, tenantID uuid.UUID) (int, []string, error) {
-	// Obtener categorías del template de ferretería desde marketplace_categories
-	query := `
-		INSERT INTO categories (id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at)
-		SELECT 
-			gen_random_uuid()::text,
-			$1,
-			name,
-			slug,
-			description,
-			NULL,  -- Por ahora sin jerarquía, todas al mismo nivel
-			'active',
-			$2,
-			$2
-		FROM marketplace_categories
-		WHERE parent_id = 'f1e8f2a3-4b6c-4d5e-8f9a-1b2c3d4e5f00'
-		  AND is_active = true
-		RETURNING id, name
-	`
+type createdCategoryList []port.CreatedCategory
 
-	now := time.Now()
-	rows, err := tx.QueryContext(ctx, query, tenantID.String(), now)
-	if err != nil {
-		return 0, nil, fmt.Errorf("failed to insert categories: %w", err)
+func (list createdCategoryList) Names() []string {
+	names := make([]string, 0, len(list))
+	for _, item := range list {
+		names = append(names, item.Name)
 	}
-	defer rows.Close()
+	return names
+}
 
-	var categoryIDs []string
-	var categoryNames []string
-	count := 0
+func (list createdCategoryList) Slugs() []string {
+	slugs := make([]string, 0, len(list))
+	for _, item := range list {
+		slugs = append(slugs, item.Slug)
+	}
+	return slugs
+}
 
-	for rows.Next() {
-		var id, name string
-		if err := rows.Scan(&id, &name); err != nil {
-			return 0, nil, fmt.Errorf("failed to scan category: %w", err)
+func (list createdCategoryList) BySlug() map[string]port.CreatedCategory {
+	result := make(map[string]port.CreatedCategory, len(list))
+	for _, item := range list {
+		result[item.Slug] = item
+	}
+	return result
+}
+
+func (list createdCategoryList) ByMarketplaceID() map[string]port.CreatedCategory {
+	result := make(map[string]port.CreatedCategory, len(list))
+	for _, item := range list {
+		if item.MarketplaceID != "" {
+			result[item.MarketplaceID] = item
 		}
-		categoryIDs = append(categoryIDs, id)
-		categoryNames = append(categoryNames, name)
-		count++
 	}
-
-	if err := rows.Err(); err != nil {
-		return 0, nil, fmt.Errorf("error iterating categories: %w", err)
-	}
-
-	return count, categoryNames, nil
+	return result
 }
 
-// createTenantAttributes crea los atributos del tenant desde marketplace_attributes
-func (uc *ApplyTemplateUseCase) createTenantAttributes(ctx context.Context, tx *sql.Tx, tenantID uuid.UUID) (int, error) {
-	// Crear atributos del tenant desde marketplace_attributes relacionados con ferretería
-	query := `
-		INSERT INTO attributes (id, tenant_id, name, type, required, options, status, created_at, updated_at)
-		SELECT 
-			gen_random_uuid()::text,
-			$1,
-			ma.name,
-			ma.type,
-			ma.is_required_for_listing,
-			COALESCE(
-				ARRAY(
-					SELECT mav.value 
-					FROM marketplace_attribute_values mav 
-					WHERE mav.attribute_id = ma.id 
-					ORDER BY mav.sort_order
-				),
-				'{}'::text[]
-			),
-			'active',
-			$2,
-			$2
-		FROM marketplace_attributes ma
-		WHERE ma.id::text LIKE 'fa1e8f2a-%'
-		  AND NOT EXISTS (
-			SELECT 1 FROM attributes a 
-			WHERE a.tenant_id = $1 
-			  AND a.name = ma.name
-		  )
-	`
-
-	now := time.Now()
-	result, err := tx.ExecContext(ctx, query, tenantID.String(), now)
-	if err != nil {
-		return 0, fmt.Errorf("failed to insert attributes: %w", err)
+func templateCategoriesSlugs(categories []port.TemplateCategory) []string {
+	slugs := make([]string, 0, len(categories))
+	seen := make(map[string]struct{}, len(categories))
+	for _, category := range categories {
+		slug := strings.TrimSpace(category.Slug)
+		if slug == "" {
+			continue
+		}
+		if _, ok := seen[slug]; ok {
+			continue
+		}
+		seen[slug] = struct{}{}
+		slugs = append(slugs, slug)
 	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return 0, fmt.Errorf("failed to get rows affected: %w", err)
-	}
-
-	return int(rowsAffected), nil
+	return slugs
 }
 
-// createCategoryAttributeRelations crea las relaciones categoría-atributo para el tenant
-func (uc *ApplyTemplateUseCase) createCategoryAttributeRelations(ctx context.Context, tx *sql.Tx, tenantID uuid.UUID) (int, error) {
-	// Crear relaciones categoría-atributo basadas en marketplace_category_attributes
-	// Necesitamos mapear los IDs de marketplace a los IDs del tenant
-	query := `
-		INSERT INTO category_attributes (id, tenant_id, category_id, attribute_id, allowed_values, status, created_at, updated_at)
-		SELECT 
-			gen_random_uuid()::text,
-			$1,
-			tc.id,
-			ta.id,
-			'{}'::text[],
-			'active',
-			$2,
-			$2
-		FROM marketplace_category_attributes mca
-		INNER JOIN marketplace_categories mc ON mca.category_id = mc.id
-		INNER JOIN marketplace_attributes ma ON mca.attribute_id = ma.id
-		INNER JOIN categories tc ON tc.tenant_id = $1 AND tc.slug = mc.slug
-		INNER JOIN attributes ta ON ta.tenant_id = $1 AND ta.name = ma.name
-		WHERE mca.id LIKE 'fca-%'
-		ON CONFLICT (tenant_id, category_id, attribute_id) DO NOTHING
-	`
-
-	now := time.Now()
-	result, err := tx.ExecContext(ctx, query, tenantID.String(), now)
-	if err != nil {
-		return 0, fmt.Errorf("failed to insert category-attribute relations: %w", err)
+func (uc *ApplyTemplateUseCase) createTenantProductFromGlobalProducts(
+	ctx context.Context,
+	exec database.Executor,
+	tenantID uuid.UUID,
+	marketplaceCategoryIDs []string,
+	categorySlugs []string,
+	useMarketplaceCategoryID bool,
+	createdCategories []port.CreatedCategory,
+	categorySlugByMarketplaceID map[string]string,
+	brandNames []string,
+) (int, int, []string, error) {
+	if useMarketplaceCategoryID && len(marketplaceCategoryIDs) == 0 {
+		return 0, 0, nil, nil
+	}
+	if !useMarketplaceCategoryID && len(categorySlugs) == 0 {
+		return 0, 0, nil, nil
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	var candidate port.GlobalProductCandidate
+	var err error
+
+	if len(brandNames) > 0 {
+		candidate, err = uc.repo.FindGlobalProduct(ctx, exec, marketplaceCategoryIDs, categorySlugs, useMarketplaceCategoryID, brandNames)
+	} else {
+		candidate, err = uc.repo.FindGlobalProduct(ctx, exec, marketplaceCategoryIDs, categorySlugs, useMarketplaceCategoryID, nil)
+	}
 	if err != nil {
-		return 0, fmt.Errorf("failed to get rows affected: %w", err)
+		if err == sql.ErrNoRows {
+			return 0, 0, nil, nil
+		}
+		return 0, 0, nil, err
 	}
 
-	return int(rowsAffected), nil
+	brandID, brandName, err := uc.repo.EnsureTenantBrand(ctx, exec, tenantID, candidate.Brand)
+	if err != nil {
+		return 0, 0, nil, err
+	}
+
+	categoryID, categoryName, err := uc.repo.ResolveTenantCategory(
+		ctx,
+		exec,
+		tenantID,
+		createdCategoryList(createdCategories).ByMarketplaceID(),
+		createdCategoryList(createdCategories).BySlug(),
+		categorySlugByMarketplaceID,
+		candidate.MarketplaceCategoryID,
+	)
+	if err != nil {
+		return 0, 0, nil, err
+	}
+
+	productID, productName, productSKU, created, err := uc.repo.EnsureTenantProduct(ctx, exec, tenantID, candidate, categoryID, categoryName, brandID, brandName)
+	if err != nil {
+		return 0, 0, nil, err
+	}
+
+	variantsCreated := 0
+	if created {
+		variantsCreated, err = uc.repo.EnsureDefaultVariant(ctx, exec, tenantID, productID, productName, productSKU)
+		if err != nil {
+			return 0, 0, nil, err
+		}
+	}
+
+	productsCreated := 0
+	if created {
+		productsCreated = 1
+	}
+
+	createdProducts := []string{}
+	if created {
+		createdProducts = append(createdProducts, productName)
+	}
+
+	return productsCreated, variantsCreated, createdProducts, nil
 }
-

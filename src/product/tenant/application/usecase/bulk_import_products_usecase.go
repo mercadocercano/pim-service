@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -21,15 +22,52 @@ type VariantImportData struct {
 	IsDefault  bool              `json:"is_default"`
 }
 
-// ProductWithVariantsImport representa un producto con sus variantes (HITO 2.1)
-// Acepta tanto "name" como "product_name" para retrocompatibilidad con tests/clientes existentes
-type ProductWithVariantsImport struct {
-	Name        string              `json:"product_name" binding:"required"` // También acepta "name" vía UnmarshalJSON
+// productWithVariantsImportRaw struct auxiliar para UnmarshalJSON (acepta name/product_name, category/category_name, brand/brand_name)
+type productWithVariantsImportRaw struct {
+	Name        string              `json:"name"`
+	ProductName string              `json:"product_name"`
 	Description string              `json:"description"`
-	Category    string              `json:"category_name" binding:"required"` // También acepta "category" vía UnmarshalJSON
-	Brand       string              `json:"brand_name"` // También acepta "brand" vía UnmarshalJSON
+	Category    string              `json:"category"`
+	CategoryName string             `json:"category_name"`
+	Brand       string              `json:"brand"`
+	BrandName   string              `json:"brand_name"`
+	Variants    []VariantImportData `json:"variants"`
+	Active      bool                `json:"active"`
+}
+
+// ProductWithVariantsImport representa un producto con sus variantes (HITO 2.1)
+// Acepta tanto "name"/"product_name" como "category"/"category_name" y "brand"/"brand_name" para retrocompatibilidad
+type ProductWithVariantsImport struct {
+	Name        string              `json:"product_name" binding:"required"`
+	Description string              `json:"description"`
+	Category    string              `json:"category_name" binding:"required"`
+	Brand       string              `json:"brand_name"`
 	Variants    []VariantImportData `json:"variants" binding:"required,min=1"`
 	Active      bool                `json:"active"`
+}
+
+// UnmarshalJSON acepta name/product_name, category/category_name, brand/brand_name del frontend
+func (p *ProductWithVariantsImport) UnmarshalJSON(data []byte) error {
+	var raw productWithVariantsImportRaw
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	p.Name = raw.ProductName
+	if p.Name == "" {
+		p.Name = raw.Name
+	}
+	p.Description = raw.Description
+	p.Category = raw.CategoryName
+	if p.Category == "" {
+		p.Category = raw.Category
+	}
+	p.Brand = raw.BrandName
+	if p.Brand == "" {
+		p.Brand = raw.Brand
+	}
+	p.Variants = raw.Variants
+	p.Active = raw.Active
+	return nil
 }
 
 // BulkImportProductsRequest es la petición para importación bulk con variantes

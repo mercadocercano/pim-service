@@ -39,8 +39,10 @@ func NewQuickstartModuleConfig(db *sql.DB) *QuickstartModuleConfig {
 	setupTenantUseCase := usecase.NewSetupTenantUseCase()
 	
 	// HITO 2: Nuevos casos de uso para templates
-	listTemplatesUseCase := usecase.NewListTemplatesUseCase(db)
-	applyTemplateUseCase := usecase.NewApplyTemplateUseCase(db)
+	applyTemplateRepo := quickstartRepository.NewApplyTemplatePostgresRepository(db)
+	listTemplatesRepo := quickstartRepository.NewListTemplatesPostgresRepository(db)
+	listTemplatesUseCase := usecase.NewListTemplatesUseCase(listTemplatesRepo)
+	applyTemplateUseCase := usecase.NewApplyTemplateUseCase(db, applyTemplateRepo)
 	
 	// Crear handler principal de quickstart
 	quickstartHandler := controller.NewQuickstartHandler(
