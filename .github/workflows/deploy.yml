@@ -73,7 +73,7 @@ jobs:
                ${{ env.CONTAINER_NAME }}=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
                -n ${{ env.NAMESPACE }} && \
              kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} \
-               -n ${{ env.NAMESPACE }} --timeout=120s"
+               -n ${{ env.NAMESPACE }} --timeout=360s"
 
       - name: Health Check (via Kong)
         run: |
