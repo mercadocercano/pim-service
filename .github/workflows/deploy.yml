@@ -37,11 +37,12 @@ jobs:
           username: ${{ secrets.DOCR_TOKEN }}
           password: ${{ secrets.DOCR_TOKEN }}
 
-      # Repo pim-service: Dockerfile en raíz, sin working-directory
+      # Repo pim-service: --target production (binario compilado, no go run)
       - name: Build and Push Image (linux/amd64)
         run: |
           docker buildx build \
             --platform linux/amd64 \
+            --target production \
             --provenance=false \
             --sbom=false \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
