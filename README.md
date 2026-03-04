@@ -1,6 +1,6 @@
 # SaaS Multitenant PIM Service
 
-**Product Information Management (PIM) Service** para el ecosistema SaaS Marketplace multitenant. Este servicio gestiona productos, categorías, atributos, marcas y catálogo global con arquitectura hexagonal.
+**Product Information Management (PIM) Service** para el ecosistema SaaS Marketplace multitenant. Este servicio gestiona productos, categorías, atributos, marcas y catálogo global con arquitectura hexagonal. Deploy: push a main → `.github/workflows/deploy-pim.yml`
 
 ## 🏗️ Arquitectura
 
