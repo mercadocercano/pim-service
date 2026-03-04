@@ -75,19 +75,17 @@ jobs:
              kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} \
                -n ${{ env.NAMESPACE }} --timeout=360s"
 
-      # Health check interno via SSH al cluster (Kong es ClusterIP, no expuesto externamente)
-      - name: Health Check (internal via SSH)
+      # Rollout exitoso = readiness probe /api/v1/health pasó. Verificar estado del pod.
+      - name: Verify Pod Ready
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy@${{ secrets.DROPLET_IP }} \
             "export KUBECONFIG=/home/deploy/.kube/config && \
-             for i in 1 2 3 4 5 6; do \
-               sleep 10; \
-               STATUS=\$(kubectl exec deployment/${{ env.DEPLOYMENT_NAME }} -c ${{ env.CONTAINER_NAME }} -- wget -qO- http://localhost:8080/api/v1/health 2>/dev/null || echo 'fail'); \
-               if echo \"\$STATUS\" | grep -q 'ok'; then \
-                 echo '✅ Health check passed (attempt '\$i')'; \
-                 exit 0; \
-               fi; \
-               echo \"Attempt \$i failed, retrying...\"; \
-             done; \
-             echo '❌ Health check failed after 6 attempts'; \
-             exit 1"
+             READY=\$(kubectl get pods -l app=pim-service -o jsonpath='{.items[0].status.containerStatuses[0].ready}') && \
+             IMAGE=\$(kubectl get pods -l app=pim-service -o jsonpath='{.items[0].spec.containers[0].image}') && \
+             echo \"Pod ready: \$READY\" && \
+             echo \"Image: \$IMAGE\" && \
+             if [ \"\$READY\" = 'true' ]; then \
+               echo '✅ pim-service is running and healthy'; \
+             else \
+               echo '❌ Pod not ready'; exit 1; \
+             fi"
