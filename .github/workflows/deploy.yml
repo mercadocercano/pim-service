@@ -77,9 +77,14 @@ jobs:
 
       - name: Health Check (via Kong)
         run: |
-          sleep 10
-          if ! curl -sf --max-time 30 "https://backoffice.mercadocercano.com.ar/pim/api/v1/health"; then
-            echo "❌ Health check failed: /pim/api/v1/health did not respond OK"
-            exit 1
-          fi
-          echo "✅ Health check passed"
+          echo "Waiting for pod to receive traffic..."
+          for i in 1 2 3 4 5 6; do
+            sleep 10
+            if curl -sf --max-time 15 "https://backoffice.mercadocercano.com.ar/pim/api/v1/health"; then
+              echo "✅ Health check passed (attempt $i)"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 10s..."
+          done
+          echo "❌ Health check failed after 6 attempts"
+          exit 1
