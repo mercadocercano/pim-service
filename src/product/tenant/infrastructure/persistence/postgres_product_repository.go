@@ -271,12 +271,14 @@ func (r *PostgresProductRepository) ExistsBySKUExcludingID(ctx context.Context, 
 }
 
 // SearchByCriteria busca productos usando criterios
+// Incluye COALESCE(products.sku, default_variant.sku) para productos sin sku (ej. bulk import con variantes)
 func (r *PostgresProductRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.Product, error) {
 	baseQuery := `
-		SELECT id, tenant_id, name, description, sku,
-			   category_id, category_name, brand_id, brand_name,
-			   status, created_at, updated_at
-		FROM products
+		SELECT p.id, p.tenant_id, p.name, p.description,
+			   COALESCE(p.sku, (SELECT pv.sku FROM product_variants pv WHERE pv.product_id = p.id AND pv.is_default = true AND pv.status != 'deleted' LIMIT 1)) as sku,
+			   p.category_id, p.category_name, p.brand_id, p.brand_name,
+			   p.status, p.created_at, p.updated_at
+		FROM products p
 	`
 
 	converter := sharedCriteria.NewSQLCriteriaConverter()
