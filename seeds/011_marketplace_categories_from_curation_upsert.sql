@@ -38,6 +38,8 @@ BEGIN
   INSERT INTO marketplace_categories (name, slug, description, parent_id, sort_order, is_active)
   VALUES
     ('Hogar y Jardín', 'hogar-jardin', 'Categoría curada: hogar y jardín', NULL, 2, true),
+    ('Electricidad', 'electricidad', 'Materiales eléctricos, cables, interruptores', NULL, 2, true),
+    ('Iluminación', 'iluminacion', 'Lámparas, tubos LED, artefactos de iluminación', NULL, 2, true),
     ('Tecnología', 'tecnologia', 'Categoría curada: tecnología', NULL, 3, true),
     ('Salud y Belleza', 'salud-belleza', 'Categoría curada: salud y belleza', NULL, 5, true),
     ('Moda y Accesorios', 'moda-accesorios', 'Categoría curada: moda y accesorios', NULL, 1, true),

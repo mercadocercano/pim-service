@@ -30,31 +30,33 @@ INSERT INTO business_types (code, name, description, icon, color, sort_order) VA
 
 -- Hogar y construcción
 ('ferreteria', 'Ferretería', 'Herramientas, materiales de construcción, pintura, electricidad y plomería', 'hammer', '#DC2626', 13),
-('muebleria', 'Mueblería', 'Muebles para el hogar, decoración, colchones y electrodomésticos', 'armchair', '#B45309', 14),
-('bazar', 'Bazar', 'Artículos para el hogar, utensilios de cocina, decoración y regalos', 'gift', '#DB2777', 15),
+('electricidad', 'Materiales Eléctricos / Iluminación', 'Cables, iluminación, interruptores, tomas y materiales eléctricos', 'zap', '#F59E0B', 14),
+('muebleria', 'Mueblería', 'Muebles para el hogar, decoración, colchones y electrodomésticos', 'armchair', '#B45309', 15),
+('bazar', 'Bazar', 'Artículos para el hogar, utensilios de cocina, decoración y regalos', 'gift', '#DB2777', 16),
 
 -- Tecnología y comunicaciones
-('electronica', 'Casa de Electrodomésticos', 'Electrodomésticos grandes y pequeños, equipos de audio y video', 'tv', '#1D4ED8', 16),
-('celulares', 'Casa de Celulares', 'Teléfonos celulares, accesorios, fundas y servicios técnicos', 'smartphone', '#2563EB', 17),
-('computacion', 'Computación', 'Computadoras, notebooks, periféricos, software y accesorios informáticos', 'monitor', '#1E40AF', 18),
+('electronica', 'Casa de Electrodomésticos', 'Electrodomésticos grandes y pequeños, equipos de audio y video', 'tv', '#1D4ED8', 17),
+('celulares', 'Casa de Celulares', 'Teléfonos celulares, accesorios, fundas y servicios técnicos', 'smartphone', '#2563EB', 18),
+('computacion', 'Computación', 'Computadoras, notebooks, periféricos, software y accesorios informáticos', 'monitor', '#1E40AF', 19),
 
 -- Automotriz
-('repuestos', 'Casa de Repuestos', 'Repuestos automotrices, neumáticos, baterías y accesorios para vehículos', 'car', '#374151', 19),
-('lubricentro', 'Lubricentro', 'Cambio de aceite, filtros, service automotriz y productos de mantenimiento', 'fuel', '#6B7280', 20),
+('repuestos', 'Casa de Repuestos', 'Repuestos automotrices, neumáticos, baterías y accesorios para vehículos', 'car', '#374151', 20),
+('lubricentro', 'Lubricentro', 'Cambio de aceite, filtros, service automotriz y productos de mantenimiento', 'fuel', '#6B7280', 21),
 
 -- Servicios especializados
-('optica', 'Óptica', 'Anteojos, lentes de contacto, anteojos de sol y servicios ópticos', 'glasses', '#4338CA', 21),
-('relojeria', 'Relojería', 'Relojes, joyería, reparación de relojes y accesorios', 'clock', '#7C2D12', 22),
-('libreria', 'Librería', 'Libros, útiles escolares, material didáctico y papelería', 'book', '#0F766E', 23),
-('jugueteria', 'Juguetería', 'Juguetes para todas las edades, juegos didácticos y artículos para bebés', 'gamepad-2', '#C2410C', 24),
+('optica', 'Óptica', 'Anteojos, lentes de contacto, anteojos de sol y servicios ópticos', 'glasses', '#4338CA', 22),
+('relojeria', 'Relojería', 'Relojes, joyería, reparación de relojes y accesorios', 'clock', '#7C2D12', 23),
+('libreria', 'Librería', 'Libros, útiles escolares, material didáctico y papelería', 'book', '#0F766E', 24),
+('jugueteria', 'Juguetería', 'Juguetes para todas las edades, juegos didácticos y artículos para bebés', 'gamepad-2', '#C2410C', 25),
 
 -- Mascotas
-('veterinaria', 'Veterinaria', 'Alimentos para mascotas, productos veterinarios, accesorios y medicamentos', 'dog', '#15803D', 25),
+('veterinaria', 'Veterinaria', 'Alimentos para mascotas, productos veterinarios, accesorios y medicamentos', 'dog', '#15803D', 26),
 
 -- Servicios diversos
-('kiosco', 'Kiosco', 'Golosinas, cigarrillos, bebidas, diarios, revistas y productos de impulso', 'newspaper', '#92400E', 26),
-('floreria', 'Florería', 'Flores frescas, plantas, arreglos florales y accesorios para jardín', 'flower', '#059669', 27),
-('polirubro', 'Polirubro', 'Comercio multirrubro con productos diversos: limpieza, bazar, ferretería básica', 'store', '#6B21A8', 28);
+('kiosco', 'Kiosco', 'Golosinas, cigarrillos, bebidas, diarios, revistas y productos de impulso', 'newspaper', '#92400E', 27),
+('floreria', 'Florería', 'Flores frescas, plantas, arreglos florales y accesorios para jardín', 'flower', '#059669', 28),
+('polirubro', 'Polirubro', 'Comercio multirrubro con productos diversos: limpieza, bazar, ferretería básica', 'store', '#6B21A8', 29),
+('delivery', 'Delivery de Comidas', 'Entrega de comidas y productos a domicilio', 'truck', '#10B981', 30);
 
 -- Comentarios sobre la tabla
 COMMENT ON TABLE business_types IS 'Tipos de comercios físicos argentinos para marketplace SaaS multitenant'; 

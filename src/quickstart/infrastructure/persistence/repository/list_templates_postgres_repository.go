@@ -28,15 +28,16 @@ type templateCategoryPayload struct {
 // LoadTemplatesFromBusinessTypeTemplates carga templates desde business_type_templates
 func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates(ctx context.Context) ([]port.ListTemplate, error) {
 	query := `
-		SELECT id, name, description, categories, is_default, region
-		FROM business_type_templates
-		WHERE is_active = true
-		  AND region IN ('AR', 'GLOBAL')
-		  AND COALESCE(jsonb_array_length(categories), 0) >= 3
-		ORDER BY is_default DESC,
-		         CASE WHEN region = 'AR' THEN 0 ELSE 1 END,
-		         name
-		LIMIT 8
+		SELECT btt.id, btt.name, btt.description, btt.categories, btt.is_default, btt.region, COALESCE(bt.code, '') as slug
+		FROM business_type_templates btt
+		LEFT JOIN business_types bt ON bt.id = btt.business_type_id
+		WHERE btt.is_active = true
+		  AND btt.region IN ('AR', 'GLOBAL')
+		  AND COALESCE(jsonb_array_length(btt.categories), 0) >= 3
+		ORDER BY btt.is_default DESC,
+		         CASE WHEN btt.region = 'AR' THEN 0 ELSE 1 END,
+		         btt.name
+		LIMIT 20
 	`
 
 	rows, err := r.db.QueryContext(ctx, query)
@@ -47,11 +48,11 @@ func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates
 
 	templates := make([]port.ListTemplate, 0)
 	for rows.Next() {
-		var id, name, description sql.NullString
+		var id, name, description, slug sql.NullString
 		var categoriesRaw []byte
 		var isDefault sql.NullBool
 		var region sql.NullString
-		if err := rows.Scan(&id, &name, &description, &categoriesRaw, &isDefault, &region); err != nil {
+		if err := rows.Scan(&id, &name, &description, &categoriesRaw, &isDefault, &region, &slug); err != nil {
 			return nil, fmt.Errorf("error scanning business_type_template: %w", err)
 		}
 		if !id.Valid || id.String == "" {
@@ -63,10 +64,16 @@ func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates
 			return nil, err
 		}
 
+		// Slug para CSV: business_type code si existe, sino id
+		templateSlug := id.String
+		if slug.Valid && slug.String != "" {
+			templateSlug = slug.String
+		}
+
 		templates = append(templates, port.ListTemplate{
 			ID:          id.String,
 			Name:        name.String,
-			Slug:        id.String,
+			Slug:        templateSlug,
 			Description: description.String,
 			Categories:  categories,
 			IsActive:    true,
