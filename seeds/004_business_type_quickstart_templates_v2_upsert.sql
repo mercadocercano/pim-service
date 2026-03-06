@@ -87,6 +87,9 @@ BEGIN
     ELSIF bt.code IN ('electronica', 'celulares', 'computacion') THEN
       cats := _qs_get_category_ids_verified(ARRAY['tecnologia', 'general'], min_verified);
 
+    ELSIF bt.code = 'electricidad' THEN
+      cats := _qs_get_category_ids_verified(ARRAY['electricidad', 'iluminacion', 'hogar-jardin', 'tecnologia', 'general'], min_verified);
+
     ELSIF bt.code IN ('muebleria', 'bazar', 'floreria') THEN
       cats := _qs_get_category_ids_verified(ARRAY['hogar-jardin', 'general'], min_verified);
 
@@ -115,7 +118,7 @@ BEGIN
       business_type_id, name, description, region, categories, is_default, is_active, generated_by, version
     ) VALUES (
       bt.id,
-      bt.name || ' (Curación)',
+      bt.name,
       'Template generado desde categorías curadas (Mongo) + disponibilidad real',
       region_code,
       cats,

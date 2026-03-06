@@ -1,7 +1,7 @@
 # Reglas de Cursor para PIM Service
 
 ## Contexto del Proyecto
-Servicio de gestión de información de productos (PIM) del ecosistema SaaS Multitenant "Tienda Vecina". Implementa arquitectura hexagonal y gestiona productos, categorías, atributos, marcas y catálogo global.
+Servicio de gestión de información de productos (PIM) del ecosistema SaaS Multitenant "Mercado Cercano". Implementa arquitectura hexagonal y gestiona productos, categorías, atributos, marcas y catálogo global.
 
 **Puerto de servicio**: 8090 (acceso vía Kong Gateway en 8001)
 
