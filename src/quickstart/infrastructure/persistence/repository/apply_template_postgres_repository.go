@@ -21,6 +21,50 @@ const (
 	legacyQuickstartTemplateID = "ferreteria-corralon"
 )
 
+// legacyTemplateCategories: categorías para templates con slug (no UUID)
+var legacyTemplateCategories = map[string][]port.TemplateCategory{
+	"ferreteria-corralon": {
+		{Name: "Tornilleria", Slug: "tornilleria"},
+		{Name: "Herramientas Manuales", Slug: "herramientas-manuales"},
+		{Name: "Herramientas Electricas", Slug: "herramientas-electricas"},
+		{Name: "Materiales de Construccion", Slug: "materiales-construccion"},
+		{Name: "Pinturas", Slug: "pinturas"},
+		{Name: "Plomeria y Sanitarios", Slug: "plomeria-sanitarios"},
+	},
+	"bazar": {
+		{Name: "Cocina", Slug: "cocina"},
+		{Name: "Bazar", Slug: "bazar"},
+		{Name: "Decoracion", Slug: "decoracion"},
+		{Name: "Organizacion", Slug: "organizacion"},
+	},
+	"jugueteria": {
+		{Name: "Bebes y Ninos", Slug: "bebes-ninos"},
+		{Name: "Juguetes", Slug: "juguetes"},
+	},
+	"ropa": {
+		{Name: "Remeras", Slug: "remeras"},
+		{Name: "Pantalones", Slug: "pantalones"},
+		{Name: "Buzos", Slug: "buzos"},
+		{Name: "Camperas", Slug: "camperas"},
+		{Name: "Zapatillas", Slug: "zapatillas"},
+	},
+	"electricidad": {
+		{Name: "Electricidad", Slug: "electricidad"},
+		{Name: "Iluminacion", Slug: "iluminacion"},
+	},
+	"zapateria": {
+		{Name: "Calzado", Slug: "calzado"},
+		{Name: "Escarpines", Slug: "escarpines"},
+		{Name: "Calzado Deportivo", Slug: "calzado-deportivo"},
+	},
+	"deportes": {
+		{Name: "Ropa Deportiva", Slug: "ropa-deportiva"},
+		{Name: "Indumentaria Deportiva", Slug: "indumentaria-deportiva"},
+		{Name: "Deportes", Slug: "deportes"},
+		{Name: "Accesorios Deportivos", Slug: "accesorios-deportivos"},
+	},
+}
+
 // ApplyTemplatePostgresRepository implementa ApplyTemplateRepository para PostgreSQL
 type ApplyTemplatePostgresRepository struct {
 	db *sql.DB
@@ -32,10 +76,18 @@ func NewApplyTemplatePostgresRepository(db *sql.DB) port.ApplyTemplateRepository
 }
 
 // LoadTemplateCategories carga categorías desde business_type_templates (usa db, fuera de tx)
-// Para template legacy "ferreteria-corralon" o IDs no-UUID retorna nil (usa marketplace_categories).
+// Para templates legacy con slug (bazar, jugueteria, etc.) retorna categorías estáticas.
+// Para ferreteria-corralon legacy retorna nil (usa CreateTenantCategoriesLegacy).
 func (r *ApplyTemplatePostgresRepository) LoadTemplateCategories(ctx context.Context, templateID string) ([]port.TemplateCategory, []string, map[string]string, error) {
 	if templateID == legacyQuickstartTemplateID {
 		return nil, nil, nil, nil
+	}
+	if cats, ok := legacyTemplateCategories[templateID]; ok {
+		slugByID := make(map[string]string)
+		for i, c := range cats {
+			slugByID[fmt.Sprintf("legacy-%d", i)] = c.Slug
+		}
+		return cats, nil, slugByID, nil
 	}
 	if _, err := uuid.Parse(templateID); err != nil {
 		return nil, nil, nil, nil
