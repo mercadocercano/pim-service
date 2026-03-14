@@ -718,6 +718,43 @@ func (r *PostgresProductRepository) FindBySKUs(ctx context.Context, tenantID str
 	return variants, rows.Err()
 }
 
+// FindVariantsEnrichedBySKUs returns variants joined with product and category data for the given SKUs
+func (r *PostgresProductRepository) FindVariantsEnrichedBySKUs(ctx context.Context, tenantID string, skus []string) ([]port.VariantEnrichedRow, error) {
+	if len(skus) == 0 {
+		return []port.VariantEnrichedRow{}, nil
+	}
+
+	query := `
+		SELECT pv.id, pv.product_id, pv.sku, pv.name, p.name, p.category_id,
+			   COALESCE(c.name, ''), pv.price
+		FROM product_variants pv
+		INNER JOIN products p ON pv.product_id = p.id AND p.tenant_id = pv.tenant_id
+		LEFT JOIN categories c ON p.category_id::text = c.id AND c.tenant_id::text = pv.tenant_id::text
+		WHERE pv.tenant_id = $1::uuid AND pv.sku = ANY($2::text[]) AND pv.status != 'deleted'
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, tenantID, pq.Array(skus))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []port.VariantEnrichedRow
+	for rows.Next() {
+		var row port.VariantEnrichedRow
+		err := rows.Scan(
+			&row.VariantID, &row.ProductID, &row.SKU, &row.VariantName,
+			&row.ProductName, &row.CategoryID, &row.CategoryName, &row.Price,
+		)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, row)
+	}
+
+	return results, rows.Err()
+}
+
 // FindVariantsByCriteria busca variantes por criterios
 func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, crit *criteria.Criteria) ([]*entity.ProductVariant, error) {
 	baseQuery := `
