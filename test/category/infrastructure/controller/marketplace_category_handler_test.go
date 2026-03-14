@@ -72,52 +72,9 @@ func TestMarketplaceCategoryHandler_CreateMarketplaceCategory_Authorization(t *t
 	})
 }
 
-func TestMarketplaceCategoryHandler_GetTenantTaxonomy_Validation(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	// Crear un handler con dependencias nil para probar solo la validación
-	handler := &controller.MarketplaceCategoryHandler{}
-
-	t.Run("debería fallar sin X-Tenant-ID", func(t *testing.T) {
-		// Arrange
-		// Crear contexto HTTP sin tenant ID
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		c.Request = httptest.NewRequest("GET", "/marketplace/taxonomy", nil)
-
-		// Act
-		handler.GetTenantTaxonomy(c)
-
-		// Assert
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-
-		var errorResponse map[string]string
-		err := json.Unmarshal(w.Body.Bytes(), &errorResponse)
-		assert.NoError(t, err)
-		assert.Contains(t, errorResponse["error"], "X-Tenant-ID es obligatorio")
-	})
-
-	// TODO: Arreglar este test - requiere implementar validación UUID en el handler
-	// t.Run("debería fallar con UUID inválido", func(t *testing.T) {
-	// 	// Arrange
-	// 	// Crear contexto HTTP con tenant ID inválido
-	// 	w := httptest.NewRecorder()
-	// 	c, _ := gin.CreateTestContext(w)
-	// 	c.Request = httptest.NewRequest("GET", "/marketplace/taxonomy", nil)
-	// 	c.Request.Header.Set("X-Tenant-ID", "invalid-uuid")
-
-	// 	// Act
-	// 	handler.GetTenantTaxonomy(c)
-
-	// 	// Assert
-	// 	assert.Equal(t, http.StatusBadRequest, w.Code)
-
-	// 	var errorResponse map[string]string
-	// 	err := json.Unmarshal(w.Body.Bytes(), &errorResponse)
-	// 	assert.NoError(t, err)
-	// 	assert.Contains(t, errorResponse["error"], "formato UUID inválido")
-	// })
-}
+// TestMarketplaceCategoryHandler_GetTenantTaxonomy_Validation - TEMPORALMENTE COMENTADO
+// El método GetTenantTaxonomy está comentado en el handler, este test se reactiva cuando se implemente.
+// Ver marketplace_category_handler.go línea 319
 
 func TestMarketplaceCategoryHandler_ValidateCategoryHierarchy_Authorization(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -173,34 +130,6 @@ func TestMarketplaceCategoryHandler_ValidateCategoryHierarchy_Authorization(t *t
 	// })
 }
 
-func TestMarketplaceCategoryHandler_SyncMarketplaceChanges_Authorization(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	handler := &controller.MarketplaceCategoryHandler{}
-
-	t.Run("debería fallar sin rol de administrador", func(t *testing.T) {
-		// Arrange
-		reqBody := map[string]interface{}{
-			"tenant_id": "tenant-123",
-		}
-		jsonBody, _ := json.Marshal(reqBody)
-
-		// Crear contexto HTTP sin rol de admin
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		c.Request = httptest.NewRequest("POST", "/marketplace/sync-changes", bytes.NewBuffer(jsonBody))
-		c.Request.Header.Set("Content-Type", "application/json")
-		c.Request.Header.Set("X-User-Role", "tenant_admin")
-
-		// Act
-		handler.SyncMarketplaceChanges(c)
-
-		// Assert
-		assert.Equal(t, http.StatusForbidden, w.Code)
-
-		var errorResponse map[string]string
-		err := json.Unmarshal(w.Body.Bytes(), &errorResponse)
-		assert.NoError(t, err)
-		assert.Contains(t, errorResponse["error"], "Solo administradores")
-	})
-}
+// TestMarketplaceCategoryHandler_SyncMarketplaceChanges_Authorization - TEMPORALMENTE COMENTADO
+// El método SyncMarketplaceChanges está comentado en el handler, este test se reactiva cuando se implemente.
+// Ver marketplace_category_handler.go línea 381

@@ -1,22 +1,21 @@
 package criteria
 
 import (
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
 
 // BrandCriteriaBuilder construye criterios específicos para Brand
 type BrandCriteriaBuilder struct {
-	helper  *sharedCriteria.EntityCriteriaHelper
-	builder *criteria.CriteriaBuilder
+	helper  *cr.EntityCriteriaHelper
+	builder *cr.CriteriaBuilder
 }
 
 // NewBrandCriteriaBuilder crea una nueva instancia del builder
 func NewBrandCriteriaBuilder() *BrandCriteriaBuilder {
 	return &BrandCriteriaBuilder{
-		helper: sharedCriteria.NewEntityCriteriaHelper(),
+		helper: cr.NewEntityCriteriaHelper(),
 	}
 }
 
@@ -32,13 +31,13 @@ func (b *BrandCriteriaBuilder) FromContext(c *gin.Context) *BrandCriteriaBuilder
 }
 
 // BuildValidated construye y valida los criterios
-func (b *BrandCriteriaBuilder) BuildValidated(c *gin.Context) criteria.Criteria {
+func (b *BrandCriteriaBuilder) BuildValidated(c *gin.Context) cr.Criteria {
 	searchCriteria := b.FromContext(c).Build()
 	return b.helper.ValidateAndSanitizeCriteria(searchCriteria, b.GetAllowedFields())
 }
 
 // Build construye los criterios sin validación
-func (b *BrandCriteriaBuilder) Build() criteria.Criteria {
+func (b *BrandCriteriaBuilder) Build() cr.Criteria {
 	return b.builder.Build()
 }
 
@@ -76,16 +75,16 @@ func (b *BrandCriteriaBuilder) addBrandFilters(c *gin.Context) {
 
 	// Filtro por website (si tiene sitio web)
 	if hasWebsite := c.Query("has_website"); hasWebsite == "true" {
-		b.builder.AddFilter("website", criteria.OpIsNotNull, nil)
+		b.builder.AddFilter("website", cr.OpIsNotNull, nil)
 	} else if hasWebsite == "false" {
-		b.builder.AddFilter("website", criteria.OpIsNull, nil)
+		b.builder.AddFilter("website", cr.OpIsNull, nil)
 	}
 
 	// Filtro por logo (si tiene logo)
 	if hasLogo := c.Query("has_logo"); hasLogo == "true" {
-		b.builder.AddFilter("logo_url", criteria.OpIsNotNull, nil)
+		b.builder.AddFilter("logo_url", cr.OpIsNotNull, nil)
 	} else if hasLogo == "false" {
-		b.builder.AddFilter("logo_url", criteria.OpIsNull, nil)
+		b.builder.AddFilter("logo_url", cr.OpIsNull, nil)
 	}
 }
 

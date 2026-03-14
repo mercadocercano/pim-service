@@ -5,7 +5,7 @@ import (
 	"saas-mt-pim-service/src/brand/application/response"
 	"saas-mt-pim-service/src/brand/domain/entity"
 	"saas-mt-pim-service/src/brand/domain/value_object"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // BrandMapper maneja las conversiones entre entidades y DTOs
@@ -35,7 +35,7 @@ func (m *BrandMapper) ToResponse(brand *entity.Brand) *response.BrandResponse {
 }
 
 // ToResponseList convierte una lista de entidades Brand a BrandListResponse
-func (m *BrandMapper) ToResponseList(brands []*entity.Brand, totalCount int, crit criteria.Criteria) *response.BrandListResponse {
+func (m *BrandMapper) ToResponseList(brands []*entity.Brand, totalCount int, crit cr.Criteria) *response.BrandListResponse {
 	items := make([]*response.BrandResponse, len(brands))
 	for i, brand := range brands {
 		items[i] = m.ToResponse(brand)

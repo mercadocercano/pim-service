@@ -4,10 +4,12 @@ import (
 	"context"
 	"testing"
 
+	businessTypeEntity "saas-mt-pim-service/src/businesstype/domain/entity"
+	quickstartEntity "saas-mt-pim-service/src/quickstart/domain/entity"
 	"saas-mt-pim-service/src/quickstart/application/usecase"
 	"saas-mt-pim-service/src/quickstart/domain/service"
 	"saas-mt-pim-service/src/quickstart/test/domain/entity"
-	businessTypeTestEntity "saas-mt-pim-service/src/quickstart/test/domain/entity"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -19,34 +21,46 @@ type MockBusinessTypeRepository struct {
 	mock.Mock
 }
 
-func (m *MockBusinessTypeRepository) Create(ctx context.Context, businessType interface{}) error {
-	args := m.Called(ctx, businessType)
+func (m *MockBusinessTypeRepository) Create(ctx context.Context, bt *businessTypeEntity.BusinessType) error {
+	args := m.Called(ctx, bt)
 	return args.Error(0)
 }
 
-func (m *MockBusinessTypeRepository) Update(ctx context.Context, businessType interface{}) error {
-	args := m.Called(ctx, businessType)
+func (m *MockBusinessTypeRepository) Update(ctx context.Context, bt *businessTypeEntity.BusinessType) error {
+	args := m.Called(ctx, bt)
 	return args.Error(0)
 }
 
-func (m *MockBusinessTypeRepository) FindByID(ctx context.Context, id string) (interface{}, error) {
+func (m *MockBusinessTypeRepository) FindByID(ctx context.Context, id string) (*businessTypeEntity.BusinessType, error) {
 	args := m.Called(ctx, id)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*businessTypeEntity.BusinessType), args.Error(1)
 }
 
-func (m *MockBusinessTypeRepository) FindByCode(ctx context.Context, code string) (interface{}, error) {
+func (m *MockBusinessTypeRepository) FindByCode(ctx context.Context, code string) (*businessTypeEntity.BusinessType, error) {
 	args := m.Called(ctx, code)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*businessTypeEntity.BusinessType), args.Error(1)
 }
 
-func (m *MockBusinessTypeRepository) FindAll(ctx context.Context) (interface{}, error) {
+func (m *MockBusinessTypeRepository) FindAll(ctx context.Context) ([]*businessTypeEntity.BusinessType, error) {
 	args := m.Called(ctx)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*businessTypeEntity.BusinessType), args.Error(1)
 }
 
-func (m *MockBusinessTypeRepository) FindActive(ctx context.Context) (interface{}, error) {
+func (m *MockBusinessTypeRepository) FindActive(ctx context.Context) ([]*businessTypeEntity.BusinessType, error) {
 	args := m.Called(ctx)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*businessTypeEntity.BusinessType), args.Error(1)
 }
 
 func (m *MockBusinessTypeRepository) Delete(ctx context.Context, id string) error {
@@ -54,12 +68,15 @@ func (m *MockBusinessTypeRepository) Delete(ctx context.Context, id string) erro
 	return args.Error(0)
 }
 
-func (m *MockBusinessTypeRepository) SearchByCriteria(ctx context.Context, crit interface{}) (interface{}, error) {
+func (m *MockBusinessTypeRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*businessTypeEntity.BusinessType, error) {
 	args := m.Called(ctx, crit)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*businessTypeEntity.BusinessType), args.Error(1)
 }
 
-func (m *MockBusinessTypeRepository) CountByCriteria(ctx context.Context, crit interface{}) (int, error) {
+func (m *MockBusinessTypeRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	args := m.Called(ctx, crit)
 	return args.Int(0), args.Error(1)
 }
@@ -69,34 +86,46 @@ type MockBusinessTypeTemplateRepository struct {
 	mock.Mock
 }
 
-func (m *MockBusinessTypeTemplateRepository) Create(ctx context.Context, template interface{}) error {
+func (m *MockBusinessTypeTemplateRepository) Create(ctx context.Context, template *businessTypeEntity.BusinessTypeTemplate) error {
 	args := m.Called(ctx, template)
 	return args.Error(0)
 }
 
-func (m *MockBusinessTypeTemplateRepository) Update(ctx context.Context, template interface{}) error {
+func (m *MockBusinessTypeTemplateRepository) Update(ctx context.Context, template *businessTypeEntity.BusinessTypeTemplate) error {
 	args := m.Called(ctx, template)
 	return args.Error(0)
 }
 
-func (m *MockBusinessTypeTemplateRepository) FindByID(ctx context.Context, id string) (interface{}, error) {
+func (m *MockBusinessTypeTemplateRepository) FindByID(ctx context.Context, id string) (*businessTypeEntity.BusinessTypeTemplate, error) {
 	args := m.Called(ctx, id)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*businessTypeEntity.BusinessTypeTemplate), args.Error(1)
 }
 
-func (m *MockBusinessTypeTemplateRepository) FindByBusinessTypeID(ctx context.Context, businessTypeID string) (interface{}, error) {
+func (m *MockBusinessTypeTemplateRepository) FindByBusinessTypeID(ctx context.Context, businessTypeID string) ([]*businessTypeEntity.BusinessTypeTemplate, error) {
 	args := m.Called(ctx, businessTypeID)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*businessTypeEntity.BusinessTypeTemplate), args.Error(1)
 }
 
-func (m *MockBusinessTypeTemplateRepository) FindByBusinessTypeAndRegion(ctx context.Context, businessTypeID, region string) (interface{}, error) {
+func (m *MockBusinessTypeTemplateRepository) FindByBusinessTypeAndRegion(ctx context.Context, businessTypeID, region string) ([]*businessTypeEntity.BusinessTypeTemplate, error) {
 	args := m.Called(ctx, businessTypeID, region)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*businessTypeEntity.BusinessTypeTemplate), args.Error(1)
 }
 
-func (m *MockBusinessTypeTemplateRepository) FindDefault(ctx context.Context, businessTypeID, region string) (interface{}, error) {
+func (m *MockBusinessTypeTemplateRepository) FindDefault(ctx context.Context, businessTypeID, region string) (*businessTypeEntity.BusinessTypeTemplate, error) {
 	args := m.Called(ctx, businessTypeID, region)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*businessTypeEntity.BusinessTypeTemplate), args.Error(1)
 }
 
 func (m *MockBusinessTypeTemplateRepository) Delete(ctx context.Context, id string) error {
@@ -104,12 +133,15 @@ func (m *MockBusinessTypeTemplateRepository) Delete(ctx context.Context, id stri
 	return args.Error(0)
 }
 
-func (m *MockBusinessTypeTemplateRepository) SearchByCriteria(ctx context.Context, crit interface{}) (interface{}, error) {
+func (m *MockBusinessTypeTemplateRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*businessTypeEntity.BusinessTypeTemplate, error) {
 	args := m.Called(ctx, crit)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*businessTypeEntity.BusinessTypeTemplate), args.Error(1)
 }
 
-func (m *MockBusinessTypeTemplateRepository) CountByCriteria(ctx context.Context, crit interface{}) (int, error) {
+func (m *MockBusinessTypeTemplateRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	args := m.Called(ctx, crit)
 	return args.Int(0), args.Error(1)
 }
@@ -119,29 +151,38 @@ type MockTenantSetupRepository struct {
 	mock.Mock
 }
 
-func (m *MockTenantSetupRepository) Create(ctx context.Context, history interface{}) error {
+func (m *MockTenantSetupRepository) Create(ctx context.Context, history *quickstartEntity.TenantQuickstartHistory) error {
 	args := m.Called(ctx, history)
 	return args.Error(0)
 }
 
-func (m *MockTenantSetupRepository) GetByTenantID(ctx context.Context, tenantID string) (interface{}, error) {
+func (m *MockTenantSetupRepository) GetByTenantID(ctx context.Context, tenantID string) ([]*quickstartEntity.TenantQuickstartHistory, error) {
 	args := m.Called(ctx, tenantID)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*quickstartEntity.TenantQuickstartHistory), args.Error(1)
 }
 
-func (m *MockTenantSetupRepository) GetByID(ctx context.Context, id string) (interface{}, error) {
+func (m *MockTenantSetupRepository) GetByID(ctx context.Context, id string) (*quickstartEntity.TenantQuickstartHistory, error) {
 	args := m.Called(ctx, id)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*quickstartEntity.TenantQuickstartHistory), args.Error(1)
 }
 
-func (m *MockTenantSetupRepository) Update(ctx context.Context, history interface{}) error {
+func (m *MockTenantSetupRepository) Update(ctx context.Context, history *quickstartEntity.TenantQuickstartHistory) error {
 	args := m.Called(ctx, history)
 	return args.Error(0)
 }
 
-func (m *MockTenantSetupRepository) GetLatestByTenantID(ctx context.Context, tenantID string) (interface{}, error) {
+func (m *MockTenantSetupRepository) GetLatestByTenantID(ctx context.Context, tenantID string) (*quickstartEntity.TenantQuickstartHistory, error) {
 	args := m.Called(ctx, tenantID)
-	return args.Get(0), args.Error(1)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*quickstartEntity.TenantQuickstartHistory), args.Error(1)
 }
 
 func TestStartWizardUseCase_Execute_Success(t *testing.T) {
@@ -155,21 +196,17 @@ func TestStartWizardUseCase_Execute_Success(t *testing.T) {
 	mockTenantSetupRepo := new(MockTenantSetupRepository)
 
 	// Configurar mocks
-	businessType := struct {
-		ID   string
-		Code string
-		Name string
-	}{
+	businessType := &businessTypeEntity.BusinessType{
 		ID:   businessTypeID,
 		Code: "polirubro",
 		Name: "Polirubro",
 	}
 
-	templateOM := businessTypeTestEntity.NewBusinessTypeTemplateObjectMother()
+	templateOM := entity.NewBusinessTypeTemplateObjectMother()
 	template := templateOM.WithBusinessTypeID(businessTypeID)
-	templates := []*interface{}{&template}
+	templates := []*businessTypeEntity.BusinessTypeTemplate{template}
 
-	mockBusinessTypeRepo.On("FindByID", ctx, businessTypeID).Return(&businessType, nil)
+	mockBusinessTypeRepo.On("FindByID", ctx, businessTypeID).Return(businessType, nil)
 	mockTemplateRepo.On("FindByBusinessTypeID", ctx, businessTypeID).Return(templates, nil)
 	mockTenantSetupRepo.On("Create", ctx, mock.AnythingOfType("*entity.TenantQuickstartHistory")).Return(nil)
 
@@ -178,10 +215,10 @@ func TestStartWizardUseCase_Execute_Success(t *testing.T) {
 		mockTemplateRepo,
 		mockTenantSetupRepo,
 	)
-	useCase := usecase.NewStartWizardUseCase(wizardService)
+	uc := usecase.NewStartWizardUseCase(wizardService)
 
 	// Act
-	result, err := useCase.Execute(ctx, tenantID, businessTypeID)
+	result, err := uc.Execute(ctx, tenantID, businessTypeID)
 
 	// Assert
 	assert.NoError(t, err)
@@ -210,10 +247,10 @@ func TestStartWizardUseCase_Execute_EmptyTenantID_ReturnsError(t *testing.T) {
 		mockTemplateRepo,
 		mockTenantSetupRepo,
 	)
-	useCase := usecase.NewStartWizardUseCase(wizardService)
+	uc := usecase.NewStartWizardUseCase(wizardService)
 
 	// Act
-	result, err := useCase.Execute(ctx, tenantID, businessTypeID)
+	result, err := uc.Execute(ctx, tenantID, businessTypeID)
 
 	// Assert
 	assert.Error(t, err)
@@ -236,10 +273,10 @@ func TestStartWizardUseCase_Execute_EmptyBusinessTypeID_ReturnsError(t *testing.
 		mockTemplateRepo,
 		mockTenantSetupRepo,
 	)
-	useCase := usecase.NewStartWizardUseCase(wizardService)
+	uc := usecase.NewStartWizardUseCase(wizardService)
 
 	// Act
-	result, err := useCase.Execute(ctx, tenantID, businessTypeID)
+	result, err := uc.Execute(ctx, tenantID, businessTypeID)
 
 	// Assert
 	assert.Error(t, err)
@@ -264,10 +301,10 @@ func TestStartWizardUseCase_Execute_BusinessTypeNotFound_ReturnsError(t *testing
 		mockTemplateRepo,
 		mockTenantSetupRepo,
 	)
-	useCase := usecase.NewStartWizardUseCase(wizardService)
+	uc := usecase.NewStartWizardUseCase(wizardService)
 
 	// Act
-	result, err := useCase.Execute(ctx, tenantID, businessTypeID)
+	result, err := uc.Execute(ctx, tenantID, businessTypeID)
 
 	// Assert
 	assert.Error(t, err)
@@ -287,19 +324,15 @@ func TestStartWizardUseCase_Execute_NoTemplatesAvailable_ReturnsError(t *testing
 	mockTemplateRepo := new(MockBusinessTypeTemplateRepository)
 	mockTenantSetupRepo := new(MockTenantSetupRepository)
 
-	businessType := struct {
-		ID   string
-		Code string
-		Name string
-	}{
+	businessType := &businessTypeEntity.BusinessType{
 		ID:   businessTypeID,
 		Code: "polirubro",
 		Name: "Polirubro",
 	}
 
-	emptyTemplates := []*interface{}{}
+	emptyTemplates := []*businessTypeEntity.BusinessTypeTemplate{}
 
-	mockBusinessTypeRepo.On("FindByID", ctx, businessTypeID).Return(&businessType, nil)
+	mockBusinessTypeRepo.On("FindByID", ctx, businessTypeID).Return(businessType, nil)
 	mockTemplateRepo.On("FindByBusinessTypeID", ctx, businessTypeID).Return(emptyTemplates, nil)
 
 	wizardService := service.NewQuickstartWizardService(
@@ -307,10 +340,10 @@ func TestStartWizardUseCase_Execute_NoTemplatesAvailable_ReturnsError(t *testing
 		mockTemplateRepo,
 		mockTenantSetupRepo,
 	)
-	useCase := usecase.NewStartWizardUseCase(wizardService)
+	uc := usecase.NewStartWizardUseCase(wizardService)
 
 	// Act
-	result, err := useCase.Execute(ctx, tenantID, businessTypeID)
+	result, err := uc.Execute(ctx, tenantID, businessTypeID)
 
 	// Assert
 	assert.Error(t, err)

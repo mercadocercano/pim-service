@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"saas-mt-pim-service/src/businesstype/application/usecase"
 	"saas-mt-pim-service/src/businesstype/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
@@ -74,7 +74,7 @@ func (h *BusinessTypeHandler) CreateBusinessType(c *gin.Context) {
 // ListBusinessTypes maneja el listado de business types
 func (h *BusinessTypeHandler) ListBusinessTypes(c *gin.Context) {
 	// Construir criterios usando el builder correcto
-	criteriaBuilder := criteria.NewCriteriaBuilder()
+	criteriaBuilder := cr.NewCriteriaBuilder()
 
 	// Poblar desde query parameters (paginación, ordenamiento básico)
 	criteriaBuilder.FromURLValues(c.Request.URL.Query())
@@ -103,7 +103,7 @@ func (h *BusinessTypeHandler) ListBusinessTypes(c *gin.Context) {
 
 	// Establecer valores por defecto si no se especifican
 	if c.Query("sort_by") == "" {
-		criteriaBuilder.SetOrder("sort_order", "ASC")
+		criteriaBuilder.SetOrder("sort_order", cr.OrderAsc)
 	}
 
 	// Construir criterios finales
@@ -117,10 +117,10 @@ func (h *BusinessTypeHandler) ListBusinessTypes(c *gin.Context) {
 	}
 
 	// Contar total usando criterios (sin paginación)
-	countCriteria := criteria.NewCriteria(
+	countCriteria := cr.NewCriteria(
 		searchCriteria.Filters,
-		criteria.Order{},      // Sin ordenamiento para conteo
-		criteria.Pagination{}, // Sin paginación para conteo
+		[]cr.Order{},    // Sin ordenamiento para conteo
+		cr.Pagination{}, // Sin paginación para conteo
 	)
 
 	total, err := h.repository.CountByCriteria(c.Request.Context(), countCriteria)

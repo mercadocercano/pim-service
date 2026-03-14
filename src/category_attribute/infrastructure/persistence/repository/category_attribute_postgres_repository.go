@@ -9,8 +9,7 @@ import (
 	"saas-mt-pim-service/src/category_attribute/domain/port"
 	"saas-mt-pim-service/src/category_attribute/infrastructure/persistence/mapper"
 	"saas-mt-pim-service/src/category_attribute/infrastructure/persistence/model"
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/lib/pq"
 )
@@ -19,8 +18,8 @@ import (
 type CategoryAttributePostgresRepository struct {
 	db        *sql.DB
 	mapper    *mapper.CategoryAttributeMapper
-	converter *sharedCriteria.SQLCriteriaConverter
-	*criteria.BaseListRepository[entity.CategoryAttribute]
+	converter *cr.SQLCriteriaConverter
+	*cr.BaseListRepository[entity.CategoryAttribute]
 }
 
 // NewCategoryAttributePostgresRepository crea una nueva instancia del repositorio
@@ -28,17 +27,17 @@ func NewCategoryAttributePostgresRepository(db *sql.DB) *CategoryAttributePostgr
 	repo := &CategoryAttributePostgresRepository{
 		db:        db,
 		mapper:    mapper.NewCategoryAttributeMapper(),
-		converter: sharedCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 
 	// Inicializar el repositorio base con criteria
-	repo.BaseListRepository = criteria.NewBaseListRepository[entity.CategoryAttribute](repo)
+	repo.BaseListRepository = cr.NewBaseListRepository[entity.CategoryAttribute](repo)
 
 	return repo
 }
 
 // SearchByCriteria implementa la búsqueda usando criteria
-func (r *CategoryAttributePostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.CategoryAttribute, error) {
+func (r *CategoryAttributePostgresRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.CategoryAttribute, error) {
 	baseQuery := `
 		SELECT id, tenant_id, category_id, attribute_id, allowed_values, status, created_at, updated_at
 		FROM category_attributes
@@ -79,7 +78,7 @@ func (r *CategoryAttributePostgresRepository) SearchByCriteria(ctx context.Conte
 }
 
 // CountByCriteria implementa el conteo usando criteria
-func (r *CategoryAttributePostgresRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *CategoryAttributePostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM category_attributes"
 
 	query, params := r.converter.ToCountSQL(baseCountQuery, crit)

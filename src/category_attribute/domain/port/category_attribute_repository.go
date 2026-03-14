@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"saas-mt-pim-service/src/category_attribute/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // CategoryAttributeRepository define el contrato para acceder a los datos de atributos de categoría
@@ -38,8 +38,8 @@ type CategoryAttributeRepository interface {
 // CategoryAttributeCriteriaRepository extiende CategoryAttributeRepository con soporte para criteria
 type CategoryAttributeCriteriaRepository interface {
 	CategoryAttributeRepository
-	criteria.CriteriaRepository[entity.CategoryAttribute]
-	criteria.ListRepository[entity.CategoryAttribute]
+	cr.CriteriaRepository[entity.CategoryAttribute]
+	cr.ListRepository[entity.CategoryAttribute]
 }
 
 // DetailedCategoryAttribute representa un atributo de categoría con datos completos del atributo

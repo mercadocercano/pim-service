@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // ProductsourceRepository define los métodos para persistir Productsource
@@ -13,6 +13,6 @@ type ProductsourceRepository interface {
 	FindByID(ctx context.Context, id string, tenantID string) (*entity.Productsource, error)
 	FindByTenant(ctx context.Context, tenantID string) ([]*entity.Productsource, error)
 	Delete(ctx context.Context, id string, tenantID string) error
-	SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.Productsource, error)
-	CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error)
+	SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.Productsource, error)
+	CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error)
 }

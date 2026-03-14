@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"saas-mt-pim-service/src/category/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // TenantCategoryMappingRepository define las operaciones de persistencia para mapeos de categorías tenant
@@ -25,10 +25,10 @@ type TenantCategoryMappingRepository interface {
 	GetByMarketplaceCategoryID(ctx context.Context, marketplaceCategoryID string) ([]*entity.TenantCategoryMapping, error)
 
 	// FindByCriteria busca mapeos según criterios
-	FindByCriteria(ctx context.Context, criteria criteria.Criteria) ([]*entity.TenantCategoryMapping, error)
+	FindByCriteria(ctx context.Context, criteria cr.Criteria) ([]*entity.TenantCategoryMapping, error)
 
 	// CountByCriteria cuenta mapeos según criterios
-	CountByCriteria(ctx context.Context, criteria criteria.Criteria) (int, error)
+	CountByCriteria(ctx context.Context, criteria cr.Criteria) (int, error)
 
 	// Update actualiza un mapeo
 	Update(ctx context.Context, mapping *entity.TenantCategoryMapping) error

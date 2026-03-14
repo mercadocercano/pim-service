@@ -6,7 +6,7 @@ import (
 
 	"saas-mt-pim-service/src/brand/application/request"
 	"saas-mt-pim-service/src/brand/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // UpdateMarketplaceBrandUseCase maneja la lógica de negocio para actualizar una marca marketplace
@@ -64,7 +64,7 @@ func (uc *UpdateMarketplaceBrandUseCase) Execute(ctx context.Context, req *reque
 // validateUniqueName valida que el nombre de la marca sea único globalmente
 func (uc *UpdateMarketplaceBrandUseCase) validateUniqueName(ctx context.Context, name, excludeID string) error {
 	// Buscar marcas con el mismo nombre
-	criteriaBuilder := criteria.NewCriteriaBuilder()
+	criteriaBuilder := cr.NewCriteriaBuilder()
 	criteriaBuilder.AddEqualFilter("name", name)
 
 	existingBrands, err := uc.repository.SearchByCriteria(ctx, criteriaBuilder.Build())

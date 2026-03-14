@@ -1,22 +1,21 @@
 package criteria
 
 import (
-	"github.com/gin-gonic/gin"
+	cr "github.com/mercadocercano/criteria"
 
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	"github.com/gin-gonic/gin"
 )
 
 // GlobalProductCriteriaBuilder construye criterios específicos para productos globales
 type GlobalProductCriteriaBuilder struct {
-	helper  *sharedCriteria.EntityCriteriaHelper
-	builder *criteria.CriteriaBuilder
+	helper  *cr.EntityCriteriaHelper
+	builder *cr.CriteriaBuilder
 }
 
 // NewGlobalProductCriteriaBuilder crea un nuevo builder para criterios de productos globales
 func NewGlobalProductCriteriaBuilder() *GlobalProductCriteriaBuilder {
 	return &GlobalProductCriteriaBuilder{
-		helper: sharedCriteria.NewEntityCriteriaHelper(),
+		helper: cr.NewEntityCriteriaHelper(),
 	}
 }
 
@@ -117,10 +116,10 @@ func (b *GlobalProductCriteriaBuilder) FromContext(c *gin.Context) *GlobalProduc
 }
 
 // Build construye los criterios finales
-func (b *GlobalProductCriteriaBuilder) Build() criteria.Criteria {
+func (b *GlobalProductCriteriaBuilder) Build() cr.Criteria {
 	if b.builder == nil {
 		// Si no se ha inicializado desde contexto, crear builder vacío
-		b.builder = criteria.NewCriteriaBuilder()
+		b.builder = cr.NewCriteriaBuilder()
 	}
 	return b.builder.Build()
 }
@@ -135,7 +134,7 @@ func (b *GlobalProductCriteriaBuilder) GetAllowedFields() []string {
 }
 
 // BuildValidated construye criterios validados desde el contexto
-func (b *GlobalProductCriteriaBuilder) BuildValidated(c *gin.Context) criteria.Criteria {
+func (b *GlobalProductCriteriaBuilder) BuildValidated(c *gin.Context) cr.Criteria {
 	searchCriteria := b.FromContext(c).Build()
 	return b.helper.ValidateAndSanitizeCriteria(searchCriteria, b.GetAllowedFields())
 }

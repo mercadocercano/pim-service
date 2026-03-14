@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"saas-mt-pim-service/src/category/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // CategoryRepository define el contrato para acceder a los datos de categorías
@@ -28,6 +28,6 @@ type CategoryRepository interface {
 // CategoryCriteriaRepository extiende CategoryRepository con soporte para criteria
 type CategoryCriteriaRepository interface {
 	CategoryRepository
-	criteria.CriteriaRepository[entity.Category]
-	criteria.ListRepository[entity.Category]
+	cr.CriteriaRepository[entity.Category]
+	cr.ListRepository[entity.Category]
 }

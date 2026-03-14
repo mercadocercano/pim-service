@@ -5,23 +5,22 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"pim/src/overview/domain/entity"
-	"pim/src/overview/domain/exception"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/overview/domain/entity"
+	"saas-mt-pim-service/src/overview/domain/exception"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // AttributeStatsPostgresRepository implementa el repositorio usando PostgreSQL
 type AttributeStatsPostgresRepository struct {
 	db        *sql.DB
-	converter *sharedCriteria.SQLCriteriaConverter
+	converter *cr.SQLCriteriaConverter
 }
 
 // NewAttributeStatsPostgresRepository crea una nueva instancia del repositorio
 func NewAttributeStatsPostgresRepository(db *sql.DB) *AttributeStatsPostgresRepository {
 	return &AttributeStatsPostgresRepository{
 		db:        db,
-		converter: sharedCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -132,7 +131,7 @@ func (r *AttributeStatsPostgresRepository) Delete(ctx context.Context, id string
 }
 
 // SearchByCriteria busca AttributeStatss usando criterios
-func (r *AttributeStatsPostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.AttributeStats, error) {
+func (r *AttributeStatsPostgresRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.AttributeStats, error) {
 	baseQuery := `
 		SELECT id, tenant_id, name, active, created_at, updated_at
 		FROM AttributeStatss
@@ -150,7 +149,7 @@ func (r *AttributeStatsPostgresRepository) SearchByCriteria(ctx context.Context,
 }
 
 // CountByCriteria cuenta AttributeStatss usando criterios
-func (r *AttributeStatsPostgresRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *AttributeStatsPostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM AttributeStatss"
 
 	query, params := r.converter.ToCountSQL(baseCountQuery, crit)

@@ -5,7 +5,7 @@ import (
 
 	"saas-mt-pim-service/src/category_attribute/domain/entity"
 	"saas-mt-pim-service/src/category_attribute/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // ListCategoryAttributesByCriteriaUseCase maneja el listado de atributos de categoría con filtros y paginación
@@ -21,6 +21,6 @@ func NewListCategoryAttributesByCriteriaUseCase(repository port.CategoryAttribut
 }
 
 // Execute ejecuta el caso de uso para listar atributos de categoría con criteria
-func (uc *ListCategoryAttributesByCriteriaUseCase) Execute(ctx context.Context, crit criteria.Criteria) (*criteria.ListResponse[entity.CategoryAttribute], error) {
+func (uc *ListCategoryAttributesByCriteriaUseCase) Execute(ctx context.Context, crit cr.Criteria) (*cr.ListResponse[entity.CategoryAttribute], error) {
 	return uc.repository.ListByCriteria(ctx, crit)
 }

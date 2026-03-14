@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"saas-mt-pim-service/src/brand/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // BrandRepository define el contrato para acceder a los datos de marcas
@@ -34,6 +34,6 @@ type BrandRepository interface {
 // BrandCriteriaRepository extiende BrandRepository con soporte para criteria
 type BrandCriteriaRepository interface {
 	BrandRepository
-	criteria.CriteriaRepository[entity.Brand]
-	criteria.ListRepository[entity.Brand]
+	cr.CriteriaRepository[entity.Brand]
+	cr.ListRepository[entity.Brand]
 }

@@ -11,8 +11,7 @@ import (
 	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	"saas-mt-pim-service/src/product/global_catalog/domain/port"
 	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -21,14 +20,14 @@ import (
 // PostgresGlobalProductRepository implementa GlobalProductRepository usando PostgreSQL
 type PostgresGlobalProductRepository struct {
 	db        *sql.DB
-	converter *sharedCriteria.SQLCriteriaConverter
+	converter *cr.SQLCriteriaConverter
 }
 
 // NewPostgresGlobalProductRepository crea una nueva instancia del repositorio
 func NewPostgresGlobalProductRepository(db *sql.DB) port.GlobalProductRepository {
 	return &PostgresGlobalProductRepository{
 		db:        db,
-		converter: sharedCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -575,7 +574,7 @@ func (r *PostgresGlobalProductRepository) CountArgentineProducts() (int, error) 
 }
 
 // SearchByCriteria busca productos usando criterios
-func (r *PostgresGlobalProductRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.GlobalProduct, error) {
+func (r *PostgresGlobalProductRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.GlobalProduct, error) {
 	baseQuery := `
 		SELECT id, ean, name, description, brand, category, price, image_url, image_urls,
 			   source, source_url, source_reliability, quality_score, is_verified, is_active,
@@ -595,7 +594,7 @@ func (r *PostgresGlobalProductRepository) SearchByCriteria(ctx context.Context, 
 }
 
 // CountByCriteria cuenta productos usando criterios
-func (r *PostgresGlobalProductRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *PostgresGlobalProductRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM global_products"
 	
 	query, params := r.converter.ToCountSQL(baseCountQuery, crit)

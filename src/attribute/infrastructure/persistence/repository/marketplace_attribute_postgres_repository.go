@@ -7,22 +7,21 @@ import (
 	"fmt"
 	"log"
 	"saas-mt-pim-service/src/attribute/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 	"time"
 )
 
 // MarketplaceAttributePostgresRepository implementa el repositorio de marketplace attributes usando PostgreSQL
 type MarketplaceAttributePostgresRepository struct {
 	db        *sql.DB
-	converter *sharedCriteria.SQLCriteriaConverter
+	converter *cr.SQLCriteriaConverter
 }
 
 // NewMarketplaceAttributePostgresRepository crea una nueva instancia del repositorio
 func NewMarketplaceAttributePostgresRepository(db *sql.DB) *MarketplaceAttributePostgresRepository {
 	return &MarketplaceAttributePostgresRepository{
 		db:        db,
-		converter: sharedCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -189,7 +188,7 @@ func (r *MarketplaceAttributePostgresRepository) Delete(ctx context.Context, id 
 }
 
 // SearchByCriteria busca marketplace attributes usando criterios
-func (r *MarketplaceAttributePostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.MarketplaceAttribute, error) {
+func (r *MarketplaceAttributePostgresRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.MarketplaceAttribute, error) {
 	baseQuery := `
 		SELECT id, name, slug, type, is_filterable, is_searchable, 
 			   is_required_for_listing, validation_rules, sort_order, created_at, updated_at
@@ -208,7 +207,7 @@ func (r *MarketplaceAttributePostgresRepository) SearchByCriteria(ctx context.Co
 }
 
 // CountByCriteria cuenta marketplace attributes usando criterios
-func (r *MarketplaceAttributePostgresRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *MarketplaceAttributePostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM marketplace_attributes"
 
 	query, params := r.converter.ToCountSQL(baseCountQuery, crit)

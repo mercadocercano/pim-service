@@ -6,7 +6,7 @@ import (
 	"saas-mt-pim-service/src/brand/application/mapper"
 	"saas-mt-pim-service/src/brand/application/response"
 	"saas-mt-pim-service/src/brand/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // ListBrandsByCriteriaUseCase maneja la obtención de marcas con filtros y paginación
@@ -27,7 +27,7 @@ func NewListBrandsByCriteriaUseCase(
 }
 
 // Execute ejecuta el caso de uso de listado de marcas con criterios
-func (uc *ListBrandsByCriteriaUseCase) Execute(ctx context.Context, searchCriteria criteria.Criteria) (*response.BrandListResponse, error) {
+func (uc *ListBrandsByCriteriaUseCase) Execute(ctx context.Context, searchCriteria cr.Criteria) (*response.BrandListResponse, error) {
 	// Buscar marcas según los criterios
 	brands, err := uc.brandRepo.SearchByCriteria(ctx, searchCriteria)
 	if err != nil {

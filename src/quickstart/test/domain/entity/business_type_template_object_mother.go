@@ -148,11 +148,11 @@ func (om *BusinessTypeTemplateObjectMother) SimpleTemplate() *businessTypeEntity
 	template.Description = "Template simple para testing"
 	template.Categories = []businessTypeEntity.CategoryTemplate{
 		{
+			ID:          "cat-gen-1",
 			Name:        "General",
+			Slug:        "general",
 			Description: "Productos generales",
-			ParentName:  "",
-			SortOrder:   1,
-			Attributes:  []string{"nombre", "precio"},
+			Level:       0,
 		},
 	}
 	template.Attributes = []businessTypeEntity.AttributeTemplate{

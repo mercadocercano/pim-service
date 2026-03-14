@@ -6,7 +6,7 @@ import (
 
 	"saas-mt-pim-service/src/businesstype/domain/entity"
 	"saas-mt-pim-service/src/businesstype/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // ListBusinessTypeTemplatesUseCase maneja la listado de templates con criterios
@@ -22,7 +22,7 @@ func NewListBusinessTypeTemplatesUseCase(templateRepo port.BusinessTypeTemplateR
 }
 
 // Execute ejecuta el caso de uso para listar templates usando criterios validados
-func (uc *ListBusinessTypeTemplatesUseCase) Execute(ctx context.Context, searchCriteria criteria.Criteria) (*criteria.ListResponse[entity.BusinessTypeTemplate], error) {
+func (uc *ListBusinessTypeTemplatesUseCase) Execute(ctx context.Context, searchCriteria cr.Criteria) (*cr.ListResponse[entity.BusinessTypeTemplate], error) {
 	// Obtener templates usando criteria
 	templates, err := uc.templateRepo.SearchByCriteria(ctx, searchCriteria)
 	if err != nil {
@@ -36,5 +36,5 @@ func (uc *ListBusinessTypeTemplatesUseCase) Execute(ctx context.Context, searchC
 	}
 
 	// Usar la respuesta genérica del dominio criteria
-	return criteria.NewListResponse(templates, totalCount, searchCriteria), nil
+	return cr.NewListResponseFromCriteria(templates, totalCount, searchCriteria), nil
 }

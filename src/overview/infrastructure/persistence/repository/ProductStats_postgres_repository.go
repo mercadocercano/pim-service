@@ -5,23 +5,22 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"pim/src/overview/domain/entity"
-	"pim/src/overview/domain/exception"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/overview/domain/entity"
+	"saas-mt-pim-service/src/overview/domain/exception"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // ProductStatsPostgresRepository implementa el repositorio usando PostgreSQL
 type ProductStatsPostgresRepository struct {
 	db        *sql.DB
-	converter *sharedCriteria.SQLCriteriaConverter
+	converter *cr.SQLCriteriaConverter
 }
 
 // NewProductStatsPostgresRepository crea una nueva instancia del repositorio
 func NewProductStatsPostgresRepository(db *sql.DB) *ProductStatsPostgresRepository {
 	return &ProductStatsPostgresRepository{
 		db:        db,
-		converter: sharedCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -132,7 +131,7 @@ func (r *ProductStatsPostgresRepository) Delete(ctx context.Context, id string, 
 }
 
 // SearchByCriteria busca ProductStatss usando criterios
-func (r *ProductStatsPostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.ProductStats, error) {
+func (r *ProductStatsPostgresRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.ProductStats, error) {
 	baseQuery := `
 		SELECT id, tenant_id, name, active, created_at, updated_at
 		FROM ProductStatss
@@ -150,7 +149,7 @@ func (r *ProductStatsPostgresRepository) SearchByCriteria(ctx context.Context, c
 }
 
 // CountByCriteria cuenta ProductStatss usando criterios
-func (r *ProductStatsPostgresRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *ProductStatsPostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM ProductStatss"
 
 	query, params := r.converter.ToCountSQL(baseCountQuery, crit)

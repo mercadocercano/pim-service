@@ -8,8 +8,7 @@ import (
 	"saas-mt-pim-service/src/brand/domain/entity"
 	"saas-mt-pim-service/src/brand/domain/exception"
 	"saas-mt-pim-service/src/brand/domain/value_object"
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // PostgresBrandRepository implementa BrandCriteriaRepository usando PostgreSQL
@@ -179,13 +178,13 @@ func (r *PostgresBrandRepository) ExistsByName(ctx context.Context, name string,
 }
 
 // SearchByCriteria implementa la búsqueda con criteria pattern
-func (r *PostgresBrandRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.Brand, error) {
+func (r *PostgresBrandRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.Brand, error) {
 	baseQuery := `
 		SELECT id, tenant_id, name, description, logo_url, website, status, created_at, updated_at
 		FROM brands
 	`
 
-	converter := sharedCriteria.NewSQLCriteriaConverter()
+	converter := cr.NewSQLCriteriaConverter()
 	query, params := converter.ToSelectSQL(baseQuery, crit)
 
 	rows, err := r.db.QueryContext(ctx, query, params...)
@@ -198,10 +197,10 @@ func (r *PostgresBrandRepository) SearchByCriteria(ctx context.Context, crit cri
 }
 
 // CountByCriteria cuenta las marcas que coinciden con los criterios
-func (r *PostgresBrandRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *PostgresBrandRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseQuery := "SELECT COUNT(*) FROM brands"
 
-	converter := sharedCriteria.NewSQLCriteriaConverter()
+	converter := cr.NewSQLCriteriaConverter()
 	query, params := converter.ToCountSQL(baseQuery, crit)
 
 	var count int
@@ -214,7 +213,7 @@ func (r *PostgresBrandRepository) CountByCriteria(ctx context.Context, crit crit
 }
 
 // ListByCriteria combina búsqueda y conteo para generar respuesta de listado
-func (r *PostgresBrandRepository) ListByCriteria(ctx context.Context, crit criteria.Criteria) (*criteria.ListResponse[entity.Brand], error) {
+func (r *PostgresBrandRepository) ListByCriteria(ctx context.Context, crit cr.Criteria) (*cr.ListResponse[entity.Brand], error) {
 	// Obtener elementos
 	items, err := r.SearchByCriteria(ctx, crit)
 	if err != nil {
@@ -228,7 +227,7 @@ func (r *PostgresBrandRepository) ListByCriteria(ctx context.Context, crit crite
 	}
 
 	// Crear respuesta
-	return criteria.NewListResponse(items, total, crit), nil
+	return cr.NewListResponseFromCriteria(items, total, crit), nil
 }
 
 // scanBrand escanea una fila de la base de datos a una entidad Brand

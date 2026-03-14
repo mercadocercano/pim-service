@@ -6,7 +6,7 @@ import (
 	"saas-mt-pim-service/src/attribute/application/request"
 	"saas-mt-pim-service/src/attribute/application/response"
 	"saas-mt-pim-service/src/attribute/application/usecase"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +18,7 @@ type AttributeHandler struct {
 	getByIDUseCase *usecase.GetAttributeByIDUseCase
 	updateUseCase  *usecase.UpdateAttributeUseCase
 	deleteUseCase  *usecase.DeleteAttributeUseCase
-	criteriaHelper *sharedCriteria.EntityCriteriaHelper
+	criteriaHelper *cr.EntityCriteriaHelper
 }
 
 // NewAttributeHandler crea una nueva instancia del manejador
@@ -35,7 +35,7 @@ func NewAttributeHandler(
 		getByIDUseCase: getByIDUseCase,
 		updateUseCase:  updateUseCase,
 		deleteUseCase:  deleteUseCase,
-		criteriaHelper: sharedCriteria.NewEntityCriteriaHelper(),
+		criteriaHelper: cr.NewEntityCriteriaHelper(),
 	}
 }
 

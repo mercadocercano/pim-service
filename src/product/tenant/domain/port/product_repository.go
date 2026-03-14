@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 )
@@ -48,9 +48,9 @@ type ProductRepository interface {
 // ProductCriteriaRepository extiende ProductRepository con capacidades de búsqueda por criterios
 type ProductCriteriaRepository interface {
 	ProductRepository
-	criteria.CriteriaRepository[entity.Product]
+	cr.CriteriaRepository[entity.Product]
 
 	// Búsqueda de variantes por criterios (a través del producto)
-	FindVariantsByCriteria(ctx context.Context, criteria *criteria.Criteria) ([]*entity.ProductVariant, error)
-	CountVariantsByCriteria(ctx context.Context, criteria *criteria.Criteria) (int, error)
+	FindVariantsByCriteria(ctx context.Context, criteria *cr.Criteria) ([]*entity.ProductVariant, error)
+	CountVariantsByCriteria(ctx context.Context, criteria *cr.Criteria) (int, error)
 }

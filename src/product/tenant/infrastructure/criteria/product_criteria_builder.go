@@ -3,23 +3,22 @@ package criteria
 import (
 	"net/url"
 
-	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
 
 // ProductCriteriaBuilder construye criterios específicos para productos
 type ProductCriteriaBuilder struct {
-	*domainCriteria.CriteriaBuilder
-	helper *sharedCriteria.EntityCriteriaHelper
+	*cr.CriteriaBuilder
+	helper *cr.EntityCriteriaHelper
 }
 
 // NewProductCriteriaBuilder crea un nuevo builder para criterios de productos
 func NewProductCriteriaBuilder() *ProductCriteriaBuilder {
 	return &ProductCriteriaBuilder{
-		CriteriaBuilder: domainCriteria.NewCriteriaBuilder(),
-		helper:          sharedCriteria.NewEntityCriteriaHelper(),
+		CriteriaBuilder: cr.NewCriteriaBuilder(),
+		helper:          cr.NewEntityCriteriaHelper(),
 	}
 }
 
@@ -35,7 +34,7 @@ func (b *ProductCriteriaBuilder) BuildFromContext(c *gin.Context) *ProductCriter
 }
 
 // BuildValidated construye y valida criterios desde el contexto
-func (b *ProductCriteriaBuilder) BuildValidated(c *gin.Context) domainCriteria.Criteria {
+func (b *ProductCriteriaBuilder) BuildValidated(c *gin.Context) cr.Criteria {
 	criteria := b.BuildFromContext(c).Build()
 	return b.helper.ValidateAndSanitizeCriteria(criteria, b.GetAllowedFields())
 }
@@ -89,23 +88,23 @@ func (b *ProductCriteriaBuilder) addProductFilters(values url.Values) {
 
 	// Filtro para excluir productos eliminados por defecto
 	if includeDeleted := values.Get("include_deleted"); includeDeleted != "true" {
-		b.AddFilter("status", domainCriteria.OpNotEqual, "deleted")
+		b.AddFilter("status", cr.OpNotEqual, "deleted")
 	}
 
 	// Filtros de disponibilidad
 	if inStock := values.Get("in_stock"); inStock == "true" {
-		b.AddFilter("stock_quantity", domainCriteria.OpGreaterThan, 0)
+		b.AddFilter("stock_quantity", cr.OpGreaterThan, 0)
 	} else if inStock == "false" {
-		b.AddFilter("stock_quantity", domainCriteria.OpLessThanOrEqual, 0)
+		b.AddFilter("stock_quantity", cr.OpLessThanOrEqual, 0)
 	}
 
 	// Filtros de precio
 	if minPrice := values.Get("min_price"); minPrice != "" {
-		b.AddFilter("price", domainCriteria.OpGreaterThanOrEqual, minPrice)
+		b.AddFilter("price", cr.OpGreaterThanOrEqual, minPrice)
 	}
 
 	if maxPrice := values.Get("max_price"); maxPrice != "" {
-		b.AddFilter("price", domainCriteria.OpLessThanOrEqual, maxPrice)
+		b.AddFilter("price", cr.OpLessThanOrEqual, maxPrice)
 	}
 }
 

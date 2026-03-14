@@ -7,8 +7,7 @@ import (
 
 	"saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/category/domain/port"
-	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
-	infraCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 )
@@ -16,14 +15,14 @@ import (
 // MarketplaceCategoryPostgresRepository implementa el repositorio de categorías marketplace para PostgreSQL
 type MarketplaceCategoryPostgresRepository struct {
 	db        *sql.DB
-	converter *infraCriteria.SQLCriteriaConverter
+	converter *cr.SQLCriteriaConverter
 }
 
 // NewMarketplaceCategoryPostgresRepository crea una nueva instancia del repositorio
 func NewMarketplaceCategoryPostgresRepository(db *sql.DB) port.MarketplaceCategoryRepository {
 	return &MarketplaceCategoryPostgresRepository{
 		db:        db,
-		converter: infraCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -143,7 +142,7 @@ func (r *MarketplaceCategoryPostgresRepository) GetTree(ctx context.Context) ([]
 }
 
 // FindByCriteria busca categorías según criterios
-func (r *MarketplaceCategoryPostgresRepository) FindByCriteria(ctx context.Context, crit domainCriteria.Criteria) ([]*entity.MarketplaceCategory, error) {
+func (r *MarketplaceCategoryPostgresRepository) FindByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.MarketplaceCategory, error) {
 	baseQuery := `
 		SELECT id, name, slug, description, parent_id, level, is_active, sort_order, created_at, updated_at
 		FROM marketplace_categories
@@ -161,7 +160,7 @@ func (r *MarketplaceCategoryPostgresRepository) FindByCriteria(ctx context.Conte
 }
 
 // CountByCriteria cuenta categorías según criterios
-func (r *MarketplaceCategoryPostgresRepository) CountByCriteria(ctx context.Context, crit domainCriteria.Criteria) (int, error) {
+func (r *MarketplaceCategoryPostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := `
 		SELECT COUNT(*)
 		FROM marketplace_categories

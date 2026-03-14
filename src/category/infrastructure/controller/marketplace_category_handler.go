@@ -8,7 +8,7 @@ import (
 	"saas-mt-pim-service/src/category/application/response"
 	"saas-mt-pim-service/src/category/application/usecase"
 	"saas-mt-pim-service/src/category/domain/port"
-	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
@@ -92,7 +92,7 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 	}
 
 	// Construir criterios de filtrado
-	criteriaBuilder := domainCriteria.NewCriteriaBuilder()
+	criteriaBuilder := cr.NewCriteriaBuilder()
 
 	// Paginación - convertir offset/limit a page/pageSize
 	offset := 0
@@ -128,7 +128,7 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 
 	if parentID := c.Query("parent_id"); parentID != "" {
 		if parentID == "null" || parentID == "" {
-			criteriaBuilder.AddFilter("parent_id", domainCriteria.OpIsNull, nil)
+			criteriaBuilder.AddFilter("parent_id", cr.OpIsNull, nil)
 		} else {
 			criteriaBuilder.AddUUIDFilter("parent_id", parentID)
 		}
@@ -170,7 +170,11 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 		sortBy = "sort_order"
 	}
 	
-	criteriaBuilder.SetOrder(sortBy, sortDir)
+	orderDir := cr.OrderDesc
+	if sortDir == "ASC" {
+		orderDir = cr.OrderAsc
+	}
+	criteriaBuilder.SetOrder(sortBy, orderDir)
 
 	criteria := criteriaBuilder.Build()
 
@@ -229,17 +233,17 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 // GetMarketplaceCategoriesTree devuelve las categorías en formato de árbol jerárquico
 func (h *MarketplaceCategoryHandler) GetMarketplaceCategoriesTree(c *gin.Context) {
 	// Obtener todas las categorías
-	filters := domainCriteria.NewFilters(
-		domainCriteria.NewFilter("is_active", domainCriteria.OpEqual, true),
+	filters := cr.NewFilters(
+		cr.NewFilter("is_active", cr.OpEqual, true),
 	)
 	
 	// Solo podemos tener un orden, usar el más importante
-	order := domainCriteria.NewOrder("level", "ASC")
+	order := cr.NewOrder("level", cr.OrderAsc)
 	
 	// Sin paginación (obtener todas)
-	pagination := domainCriteria.NewPagination(0, 0)
+	pagination := cr.NewPagination(0, 0)
 	
-	criteria := domainCriteria.NewCriteria(filters, order, pagination)
+	criteria := cr.NewCriteria(filters, []cr.Order{order}, pagination)
 
 	categories, err := h.categoryRepository.FindByCriteria(c.Request.Context(), criteria)
 	if err != nil {

@@ -7,8 +7,7 @@ import (
 
 	"saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/category/domain/port"
-	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
-	infraCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 )
@@ -16,14 +15,14 @@ import (
 // TenantCategoryMappingPostgresRepository implementa el repositorio de mapeos de categorías tenant para PostgreSQL
 type TenantCategoryMappingPostgresRepository struct {
 	db        *sql.DB
-	converter *infraCriteria.SQLCriteriaConverter
+	converter *cr.SQLCriteriaConverter
 }
 
 // NewTenantCategoryMappingPostgresRepository crea una nueva instancia del repositorio
 func NewTenantCategoryMappingPostgresRepository(db *sql.DB) port.TenantCategoryMappingRepository {
 	return &TenantCategoryMappingPostgresRepository{
 		db:        db,
-		converter: infraCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -120,7 +119,7 @@ func (r *TenantCategoryMappingPostgresRepository) GetByMarketplaceCategoryID(ctx
 }
 
 // FindByCriteria busca mapeos según criterios
-func (r *TenantCategoryMappingPostgresRepository) FindByCriteria(ctx context.Context, crit domainCriteria.Criteria) ([]*entity.TenantCategoryMapping, error) {
+func (r *TenantCategoryMappingPostgresRepository) FindByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.TenantCategoryMapping, error) {
 	baseQuery := `
 		SELECT id, tenant_id, category_id, marketplace_category_id, custom_name, created_at, updated_at
 		FROM tenant_category_mappings
@@ -139,7 +138,7 @@ func (r *TenantCategoryMappingPostgresRepository) FindByCriteria(ctx context.Con
 }
 
 // CountByCriteria cuenta mapeos según criterios
-func (r *TenantCategoryMappingPostgresRepository) CountByCriteria(ctx context.Context, crit domainCriteria.Criteria) (int, error) {
+func (r *TenantCategoryMappingPostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := `
 		SELECT COUNT(*)
 		FROM tenant_category_mappings

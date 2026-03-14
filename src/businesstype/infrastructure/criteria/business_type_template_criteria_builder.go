@@ -1,22 +1,21 @@
 package criteria
 
 import (
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
 
 // BusinessTypeTemplateCriteriaBuilder construye criterios específicos para BusinessTypeTemplate
 type BusinessTypeTemplateCriteriaBuilder struct {
-	helper  *sharedCriteria.EntityCriteriaHelper
-	builder *criteria.CriteriaBuilder
+	helper  *cr.EntityCriteriaHelper
+	builder *cr.CriteriaBuilder
 }
 
 // NewBusinessTypeTemplateCriteriaBuilder crea una nueva instancia del builder
 func NewBusinessTypeTemplateCriteriaBuilder() *BusinessTypeTemplateCriteriaBuilder {
 	return &BusinessTypeTemplateCriteriaBuilder{
-		helper: sharedCriteria.NewEntityCriteriaHelper(),
+		helper: cr.NewEntityCriteriaHelper(),
 	}
 }
 
@@ -32,13 +31,13 @@ func (b *BusinessTypeTemplateCriteriaBuilder) FromContext(c *gin.Context) *Busin
 }
 
 // BuildValidated construye y valida los criterios
-func (b *BusinessTypeTemplateCriteriaBuilder) BuildValidated(c *gin.Context) criteria.Criteria {
+func (b *BusinessTypeTemplateCriteriaBuilder) BuildValidated(c *gin.Context) cr.Criteria {
 	searchCriteria := b.FromContext(c).Build()
 	return b.helper.ValidateAndSanitizeCriteria(searchCriteria, b.GetAllowedFields())
 }
 
 // Build construye los criterios sin validación
-func (b *BusinessTypeTemplateCriteriaBuilder) Build() criteria.Criteria {
+func (b *BusinessTypeTemplateCriteriaBuilder) Build() cr.Criteria {
 	return b.builder.Build()
 }
 

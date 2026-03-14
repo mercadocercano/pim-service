@@ -1,22 +1,21 @@
 package criteria
 
 import (
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
 
 // MarketplaceAttributeCriteriaBuilder construye criterios específicos para MarketplaceAttribute
 type MarketplaceAttributeCriteriaBuilder struct {
-	helper  *sharedCriteria.EntityCriteriaHelper
-	builder *criteria.CriteriaBuilder
+	helper  *cr.EntityCriteriaHelper
+	builder *cr.CriteriaBuilder
 }
 
 // NewMarketplaceAttributeCriteriaBuilder crea una nueva instancia del builder
 func NewMarketplaceAttributeCriteriaBuilder() *MarketplaceAttributeCriteriaBuilder {
 	return &MarketplaceAttributeCriteriaBuilder{
-		helper: sharedCriteria.NewEntityCriteriaHelper(),
+		helper: cr.NewEntityCriteriaHelper(),
 	}
 }
 
@@ -32,13 +31,13 @@ func (b *MarketplaceAttributeCriteriaBuilder) FromContext(c *gin.Context) *Marke
 }
 
 // BuildValidated construye y valida los criterios
-func (b *MarketplaceAttributeCriteriaBuilder) BuildValidated(c *gin.Context) criteria.Criteria {
+func (b *MarketplaceAttributeCriteriaBuilder) BuildValidated(c *gin.Context) cr.Criteria {
 	searchCriteria := b.FromContext(c).Build()
 	return b.helper.ValidateAndSanitizeCriteria(searchCriteria, b.GetAllowedFields())
 }
 
 // Build construye los criterios sin validación
-func (b *MarketplaceAttributeCriteriaBuilder) Build() criteria.Criteria {
+func (b *MarketplaceAttributeCriteriaBuilder) Build() cr.Criteria {
 	return b.builder.Build()
 }
 

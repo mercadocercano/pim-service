@@ -6,7 +6,7 @@ import (
 	"saas-mt-pim-service/src/product/tenant/application/mapper"
 	"saas-mt-pim-service/src/product/tenant/application/response"
 	"saas-mt-pim-service/src/product/tenant/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // ListProductsByCriteriaUseCase maneja la búsqueda de productos con criterios
@@ -29,7 +29,7 @@ func NewListProductsByCriteriaUseCase(
 // Execute ejecuta el caso de uso de búsqueda de productos por criterios
 func (uc *ListProductsByCriteriaUseCase) Execute(
 	ctx context.Context,
-	searchCriteria criteria.Criteria,
+	searchCriteria cr.Criteria,
 ) (*response.ProductListResponse, error) {
 	// Buscar productos
 	products, err := uc.productRepo.SearchByCriteria(ctx, searchCriteria)

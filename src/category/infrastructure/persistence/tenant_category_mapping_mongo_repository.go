@@ -7,7 +7,7 @@ import (
 
 	"saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/category/domain/port"
-	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -192,7 +192,7 @@ func (r *TenantCategoryMappingMongoRepository) GetTenantCategoriesForMarketplace
 }
 
 // FindByCriteria busca mapeos según criterios (implementación básica)
-func (r *TenantCategoryMappingMongoRepository) FindByCriteria(ctx context.Context, crit domainCriteria.Criteria) ([]*entity.TenantCategoryMapping, error) {
+func (r *TenantCategoryMappingMongoRepository) FindByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.TenantCategoryMapping, error) {
 	// Implementación básica - se puede mejorar con un convertidor de criterios a MongoDB
 	filter := bson.M{"deleted_at": bson.M{"$exists": false}}
 
@@ -206,7 +206,7 @@ func (r *TenantCategoryMappingMongoRepository) FindByCriteria(ctx context.Contex
 }
 
 // CountByCriteria cuenta mapeos según criterios
-func (r *TenantCategoryMappingMongoRepository) CountByCriteria(ctx context.Context, crit domainCriteria.Criteria) (int, error) {
+func (r *TenantCategoryMappingMongoRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	filter := bson.M{"deleted_at": bson.M{"$exists": false}}
 
 	count, err := r.collection.CountDocuments(ctx, filter)

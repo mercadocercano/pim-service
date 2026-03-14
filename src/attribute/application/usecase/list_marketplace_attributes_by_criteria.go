@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/attribute/domain/entity"
 	"saas-mt-pim-service/src/attribute/domain/port"
 )
@@ -20,7 +20,7 @@ func NewListMarketplaceAttributesByCriteriaUseCase(marketplaceAttrRepo port.Mark
 }
 
 // Execute ejecuta el caso de uso
-func (uc *ListMarketplaceAttributesByCriteriaUseCase) Execute(ctx context.Context, searchCriteria criteria.Criteria) (*criteria.ListResponse[entity.MarketplaceAttribute], error) {
+func (uc *ListMarketplaceAttributesByCriteriaUseCase) Execute(ctx context.Context, searchCriteria cr.Criteria) (*cr.ListResponse[entity.MarketplaceAttribute], error) {
 	// Buscar atributos usando criterios
 	attributes, err := uc.marketplaceAttrRepo.SearchByCriteria(ctx, searchCriteria)
 	if err != nil {
@@ -28,7 +28,7 @@ func (uc *ListMarketplaceAttributesByCriteriaUseCase) Execute(ctx context.Contex
 	}
 
 	// Contar total de atributos con los mismos filtros (sin paginación)
-	countCriteria := criteria.Criteria{
+	countCriteria := cr.Criteria{
 		Filters: searchCriteria.Filters,
 		// No incluir Order ni Pagination para el conteo
 	}
@@ -38,5 +38,5 @@ func (uc *ListMarketplaceAttributesByCriteriaUseCase) Execute(ctx context.Contex
 	}
 
 	// Crear respuesta con información de paginación
-	return criteria.NewListResponse(attributes, total, searchCriteria), nil
+	return cr.NewListResponseFromCriteria(attributes, total, searchCriteria), nil
 }
