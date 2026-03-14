@@ -34,6 +34,38 @@ type GlobalProductCandidate struct {
 	SkuGlobal             sql.NullString
 }
 
+// TemplateBrand represents a brand from the template JSONB
+type TemplateBrand struct {
+	Name                    string   `json:"name"`
+	SuggestedForCategories []string `json:"suggested_for_categories"`
+}
+
+// TemplateProduct represents a curated product from the template JSONB
+type TemplateProduct struct {
+	Name          string  `json:"name"`
+	CategorySlug  string  `json:"category_slug"`
+	Brand         string  `json:"brand"`
+	PriceReference float64 `json:"price_reference"`
+	Unit          string  `json:"unit"`
+	SkuPrefix     string  `json:"sku_prefix"`
+}
+
+// TemplateAttribute represents an attribute definition from the template JSONB
+type TemplateAttribute struct {
+	Name                 string   `json:"name"`
+	Slug                 string   `json:"slug"`
+	Values               []string `json:"values"`
+	AppliesToCategories []string `json:"applies_to_categories"`
+}
+
+// FullTemplateData contains all curated data from a template JSONB
+type FullTemplateData struct {
+	Categories []TemplateCategory
+	Brands     []TemplateBrand
+	Products   []TemplateProduct
+	Attributes []TemplateAttribute
+}
+
 // ApplyTemplateRepository define las operaciones de persistencia para aplicar templates
 type ApplyTemplateRepository interface {
 	// LoadTemplateCategories carga desde business_type_templates (usa db, fuera de tx)
@@ -71,4 +103,16 @@ type ApplyTemplateRepository interface {
 
 	// GlobalProductsHasMarketplaceCategoryID atajo para marketplace_category_id
 	GlobalProductsHasMarketplaceCategoryID(ctx context.Context, exec database.Executor) bool
+
+	// LoadFullTemplateData loads categories + brands + products + attributes from template JSONB
+	LoadFullTemplateData(ctx context.Context, templateID string) (*FullTemplateData, error)
+
+	// CreateTenantBrandsFromTemplate creates all brands listed in the template
+	CreateTenantBrandsFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, brands []TemplateBrand) (int, []string, error)
+
+	// CreateTenantProductsFromTemplate creates all products listed in the template
+	CreateTenantProductsFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, products []TemplateProduct, createdCategories []CreatedCategory, createdBrands []string) (int, int, []string, error)
+
+	// CreateTenantAttributesFromTemplate creates attributes and links them to categories
+	CreateTenantAttributesFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, attributes []TemplateAttribute, createdCategories []CreatedCategory) (int, int, error)
 }

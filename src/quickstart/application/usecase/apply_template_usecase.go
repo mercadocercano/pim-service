@@ -62,17 +62,26 @@ func (uc *ApplyTemplateUseCase) Execute(ctx context.Context, req ApplyTemplateRe
 		return nil, fmt.Errorf("invalid tenant_id format: %w", err)
 	}
 
-	// Verificar que el template existe (fuera de tx)
+	// Intentar cargar datos curados del template (brands, products, attributes)
+	fullData, _ := uc.repo.LoadFullTemplateData(ctx, req.TemplateID)
+	useCuratedFlow := fullData != nil && len(fullData.Products) > 0
+
+	// Cargar categorías (siempre necesario)
 	templateCategories, marketplaceCategoryIDs, categorySlugByMarketplaceID, err := uc.repo.LoadTemplateCategories(ctx, req.TemplateID)
 	if err != nil {
 		return nil, err
 	}
+
+	// Si hay datos curados, usar sus categorías (pueden ser más completas)
+	if useCuratedFlow && len(fullData.Categories) > 0 {
+		templateCategories = fullData.Categories
+	}
+
 	useLegacy := len(templateCategories) == 0 && req.TemplateID == legacyQuickstartTemplateID
 	if !useLegacy && len(templateCategories) == 0 {
 		return nil, fmt.Errorf("template not found: %s", req.TemplateID)
 	}
 
-	// Iniciar transacción
 	tx, err := uc.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
@@ -85,7 +94,7 @@ func (uc *ApplyTemplateUseCase) Execute(ctx context.Context, req ApplyTemplateRe
 		TenantID:   req.TenantID,
 	}
 
-	// PASO 1: Crear categorias del tenant desde el template
+	// PASO 1: Crear categorías del tenant
 	var categoriesCreated int
 	var createdCategories []port.CreatedCategory
 	if useLegacy {
@@ -99,68 +108,90 @@ func (uc *ApplyTemplateUseCase) Execute(ctx context.Context, req ApplyTemplateRe
 	response.CategoriesCreated = categoriesCreated
 	response.CreatedCategories = createdCategoryList(createdCategories).Names()
 
-	if useLegacy {
-		marketplaceCategoryIDs, err = uc.repo.GetMarketplaceCategoryIDsBySlug(ctx, tx, createdCategoryList(createdCategories).Slugs())
+	if useCuratedFlow {
+		// FLUJO CURADO: usar datos del template JSONB
+
+		// PASO 2: Crear marcas del template
+		brandsCreated, createdBrands, err := uc.repo.CreateTenantBrandsFromTemplate(ctx, tx, tenantUUID, fullData.Brands)
 		if err != nil {
-			return nil, fmt.Errorf("failed to load marketplace categories: %w", err)
+			return nil, fmt.Errorf("failed to create brands from template: %w", err)
 		}
+		response.BrandsCreated = brandsCreated
+		response.CreatedBrands = createdBrands
+
+		// PASO 3: Crear productos del template
+		productsCreated, variantsCreated, createdProducts, err := uc.repo.CreateTenantProductsFromTemplate(
+			ctx, tx, tenantUUID, fullData.Products, createdCategories, createdBrands,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create products from template: %w", err)
+		}
+		response.ProductsCreated = productsCreated
+		response.VariantsCreated = variantsCreated
+		response.CreatedProducts = createdProducts
+
+		// PASO 4: Crear atributos y vincularlos a categorías
+		attrsCreated, linksCreated, err := uc.repo.CreateTenantAttributesFromTemplate(
+			ctx, tx, tenantUUID, fullData.Attributes, createdCategories,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create attributes from template: %w", err)
+		}
+		response.AttributesCreated = attrsCreated
+		response.CategoryAttributes = linksCreated
+
+	} else {
+		// FLUJO LEGACY: buscar en global_products (retrocompatibilidad)
+
+		if useLegacy {
+			marketplaceCategoryIDs, err = uc.repo.GetMarketplaceCategoryIDsBySlug(ctx, tx, createdCategoryList(createdCategories).Slugs())
+			if err != nil {
+				return nil, fmt.Errorf("failed to load marketplace categories: %w", err)
+			}
+		}
+
+		useMarketplaceCategoryID := uc.repo.GlobalProductsHasMarketplaceCategoryID(ctx, tx)
+
+		categorySlugs := createdCategoryList(createdCategories).Slugs()
+		if !useLegacy {
+			categorySlugs = templateCategoriesSlugs(templateCategories)
+		}
+
+		brandsCreated, createdBrands, err := uc.repo.CreateTenantBrandsFromGlobalProducts(
+			ctx, tx, tenantUUID, marketplaceCategoryIDs, categorySlugs, useMarketplaceCategoryID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create brands: %w", err)
+		}
+		response.BrandsCreated = brandsCreated
+		response.CreatedBrands = createdBrands
+
+		productsCreated, variantsCreated, createdProducts, err := uc.createTenantProductFromGlobalProducts(
+			ctx, tx, tenantUUID, marketplaceCategoryIDs, categorySlugs,
+			useMarketplaceCategoryID, createdCategories, categorySlugByMarketplaceID, createdBrands,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create product: %w", err)
+		}
+		response.ProductsCreated = productsCreated
+		response.VariantsCreated = variantsCreated
+		response.CreatedProducts = createdProducts
+
+		response.AttributesCreated = 0
+		response.CategoryAttributes = 0
 	}
 
-	useMarketplaceCategoryID := uc.repo.GlobalProductsHasMarketplaceCategoryID(ctx, tx)
-
-	categorySlugs := createdCategoryList(createdCategories).Slugs()
-	if !useLegacy {
-		categorySlugs = templateCategoriesSlugs(templateCategories)
-	}
-
-	// PASO 1.5: Crear marcas base desde global_products (datos reales)
-	brandsCreated, createdBrands, err := uc.repo.CreateTenantBrandsFromGlobalProducts(
-		ctx,
-		tx,
-		tenantUUID,
-		marketplaceCategoryIDs,
-		categorySlugs,
-		useMarketplaceCategoryID,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create brands: %w", err)
-	}
-	response.BrandsCreated = brandsCreated
-	response.CreatedBrands = createdBrands
-
-	// PASO 1.6: Crear 1 producto + 1 variante con datos reales
-	productsCreated, variantsCreated, createdProducts, err := uc.createTenantProductFromGlobalProducts(
-		ctx,
-		tx,
-		tenantUUID,
-		marketplaceCategoryIDs,
-		categorySlugs,
-		useMarketplaceCategoryID,
-		createdCategories,
-		categorySlugByMarketplaceID,
-		createdBrands,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create product: %w", err)
-	}
-	response.ProductsCreated = productsCreated
-	response.VariantsCreated = variantsCreated
-	response.CreatedProducts = createdProducts
-
-	response.AttributesCreated = 0
-	response.CategoryAttributes = 0
-
-	// Commit de la transacción
 	if err := tx.Commit(); err != nil {
 		return nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	response.Message = fmt.Sprintf(
-		"Template aplicado exitosamente: %d categorías, %d marcas, %d productos, %d variantes",
-		categoriesCreated,
+		"Template aplicado exitosamente: %d categorías, %d marcas, %d productos, %d variantes, %d atributos",
+		response.CategoriesCreated,
 		response.BrandsCreated,
 		response.ProductsCreated,
 		response.VariantsCreated,
+		response.AttributesCreated,
 	)
 
 	return response, nil

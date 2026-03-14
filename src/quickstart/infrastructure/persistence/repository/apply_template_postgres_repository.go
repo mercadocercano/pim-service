@@ -604,3 +604,219 @@ func nullableUUID(value string) sql.NullString {
 	}
 	return sql.NullString{String: value, Valid: true}
 }
+
+// LoadFullTemplateData loads all JSONB fields from business_type_templates
+func (r *ApplyTemplatePostgresRepository) LoadFullTemplateData(ctx context.Context, templateID string) (*port.FullTemplateData, error) {
+	if _, err := uuid.Parse(templateID); err != nil {
+		return nil, nil
+	}
+
+	var categoriesRaw, brandsRaw, productsRaw, attributesRaw []byte
+	err := r.db.QueryRowContext(ctx, `
+		SELECT 
+			COALESCE(categories, '[]'::jsonb),
+			COALESCE(brands, '[]'::jsonb),
+			COALESCE(products, '[]'::jsonb),
+			COALESCE(attributes, '[]'::jsonb)
+		FROM business_type_templates
+		WHERE id = $1 AND is_active = true
+	`, templateID).Scan(&categoriesRaw, &brandsRaw, &productsRaw, &attributesRaw)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to load full template data: %w", err)
+	}
+
+	data := &port.FullTemplateData{}
+
+	type catPayload struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+		Slug string `json:"slug"`
+	}
+	var cats []catPayload
+	if err := json.Unmarshal(categoriesRaw, &cats); err == nil {
+		for _, c := range cats {
+			data.Categories = append(data.Categories, port.TemplateCategory{
+				MarketplaceID: c.ID,
+				Name:          c.Name,
+				Slug:          c.Slug,
+			})
+		}
+	}
+
+	json.Unmarshal(brandsRaw, &data.Brands)
+	json.Unmarshal(productsRaw, &data.Products)
+	json.Unmarshal(attributesRaw, &data.Attributes)
+
+	return data, nil
+}
+
+// CreateTenantBrandsFromTemplate creates all brands listed in the template
+func (r *ApplyTemplatePostgresRepository) CreateTenantBrandsFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, brands []port.TemplateBrand) (int, []string, error) {
+	if len(brands) == 0 {
+		return 0, nil, nil
+	}
+
+	created := 0
+	var createdNames []string
+	now := time.Now()
+
+	for _, b := range brands {
+		name := strings.TrimSpace(b.Name)
+		if name == "" {
+			continue
+		}
+
+		result, err := exec.ExecContext(ctx, `
+			INSERT INTO brands (id, tenant_id, name, description, status, created_at, updated_at)
+			VALUES ($1, $2, $3, '', 'active', $4, $4)
+			ON CONFLICT (tenant_id, name) DO NOTHING
+		`, uuid.New().String(), tenantID.String(), name, now)
+		if err != nil {
+			return created, createdNames, fmt.Errorf("failed to insert brand %s: %w", name, err)
+		}
+
+		if rowsAffected, err := result.RowsAffected(); err == nil && rowsAffected > 0 {
+			created++
+			createdNames = append(createdNames, name)
+		}
+	}
+
+	return created, createdNames, nil
+}
+
+// CreateTenantProductsFromTemplate creates all curated products from the template
+func (r *ApplyTemplatePostgresRepository) CreateTenantProductsFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, products []port.TemplateProduct, createdCategories []port.CreatedCategory, createdBrands []string) (int, int, []string, error) {
+	if len(products) == 0 {
+		return 0, 0, nil, nil
+	}
+
+	catBySlug := make(map[string]port.CreatedCategory)
+	for _, c := range createdCategories {
+		catBySlug[c.Slug] = c
+	}
+
+	now := time.Now()
+	productsCreated := 0
+	variantsCreated := 0
+	var productNames []string
+
+	for i, p := range products {
+		name := strings.TrimSpace(p.Name)
+		if name == "" {
+			continue
+		}
+
+		var categoryID, categoryName sql.NullString
+		if cat, ok := catBySlug[p.CategorySlug]; ok {
+			categoryID = sql.NullString{String: cat.ID, Valid: true}
+			categoryName = sql.NullString{String: cat.Name, Valid: true}
+		}
+
+		var brandID, brandName sql.NullString
+		if p.Brand != "" {
+			brandName = sql.NullString{String: p.Brand, Valid: true}
+			var foundBrandID string
+			err := exec.QueryRowContext(ctx, `
+				SELECT id FROM brands WHERE tenant_id = $1 AND name = $2 AND status = 'active' LIMIT 1
+			`, tenantID.String(), p.Brand).Scan(&foundBrandID)
+			if err == nil {
+				brandID = sql.NullString{String: foundBrandID, Valid: true}
+			}
+		}
+
+		sku := fmt.Sprintf("%s-%03d", p.SkuPrefix, i+1)
+
+		var existingID string
+		err := exec.QueryRowContext(ctx, `
+			SELECT id FROM products WHERE tenant_id = $1 AND name = $2 AND status != 'deleted' LIMIT 1
+		`, tenantID.String(), name).Scan(&existingID)
+
+		if err == sql.ErrNoRows {
+			productID := uuid.New().String()
+			_, err = exec.ExecContext(ctx, `
+				INSERT INTO products (id, tenant_id, name, description, sku, category_id, category_name, brand_id, brand_name, status, created_at, updated_at)
+				VALUES ($1, $2, $3, '', $4, $5, $6, $7, $8, 'active', $9, $9)
+			`, productID, tenantID.String(), name, sku, categoryID, categoryName, brandID, brandName, now)
+			if err != nil {
+				continue
+			}
+			productsCreated++
+			productNames = append(productNames, name)
+
+			variantSKU := sku + "-DEF"
+			_, err = exec.ExecContext(ctx, `
+				INSERT INTO product_variants (id, tenant_id, product_id, name, sku, status, is_default, sort_order, price, stock, created_at, updated_at)
+				VALUES ($1, $2, $3, $4, $5, 'active', true, 0, $6, 0, $7, $7)
+			`, uuid.New().String(), tenantID.String(), productID, name, variantSKU, p.PriceReference, now)
+			if err == nil {
+				variantsCreated++
+			}
+		} else if err != nil {
+			continue
+		}
+	}
+
+	return productsCreated, variantsCreated, productNames, nil
+}
+
+// CreateTenantAttributesFromTemplate creates attributes and links them to categories
+func (r *ApplyTemplatePostgresRepository) CreateTenantAttributesFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, attributes []port.TemplateAttribute, createdCategories []port.CreatedCategory) (int, int, error) {
+	if len(attributes) == 0 {
+		return 0, 0, nil
+	}
+
+	catBySlug := make(map[string]port.CreatedCategory)
+	for _, c := range createdCategories {
+		catBySlug[c.Slug] = c
+	}
+
+	now := time.Now()
+	attributesCreated := 0
+	linksCreated := 0
+
+	for _, attr := range attributes {
+		name := strings.TrimSpace(attr.Name)
+		if name == "" {
+			continue
+		}
+
+		var attrID string
+		err := exec.QueryRowContext(ctx, `
+			SELECT id FROM attributes WHERE tenant_id = $1 AND name = $2 AND status = 'active' LIMIT 1
+		`, tenantID.String(), name).Scan(&attrID)
+
+		if err == sql.ErrNoRows {
+			attrID = uuid.New().String()
+			_, err = exec.ExecContext(ctx, `
+				INSERT INTO attributes (id, tenant_id, name, description, type, required, options, status, created_at, updated_at)
+				VALUES ($1, $2, $3, '', 'select', false, $4, 'active', $5, $5)
+			`, attrID, tenantID.String(), name, pq.Array(attr.Values), now)
+			if err != nil {
+				continue
+			}
+			attributesCreated++
+		} else if err != nil {
+			continue
+		}
+
+		for _, catSlug := range attr.AppliesToCategories {
+			cat, ok := catBySlug[catSlug]
+			if !ok {
+				continue
+			}
+			_, err = exec.ExecContext(ctx, `
+				INSERT INTO category_attributes (id, tenant_id, category_id, attribute_id, status, created_at, updated_at)
+				VALUES ($1, $2, $3, $4, 'active', $5, $5)
+				ON CONFLICT (tenant_id, category_id, attribute_id) DO NOTHING
+			`, uuid.New().String(), tenantID.String(), cat.ID, attrID, now)
+			if err == nil {
+				linksCreated++
+			}
+		}
+	}
+
+	return attributesCreated, linksCreated, nil
+}
