@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Multi-Tenant PIM API
-  version: 2.2.0
+  version: 2.2.1
   description: |
     API para gestión de información de productos multi-tenant.
     
@@ -2473,6 +2473,79 @@ paths:
           description: Producto no encontrado
         '409':
           description: SKU ya existe
+        '500':
+          description: Error interno del servidor
+
+  /variants/by-skus:
+    post:
+      summary: Búsqueda por lotes de variantes por SKU
+      tags: [Variants]
+      operationId: getVariantsBySKUs
+      description: |
+        Realiza una búsqueda por lotes de variantes de productos enriquecidas
+        con información del producto y categoría.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [skus]
+              properties:
+                skus:
+                  type: array
+                  items:
+                    type: string
+                  description: Lista de SKUs a buscar
+                  example: ["SKU-1", "SKU-2", "SKU-3"]
+      responses:
+        '200':
+          description: Lista de variantes enriquecidas encontradas
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [variants]
+                properties:
+                  variants:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        variant_id:
+                          type: string
+                          format: uuid
+                          description: ID de la variante
+                        product_id:
+                          type: string
+                          format: uuid
+                          description: ID del producto
+                        sku:
+                          type: string
+                          description: Código SKU
+                        variant_name:
+                          type: string
+                          description: Nombre de la variante
+                        product_name:
+                          type: string
+                          description: Nombre del producto
+                        category_id:
+                          type: string
+                          description: ID de la categoría
+                        category_name:
+                          type: string
+                          description: Nombre de la categoría
+                        price:
+                          type: number
+                          format: float
+                          description: Precio
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
         '500':
           description: Error interno del servidor
 

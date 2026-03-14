@@ -18,6 +18,7 @@ type ProductVariantController struct {
 	updateProductVariantUseCase          *usecase.UpdateProductVariantUseCase
 	deleteProductVariantUseCase          *usecase.DeleteProductVariantUseCase
 	listProductVariantsByCriteriaUseCase *usecase.ListProductVariantsByCriteriaUseCase
+	getVariantsBySKUsUseCase             *usecase.GetVariantsBySKUsUseCase
 }
 
 // NewProductVariantController crea una nueva instancia del controller
@@ -28,6 +29,7 @@ func NewProductVariantController(
 	updateProductVariantUseCase *usecase.UpdateProductVariantUseCase,
 	deleteProductVariantUseCase *usecase.DeleteProductVariantUseCase,
 	listProductVariantsByCriteriaUseCase *usecase.ListProductVariantsByCriteriaUseCase,
+	getVariantsBySKUsUseCase *usecase.GetVariantsBySKUsUseCase,
 ) *ProductVariantController {
 	return &ProductVariantController{
 		createProductVariantUseCase:          createProductVariantUseCase,
@@ -36,6 +38,7 @@ func NewProductVariantController(
 		updateProductVariantUseCase:          updateProductVariantUseCase,
 		deleteProductVariantUseCase:          deleteProductVariantUseCase,
 		listProductVariantsByCriteriaUseCase: listProductVariantsByCriteriaUseCase,
+		getVariantsBySKUsUseCase:             getVariantsBySKUsUseCase,
 	}
 }
 
@@ -328,7 +331,10 @@ func (ctrl *ProductVariantController) RegisterRoutes(router *gin.RouterGroup) {
 	
 	// HITO A - Endpoint para buscar variante por SKU
 	router.GET("/variants/by-sku/:sku", ctrl.GetVariantBySKU)
-	
+
+	// Batch lookup de variantes por SKUs (para orquestación BFF)
+	router.POST("/variants/by-skus", ctrl.GetVariantsBySKUs)
+
 	// Rutas anidadas bajo productos (usando :id en lugar de :product_id para evitar conflicto con /products/:id)
 	// Estas se registran en el setup del módulo Product, DESPUÉS de las rutas de ProductController
 }
@@ -496,4 +502,27 @@ func (ctrl *ProductVariantController) GetVariantBySKU(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, variant)
+}
+
+// GetVariantsBySKUs batch lookup of variants enriched with product and category info
+func (ctrl *ProductVariantController) GetVariantsBySKUs(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		return
+	}
+
+	var req usecase.GetVariantsBySKUsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		return
+	}
+
+	result, err := ctrl.getVariantsBySKUsUseCase.Execute(c.Request.Context(), &req, tenantID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }
