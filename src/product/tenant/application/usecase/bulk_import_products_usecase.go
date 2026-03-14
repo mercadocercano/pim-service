@@ -83,6 +83,7 @@ type BulkImportProductsResponse struct {
 	Success           bool     `json:"success"`
 	TotalProducts     int      `json:"total_products"`
 	ProductsCreated   int      `json:"products_created"`
+	ProductsSkipped   int      `json:"products_skipped"`   // Ya existían (ej. creados por ApplyTemplate)
 	ProductsFailed    int      `json:"products_failed"`
 	Errors            []string `json:"errors,omitempty"`
 	CreatedProductIDs []string `json:"created_product_ids,omitempty"`
@@ -123,6 +124,7 @@ func (uc *BulkImportProductsUseCase) Execute(ctx context.Context, req BulkImport
 		Success:           true,
 		TotalProducts:     len(req.Products),
 		ProductsCreated:   0,
+		ProductsSkipped:   0,
 		ProductsFailed:    0,
 		Errors:            make([]string, 0),
 		CreatedProductIDs: make([]string, 0),
@@ -130,7 +132,7 @@ func (uc *BulkImportProductsUseCase) Execute(ctx context.Context, req BulkImport
 
 	// Procesar cada producto con sus variantes
 	for idx, productData := range req.Products {
-		productID, err := uc.createProductWithVariants(ctx, tenantUUID, productData)
+		productID, skipped, err := uc.createProductWithVariants(ctx, tenantUUID, productData)
 		if err != nil {
 			response.ProductsFailed++
 			response.Errors = append(response.Errors, fmt.Sprintf(
@@ -141,28 +143,41 @@ func (uc *BulkImportProductsUseCase) Execute(ctx context.Context, req BulkImport
 			))
 			continue
 		}
+		if skipped {
+			response.ProductsSkipped++
+			continue
+		}
 
 		response.ProductsCreated++
 		response.CreatedProductIDs = append(response.CreatedProductIDs, productID)
 	}
 
-	// Si todos fallaron, marcar como no exitoso
-	if response.ProductsCreated == 0 {
+	// Si todos fallaron (ninguno creado ni skipped), marcar como no exitoso
+	if response.ProductsCreated == 0 && response.ProductsSkipped == 0 {
 		response.Success = false
 	}
 
 	return response, nil
 }
 
-// createProductWithVariants crea un producto con sus variantes (HITO 2.1)
+// createProductWithVariants crea un producto con sus variantes (HITO 2.1).
+// Si el producto ya existe por (tenant_id, name), retorna ("", true, nil) para omitirlo sin error.
 func (uc *BulkImportProductsUseCase) createProductWithVariants(
 	ctx context.Context,
 	tenantID uuid.UUID,
 	data ProductWithVariantsImport,
-) (string, error) {
+) (string, bool, error) {
+	// 0. Si ya existe (ej. creado por ApplyTemplate), omitir sin error
+	exists, err := uc.productRepo.ExistsByName(ctx, data.Name, tenantID.String())
+	if err != nil {
+		return "", false, fmt.Errorf("error checking product existence: %w", err)
+	}
+	if exists {
+		return "", true, nil
+	}
+
 	// 1. Buscar categoría
 	var category *categoryEntity.Category
-	var err error
 
 	category, err = uc.categoryRepo.FindBySlug(ctx, tenantID, data.Category)
 	if err != nil {
@@ -183,7 +198,7 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 		category.Name,
 	)
 	if err != nil {
-		return "", fmt.Errorf("error creating category reference: %w", err)
+		return "", false, fmt.Errorf("error creating category reference: %w", err)
 	}
 
 	// 3. Crear referencia de marca (opcional)
@@ -212,7 +227,7 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 		brandRef,
 	)
 	if err != nil {
-		return "", fmt.Errorf("error creating product: %w", err)
+		return "", false, fmt.Errorf("error creating product: %w", err)
 	}
 
 	// 6. El constructor NewProduct ya crea 1 variante default, la eliminamos si tenemos variantes específicas
@@ -226,7 +241,7 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 		// Crear SKU de la variante
 		variantSKU, err := value_object.NewProductSKU(variantData.SKU)
 		if err != nil {
-			return "", fmt.Errorf("invalid SKU for variant %d: %w", idx+1, err)
+			return "", false, fmt.Errorf("invalid SKU for variant %d: %w", idx+1, err)
 		}
 
 		// Crear atributos de la variante
@@ -281,20 +296,20 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 			attrCollection,
 		)
 		if err != nil {
-			return "", fmt.Errorf("error adding variant %d: %w", idx+1, err)
+			return "", false, fmt.Errorf("error adding variant %d: %w", idx+1, err)
 		}
 	}
 
 	// 8. Si no hay variantes, crear una default
 	if len(product.Variants()) == 0 {
-		return "", fmt.Errorf("product must have at least one variant")
+		return "", false, fmt.Errorf("product must have at least one variant")
 	}
 
 	// 9. Guardar producto con sus variantes
 	if err := uc.productRepo.Save(ctx, product); err != nil {
-		return "", fmt.Errorf("error saving product: %w", err)
+		return "", false, fmt.Errorf("error saving product: %w", err)
 	}
 
-	return product.ID().String(), nil
+	return product.ID().String(), false, nil
 }
 

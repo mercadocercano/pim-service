@@ -28,16 +28,9 @@ type ListTemplatesUseCase struct {
 	repo port.ListTemplatesRepository
 }
 
-// legacyTemplates: templates estáticos que siempre se muestran si no vienen del DB
-var legacyTemplates = []port.ListTemplate{
-	{ID: "ferreteria-corralon", Name: "Ferretería / Corralón", Slug: "ferreteria-corralon", Categories: []string{"Tornilleria", "Herramientas Manuales", "Herramientas Electricas", "Materiales de Construccion", "Pinturas", "Plomeria y Sanitarios"}, IsActive: true},
-	{ID: "bazar", Name: "Bazar", Slug: "bazar", Categories: []string{"Cocina", "Bazar", "Decoracion", "Organizacion"}, IsActive: true},
-	{ID: "jugueteria", Name: "Juguetería", Slug: "jugueteria", Categories: []string{"Bebes y Ninos", "Juguetes"}, IsActive: true},
-	{ID: "ropa", Name: "Indumentaria", Slug: "ropa", Categories: []string{"Remeras", "Pantalones", "Buzos", "Camperas", "Zapatillas"}, IsActive: true},
-	{ID: "electricidad", Name: "Materiales Eléctricos / Iluminación", Slug: "electricidad", Categories: []string{"Electricidad", "Iluminacion"}, IsActive: true},
-	{ID: "zapateria", Name: "Zapatería", Slug: "zapateria", Categories: []string{"Calzado", "Escarpines", "Calzado Deportivo"}, IsActive: true},
-	{ID: "deportes", Name: "Indumentaria y Accesorios Deportivos", Slug: "deportes", Categories: []string{"Ropa Deportiva", "Indumentaria Deportiva", "Deportes", "Accesorios Deportivos"}, IsActive: true},
-}
+// legacyTemplates: fallback solo cuando no hay templates curados en DB.
+// Con templates curados (v3.0.0), los legacy se ignoran si el slug ya existe.
+var legacyTemplates = []port.ListTemplate{}
 
 // NewListTemplatesUseCase crea una nueva instancia del caso de uso
 func NewListTemplatesUseCase(repo port.ListTemplatesRepository) *ListTemplatesUseCase {
