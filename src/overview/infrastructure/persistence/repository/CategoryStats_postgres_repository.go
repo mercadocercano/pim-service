@@ -5,23 +5,22 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"pim/src/overview/domain/entity"
-	"pim/src/overview/domain/exception"
-	"pim/src/shared/domain/criteria"
-	sharedCriteria "pim/src/shared/infrastructure/criteria"
+	"saas-mt-pim-service/src/overview/domain/entity"
+	"saas-mt-pim-service/src/overview/domain/exception"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // CategoryStatsPostgresRepository implementa el repositorio usando PostgreSQL
 type CategoryStatsPostgresRepository struct {
 	db        *sql.DB
-	converter *sharedCriteria.SQLCriteriaConverter
+	converter *cr.SQLCriteriaConverter
 }
 
 // NewCategoryStatsPostgresRepository crea una nueva instancia del repositorio
 func NewCategoryStatsPostgresRepository(db *sql.DB) *CategoryStatsPostgresRepository {
 	return &CategoryStatsPostgresRepository{
 		db:        db,
-		converter: sharedCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -132,7 +131,7 @@ func (r *CategoryStatsPostgresRepository) Delete(ctx context.Context, id string,
 }
 
 // SearchByCriteria busca CategoryStatss usando criterios
-func (r *CategoryStatsPostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.CategoryStats, error) {
+func (r *CategoryStatsPostgresRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.CategoryStats, error) {
 	baseQuery := `
 		SELECT id, tenant_id, name, active, created_at, updated_at
 		FROM CategoryStatss
@@ -150,7 +149,7 @@ func (r *CategoryStatsPostgresRepository) SearchByCriteria(ctx context.Context, 
 }
 
 // CountByCriteria cuenta CategoryStatss usando criterios
-func (r *CategoryStatsPostgresRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *CategoryStatsPostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM CategoryStatss"
 
 	query, params := r.converter.ToCountSQL(baseCountQuery, crit)

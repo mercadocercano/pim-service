@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 	"saas-mt-pim-service/src/attribute/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // MarketplaceAttributeRepository define los métodos para persistir MarketplaceAttribute
@@ -15,6 +15,6 @@ type MarketplaceAttributeRepository interface {
 	FindByName(ctx context.Context, name string) (*entity.MarketplaceAttribute, error)
 	FindBySlug(ctx context.Context, slug string) (*entity.MarketplaceAttribute, error)
 	Delete(ctx context.Context, id string) error
-	SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.MarketplaceAttribute, error)
-	CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error)
+	SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.MarketplaceAttribute, error)
+	CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error)
 }

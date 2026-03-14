@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // GlobalProductRepository define los métodos para persistir GlobalProduct
@@ -46,6 +46,6 @@ type GlobalProductRepository interface {
 	CountArgentineProducts() (int, error)
 
 	// Búsqueda con criterios (para compatibilidad con el sistema existente)
-	SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.GlobalProduct, error)
-	CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error)
+	SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.GlobalProduct, error)
+	CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error)
 }

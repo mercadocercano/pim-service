@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"saas-mt-pim-service/src/category/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // MarketplaceCategoryRepository define las operaciones de persistencia para categorías marketplace
@@ -28,10 +28,10 @@ type MarketplaceCategoryRepository interface {
 	GetTree(ctx context.Context) ([]*entity.MarketplaceCategory, error)
 
 	// FindByCriteria busca categorías según criterios
-	FindByCriteria(ctx context.Context, criteria criteria.Criteria) ([]*entity.MarketplaceCategory, error)
+	FindByCriteria(ctx context.Context, criteria cr.Criteria) ([]*entity.MarketplaceCategory, error)
 
 	// CountByCriteria cuenta categorías según criterios
-	CountByCriteria(ctx context.Context, criteria criteria.Criteria) (int, error)
+	CountByCriteria(ctx context.Context, criteria cr.Criteria) (int, error)
 
 	// Update actualiza una categoría
 	Update(ctx context.Context, category *entity.MarketplaceCategory) error

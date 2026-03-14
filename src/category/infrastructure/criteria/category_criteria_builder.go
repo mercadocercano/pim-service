@@ -3,23 +3,22 @@ package criteria
 import (
 	"net/url"
 
-	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
 
 // CategoryCriteriaBuilder construye criterios específicos para categorías
 type CategoryCriteriaBuilder struct {
-	*domainCriteria.CriteriaBuilder
-	helper *sharedCriteria.EntityCriteriaHelper
+	*cr.CriteriaBuilder
+	helper *cr.EntityCriteriaHelper
 }
 
 // NewCategoryCriteriaBuilder crea un nuevo builder para criterios de categorías
 func NewCategoryCriteriaBuilder() *CategoryCriteriaBuilder {
 	return &CategoryCriteriaBuilder{
-		CriteriaBuilder: domainCriteria.NewCriteriaBuilder(),
-		helper:          sharedCriteria.NewEntityCriteriaHelper(),
+		CriteriaBuilder: cr.NewCriteriaBuilder(),
+		helper:         cr.NewEntityCriteriaHelper(),
 	}
 }
 
@@ -35,7 +34,7 @@ func (b *CategoryCriteriaBuilder) BuildFromContext(c *gin.Context) *CategoryCrit
 }
 
 // BuildValidated construye y valida criterios desde el contexto
-func (b *CategoryCriteriaBuilder) BuildValidated(c *gin.Context) domainCriteria.Criteria {
+func (b *CategoryCriteriaBuilder) BuildValidated(c *gin.Context) cr.Criteria {
 	criteria := b.BuildFromContext(c).Build()
 	return b.helper.ValidateAndSanitizeCriteria(criteria, b.GetAllowedFields())
 }
@@ -55,7 +54,7 @@ func (b *CategoryCriteriaBuilder) addCategoryFilters(values url.Values) {
 	// Filtro por parent_id
 	if parentID := values.Get("parent_id"); parentID != "" {
 		if parentID == "null" || parentID == "NULL" {
-			b.AddFilter("parent_id", domainCriteria.OpIsNull, nil)
+			b.AddFilter("parent_id", cr.OpIsNull, nil)
 		} else {
 			b.AddUUIDFilter("parent_id", parentID)
 		}
@@ -77,7 +76,7 @@ func (b *CategoryCriteriaBuilder) addCategoryFilters(values url.Values) {
 	}
 
 	if rootOnly := values.Get("root_only"); rootOnly == "true" {
-		b.AddFilter("parent_id", domainCriteria.OpIsNull, nil)
+		b.AddFilter("parent_id", cr.OpIsNull, nil)
 	}
 }
 

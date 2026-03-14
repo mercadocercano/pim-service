@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	"saas-mt-pim-service/src/product/global_catalog/domain/port"
 )
@@ -20,7 +20,7 @@ func NewListGlobalProductsByCriteriaUseCase(globalProductRepo port.GlobalProduct
 }
 
 // Execute ejecuta el caso de uso
-func (uc *ListGlobalProductsByCriteriaUseCase) Execute(ctx context.Context, searchCriteria criteria.Criteria) (*criteria.ListResponse[entity.GlobalProduct], error) {
+func (uc *ListGlobalProductsByCriteriaUseCase) Execute(ctx context.Context, searchCriteria cr.Criteria) (*cr.ListResponse[entity.GlobalProduct], error) {
 	// Buscar productos usando criterios
 	products, err := uc.globalProductRepo.SearchByCriteria(ctx, searchCriteria)
 	if err != nil {
@@ -28,7 +28,7 @@ func (uc *ListGlobalProductsByCriteriaUseCase) Execute(ctx context.Context, sear
 	}
 
 	// Contar total de productos con los mismos filtros (sin paginación)
-	countCriteria := criteria.Criteria{
+	countCriteria := cr.Criteria{
 		Filters: searchCriteria.Filters,
 		// No incluir Order ni Pagination para el conteo
 	}
@@ -38,5 +38,5 @@ func (uc *ListGlobalProductsByCriteriaUseCase) Execute(ctx context.Context, sear
 	}
 
 	// Crear respuesta con información de paginación
-	return criteria.NewListResponse(products, total, searchCriteria), nil
+	return cr.NewListResponseFromCriteria(products, total, searchCriteria), nil
 }

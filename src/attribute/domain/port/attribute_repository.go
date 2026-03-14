@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 	"saas-mt-pim-service/src/attribute/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // AttributeRepository define los métodos para persistir Attribute
@@ -13,6 +13,6 @@ type AttributeRepository interface {
 	FindByID(ctx context.Context, id string, tenantID string) (*entity.Attribute, error)
 	FindByTenant(ctx context.Context, tenantID string) ([]*entity.Attribute, error)
 	Delete(ctx context.Context, id string, tenantID string) error
-	SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.Attribute, error)
-	CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error)
+	SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.Attribute, error)
+	CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error)
 }

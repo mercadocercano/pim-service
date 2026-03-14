@@ -5,9 +5,10 @@ go 1.22
 toolchain go1.23.5
 
 require (
-	github.com/gin-gonic/gin v1.9.1
+	github.com/gin-gonic/gin v1.10.0
 	github.com/gofrs/uuid/v5 v5.3.2
 	github.com/lib/pq v1.10.9
+	github.com/mercadocercano/criteria v0.1.0
 	github.com/prometheus/client_golang v1.22.0
 	go.mongodb.org/mongo-driver v1.13.1
 )
@@ -63,3 +64,5 @@ require (
 	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/mercadocercano/criteria => ../../libs/criteria

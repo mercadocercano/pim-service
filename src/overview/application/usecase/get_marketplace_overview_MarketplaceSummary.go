@@ -16,7 +16,7 @@ import (
 	brandPort "saas-mt-pim-service/src/brand/domain/port"
 	categoryPort "saas-mt-pim-service/src/category/domain/port"
 	globalProductPort "saas-mt-pim-service/src/product/global_catalog/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // GetMarketplaceOverviewUseCase implementa el caso de uso para obtener overview del marketplace
@@ -205,7 +205,7 @@ func (uc *GetMarketplaceOverviewUseCase) getDashboardStats(
 	}
 
 	// Consultar datos reales desde los repositorios
-	emptyCriteria := criteria.Criteria{} // Sin filtros para contar todos
+	emptyCriteria := cr.Criteria{} // Sin filtros para contar todos
 
 	// Contar categorías de marketplace
 	totalCategories, err := uc.marketplaceCategoryRepo.CountByCriteria(ctx, emptyCriteria)
@@ -278,7 +278,7 @@ func (uc *GetMarketplaceOverviewUseCase) getBrandsStats(
 	}
 
 	// Consultar datos reales
-	emptyCriteria := criteria.Criteria{}
+	emptyCriteria := cr.Criteria{}
 
 	// Contar todas las marcas
 	totalBrands, err := uc.marketplaceBrandRepo.CountByCriteria(ctx, emptyCriteria)
@@ -288,9 +288,9 @@ func (uc *GetMarketplaceOverviewUseCase) getBrandsStats(
 	stats["total_brands"] = totalBrands
 
 	// Contar marcas verificadas
-	verifiedCriteria := criteria.Criteria{
-		Filters: criteria.NewFilters(
-			criteria.NewFilter("verification_status", criteria.OpEqual, "verified"),
+	verifiedCriteria := cr.Criteria{
+		Filters: cr.NewFilters(
+			cr.NewFilter("verification_status", cr.OpEqual, "verified"),
 		),
 	}
 	verifiedBrands, err := uc.marketplaceBrandRepo.CountByCriteria(ctx, verifiedCriteria)
@@ -300,9 +300,9 @@ func (uc *GetMarketplaceOverviewUseCase) getBrandsStats(
 	stats["verified_brands"] = verifiedBrands
 
 	// Contar marcas pendientes
-	pendingCriteria := criteria.Criteria{
-		Filters: criteria.NewFilters(
-			criteria.NewFilter("verification_status", criteria.OpEqual, "pending"),
+	pendingCriteria := cr.Criteria{
+		Filters: cr.NewFilters(
+			cr.NewFilter("verification_status", cr.OpEqual, "pending"),
 		),
 	}
 	pendingBrands, err := uc.marketplaceBrandRepo.CountByCriteria(ctx, pendingCriteria)
@@ -369,7 +369,7 @@ func (uc *GetMarketplaceOverviewUseCase) getAttributesStats(
 	}
 
 	// Consultar datos reales
-	emptyCriteria := criteria.Criteria{}
+	emptyCriteria := cr.Criteria{}
 
 	// Contar total de atributos
 	totalAttributes, err := uc.marketplaceAttributeRepo.CountByCriteria(ctx, emptyCriteria)
@@ -379,9 +379,9 @@ func (uc *GetMarketplaceOverviewUseCase) getAttributesStats(
 	stats["total_attributes"] = totalAttributes
 
 	// Contar atributos requeridos para listado
-	requiredCriteria := criteria.Criteria{
-		Filters: criteria.NewFilters(
-			criteria.NewFilter("is_required_for_listing", criteria.OpEqual, true),
+	requiredCriteria := cr.Criteria{
+		Filters: cr.NewFilters(
+			cr.NewFilter("is_required_for_listing", cr.OpEqual, true),
 		),
 	}
 	requiredAttributes, err := uc.marketplaceAttributeRepo.CountByCriteria(ctx, requiredCriteria)

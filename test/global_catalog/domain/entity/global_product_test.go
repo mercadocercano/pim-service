@@ -87,14 +87,14 @@ func TestNewGlobalProduct(t *testing.T) {
 		assert.Empty(t, product.ImageURLs())
 	})
 
-	t.Run("should fail when EAN is nil", func(t *testing.T) {
+	t.Run("should allow nil EAN for scraped products", func(t *testing.T) {
 		// Arrange
 		source, _ := value_object.NewManualSource()
 		name := "Producto Test"
 
 		// Act
 		product, err := entity.NewGlobalProduct(
-			nil, // EAN nil
+			nil, // EAN nil - ahora es opcional
 			name,
 			nil,
 			nil,
@@ -105,9 +105,10 @@ func TestNewGlobalProduct(t *testing.T) {
 		)
 
 		// Assert
-		assert.Error(t, err)
-		assert.Nil(t, product)
-		assert.Contains(t, err.Error(), "EAN-13 es obligatorio")
+		require.NoError(t, err)
+		assert.NotNil(t, product)
+		assert.Nil(t, product.EAN())
+		assert.Equal(t, name, product.Name())
 	})
 
 	t.Run("should fail when name is empty", func(t *testing.T) {

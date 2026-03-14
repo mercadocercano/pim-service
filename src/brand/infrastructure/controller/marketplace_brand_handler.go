@@ -9,7 +9,7 @@ import (
 	"saas-mt-pim-service/src/brand/application/usecase"
 	"saas-mt-pim-service/src/brand/domain/entity"
 	"saas-mt-pim-service/src/brand/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
@@ -53,7 +53,7 @@ func (h *MarketplaceBrandHandler) GetAllMarketplaceBrands(c *gin.Context) {
 	}
 
 	// Construir criterios de filtrado desde query parameters
-	criteriaBuilder := criteria.NewCriteriaBuilder().FromURLValues(c.Request.URL.Query())
+	criteriaBuilder := cr.NewCriteriaBuilder().FromURLValues(c.Request.URL.Query())
 
 	// Configurar paginación personalizada para marcas (sin límite de 100)
 	page := 1

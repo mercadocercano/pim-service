@@ -3,23 +3,22 @@ package criteria
 import (
 	"net/url"
 
-	domainCriteria "saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
 
 // CategoryAttributeCriteriaBuilder construye criterios específicos para atributos de categoría
 type CategoryAttributeCriteriaBuilder struct {
-	*domainCriteria.CriteriaBuilder
-	helper *sharedCriteria.EntityCriteriaHelper
+	*cr.CriteriaBuilder
+	helper *cr.EntityCriteriaHelper
 }
 
 // NewCategoryAttributeCriteriaBuilder crea un nuevo builder para criterios de atributos de categoría
 func NewCategoryAttributeCriteriaBuilder() *CategoryAttributeCriteriaBuilder {
 	return &CategoryAttributeCriteriaBuilder{
-		CriteriaBuilder: domainCriteria.NewCriteriaBuilder(),
-		helper:          sharedCriteria.NewEntityCriteriaHelper(),
+		CriteriaBuilder: cr.NewCriteriaBuilder(),
+		helper:         cr.NewEntityCriteriaHelper(),
 	}
 }
 
@@ -35,7 +34,7 @@ func (b *CategoryAttributeCriteriaBuilder) BuildFromContext(c *gin.Context) *Cat
 }
 
 // BuildValidated construye y valida criterios desde el contexto
-func (b *CategoryAttributeCriteriaBuilder) BuildValidated(c *gin.Context) domainCriteria.Criteria {
+func (b *CategoryAttributeCriteriaBuilder) BuildValidated(c *gin.Context) cr.Criteria {
 	criteria := b.BuildFromContext(c).Build()
 	return b.helper.ValidateAndSanitizeCriteria(criteria, b.GetAllowedFields())
 }

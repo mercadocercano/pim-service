@@ -8,21 +8,20 @@ import (
 
 	"saas-mt-pim-service/src/businesstype/domain/entity"
 	"saas-mt-pim-service/src/businesstype/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // BusinessTypeTemplatePostgresRepository implementa el repositorio de BusinessTypeTemplate para PostgreSQL
 type BusinessTypeTemplatePostgresRepository struct {
 	db        *sql.DB
-	converter *sharedCriteria.SQLCriteriaConverter
+	converter *cr.SQLCriteriaConverter
 }
 
 // NewBusinessTypeTemplatePostgresRepository crea una nueva instancia del repositorio
 func NewBusinessTypeTemplatePostgresRepository(db *sql.DB) port.BusinessTypeTemplateRepository {
 	return &BusinessTypeTemplatePostgresRepository{
 		db:        db,
-		converter: sharedCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -292,7 +291,7 @@ func (r *BusinessTypeTemplatePostgresRepository) Delete(ctx context.Context, id 
 }
 
 // SearchByCriteria busca templates usando criteria
-func (r *BusinessTypeTemplatePostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.BusinessTypeTemplate, error) {
+func (r *BusinessTypeTemplatePostgresRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.BusinessTypeTemplate, error) {
 	baseQuery := `
 		SELECT id, business_type_id, name, description, version, region,
 			   categories, attributes, products, brands, is_active, is_default,
@@ -324,7 +323,7 @@ func (r *BusinessTypeTemplatePostgresRepository) SearchByCriteria(ctx context.Co
 }
 
 // CountByCriteria cuenta templates usando criteria
-func (r *BusinessTypeTemplatePostgresRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *BusinessTypeTemplatePostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM business_type_templates"
 
 	query, params := r.converter.ToCountSQL(baseCountQuery, crit)

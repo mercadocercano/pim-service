@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 	"saas-mt-pim-service/src/businesstype/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // BusinessTypeRepository define los métodos para persistir BusinessType
@@ -15,6 +15,6 @@ type BusinessTypeRepository interface {
 	FindAll(ctx context.Context) ([]*entity.BusinessType, error)
 	FindActive(ctx context.Context) ([]*entity.BusinessType, error)
 	Delete(ctx context.Context, id string) error
-	SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.BusinessType, error)
-	CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error)
+	SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.BusinessType, error)
+	CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error)
 }

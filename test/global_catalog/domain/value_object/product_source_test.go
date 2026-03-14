@@ -58,14 +58,15 @@ func TestNewProductSource(t *testing.T) {
 		assert.Contains(t, err.Error(), "fuente del producto es obligatoria")
 	})
 
-	t.Run("should fail with invalid source", func(t *testing.T) {
-		// Act
-		ps, err := value_object.NewProductSource("invalid_source", nil, nil, 1.0)
+	t.Run("should accept normalized source names", func(t *testing.T) {
+		// isValidSource ahora acepta cualquier string normalizado (letras, números, guiones, underscores)
+		// para permitir fuentes dinámicas de scraping
+		ps, err := value_object.NewProductSource("custom_source", nil, nil, 1.0)
 
 		// Assert
-		assert.Error(t, err)
-		assert.Nil(t, ps)
-		assert.Contains(t, err.Error(), "fuente de producto no válida")
+		require.NoError(t, err)
+		assert.NotNil(t, ps)
+		assert.Equal(t, "custom_source", ps.Source())
 	})
 
 	t.Run("should fail with reliability below 0", func(t *testing.T) {

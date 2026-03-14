@@ -10,8 +10,7 @@ import (
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	"saas-mt-pim-service/src/product/tenant/domain/port"
 	"saas-mt-pim-service/src/product/tenant/domain/value_object"
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -272,7 +271,7 @@ func (r *PostgresProductRepository) ExistsBySKUExcludingID(ctx context.Context, 
 
 // SearchByCriteria busca productos usando criterios
 // Incluye COALESCE(products.sku, default_variant.sku) para productos sin sku (ej. bulk import con variantes)
-func (r *PostgresProductRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.Product, error) {
+func (r *PostgresProductRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.Product, error) {
 	baseQuery := `
 		SELECT p.id, p.tenant_id, p.name, p.description,
 			   COALESCE(p.sku, (SELECT pv.sku FROM product_variants pv WHERE pv.product_id = p.id AND pv.is_default = true AND pv.status != 'deleted' LIMIT 1)) as sku,
@@ -281,7 +280,7 @@ func (r *PostgresProductRepository) SearchByCriteria(ctx context.Context, crit c
 		FROM products p
 	`
 
-	converter := sharedCriteria.NewSQLCriteriaConverter()
+	converter := cr.NewSQLCriteriaConverter()
 	query, params := converter.ToSelectSQL(baseQuery, crit)
 
 	rows, err := r.db.QueryContext(ctx, query, params...)
@@ -294,10 +293,10 @@ func (r *PostgresProductRepository) SearchByCriteria(ctx context.Context, crit c
 }
 
 // CountByCriteria cuenta productos usando criterios
-func (r *PostgresProductRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *PostgresProductRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseQuery := "SELECT COUNT(*) FROM products"
 
-	converter := sharedCriteria.NewSQLCriteriaConverter()
+	converter := cr.NewSQLCriteriaConverter()
 	query, params := converter.ToCountSQL(baseQuery, crit)
 
 	var count int
@@ -756,7 +755,7 @@ func (r *PostgresProductRepository) FindVariantsEnrichedBySKUs(ctx context.Conte
 }
 
 // FindVariantsByCriteria busca variantes por criterios
-func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, crit *criteria.Criteria) ([]*entity.ProductVariant, error) {
+func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, crit *cr.Criteria) ([]*entity.ProductVariant, error) {
 	baseQuery := `
 		SELECT id, tenant_id, product_id, name, sku, status,
 			   is_default, sort_order, price, stock, created_at, updated_at
@@ -764,7 +763,7 @@ func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, 
 	`
 
 	// Usar el convertidor de criterios para generar la query con filtros
-	converter := sharedCriteria.NewSQLCriteriaConverter()
+	converter := cr.NewSQLCriteriaConverter()
 	query, params := converter.ToSelectSQL(baseQuery, *crit)
 
 	rows, err := r.db.QueryContext(ctx, query, params...)
@@ -810,11 +809,11 @@ func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, 
 }
 
 // CountVariantsByCriteria cuenta variantes por criterios
-func (r *PostgresProductRepository) CountVariantsByCriteria(ctx context.Context, crit *criteria.Criteria) (int, error) {
+func (r *PostgresProductRepository) CountVariantsByCriteria(ctx context.Context, crit *cr.Criteria) (int, error) {
 	baseQuery := "SELECT COUNT(*) FROM product_variants"
 
 	// Usar el convertidor de criterios para generar la query con filtros
-	converter := sharedCriteria.NewSQLCriteriaConverter()
+	converter := cr.NewSQLCriteriaConverter()
 	query, params := converter.ToCountSQL(baseQuery, *crit)
 
 	var count int

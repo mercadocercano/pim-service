@@ -8,21 +8,20 @@ import (
 	"log"
 	"saas-mt-pim-service/src/businesstype/domain/entity"
 	"saas-mt-pim-service/src/businesstype/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // BusinessTypePostgresRepository implementa el repositorio usando PostgreSQL
 type BusinessTypePostgresRepository struct {
 	db        *sql.DB
-	converter *sharedCriteria.SQLCriteriaConverter
+	converter *cr.SQLCriteriaConverter
 }
 
 // NewBusinessTypePostgresRepository crea una nueva instancia del repositorio
 func NewBusinessTypePostgresRepository(db *sql.DB) port.BusinessTypeRepository {
 	return &BusinessTypePostgresRepository{
 		db:        db,
-		converter: sharedCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -191,7 +190,7 @@ func (r *BusinessTypePostgresRepository) Delete(ctx context.Context, id string) 
 }
 
 // SearchByCriteria busca business types usando criterios
-func (r *BusinessTypePostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.BusinessType, error) {
+func (r *BusinessTypePostgresRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.BusinessType, error) {
 	baseQuery := `
 		SELECT id, code, name, description, icon, color, 
 			   is_active, sort_order, metadata, created_at, updated_at
@@ -210,7 +209,7 @@ func (r *BusinessTypePostgresRepository) SearchByCriteria(ctx context.Context, c
 }
 
 // CountByCriteria cuenta business types usando criterios
-func (r *BusinessTypePostgresRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *BusinessTypePostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM business_types"
 
 	query, params := r.converter.ToCountSQL(baseCountQuery, crit)

@@ -11,7 +11,7 @@ import (
 	"saas-mt-pim-service/src/product/global_catalog/application/usecase"
 	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // MockGlobalProductRepository es un mock del repositorio
@@ -149,12 +149,12 @@ func (m *MockGlobalProductRepository) FindNeedingUpdate(maxAgeHours int, limit i
 	return args.Get(0).([]*entity.GlobalProduct), args.Error(1)
 }
 
-func (m *MockGlobalProductRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.GlobalProduct, error) {
+func (m *MockGlobalProductRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.GlobalProduct, error) {
 	args := m.Called(ctx, crit)
 	return args.Get(0).([]*entity.GlobalProduct), args.Error(1)
 }
 
-func (m *MockGlobalProductRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (m *MockGlobalProductRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	args := m.Called(ctx, crit)
 	return args.Int(0), args.Error(1)
 }

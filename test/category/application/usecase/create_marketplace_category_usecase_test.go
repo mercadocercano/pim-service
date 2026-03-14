@@ -11,7 +11,7 @@ import (
 	"saas-mt-pim-service/src/category/application/request"
 	"saas-mt-pim-service/src/category/application/usecase"
 	"saas-mt-pim-service/src/category/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // MockMarketplaceCategoryRepository es un mock del repositorio
@@ -64,7 +64,7 @@ func (m *MockMarketplaceCategoryRepository) GetTree(ctx context.Context) ([]*ent
 	return args.Get(0).([]*entity.MarketplaceCategory), args.Error(1)
 }
 
-func (m *MockMarketplaceCategoryRepository) FindByCriteria(ctx context.Context, criteria criteria.Criteria) ([]*entity.MarketplaceCategory, error) {
+func (m *MockMarketplaceCategoryRepository) FindByCriteria(ctx context.Context, criteria cr.Criteria) ([]*entity.MarketplaceCategory, error) {
 	args := m.Called(ctx, criteria)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -72,7 +72,7 @@ func (m *MockMarketplaceCategoryRepository) FindByCriteria(ctx context.Context, 
 	return args.Get(0).([]*entity.MarketplaceCategory), args.Error(1)
 }
 
-func (m *MockMarketplaceCategoryRepository) CountByCriteria(ctx context.Context, criteria criteria.Criteria) (int, error) {
+func (m *MockMarketplaceCategoryRepository) CountByCriteria(ctx context.Context, criteria cr.Criteria) (int, error) {
 	args := m.Called(ctx, criteria)
 	return args.Int(0), args.Error(1)
 }

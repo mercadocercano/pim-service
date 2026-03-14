@@ -11,16 +11,15 @@ import (
 	"saas-mt-pim-service/src/category/domain/exception"
 	"saas-mt-pim-service/src/category/infrastructure/persistence/mapper"
 	"saas-mt-pim-service/src/category/infrastructure/persistence/model"
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // CategoryPostgresRepository implementa el repositorio de categorías usando PostgreSQL
 type CategoryPostgresRepository struct {
 	db        *sql.DB
 	mapper    *mapper.CategoryMapper
-	converter *sharedCriteria.SQLCriteriaConverter
-	*criteria.BaseListRepository[entity.Category]
+	converter *cr.SQLCriteriaConverter
+	*cr.BaseListRepository[entity.Category]
 }
 
 // NewCategoryPostgresRepository crea una nueva instancia del repositorio
@@ -28,17 +27,17 @@ func NewCategoryPostgresRepository(db *sql.DB) *CategoryPostgresRepository {
 	repo := &CategoryPostgresRepository{
 		db:        db,
 		mapper:    mapper.NewCategoryMapper(),
-		converter: sharedCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 
 	// Inicializar el repositorio base con criteria
-	repo.BaseListRepository = criteria.NewBaseListRepository[entity.Category](repo)
+	repo.BaseListRepository = cr.NewBaseListRepository[entity.Category](repo)
 
 	return repo
 }
 
 // SearchByCriteria implementa la búsqueda usando criteria
-func (r *CategoryPostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.Category, error) {
+func (r *CategoryPostgresRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.Category, error) {
 	baseQuery := `
 		SELECT id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at
 		FROM categories
@@ -80,7 +79,7 @@ func (r *CategoryPostgresRepository) SearchByCriteria(ctx context.Context, crit 
 }
 
 // CountByCriteria implementa el conteo usando criteria
-func (r *CategoryPostgresRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *CategoryPostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM categories"
 
 	query, params := r.converter.ToCountSQL(baseCountQuery, crit)

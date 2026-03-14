@@ -7,21 +7,20 @@ import (
 	"log"
 	"saas-mt-pim-service/src/attribute/domain/entity"
 	"saas-mt-pim-service/src/attribute/domain/exception"
-	"saas-mt-pim-service/src/shared/domain/criteria"
-	sharedCriteria "saas-mt-pim-service/src/shared/infrastructure/criteria"
+	cr "github.com/mercadocercano/criteria"
 )
 
 // AttributePostgresRepository implementa el repositorio usando PostgreSQL
 type AttributePostgresRepository struct {
 	db        *sql.DB
-	converter *sharedCriteria.SQLCriteriaConverter
+	converter *cr.SQLCriteriaConverter
 }
 
 // NewAttributePostgresRepository crea una nueva instancia del repositorio
 func NewAttributePostgresRepository(db *sql.DB) *AttributePostgresRepository {
 	return &AttributePostgresRepository{
 		db:        db,
-		converter: sharedCriteria.NewSQLCriteriaConverter(),
+		converter: cr.NewSQLCriteriaConverter(),
 	}
 }
 
@@ -132,7 +131,7 @@ func (r *AttributePostgresRepository) Delete(ctx context.Context, id string, ten
 }
 
 // SearchByCriteria busca attributes usando criterios
-func (r *AttributePostgresRepository) SearchByCriteria(ctx context.Context, crit criteria.Criteria) ([]*entity.Attribute, error) {
+func (r *AttributePostgresRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.Attribute, error) {
 	baseQuery := `
 		SELECT id, tenant_id, name, active, created_at, updated_at
 		FROM attributes
@@ -150,7 +149,7 @@ func (r *AttributePostgresRepository) SearchByCriteria(ctx context.Context, crit
 }
 
 // CountByCriteria cuenta attributes usando criterios
-func (r *AttributePostgresRepository) CountByCriteria(ctx context.Context, crit criteria.Criteria) (int, error) {
+func (r *AttributePostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM attributes"
 
 	query, params := r.converter.ToCountSQL(baseCountQuery, crit)

@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/stretchr/testify/assert"
 	"saas-mt-pim-service/src/product/tenant/application/mapper"
-	"saas-mt-pim-service/src/product/application/request"
-	"saas-mt-pim-service/src/product/application/usecase"
+	"saas-mt-pim-service/src/product/tenant/application/request"
+	"saas-mt-pim-service/src/product/tenant/application/usecase"
 	"testing"
 )
 

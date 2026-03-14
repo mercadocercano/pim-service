@@ -9,7 +9,7 @@ import (
 	"saas-mt-pim-service/src/product/tenant/application/response"
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	"saas-mt-pim-service/src/product/tenant/domain/port"
-	"saas-mt-pim-service/src/shared/domain/criteria"
+	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 )
@@ -38,7 +38,7 @@ func (uc *ListProductVariantsByCriteriaUseCase) Execute(
 	tenantID string,
 ) (*response.ProductVariantListResponse, error) {
 	// Crear builder de criterios desde URL values
-	builder := criteria.NewCriteriaBuilder().FromURLValues(urlValues)
+	builder := cr.NewCriteriaBuilder().FromURLValues(urlValues)
 
 	// Agregar filtro de tenant automáticamente
 	builder.AddEqualFilter("tenant_id", tenantID)
