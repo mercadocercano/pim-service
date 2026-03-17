@@ -6,6 +6,7 @@ import (
 
 	"saas-mt-pim-service/src/schema_validation/application/usecase"
 	"saas-mt-pim-service/src/schema_validation/domain/service"
+	"saas-mt-pim-service/src/schema_validation/infrastructure/adapter"
 	"saas-mt-pim-service/src/schema_validation/infrastructure/cache"
 	"saas-mt-pim-service/src/schema_validation/infrastructure/controller"
 
@@ -14,49 +15,72 @@ import (
 
 // SchemaValidationConfig contiene la configuración del módulo
 type SchemaValidationConfig struct {
-	db                         *sql.DB
-	csvAnalyzer                *service.CSVAnalyzerService
-	jsonAnalyzer               *service.JSONAnalyzerService
-	validationCache            *cache.MemoryValidationCache
-	validateCSVSchemaUseCase   *usecase.ValidateCSVSchemaUseCase
-	validateJSONSchemaUseCase  *usecase.ValidateJSONSchemaUseCase
-	schemaValidationController *controller.SchemaValidationController
+	db                          *sql.DB
+	csvAnalyzer                 *service.CSVAnalyzerService
+	jsonAnalyzer                *service.JSONAnalyzerService
+	excelAnalyzer               *service.ExcelAnalyzerService
+	validationCache             *cache.MemoryValidationCache
+	validateCSVSchemaUseCase    *usecase.ValidateCSVSchemaUseCase
+	validateJSONSchemaUseCase   *usecase.ValidateJSONSchemaUseCase
+	validateExcelSchemaUseCase  *usecase.ValidateExcelSchemaUseCase
+	schemaValidationController  *controller.SchemaValidationController
 }
 
 // NewSchemaValidationConfig crea una nueva configuración del módulo
 func NewSchemaValidationConfig(db *sql.DB) *SchemaValidationConfig {
-	// Crear servicios
 	csvAnalyzer := service.NewCSVAnalyzerService()
 	jsonAnalyzer := service.NewJSONAnalyzerService()
-	
-	// Crear cache con limpieza cada 5 minutos
+	excelAnalyzer := service.NewExcelAnalyzerService(csvAnalyzer)
+	categoryDeducer := service.NewCategoryDeductionService()
+	categoryAdapter := adapter.NewPimCategoryAdapter(db)
+
 	validationCache := cache.NewMemoryValidationCache(5 * time.Minute)
-	
-	// Crear casos de uso
+
 	validateCSVSchemaUseCase := usecase.NewValidateCSVSchemaUseCase(
 		csvAnalyzer,
+		categoryDeducer,
+		categoryAdapter,
 		validationCache,
 	)
-	
+
 	validateJSONSchemaUseCase := usecase.NewValidateJSONSchemaUseCase(
 		jsonAnalyzer,
 		validationCache,
 	)
-	
-	// Crear controller
+
+	validateExcelSchemaUseCase := usecase.NewValidateExcelSchemaUseCase(
+		excelAnalyzer,
+		validateCSVSchemaUseCase,
+		validationCache,
+	)
+
+	brandDeducer := service.NewBrandDeductionService()
+	brandAdapter := adapter.NewPimBrandAdapter(db)
+
+	importFromValidationUseCase := usecase.NewImportFromValidationUseCase(
+		validationCache,
+		brandDeducer,
+		categoryAdapter.GetCategoryNames,
+		brandAdapter.GetBrandNames,
+	)
+
 	schemaValidationController := controller.NewSchemaValidationController(
 		validateCSVSchemaUseCase,
 		validateJSONSchemaUseCase,
+		validateExcelSchemaUseCase,
+		importFromValidationUseCase,
 	)
 	
 	return &SchemaValidationConfig{
-		db:                         db,
-		csvAnalyzer:                csvAnalyzer,
-		jsonAnalyzer:               jsonAnalyzer,
-		validationCache:            validationCache,
-		validateCSVSchemaUseCase:   validateCSVSchemaUseCase,
-		validateJSONSchemaUseCase:  validateJSONSchemaUseCase,
-		schemaValidationController: schemaValidationController,
+		db:                          db,
+		csvAnalyzer:                 csvAnalyzer,
+		jsonAnalyzer:                jsonAnalyzer,
+		excelAnalyzer:               excelAnalyzer,
+		validationCache:             validationCache,
+		validateCSVSchemaUseCase:    validateCSVSchemaUseCase,
+		validateJSONSchemaUseCase:   validateJSONSchemaUseCase,
+		validateExcelSchemaUseCase:  validateExcelSchemaUseCase,
+		schemaValidationController:  schemaValidationController,
 	}
 }
 

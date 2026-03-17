@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"saas-mt-pim-service/src/schema_validation/domain/entity"
+	"saas-mt-pim-service/src/schema_validation/domain/port/outbound"
 	"saas-mt-pim-service/src/schema_validation/domain/service"
 	"saas-mt-pim-service/src/schema_validation/domain/value_object"
 )
@@ -27,9 +28,11 @@ type ColumnDefinition struct {
 
 // ValidateCSVSchemaUseCase valida el schema de un archivo CSV
 type ValidateCSVSchemaUseCase struct {
-	csvAnalyzer    *service.CSVAnalyzerService
-	schemaCache    SchemaValidationCache
-	productSchema  ProductSchemaDefinition
+	csvAnalyzer       *service.CSVAnalyzerService
+	categoryDeducer   *service.CategoryDeductionService
+	categoryRepo      outbound.CategoryRepository
+	schemaCache       SchemaValidationCache
+	productSchema     ProductSchemaDefinition
 }
 
 // SchemaValidationCache define la interfaz para cache de validaciones
@@ -41,11 +44,15 @@ type SchemaValidationCache interface {
 // NewValidateCSVSchemaUseCase crea una nueva instancia del caso de uso
 func NewValidateCSVSchemaUseCase(
 	csvAnalyzer *service.CSVAnalyzerService,
+	categoryDeducer *service.CategoryDeductionService,
+	categoryRepo outbound.CategoryRepository,
 	schemaCache SchemaValidationCache,
 ) *ValidateCSVSchemaUseCase {
 	return &ValidateCSVSchemaUseCase{
-		csvAnalyzer: csvAnalyzer,
-		schemaCache: schemaCache,
+		csvAnalyzer:     csvAnalyzer,
+		categoryDeducer: categoryDeducer,
+		categoryRepo:    categoryRepo,
+		schemaCache:     schemaCache,
 		productSchema: ProductSchemaDefinition{
 			RequiredColumns: map[string]ColumnDefinition{
 				"name": {Name: "name", Type: "string", Required: true},
@@ -88,10 +95,25 @@ func (uc *ValidateCSVSchemaUseCase) Execute(
 	if err != nil {
 		return nil, fmt.Errorf("error analyzing CSV: %w", err)
 	}
+
+	// Set detected delimiter info
+	switch analysis.Delimiter {
+	case ';':
+		validation.DetectedDelimiter = ";"
+	case '|':
+		validation.DetectedDelimiter = "|"
+	case '\t':
+		validation.DetectedDelimiter = "tab"
+	default:
+		validation.DetectedDelimiter = ","
+	}
 	
 	// Validar columnas
 	uc.validateColumns(validation, analysis)
-	
+
+	// Deducir categorías si no hay columna de categoría mapeada
+	uc.deduceCategories(ctx, validation, analysis, tenantID)
+
 	// Generar preview de tabla
 	preview := uc.generateTablePreview(analysis, validation)
 	validation.SetTablePreview(preview)
@@ -134,8 +156,13 @@ func (uc *ValidateCSVSchemaUseCase) validateColumns(
 			}
 		}
 		
-		// Buscar mapeo automático
+		// Buscar mapeo automático: primero por nombre, luego por contenido
 		suggestedMapping := uc.csvAnalyzer.SuggestMapping(csvColumn)
+		if suggestedMapping == "" {
+			if samples, exists := analysis.ColumnSamples[csvColumn]; exists && len(samples) > 0 {
+				suggestedMapping = uc.csvAnalyzer.SuggestMappingByContent(samples, analysis.ColumnSamples)
+			}
+		}
 		
 		if suggestedMapping != "" {
 			// Verificar si es columna requerida u opcional
@@ -184,6 +211,57 @@ func (uc *ValidateCSVSchemaUseCase) validateColumns(
 			validation.AddColumn(missingCol)
 			validation.AddRecommendation(fmt.Sprintf("Agregar columna requerida '%s'", reqColumn))
 		}
+	}
+}
+
+// deduceCategories assigns a deduced category for each row when no category column is mapped
+func (uc *ValidateCSVSchemaUseCase) deduceCategories(
+	ctx context.Context,
+	validation *entity.SchemaValidation,
+	analysis *service.CSVAnalysis,
+	tenantID string,
+) {
+	if uc.categoryDeducer == nil {
+		return
+	}
+
+	hasCategoryColumn := false
+	nameColumn := ""
+	for _, col := range validation.Columns {
+		if col.MappedTo == "category_name" || col.MappedTo == "category_id" {
+			hasCategoryColumn = true
+			break
+		}
+		if col.MappedTo == "name" {
+			nameColumn = col.Name
+		}
+	}
+	if hasCategoryColumn || nameColumn == "" {
+		return
+	}
+
+	var tenantCategories []string
+	if uc.categoryRepo != nil {
+		cats, err := uc.categoryRepo.GetCategoryNames(ctx, tenantID)
+		if err == nil {
+			tenantCategories = cats
+		}
+	}
+
+	samples := analysis.ColumnSamples[nameColumn]
+	if len(samples) == 0 {
+		return
+	}
+
+	deduced := make(map[int]string)
+	for i, name := range samples {
+		if cat := uc.categoryDeducer.DeduceCategory(name, tenantCategories); cat != "" {
+			deduced[i] = cat
+		}
+	}
+	if len(deduced) > 0 {
+		validation.DeducedCategories = deduced
+		validation.AddRecommendation("Categorías deducidas automáticamente desde nombres de productos")
 	}
 }
 

@@ -126,7 +126,10 @@ func (r *TenantCategoryMappingPostgresRepository) FindByCriteria(ctx context.Con
 		WHERE deleted_at IS NULL
 	`
 
-	query, args := r.converter.ToSelectSQL(baseQuery, crit)
+	query, args, err := r.converter.ToSelectSQL(baseQuery, crit)
+	if err != nil {
+		return nil, fmt.Errorf("invalid criteria: %w", err)
+	}
 
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -145,10 +148,13 @@ func (r *TenantCategoryMappingPostgresRepository) CountByCriteria(ctx context.Co
 		WHERE deleted_at IS NULL
 	`
 
-	query, args := r.converter.ToCountSQL(baseCountQuery, crit)
+	query, args, err := r.converter.ToCountSQL(baseCountQuery, crit)
+	if err != nil {
+		return 0, fmt.Errorf("invalid criteria: %w", err)
+	}
 
 	var count int
-	err := r.db.QueryRowContext(ctx, query, args...).Scan(&count)
+	err = r.db.QueryRowContext(ctx, query, args...).Scan(&count)
 	return count, err
 }
 

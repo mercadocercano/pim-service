@@ -37,6 +37,18 @@ type SchemaValidation struct {
 	
 	// SuggestedMappings son los mapeos sugeridos automáticamente
 	SuggestedMappings map[string]string `json:"suggested_mappings"`
+
+	// SourceFormat indica el formato de origen (csv, json, excel)
+	SourceFormat string `json:"source_format,omitempty"`
+
+	// SheetName es el nombre de la hoja de Excel usada (solo para Excel)
+	SheetName string `json:"sheet_name,omitempty"`
+
+	// DetectedDelimiter es el delimitador detectado en el CSV (ej: , ; | tab)
+	DetectedDelimiter string `json:"detected_delimiter,omitempty"`
+
+	// DeducedCategories maps row index → deduced category name (only when no category column mapped)
+	DeducedCategories map[int]string `json:"deduced_categories,omitempty"`
 	
 	// CreatedAt es la fecha de creación
 	CreatedAt time.Time `json:"created_at"`

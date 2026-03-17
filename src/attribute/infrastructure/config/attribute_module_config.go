@@ -15,26 +15,36 @@ import (
 type AttributeModuleConfig struct {
 	// Repositories
 	MarketplaceAttributeRepository *repository.MarketplaceAttributePostgresRepository
+	AttributeRepository            *repository.AttributePostgresRepository
 
 	// Use Cases - Marketplace
-	CreateMarketplaceAttributeUseCase  *usecase.CreateMarketplaceAttributeUseCase
-	ListMarketplaceAttributesUseCase   *usecase.ListMarketplaceAttributesUseCase
+	CreateMarketplaceAttributeUseCase          *usecase.CreateMarketplaceAttributeUseCase
+	ListMarketplaceAttributesUseCase           *usecase.ListMarketplaceAttributesUseCase
 	ListMarketplaceAttributesByCriteriaUseCase *usecase.ListMarketplaceAttributesByCriteriaUseCase
-	GetMarketplaceAttributeByIDUseCase *usecase.GetMarketplaceAttributeByIDUseCase
-	UpdateMarketplaceAttributeUseCase  *usecase.UpdateMarketplaceAttributeUseCase
-	DeleteMarketplaceAttributeUseCase  *usecase.DeleteMarketplaceAttributeUseCase
+	GetMarketplaceAttributeByIDUseCase         *usecase.GetMarketplaceAttributeByIDUseCase
+	UpdateMarketplaceAttributeUseCase          *usecase.UpdateMarketplaceAttributeUseCase
+	DeleteMarketplaceAttributeUseCase          *usecase.DeleteMarketplaceAttributeUseCase
+
+	// Use Cases - Tenant
+	CreateAttributeUseCase  *usecase.CreateAttributeUseCase
+	ListAttributesUseCase   *usecase.ListAttributesUseCase
+	GetAttributeByIDUseCase *usecase.GetAttributeByIDUseCase
+	UpdateAttributeUseCase  *usecase.UpdateAttributeUseCase
+	DeleteAttributeUseCase  *usecase.DeleteAttributeUseCase
 
 	// Infrastructure
 	MarketplaceAttributeCriteriaBuilder *criteria.MarketplaceAttributeCriteriaBuilder
 
 	// Controllers
 	MarketplaceAttributeHandler *controller.MarketplaceAttributeHandler
+	AttributeHandler            *controller.AttributeHandler
 }
 
 // NewAttributeModuleConfig crea e inicializa todas las dependencias del módulo Attribute
 func NewAttributeModuleConfig(db *sql.DB) *AttributeModuleConfig {
 	// Repositories
 	marketplaceAttributeRepo := repository.NewMarketplaceAttributePostgresRepository(db)
+	attributeRepo := repository.NewAttributePostgresRepository(db)
 
 	// Infrastructure
 	marketplaceAttributeCriteriaBuilder := criteria.NewMarketplaceAttributeCriteriaBuilder()
@@ -47,6 +57,13 @@ func NewAttributeModuleConfig(db *sql.DB) *AttributeModuleConfig {
 	updateMarketplaceAttributeUseCase := usecase.NewUpdateMarketplaceAttributeUseCase(marketplaceAttributeRepo)
 	deleteMarketplaceAttributeUseCase := usecase.NewDeleteMarketplaceAttributeUseCase(marketplaceAttributeRepo)
 
+	// Use Cases para Tenant Attributes
+	createAttributeUseCase := usecase.NewCreateAttributeUseCase(attributeRepo)
+	listAttributesUseCase := usecase.NewListAttributesUseCase(attributeRepo)
+	getAttributeByIDUseCase := usecase.NewGetAttributeByIDUseCase(attributeRepo)
+	updateAttributeUseCase := usecase.NewUpdateAttributeUseCase(attributeRepo)
+	deleteAttributeUseCase := usecase.NewDeleteAttributeUseCase(attributeRepo)
+
 	// Controllers
 	marketplaceAttributeHandler := controller.NewMarketplaceAttributeHandler(
 		createMarketplaceAttributeUseCase,
@@ -58,16 +75,31 @@ func NewAttributeModuleConfig(db *sql.DB) *AttributeModuleConfig {
 		marketplaceAttributeCriteriaBuilder,
 	)
 
+	attributeHandler := controller.NewAttributeHandler(
+		createAttributeUseCase,
+		listAttributesUseCase,
+		getAttributeByIDUseCase,
+		updateAttributeUseCase,
+		deleteAttributeUseCase,
+	)
+
 	return &AttributeModuleConfig{
-		MarketplaceAttributeRepository:      marketplaceAttributeRepo,
-		CreateMarketplaceAttributeUseCase:   createMarketplaceAttributeUseCase,
-		ListMarketplaceAttributesUseCase:    listMarketplaceAttributesUseCase,
+		MarketplaceAttributeRepository:             marketplaceAttributeRepo,
+		AttributeRepository:                        attributeRepo,
+		CreateMarketplaceAttributeUseCase:          createMarketplaceAttributeUseCase,
+		ListMarketplaceAttributesUseCase:           listMarketplaceAttributesUseCase,
 		ListMarketplaceAttributesByCriteriaUseCase: listMarketplaceAttributesByCriteriaUseCase,
-		GetMarketplaceAttributeByIDUseCase:  getMarketplaceAttributeByIDUseCase,
-		UpdateMarketplaceAttributeUseCase:   updateMarketplaceAttributeUseCase,
-		DeleteMarketplaceAttributeUseCase:   deleteMarketplaceAttributeUseCase,
-		MarketplaceAttributeCriteriaBuilder: marketplaceAttributeCriteriaBuilder,
-		MarketplaceAttributeHandler:         marketplaceAttributeHandler,
+		GetMarketplaceAttributeByIDUseCase:         getMarketplaceAttributeByIDUseCase,
+		UpdateMarketplaceAttributeUseCase:          updateMarketplaceAttributeUseCase,
+		DeleteMarketplaceAttributeUseCase:          deleteMarketplaceAttributeUseCase,
+		CreateAttributeUseCase:                     createAttributeUseCase,
+		ListAttributesUseCase:                      listAttributesUseCase,
+		GetAttributeByIDUseCase:                    getAttributeByIDUseCase,
+		UpdateAttributeUseCase:                     updateAttributeUseCase,
+		DeleteAttributeUseCase:                     deleteAttributeUseCase,
+		MarketplaceAttributeCriteriaBuilder:        marketplaceAttributeCriteriaBuilder,
+		MarketplaceAttributeHandler:                marketplaceAttributeHandler,
+		AttributeHandler:                           attributeHandler,
 	}
 }
 
@@ -76,14 +108,18 @@ func (c *AttributeModuleConfig) GetMarketplaceAttributeHandler() *controller.Mar
 	return c.MarketplaceAttributeHandler
 }
 
+// GetAttributeHandler retorna el controller de Tenant Attributes
+func (c *AttributeModuleConfig) GetAttributeHandler() *controller.AttributeHandler {
+	return c.AttributeHandler
+}
+
 // SetupAttributeModule configura el módulo de atributos y sus dependencias
 func SetupAttributeModule(router *gin.RouterGroup, db *sql.DB) {
-	// Crear configuración del módulo
 	attributeConfig := NewAttributeModuleConfig(db)
 
-	// Obtener el controller
 	marketplaceAttributeHandler := attributeConfig.GetMarketplaceAttributeHandler()
-
-	// Registrar las rutas de marketplace attributes
 	marketplaceAttributeHandler.RegisterRoutes(router)
+
+	attributeHandler := attributeConfig.GetAttributeHandler()
+	attributeHandler.RegisterRoutes(router)
 }

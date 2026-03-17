@@ -148,7 +148,10 @@ func (r *MarketplaceCategoryPostgresRepository) FindByCriteria(ctx context.Conte
 		FROM marketplace_categories
 	`
 
-	query, args := r.converter.ToSelectSQL(baseQuery, crit)
+	query, args, err := r.converter.ToSelectSQL(baseQuery, crit)
+	if err != nil {
+		return nil, fmt.Errorf("invalid criteria: %w", err)
+	}
 
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -166,10 +169,13 @@ func (r *MarketplaceCategoryPostgresRepository) CountByCriteria(ctx context.Cont
 		FROM marketplace_categories
 	`
 
-	query, args := r.converter.ToCountSQL(baseCountQuery, crit)
+	query, args, err := r.converter.ToCountSQL(baseCountQuery, crit)
+	if err != nil {
+		return 0, fmt.Errorf("invalid criteria: %w", err)
+	}
 
 	var count int
-	err := r.db.QueryRowContext(ctx, query, args...).Scan(&count)
+	err = r.db.QueryRowContext(ctx, query, args...).Scan(&count)
 	return count, err
 }
 

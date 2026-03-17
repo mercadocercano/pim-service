@@ -298,7 +298,10 @@ func (r *BusinessTypeTemplatePostgresRepository) SearchByCriteria(ctx context.Co
 			   metadata, created_at, updated_at
 		FROM business_type_templates`
 
-	query, params := r.converter.ToSelectSQL(baseQuery, crit)
+	query, params, err := r.converter.ToSelectSQL(baseQuery, crit)
+	if err != nil {
+		return nil, fmt.Errorf("invalid criteria: %w", err)
+	}
 
 	rows, err := r.db.QueryContext(ctx, query, params...)
 	if err != nil {
@@ -326,10 +329,13 @@ func (r *BusinessTypeTemplatePostgresRepository) SearchByCriteria(ctx context.Co
 func (r *BusinessTypeTemplatePostgresRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM business_type_templates"
 
-	query, params := r.converter.ToCountSQL(baseCountQuery, crit)
+	query, params, err := r.converter.ToCountSQL(baseCountQuery, crit)
+	if err != nil {
+		return 0, fmt.Errorf("invalid criteria: %w", err)
+	}
 
 	var count int
-	err := r.db.QueryRowContext(ctx, query, params...).Scan(&count)
+	err = r.db.QueryRowContext(ctx, query, params...).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("error counting templates by criteria: %w", err)
 	}
