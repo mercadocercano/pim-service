@@ -56,6 +56,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // Driver de PostgreSQL
+	tenantmw "github.com/mercadocercano/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -73,10 +74,23 @@ func main() {
 	log.Println("🚀 *** MAIN.GO DE LA RAÍZ EJECUTÁNDOSE - VERSIÓN NUEVA ***")
 	// Configurar el router con Gin
 	router := gin.New()
+	router.MaxMultipartMemory = 50 << 20 // 50MB
 
 	// Agregar middlewares básicos necesarios
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+	router.Use(tenantmw.TenantValidation(tenantmw.TenantValidationConfig{
+		JWTSecret: os.Getenv("JWT_SECRET"),
+		ExcludedRoutes: []string{
+			"/api/v1/health",
+			"/metrics",
+			"/api/v1/marketplace-brands",
+			"/api/v1/marketplace-categories",
+			"/api/v1/marketplace-attributes",
+			"/api/v1/business-types",
+			"/api/v1/business-type-templates",
+		},
+	}))
 
 	// Configurar Prometheus metrics si está habilitado
 	prometheusEnabled := os.Getenv("PROMETHEUS_ENABLED")
@@ -123,19 +137,23 @@ func main() {
 	}
 	log.Println("Conexión a la base de datos establecida con éxito")
 
-	// Configurar MongoDB para marketplace
-	log.Println("Inicializando conexión MongoDB para marketplace...")
-	mongoClient, err := database.NewMongoDBClient()
-	if err != nil {
-		log.Fatalf("Error al conectar a MongoDB: %v", err)
+	// MongoDB: conexión condicional (solo si MONGO_HOST está configurado)
+	if mongoHost := os.Getenv("MONGO_HOST"); mongoHost != "" {
+		log.Printf("Inicializando conexión MongoDB (%s)...", mongoHost)
+		mongoClient, err := database.NewMongoDBClient()
+		if err != nil {
+			log.Printf("⚠️ MongoDB no disponible: %v (continuando sin MongoDB)", err)
+		} else {
+			defer mongoClient.Close()
+			if err := mongoClient.HealthCheck(nil); err != nil {
+				log.Printf("⚠️ MongoDB health check falló: %v (continuando sin MongoDB)", err)
+			} else {
+				log.Println("✅ Conexión a MongoDB establecida")
+			}
+		}
+	} else {
+		log.Println("ℹ️ MONGO_HOST no configurado, MongoDB deshabilitado")
 	}
-	defer mongoClient.Close()
-
-	// Verificar conexión MongoDB
-	if err := mongoClient.HealthCheck(nil); err != nil {
-		log.Fatalf("Error al verificar la conexión a MongoDB: %v", err)
-	}
-	log.Println("Conexión a MongoDB establecida con éxito")
 
 	// API v1 grupo de rutas
 	v1 := router.Group("/api/v1")
@@ -236,6 +254,11 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
 	if productCfg.BulkImportController != nil {
 		productCfg.BulkImportController.RegisterRoutes(router)
 		log.Println("  POST   /api/v1/products/import (HITO 2)")
+	}
+
+	if productCfg.BulkUpdateController != nil {
+		productCfg.BulkUpdateController.RegisterRoutes(router)
+		log.Println("  PATCH  /api/v1/products/bulk-update")
 	}
 
 	log.Println("Módulo Product configurado exitosamente")
@@ -463,7 +486,11 @@ func setupAttributeModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  PUT    /api/v1/marketplace/attributes/:id")
 	log.Println("  DELETE /api/v1/marketplace/attributes/:id")
 	log.Println("Rutas Tenant Attributes disponibles:")
-	log.Println("  Nota: Los atributos custom del tenant se manejan a través de la tabla 'attributes'")
+	log.Println("  POST   /api/v1/attributes")
+	log.Println("  GET    /api/v1/attributes")
+	log.Println("  GET    /api/v1/attributes/:id")
+	log.Println("  PUT    /api/v1/attributes/:id")
+	log.Println("  DELETE /api/v1/attributes/:id")
 }
 
 // setupBatchModule configura el módulo Batch

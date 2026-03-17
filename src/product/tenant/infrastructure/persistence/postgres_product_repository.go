@@ -281,7 +281,10 @@ func (r *PostgresProductRepository) SearchByCriteria(ctx context.Context, crit c
 	`
 
 	converter := cr.NewSQLCriteriaConverter()
-	query, params := converter.ToSelectSQL(baseQuery, crit)
+	query, params, err := converter.ToSelectSQL(baseQuery, crit)
+	if err != nil {
+		return nil, fmt.Errorf("invalid criteria: %w", err)
+	}
 
 	rows, err := r.db.QueryContext(ctx, query, params...)
 	if err != nil {
@@ -297,10 +300,13 @@ func (r *PostgresProductRepository) CountByCriteria(ctx context.Context, crit cr
 	baseQuery := "SELECT COUNT(*) FROM products"
 
 	converter := cr.NewSQLCriteriaConverter()
-	query, params := converter.ToCountSQL(baseQuery, crit)
+	query, params, err := converter.ToCountSQL(baseQuery, crit)
+	if err != nil {
+		return 0, fmt.Errorf("invalid criteria: %w", err)
+	}
 
 	var count int
-	err := r.db.QueryRowContext(ctx, query, params...).Scan(&count)
+	err = r.db.QueryRowContext(ctx, query, params...).Scan(&count)
 	return count, err
 }
 
@@ -764,7 +770,10 @@ func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, 
 
 	// Usar el convertidor de criterios para generar la query con filtros
 	converter := cr.NewSQLCriteriaConverter()
-	query, params := converter.ToSelectSQL(baseQuery, *crit)
+	query, params, err := converter.ToSelectSQL(baseQuery, *crit)
+	if err != nil {
+		return nil, fmt.Errorf("invalid criteria: %w", err)
+	}
 
 	rows, err := r.db.QueryContext(ctx, query, params...)
 	if err != nil {
@@ -814,10 +823,13 @@ func (r *PostgresProductRepository) CountVariantsByCriteria(ctx context.Context,
 
 	// Usar el convertidor de criterios para generar la query con filtros
 	converter := cr.NewSQLCriteriaConverter()
-	query, params := converter.ToCountSQL(baseQuery, *crit)
+	query, params, err := converter.ToCountSQL(baseQuery, *crit)
+	if err != nil {
+		return 0, fmt.Errorf("invalid criteria: %w", err)
+	}
 
 	var count int
-	err := r.db.QueryRowContext(ctx, query, params...).Scan(&count)
+	err = r.db.QueryRowContext(ctx, query, params...).Scan(&count)
 	return count, err
 }
 

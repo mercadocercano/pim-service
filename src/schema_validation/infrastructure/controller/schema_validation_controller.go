@@ -18,18 +18,24 @@ import (
 
 // SchemaValidationController maneja las peticiones HTTP para validación de schema
 type SchemaValidationController struct {
-	validateCSVSchemaUseCase  *usecase.ValidateCSVSchemaUseCase
-	validateJSONSchemaUseCase *usecase.ValidateJSONSchemaUseCase
+	validateCSVSchemaUseCase     *usecase.ValidateCSVSchemaUseCase
+	validateJSONSchemaUseCase    *usecase.ValidateJSONSchemaUseCase
+	validateExcelSchemaUseCase   *usecase.ValidateExcelSchemaUseCase
+	importFromValidationUseCase  *usecase.ImportFromValidationUseCase
 }
 
 // NewSchemaValidationController crea una nueva instancia del controller
 func NewSchemaValidationController(
 	validateCSVSchemaUseCase *usecase.ValidateCSVSchemaUseCase,
 	validateJSONSchemaUseCase *usecase.ValidateJSONSchemaUseCase,
+	validateExcelSchemaUseCase *usecase.ValidateExcelSchemaUseCase,
+	importFromValidationUseCase *usecase.ImportFromValidationUseCase,
 ) *SchemaValidationController {
 	return &SchemaValidationController{
-		validateCSVSchemaUseCase:  validateCSVSchemaUseCase,
-		validateJSONSchemaUseCase: validateJSONSchemaUseCase,
+		validateCSVSchemaUseCase:     validateCSVSchemaUseCase,
+		validateJSONSchemaUseCase:    validateJSONSchemaUseCase,
+		validateExcelSchemaUseCase:   validateExcelSchemaUseCase,
+		importFromValidationUseCase:  importFromValidationUseCase,
 	}
 }
 
@@ -67,9 +73,10 @@ func (c *SchemaValidationController) ValidateSchema(ctx *gin.Context) {
 	filename := strings.ToLower(header.Filename)
 	isCSV := strings.HasSuffix(filename, ".csv")
 	isJSON := strings.HasSuffix(filename, ".json")
+	isExcel := strings.HasSuffix(filename, ".xlsx") || strings.HasSuffix(filename, ".xls")
 	
-	if !isCSV && !isJSON {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El archivo debe ser CSV o JSON"})
+	if !isCSV && !isJSON && !isExcel {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Formato no soportado. Use CSV, Excel (.xlsx) o JSON."})
 		return
 	}
 
@@ -94,7 +101,15 @@ func (c *SchemaValidationController) ValidateSchema(ctx *gin.Context) {
 	// Ejecutar validación según tipo de archivo
 	var validation *entity.SchemaValidation
 	
-	if isCSV {
+	if isExcel {
+		validation, err = c.validateExcelSchemaUseCase.Execute(
+			ctx.Request.Context(),
+			reader,
+			tenantID,
+			header.Filename,
+			maxRows,
+		)
+	} else if isCSV {
 		validation, err = c.validateCSVSchemaUseCase.Execute(
 			ctx.Request.Context(),
 			reader,
@@ -245,12 +260,54 @@ func (c *SchemaValidationController) GetJSONTemplate(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, products)
 }
 
+// ImportFromValidation godoc
+// @Summary Importar productos desde una validación cacheada
+// @Description Toma una validación previamente generada por validate-schema, aplica los mapeos de columnas y retorna los datos listos para importar
+// @Tags schema-validation
+// @Accept json
+// @Produce json
+// @Param body body usecase.ImportFromValidationRequest true "Request de importación"
+// @Success 200 {object} usecase.ImportFromValidationResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /products/import-from-validation [post]
+// @Security BearerAuth
+func (c *SchemaValidationController) ImportFromValidation(ctx *gin.Context) {
+	tenantID := ctx.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		return
+	}
+
+	var req usecase.ImportFromValidationRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		return
+	}
+
+	result, products, err := c.importFromValidationUseCase.Execute(ctx.Request.Context(), req, tenantID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "expired") {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"result":   result,
+		"products": products,
+	})
+}
+
 // RegisterRoutes registra las rutas del controller
 func (c *SchemaValidationController) RegisterRoutes(router *gin.RouterGroup) {
 	products := router.Group("/products")
 	{
 		products.POST("/validate-schema", c.ValidateSchema)
 		products.POST("/apply-mapping", c.ApplyMapping)
+		products.POST("/import-from-validation", c.ImportFromValidation)
 		products.GET("/csv-template", c.GetCSVTemplate)
 		products.GET("/json-template", c.GetJSONTemplate)
 	}

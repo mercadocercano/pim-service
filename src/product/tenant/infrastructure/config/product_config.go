@@ -13,6 +13,7 @@ import (
 	"saas-mt-pim-service/src/product/tenant/infrastructure/controller"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/criteria"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/persistence"
+	brandRepository "saas-mt-pim-service/src/brand/infrastructure/persistence"
 	categoryRepository "saas-mt-pim-service/src/category/infrastructure/persistence/repository"
 	"saas-mt-pim-service/src/quickstart/domain/port"
 )
@@ -57,6 +58,7 @@ type ProductConfig struct {
 	ProductVariantController *controller.ProductVariantController
 	QuickstartController     *quickstartCtrl.QuickstartController
 	BulkImportController     *controller.BulkImportController  // HITO 2
+	BulkUpdateController     *controller.BulkUpdateController
 
 	// Criteria Builders
 	ProductCriteriaBuilder *criteria.ProductCriteriaBuilder
@@ -204,8 +206,13 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 
 	// HITO 2: Configurar BulkImportController
 	categoryRepo := categoryRepository.NewCategoryPostgresRepository(db)
-	bulkImportUseCase := usecase.NewBulkImportProductsUseCase(productRepo, categoryRepo)
+	brandRepo := brandRepository.NewPostgresBrandRepository(db)
+	bulkImportUseCase := usecase.NewBulkImportProductsUseCase(productRepo, categoryRepo, brandRepo)
 	bulkImportController := controller.NewBulkImportController(bulkImportUseCase)
+
+	// Bulk Update: asignación masiva de marca/categoría
+	bulkUpdateUseCase := usecase.NewBulkUpdateProductsUseCase(productRepo, brandRepo, categoryRepo)
+	bulkUpdateController := controller.NewBulkUpdateController(bulkUpdateUseCase)
 
 	return &ProductConfig{
 		ProductRepository:                    *productRepo.(*persistence.PostgresProductRepository),
@@ -233,6 +240,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		ProductVariantController:             productVariantController,
 		QuickstartController:                 quickstartController,
 		BulkImportController:                 bulkImportController,
+		BulkUpdateController:                 bulkUpdateController,
 		ProductCriteriaBuilder:               productCriteriaBuilder,
 	}
 }

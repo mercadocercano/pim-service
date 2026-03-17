@@ -52,10 +52,11 @@ func (h *MarketplaceBrandHandler) GetAllMarketplaceBrands(c *gin.Context) {
 		return
 	}
 
-	// Construir criterios de filtrado desde query parameters
+	// Campos permitidos para marketplace brands
+	allowedFields := []string{"id", "name", "slug", "status", "verification_status", "is_active", "quality_score", "created_at", "updated_at"}
+
 	criteriaBuilder := cr.NewCriteriaBuilder().FromURLValues(c.Request.URL.Query())
 
-	// Configurar paginación personalizada para marcas (sin límite de 100)
 	page := 1
 	pageSize := 20
 
@@ -77,15 +78,12 @@ func (h *MarketplaceBrandHandler) GetAllMarketplaceBrands(c *gin.Context) {
 		}
 	}
 
-	// Limitar solo para seguridad (1000 marcas máximo)
 	if pageSize > 1000 {
 		pageSize = 1000
 	}
 
-	// Establecer paginación manualmente
 	criteriaBuilder.SetPagination(page, pageSize)
 
-	// Filtros
 	if search := c.Query("search"); search != "" {
 		criteriaBuilder.AddLikeFilter("name", search)
 	}
@@ -96,13 +94,11 @@ func (h *MarketplaceBrandHandler) GetAllMarketplaceBrands(c *gin.Context) {
 		}
 	}
 
-	// Ordenamiento por defecto solo si no se especificó uno
 	if c.Query("sort_by") == "" {
-		criteriaBuilder.SetOrder("name", "ASC") // Cambiar a orden alfabético por defecto
+		criteriaBuilder.SetOrder("name", "ASC")
 	}
 
-	// Construir criteria final
-	builtCriteria := criteriaBuilder.Build()
+	builtCriteria := cr.Sanitize(criteriaBuilder.Build(), allowedFields)
 
 	// Usar el repository para obtener datos
 	brands, err := h.repository.SearchByCriteria(c.Request.Context(), builtCriteria)

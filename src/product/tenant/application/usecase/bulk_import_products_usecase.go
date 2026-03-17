@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 
+	brandEntity "saas-mt-pim-service/src/brand/domain/entity"
 	categoryEntity "saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	"saas-mt-pim-service/src/product/tenant/domain/port"
@@ -95,6 +97,11 @@ type BulkImportProductsUseCase struct {
 	categoryRepo interface {
 		FindBySlug(ctx context.Context, tenantID uuid.UUID, slug string) (*categoryEntity.Category, error)
 		FindByName(ctx context.Context, tenantID uuid.UUID, name string) (*categoryEntity.Category, error)
+		Create(ctx context.Context, category *categoryEntity.Category) error
+	}
+	brandRepo interface {
+		FindByName(ctx context.Context, name string, tenantID string) (*brandEntity.Brand, error)
+		Create(ctx context.Context, brand *brandEntity.Brand) error
 	}
 }
 
@@ -104,11 +111,17 @@ func NewBulkImportProductsUseCase(
 	categoryRepo interface {
 		FindBySlug(ctx context.Context, tenantID uuid.UUID, slug string) (*categoryEntity.Category, error)
 		FindByName(ctx context.Context, tenantID uuid.UUID, name string) (*categoryEntity.Category, error)
+		Create(ctx context.Context, category *categoryEntity.Category) error
+	},
+	brandRepo interface {
+		FindByName(ctx context.Context, name string, tenantID string) (*brandEntity.Brand, error)
+		Create(ctx context.Context, brand *brandEntity.Brand) error
 	},
 ) *BulkImportProductsUseCase {
 	return &BulkImportProductsUseCase{
 		productRepo:  productRepo,
 		categoryRepo: categoryRepo,
+		brandRepo:    brandRepo,
 	}
 }
 
@@ -132,7 +145,7 @@ func (uc *BulkImportProductsUseCase) Execute(ctx context.Context, req BulkImport
 
 	// Procesar cada producto con sus variantes
 	for idx, productData := range req.Products {
-		productID, skipped, err := uc.createProductWithVariants(ctx, tenantUUID, productData)
+		productID, skipped, err := uc.createProductWithVariants(ctx, tenantUUID, productData, req.CreateCategories, req.CreateBrands)
 		if err != nil {
 			response.ProductsFailed++
 			response.Errors = append(response.Errors, fmt.Sprintf(
@@ -166,6 +179,8 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 	ctx context.Context,
 	tenantID uuid.UUID,
 	data ProductWithVariantsImport,
+	createCategories bool,
+	createBrands bool,
 ) (string, bool, error) {
 	// 0. Si ya existe (ej. creado por ApplyTemplate), omitir sin error
 	exists, err := uc.productRepo.ExistsByName(ctx, data.Name, tenantID.String())
@@ -176,38 +191,45 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 		return "", true, nil
 	}
 
-	// 1. Buscar categoría
+	// 1. Buscar categoría por slug o nombre
 	var category *categoryEntity.Category
-
 	category, err = uc.categoryRepo.FindBySlug(ctx, tenantID, data.Category)
 	if err != nil {
 		category, err = uc.categoryRepo.FindByName(ctx, tenantID, data.Category)
-		if err != nil {
-			// Si create_categories está habilitado, creamos categoría con valores por defecto
-			// Para el test E2E, esto permite continuar sin bloquear el flujo
-			category = &categoryEntity.Category{
-				ID:   uuid.New().String(),
-				Name: data.Category,
-			}
+	}
+	if err != nil && createCategories {
+		newCat, catErr := categoryEntity.NewCategory(tenantID.String(), data.Category, "", nil)
+		if catErr != nil {
+			return "", false, fmt.Errorf("error creating category '%s': %w", data.Category, catErr)
 		}
+		if persistErr := uc.categoryRepo.Create(ctx, newCat); persistErr != nil {
+			return "", false, fmt.Errorf("error persisting category '%s': %w", data.Category, persistErr)
+		}
+		category = newCat
+	} else if err != nil {
+		return "", false, fmt.Errorf("category '%s' not found and create_categories is disabled", data.Category)
 	}
 
 	// 2. Crear referencia de categoría
-	categoryRef, err := value_object.NewCategoryReference(
-		category.ID,
-		category.Name,
-	)
+	categoryRef, err := value_object.NewCategoryReference(category.ID, category.Name)
 	if err != nil {
 		return "", false, fmt.Errorf("error creating category reference: %w", err)
 	}
 
-	// 3. Crear referencia de marca (opcional)
+	// 3. Resolver marca por nombre (opcional)
 	var brandRef *value_object.BrandReference
-	if data.Brand != "" {
-		brandRef, err = value_object.NewBrandReference("", data.Brand)
-		if err != nil {
-			// Si falla, continuamos sin marca
-			brandRef = nil
+	if data.Brand != "" && uc.brandRepo != nil {
+		brand, brandErr := uc.brandRepo.FindByName(ctx, data.Brand, tenantID.String())
+		if brandErr != nil && createBrands {
+			newBrand, createErr := brandEntity.NewBrand(tenantID.String(), data.Brand, "", nil, nil)
+			if createErr == nil {
+				if persistErr := uc.brandRepo.Create(ctx, newBrand); persistErr == nil {
+					brand = newBrand
+				}
+			}
+		}
+		if brand != nil {
+			brandRef, _ = value_object.NewBrandReference(brand.ID, brand.Name)
 		}
 	}
 
@@ -307,6 +329,10 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 
 	// 9. Guardar producto con sus variantes
 	if err := uc.productRepo.Save(ctx, product); err != nil {
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "duplicate key") || strings.Contains(errMsg, "already exists") {
+			return "", true, nil // Treat as skipped, not failed
+		}
 		return "", false, fmt.Errorf("error saving product: %w", err)
 	}
 

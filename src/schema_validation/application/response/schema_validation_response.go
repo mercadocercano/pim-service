@@ -15,6 +15,10 @@ type SchemaValidationResponse struct {
 	Summary           *ValidationSummaryDTO             `json:"summary"`
 	Recommendations   []string                          `json:"recommendations"`
 	SuggestedMappings map[string]string                 `json:"suggested_mappings"`
+	SourceFormat      string                            `json:"source_format,omitempty"`
+	SheetName         string                            `json:"sheet_name,omitempty"`
+	DetectedDelimiter string                            `json:"detected_delimiter,omitempty"`
+	DeducedCategories map[int]string                    `json:"deduced_categories,omitempty"`
 	CreatedAt         time.Time                         `json:"created_at"`
 	ExpiresAt         time.Time                         `json:"expires_at"`
 }
@@ -102,6 +106,10 @@ func NewSchemaValidationResponse(validation *entity.SchemaValidation) *SchemaVal
 		Columns:           make(map[string]ColumnValidationDTO),
 		Recommendations:   validation.Recommendations,
 		SuggestedMappings: validation.SuggestedMappings,
+		SourceFormat:      validation.SourceFormat,
+		SheetName:         validation.SheetName,
+		DetectedDelimiter: validation.DetectedDelimiter,
+		DeducedCategories: validation.DeducedCategories,
 		CreatedAt:         validation.CreatedAt,
 		ExpiresAt:         validation.ExpiresAt,
 	}
