@@ -6,7 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gofrs/uuid/v5 v5.3.2
 	github.com/lib/pq v1.10.9
-	github.com/mercadocercano/criteria v0.1.0
+	github.com/mercadocercano/criteria v0.3.0
 	github.com/mercadocercano/middleware v0.1.0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/xuri/excelize/v2 v2.9.0
