@@ -1,5 +1,6 @@
 # Deploy pim-service a producción
-# Push a main/master → build → push DOCR → deploy vía SSH
+# Solo corre en pushes a ESTE repo (pim-service). Un deploy de backoffice-admin no lo dispara.
+# Push a main/master → build → push DOCR → deploy vía SSH | workflow_dispatch para redeploy manual
 # Requiere: deployment pim-service aplicado en K8s, secrets DOCR_TOKEN, SSH_PRIVATE_KEY, DROPLET_IP
 #
 # ⚠️ Drift: kubectl set image modifica el deployment en vivo pero NO el YAML del repo.
@@ -10,6 +11,7 @@ name: Deploy pim-service to Production
 on:
   push:
     branches: [main, master]
+  workflow_dispatch: {}
 
 env:
   REGISTRY: registry.digitalocean.com/mc-bootstrap-registry
