@@ -207,7 +207,7 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 		}
 		category = newCat
 	} else if err != nil {
-		return "", false, fmt.Errorf("category '%s' not found and create_categories is disabled", data.Category)
+		return "", false, fmt.Errorf("no se encontró la categoría '%s' y create_categories está deshabilitado", data.Category)
 	}
 
 	// 2. Crear referencia de categoría
