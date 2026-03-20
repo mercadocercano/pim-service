@@ -33,11 +33,11 @@ func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates
 		LEFT JOIN business_types bt ON bt.id = btt.business_type_id
 		WHERE btt.is_active = true
 		  AND btt.region IN ('AR', 'GLOBAL')
-		  AND COALESCE(jsonb_array_length(btt.categories), 0) >= 3
+		  AND COALESCE(jsonb_array_length(btt.categories), 0) >= 1
 		ORDER BY btt.is_default DESC,
 		         CASE WHEN btt.region = 'AR' THEN 0 ELSE 1 END,
 		         btt.name
-		LIMIT 20
+		LIMIT 50
 	`
 
 	rows, err := r.db.QueryContext(ctx, query)
