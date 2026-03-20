@@ -107,9 +107,11 @@ func (r *ApplyTemplatePostgresRepository) LoadTemplateCategories(ctx context.Con
 	}
 
 	type categoryPayload struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
-		Slug string `json:"slug"`
+		ID         string `json:"id"`
+		Name       string `json:"name"`
+		Slug       string `json:"slug"`
+		ParentSlug string `json:"parent_slug"`
+		Level      int    `json:"level"`
 	}
 
 	var payload []categoryPayload
@@ -137,6 +139,8 @@ func (r *ApplyTemplatePostgresRepository) LoadTemplateCategories(ctx context.Con
 			MarketplaceID: marketplaceID,
 			Name:          name,
 			Slug:          slug,
+			ParentSlug:    strings.TrimSpace(item.ParentSlug),
+			Level:         item.Level,
 		})
 
 		if marketplaceID != "" {
@@ -206,6 +210,8 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesLegacy(ctx conte
 }
 
 // CreateTenantCategoriesFromTemplate INSERT categorías desde template JSON
+// Soporta jerarquía: primero crea categorías raíz (level=0 o sin parent_slug),
+// luego crea hijas resolviendo parent_id desde el slug del padre.
 func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, categories []port.TemplateCategory) (int, []port.CreatedCategory, error) {
 	if len(categories) == 0 {
 		return 0, nil, nil
@@ -214,44 +220,48 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesFromTemplate(ctx
 	now := time.Now()
 	created := 0
 	var createdCategories []port.CreatedCategory
+	// Map slug -> created ID for parent resolution
+	slugToID := make(map[string]string)
 
-	for _, category := range categories {
-		name := strings.TrimSpace(category.Name)
-		slug := strings.TrimSpace(category.Slug)
+	// Separate root categories (no parent) from children
+	var roots, children []port.TemplateCategory
+	for _, cat := range categories {
+		if cat.ParentSlug == "" {
+			roots = append(roots, cat)
+		} else {
+			children = append(children, cat)
+		}
+	}
 
-		if name == "" && slug == "" {
-			continue
+	// Pass 1: Create root categories
+	for _, category := range roots {
+		id, name, slug, isNew, err := r.upsertCategory(ctx, exec, tenantID, category, "", now)
+		if err != nil {
+			return created, createdCategories, err
 		}
-		if slug == "" {
-			slug = buildSlug(name)
-		}
-		if name == "" {
-			name = slug
-		}
-
-		var id string
-		err := exec.QueryRowContext(ctx, `
-			SELECT id
-			FROM categories
-			WHERE tenant_id = $1 AND slug = $2 AND status = 'active'
-			LIMIT 1
-		`, tenantID.String(), slug).Scan(&id)
-		if err != nil && err != sql.ErrNoRows {
-			return created, createdCategories, fmt.Errorf("failed to query category: %w", err)
-		}
-
-		if err == sql.ErrNoRows {
-			err = exec.QueryRowContext(ctx, `
-				INSERT INTO categories (id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at)
-				VALUES (gen_random_uuid()::text, $1, $2, $3, '', NULL, 'active', $4, $4)
-				RETURNING id
-			`, tenantID.String(), name, slug, now).Scan(&id)
-			if err != nil {
-				return created, createdCategories, fmt.Errorf("failed to insert category: %w", err)
-			}
+		if isNew {
 			created++
 		}
+		slugToID[slug] = id
+		createdCategories = append(createdCategories, port.CreatedCategory{
+			ID:            id,
+			Name:          name,
+			Slug:          slug,
+			MarketplaceID: category.MarketplaceID,
+		})
+	}
 
+	// Pass 2: Create child categories with resolved parent_id
+	for _, category := range children {
+		parentID := slugToID[category.ParentSlug]
+		id, name, slug, isNew, err := r.upsertCategory(ctx, exec, tenantID, category, parentID, now)
+		if err != nil {
+			return created, createdCategories, err
+		}
+		if isNew {
+			created++
+		}
+		slugToID[slug] = id
 		createdCategories = append(createdCategories, port.CreatedCategory{
 			ID:            id,
 			Name:          name,
@@ -261,6 +271,51 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesFromTemplate(ctx
 	}
 
 	return created, createdCategories, nil
+}
+
+// upsertCategory busca o crea una categoría individual, retornando (id, name, slug, isNew, error)
+func (r *ApplyTemplatePostgresRepository) upsertCategory(ctx context.Context, exec database.Executor, tenantID uuid.UUID, category port.TemplateCategory, parentID string, now time.Time) (string, string, string, bool, error) {
+	name := strings.TrimSpace(category.Name)
+	slug := strings.TrimSpace(category.Slug)
+
+	if name == "" && slug == "" {
+		return "", "", "", false, nil
+	}
+	if slug == "" {
+		slug = buildSlug(name)
+	}
+	if name == "" {
+		name = slug
+	}
+
+	var id string
+	err := exec.QueryRowContext(ctx, `
+		SELECT id
+		FROM categories
+		WHERE tenant_id = $1 AND slug = $2 AND status = 'active'
+		LIMIT 1
+	`, tenantID.String(), slug).Scan(&id)
+	if err != nil && err != sql.ErrNoRows {
+		return "", "", "", false, fmt.Errorf("failed to query category: %w", err)
+	}
+
+	if err == sql.ErrNoRows {
+		var parentVal interface{}
+		if parentID != "" {
+			parentVal = parentID
+		}
+		err = exec.QueryRowContext(ctx, `
+			INSERT INTO categories (id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at)
+			VALUES (gen_random_uuid()::text, $1, $2, $3, '', $4, 'active', $5, $5)
+			RETURNING id
+		`, tenantID.String(), name, slug, parentVal, now).Scan(&id)
+		if err != nil {
+			return "", "", "", false, fmt.Errorf("failed to insert category: %w", err)
+		}
+		return id, name, slug, true, nil
+	}
+
+	return id, name, slug, false, nil
 }
 
 // GetMarketplaceCategoryIDsBySlug SELECT id FROM marketplace_categories
@@ -631,9 +686,11 @@ func (r *ApplyTemplatePostgresRepository) LoadFullTemplateData(ctx context.Conte
 	data := &port.FullTemplateData{}
 
 	type catPayload struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
-		Slug string `json:"slug"`
+		ID         string `json:"id"`
+		Name       string `json:"name"`
+		Slug       string `json:"slug"`
+		ParentSlug string `json:"parent_slug"`
+		Level      int    `json:"level"`
 	}
 	var cats []catPayload
 	if err := json.Unmarshal(categoriesRaw, &cats); err == nil {
@@ -642,6 +699,8 @@ func (r *ApplyTemplatePostgresRepository) LoadFullTemplateData(ctx context.Conte
 				MarketplaceID: c.ID,
 				Name:          c.Name,
 				Slug:          c.Slug,
+				ParentSlug:    c.ParentSlug,
+				Level:         c.Level,
 			})
 		}
 	}

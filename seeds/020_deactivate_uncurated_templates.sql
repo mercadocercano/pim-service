@@ -14,7 +14,11 @@ WHERE business_type_id IN (
     'pintureria',
     'ropa',
     'deportes',
-    'libreria'
+    'libreria',
+    'bazar',
+    'electricidad',
+    'sanitarios',
+    'zapateria'
   )
 );
 
@@ -29,6 +33,10 @@ WHERE business_type_id IN (
     'pintureria',
     'ropa',
     'deportes',
-    'libreria'
+    'libreria',
+    'bazar',
+    'electricidad',
+    'sanitarios',
+    'zapateria'
   )
 );
