@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"strings"
 
 	"saas-mt-pim-service/src/quickstart/domain/port"
 )
@@ -28,10 +27,6 @@ type ListTemplatesUseCase struct {
 	repo port.ListTemplatesRepository
 }
 
-// legacyTemplates: fallback solo cuando no hay templates curados en DB.
-// Con templates curados (v3.0.0), los legacy se ignoran si el slug ya existe.
-var legacyTemplates = []port.ListTemplate{}
-
 // NewListTemplatesUseCase crea una nueva instancia del caso de uso
 func NewListTemplatesUseCase(repo port.ListTemplatesRepository) *ListTemplatesUseCase {
 	return &ListTemplatesUseCase{
@@ -39,36 +34,15 @@ func NewListTemplatesUseCase(repo port.ListTemplatesRepository) *ListTemplatesUs
 	}
 }
 
-// Execute ejecuta el caso de uso para listar templates
+// Execute lista templates desde business_type_templates en la DB.
+// Si la DB está vacía (seeds no ejecutados), retorna lista vacía y el frontend
+// muestra su propio fallback estático.
 func (uc *ListTemplatesUseCase) Execute(ctx context.Context) (*ListTemplatesResponse, error) {
 	templates, err := uc.repo.LoadTemplatesFromBusinessTypeTemplates(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// Merge con legacy: agregar los que no están (por slug)
-	hasSlug := make(map[string]bool)
-	for _, t := range templates {
-		if t.Slug != "" {
-			hasSlug[t.Slug] = true
-		}
-		if t.Name != "" && strings.Contains(strings.ToLower(t.Name), "ferreter") {
-			hasSlug["ferreteria-corralon"] = true
-		}
-	}
-
-	for _, lt := range legacyTemplates {
-		if !hasSlug[lt.Slug] {
-			templates = append(templates, lt)
-			hasSlug[lt.Slug] = true
-		}
-	}
-
-	if len(templates) == 0 {
-		templates = append([]port.ListTemplate{}, legacyTemplates...)
-	}
-
-	// Mapear port.ListTemplate a usecase.Template
 	result := make([]Template, len(templates))
 	for i, t := range templates {
 		result[i] = Template{
