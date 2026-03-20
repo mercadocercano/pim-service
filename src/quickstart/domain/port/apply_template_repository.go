@@ -12,8 +12,10 @@ import (
 // TemplateCategory representa una categoría del template (desde JSON)
 type TemplateCategory struct {
 	MarketplaceID string
-	Name         string
-	Slug         string
+	Name          string
+	Slug          string
+	ParentSlug    string `json:"parent_slug"`
+	Level         int    `json:"level"`
 }
 
 // CreatedCategory representa una categoría creada en el tenant

@@ -20,9 +20,11 @@ func NewListTemplatesPostgresRepository(db *sql.DB) port.ListTemplatesRepository
 }
 
 type templateCategoryPayload struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Slug string `json:"slug"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Slug       string `json:"slug"`
+	ParentSlug string `json:"parent_slug"`
+	Level      int    `json:"level"`
 }
 
 // LoadTemplatesFromBusinessTypeTemplates carga templates desde business_type_templates
@@ -99,6 +101,10 @@ func parseTemplateCategoryNames(categoriesRaw []byte) ([]string, error) {
 
 	categories := make([]string, 0, len(payload))
 	for _, category := range payload {
+		// Solo mostrar categorías raíz (level 0 o sin parent_slug) en el listado
+		if category.ParentSlug != "" {
+			continue
+		}
 		if category.Name != "" {
 			categories = append(categories, category.Name)
 			continue
