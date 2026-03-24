@@ -152,11 +152,11 @@ func (h *MarketplaceBrandHandler) CreateMarketplaceBrand(c *gin.Context) {
 
 	// Estructura para recibir los datos de creación
 	var createData struct {
-		Name        string   `json:"name" binding:"required"`
-		Description string   `json:"description"`
-		LogoURL     string   `json:"logo_url"`
-		Website     string   `json:"website"`
-		Aliases     []string `json:"aliases"`
+		Name         string   `json:"name" binding:"required"`
+		Description  string   `json:"description"`
+		LogoURL      string   `json:"logo_url" binding:"omitempty,url"`
+		Website      string   `json:"website" binding:"omitempty,url"`
+		Aliases      []string `json:"aliases"`
 		CategoryTags []string `json:"category_tags"`
 	}
 
@@ -271,8 +271,8 @@ func (h *MarketplaceBrandHandler) UpdateMarketplaceBrand(c *gin.Context) {
 	var updateData struct {
 		Name         string   `json:"name"`
 		Description  string   `json:"description"`
-		LogoURL      string   `json:"logo_url"`
-		Website      string   `json:"website"`
+		LogoURL      string   `json:"logo_url" binding:"omitempty,url"`
+		Website      string   `json:"website" binding:"omitempty,url"`
 		Aliases      []string `json:"aliases"`
 		CategoryTags []string `json:"category_tags"`
 		Sources      []string `json:"sources"`
