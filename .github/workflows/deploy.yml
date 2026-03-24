@@ -1,17 +1,8 @@
-# Deploy pim-service a producción
-# Solo corre en pushes a ESTE repo (pim-service). Un deploy de backoffice-admin no lo dispara.
-# Push a main/master → build → push DOCR → deploy vía SSH | workflow_dispatch para redeploy manual
-# Requiere: deployment pim-service aplicado en K8s, secrets DOCR_TOKEN, SSH_PRIVATE_KEY, DROPLET_IP
-#
-# ⚠️ Drift: kubectl set image modifica el deployment en vivo pero NO el YAML del repo.
-# Para H5 aceptamos este tradeoff (no GitOps en esta etapa).
-
 name: Deploy pim-service to Production
 
 on:
   push:
     branches: [main, master]
-  workflow_dispatch: {}
 
 env:
   REGISTRY: registry.digitalocean.com/mc-bootstrap-registry
@@ -31,7 +22,6 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # DOCR login (token/token compatible con entorno actual)
       - name: Login to DigitalOcean Container Registry
         uses: docker/login-action@v3
         with:
@@ -39,15 +29,13 @@ jobs:
           username: ${{ secrets.DOCR_TOKEN }}
           password: ${{ secrets.DOCR_TOKEN }}
 
-      # Repo pim-service: --target production (binario compilado, no go run)
       - name: Build and Push Image (linux/amd64)
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           platforms: linux/amd64
-          "target: production
-production"
+          target: production
           provenance: false
           sbom: false
           build-args: |
@@ -55,7 +43,6 @@ production"
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-
 
       - name: Set up SSH key
         run: |
@@ -71,7 +58,6 @@ production"
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           DROPLET_IP: ${{ secrets.DROPLET_IP }}
 
-      # kubectl set image genera drift respecto al YAML del repo (aceptado en H5)
       - name: Deploy to K8s
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy@${{ secrets.DROPLET_IP }} \
@@ -80,19 +66,14 @@ production"
                ${{ env.CONTAINER_NAME }}=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
                -n ${{ env.NAMESPACE }} && \
              kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} \
-               -n ${{ env.NAMESPACE }} --timeout=360s"
+               -n ${{ env.NAMESPACE }} --timeout=180s"
 
-      # Rollout exitoso = readiness probe /api/v1/health pasó. Verificar estado del pod.
       - name: Verify Pod Ready
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy@${{ secrets.DROPLET_IP }} \
             "export KUBECONFIG=/home/deploy/.kube/config && \
-             READY=\$(kubectl get pods -l app=pim-service -o jsonpath='{.items[0].status.containerStatuses[0].ready}') && \
-             IMAGE=\$(kubectl get pods -l app=pim-service -o jsonpath='{.items[0].spec.containers[0].image}') && \
-             echo \"Pod ready: \$READY\" && \
-             echo \"Image: \$IMAGE\" && \
-             if [ \"\$READY\" = 'true' ]; then \
-               echo '✅ pim-service is running and healthy'; \
-             else \
-               echo '❌ Pod not ready'; exit 1; \
-             fi"
+             READY=\$(kubectl get pods -l app=${{ env.DEPLOYMENT_NAME }} -o jsonpath='{.items[0].status.containerStatuses[0].ready}') && \
+             IMAGE=\$(kubectl get pods -l app=${{ env.DEPLOYMENT_NAME }} -o jsonpath='{.items[0].spec.containers[0].image}') && \
+             echo \\"Pod ready: \$READY\\" && echo \\"Image: \$IMAGE\\" && \
+             [ \\"\$READY\\" = 'true' ] || (echo '❌ Pod not ready'; exit 1) && \
+             echo '✅ ${{ env.IMAGE_NAME }} is running and healthy'"
