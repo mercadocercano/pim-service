@@ -13,10 +13,6 @@ require (
 	go.mongodb.org/mongo-driver v1.13.1
 )
 
-replace (
-	github.com/mercadocercano/criteria => /libs/criteria
-	github.com/mercadocercano/middleware => /libs/middleware
-)
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
