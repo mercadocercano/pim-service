@@ -10,6 +10,7 @@ type ListTemplate struct {
 	Name        string   `json:"name"`
 	Slug        string   `json:"slug"`
 	Description string   `json:"description"`
+	Icon        string   `json:"icon"`
 	Categories  []string `json:"categories"`
 	IsActive    bool     `json:"is_active"`
 }
