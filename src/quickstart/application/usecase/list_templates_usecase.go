@@ -12,6 +12,7 @@ type Template struct {
 	Name        string   `json:"name"`
 	Slug        string   `json:"slug"`
 	Description string   `json:"description"`
+	Icon        string   `json:"icon"`
 	Categories  []string `json:"categories"`
 	IsActive    bool     `json:"is_active"`
 }
@@ -50,6 +51,7 @@ func (uc *ListTemplatesUseCase) Execute(ctx context.Context) (*ListTemplatesResp
 			Name:        t.Name,
 			Slug:        t.Slug,
 			Description: t.Description,
+			Icon:        t.Icon,
 			Categories:  t.Categories,
 			IsActive:    t.IsActive,
 		}

@@ -30,7 +30,8 @@ type templateCategoryPayload struct {
 // LoadTemplatesFromBusinessTypeTemplates carga templates desde business_type_templates
 func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates(ctx context.Context) ([]port.ListTemplate, error) {
 	query := `
-		SELECT btt.id, btt.name, btt.description, btt.categories, btt.is_default, btt.region, COALESCE(bt.code, '') as slug
+		SELECT btt.id, btt.name, btt.description, btt.categories, btt.is_default, btt.region,
+		       COALESCE(bt.code, '') as slug, COALESCE(bt.icon, '') as icon
 		FROM business_type_templates btt
 		LEFT JOIN business_types bt ON bt.id = btt.business_type_id
 		WHERE btt.is_active = true
@@ -50,11 +51,11 @@ func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates
 
 	templates := make([]port.ListTemplate, 0)
 	for rows.Next() {
-		var id, name, description, slug sql.NullString
+		var id, name, description, slug, icon sql.NullString
 		var categoriesRaw []byte
 		var isDefault sql.NullBool
 		var region sql.NullString
-		if err := rows.Scan(&id, &name, &description, &categoriesRaw, &isDefault, &region, &slug); err != nil {
+		if err := rows.Scan(&id, &name, &description, &categoriesRaw, &isDefault, &region, &slug, &icon); err != nil {
 			return nil, fmt.Errorf("error scanning business_type_template: %w", err)
 		}
 		if !id.Valid || id.String == "" {
@@ -77,6 +78,7 @@ func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates
 			Name:        name.String,
 			Slug:        templateSlug,
 			Description: description.String,
+			Icon:        icon.String,
 			Categories:  categories,
 			IsActive:    true,
 		})
