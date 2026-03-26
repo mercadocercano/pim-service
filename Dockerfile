@@ -86,8 +86,7 @@ RUN mkdir -p tmp scripts uploads logs /go/pkg/mod && \
 COPY --chown=appuser:appgroup . .
 
 # Switch to non-root user
-# USER appuser
-# Temporarily run as root to fix permission issues
+USER appuser
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
@@ -95,8 +94,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 EXPOSE 8080
 
-# Use go run directly (simple fix)
-CMD ["go", "run", "."]
+CMD sh -c 'if [ -n "$GITHUB_TOKEN" ]; then git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"; fi && air -c .air.toml'
 
 # ==============================================
 # Stage 3b: Migrate stage (para Job de migraciones)
