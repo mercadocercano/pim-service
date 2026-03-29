@@ -163,7 +163,7 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesLegacy(ctx conte
 	query := `
 		INSERT INTO categories (id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at)
 		SELECT 
-			gen_random_uuid()::text,
+			gen_random_uuid(),
 			$1,
 			name,
 			slug,
@@ -306,7 +306,7 @@ func (r *ApplyTemplatePostgresRepository) upsertCategory(ctx context.Context, ex
 		}
 		err = exec.QueryRowContext(ctx, `
 			INSERT INTO categories (id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at)
-			VALUES (gen_random_uuid()::text, $1, $2, $3, '', $4, 'active', $5, $5)
+			VALUES (gen_random_uuid(), $1, $2, $3, '', $4, 'active', $5, $5)
 			RETURNING id
 		`, tenantID.String(), name, slug, parentVal, now).Scan(&id)
 		if err != nil {
