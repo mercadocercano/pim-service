@@ -310,7 +310,7 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 
 		// Agregar variante al producto
 		isDefault := variantData.IsDefault || idx == 0 // Primera variante es default
-		_, err = product.AddVariant(
+		variant, err := product.AddVariant(
 			variantName,
 			variantSKU,
 			isDefault,
@@ -319,6 +319,11 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 		)
 		if err != nil {
 			return "", false, fmt.Errorf("error adding variant %d: %w", idx+1, err)
+		}
+
+		// Aplicar precio de la variante
+		if variantData.Price > 0 {
+			variant.UpdatePrice(variantData.Price)
 		}
 	}
 

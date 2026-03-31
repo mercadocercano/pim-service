@@ -271,12 +271,15 @@ func (r *PostgresProductRepository) ExistsBySKUExcludingID(ctx context.Context, 
 
 // SearchByCriteria busca productos usando criterios
 // Incluye COALESCE(products.sku, default_variant.sku) para productos sin sku (ej. bulk import con variantes)
+// Incluye price y stock de la variante default para mostrar en listados
 func (r *PostgresProductRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.Product, error) {
 	baseQuery := `
 		SELECT p.id, p.tenant_id, p.name, p.description,
 			   COALESCE(p.sku, (SELECT pv.sku FROM product_variants pv WHERE pv.product_id = p.id AND pv.is_default = true AND pv.status != 'deleted' LIMIT 1)) as sku,
 			   p.category_id, p.category_name, p.brand_id, p.brand_name,
-			   p.status, p.created_at, p.updated_at
+			   p.status, p.created_at, p.updated_at,
+			   (SELECT pv.price FROM product_variants pv WHERE pv.product_id = p.id AND pv.is_default = true AND pv.status != 'deleted' LIMIT 1) as default_price,
+			   (SELECT pv.stock FROM product_variants pv WHERE pv.product_id = p.id AND pv.is_default = true AND pv.status != 'deleted' LIMIT 1) as default_stock
 		FROM products p
 	`
 
@@ -292,7 +295,7 @@ func (r *PostgresProductRepository) SearchByCriteria(ctx context.Context, crit c
 	}
 	defer rows.Close()
 
-	return r.scanProducts(rows)
+	return r.scanProductsWithVariantInfo(rows)
 }
 
 // CountByCriteria cuenta productos usando criterios
@@ -363,6 +366,59 @@ func (r *PostgresProductRepository) scanProducts(rows *sql.Rows) ([]*entity.Prod
 
 		if err != nil {
 			return nil, err
+		}
+
+		products = append(products, product)
+	}
+
+	return products, rows.Err()
+}
+
+// scanProductsWithVariantInfo escanea productos con price/stock de la variante default
+func (r *PostgresProductRepository) scanProductsWithVariantInfo(rows *sql.Rows) ([]*entity.Product, error) {
+	var products []*entity.Product
+
+	for rows.Next() {
+		var id, tenantID, name, statusStr string
+		var description, sku, categoryID, categoryName, brandID, brandName *string
+		var createdAt, updatedAt sql.NullTime
+		var defaultPrice sql.NullFloat64
+		var defaultStock sql.NullInt64
+
+		err := rows.Scan(
+			&id, &tenantID, &name, &description, &sku,
+			&categoryID, &categoryName, &brandID, &brandName,
+			&statusStr, &createdAt, &updatedAt,
+			&defaultPrice, &defaultStock,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		product, err := r.buildProductFromScan(
+			id, tenantID, name, description, sku,
+			categoryID, categoryName, brandID, brandName,
+			statusStr, createdAt, updatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		// Crear variante default virtual con price/stock para el mapper
+		if defaultPrice.Valid || defaultStock.Valid {
+			price := defaultPrice.Float64
+			stock := int(defaultStock.Int64)
+			attrs, _ := value_object.NewVariantAttributeCollection([]*value_object.VariantAttribute{})
+			variantStatus := value_object.NewActiveVariantStatus()
+			defaultVariant := entity.NewProductVariantFromRepository(
+				uuid.Nil, tenantID, product.ID(),
+				name+" - Default", nil, variantStatus,
+				true, 1, price, stock, attrs,
+				product.CreatedAt(), product.UpdatedAt(),
+			)
+			product.LoadVariants([]*entity.ProductVariant{defaultVariant})
 		}
 
 		products = append(products, product)

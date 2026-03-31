@@ -92,6 +92,19 @@ func (uc *CreateProductUseCase) Execute(
 		return nil, err
 	}
 
+	// Aplicar precio y stock a la variante default si se proporcionan
+	if req.Price != nil || req.Stock != nil {
+		defaultVariant := product.GetDefaultVariant()
+		if defaultVariant != nil {
+			if req.Price != nil {
+				defaultVariant.UpdatePrice(*req.Price)
+			}
+			if req.Stock != nil {
+				defaultVariant.UpdateStock(*req.Stock)
+			}
+		}
+	}
+
 	// Validar reglas de negocio
 	if err := uc.domainService.ValidateForCreation(ctx, product); err != nil {
 		return nil, err

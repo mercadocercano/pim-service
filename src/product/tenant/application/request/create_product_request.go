@@ -4,11 +4,13 @@ import "errors"
 
 // CreateProductRequest representa la petición para crear un producto
 type CreateProductRequest struct {
-	Name        string  `json:"name" binding:"required" example:"iPhone 15 Pro"`
-	Description *string `json:"description,omitempty" example:"Smartphone Apple con chip A17 Pro"`
-	SKU         *string `json:"sku,omitempty" example:"IPHONE-15-PRO-256GB"`
-	CategoryID  *string `json:"category_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440001"`
-	BrandID     *string `json:"brand_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440006"`
+	Name        string   `json:"name" binding:"required" example:"iPhone 15 Pro"`
+	Description *string  `json:"description,omitempty" example:"Smartphone Apple con chip A17 Pro"`
+	SKU         *string  `json:"sku,omitempty" example:"IPHONE-15-PRO-256GB"`
+	CategoryID  *string  `json:"category_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440001"`
+	BrandID     *string  `json:"brand_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440006"`
+	Price       *float64 `json:"price,omitempty" example:"1299.99"`
+	Stock       *int     `json:"stock,omitempty" example:"100"`
 }
 
 // Validate valida los datos de la petición
@@ -36,6 +38,14 @@ func (r *CreateProductRequest) Validate() error {
 		if len(*r.SKU) > 50 {
 			return errors.New("el SKU no puede exceder 50 caracteres")
 		}
+	}
+
+	if r.Price != nil && *r.Price < 0 {
+		return errors.New("el precio no puede ser negativo")
+	}
+
+	if r.Stock != nil && *r.Stock < 0 {
+		return errors.New("el stock no puede ser negativo")
 	}
 
 	return nil
