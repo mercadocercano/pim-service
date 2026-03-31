@@ -13,6 +13,8 @@ type ProductResponse struct {
 	Category    *CategoryReferenceResponse `json:"category,omitempty"`
 	Brand       *BrandReferenceResponse    `json:"brand,omitempty"`
 	Status      string                     `json:"status"`
+	Price       *float64                   `json:"price,omitempty"`
+	Stock       *int                       `json:"stock,omitempty"`
 	Variants    []ProductVariantResponse   `json:"variants,omitempty"`
 	CreatedAt   time.Time                  `json:"created_at"`
 	UpdatedAt   time.Time                  `json:"updated_at"`
