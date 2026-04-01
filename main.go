@@ -39,6 +39,7 @@ import (
 	categoryRepository "saas-mt-pim-service/src/category/infrastructure/persistence/repository"
 
 	// Batch imports
+	batchPort "saas-mt-pim-service/src/batch/domain/port"
 	batchUseCase "saas-mt-pim-service/src/batch/application/usecase"
 	batchController "saas-mt-pim-service/src/batch/infrastructure/controller"
 
@@ -84,11 +85,11 @@ func main() {
 		ExcludedRoutes: []string{
 			"/api/v1/health",
 			"/metrics",
-			"/api/v1/marketplace-brands",
-			"/api/v1/marketplace-categories",
-			"/api/v1/marketplace-attributes",
-			"/api/v1/business-types",
-			"/api/v1/business-type-templates",
+			"/api/v1/marketplace-brands*",
+			"/api/v1/marketplace/categories*",
+			"/api/v1/marketplace-attributes*",
+			"/api/v1/business-types*",
+			"/api/v1/business-type-templates*",
 		},
 	}))
 
@@ -507,8 +508,9 @@ func setupBatchModule(router *gin.RouterGroup, db *sql.DB) {
 	categoryMappingRepo := categoryPersistence.NewTenantCategoryMappingPostgresRepository(db)
 
 	// Crear caso de uso batch
+	txBeginner := &batchPort.SQLDBTxBeginner{DB: db}
 	batchUseCase := batchUseCase.NewBatchCreateUseCase(
-		db,
+		txBeginner,
 		categoryRepo,
 		brandRepo,
 		productRepo,
