@@ -44,3 +44,8 @@ logs/
 
 # Go build cache
 .cache/
+tmp/
+.config/
+.gitconfig
+*-management/
+.cursorrules
