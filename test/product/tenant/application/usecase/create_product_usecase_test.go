@@ -198,3 +198,62 @@ func TestCreateProductRequest_Validate_ValidRequest_ShouldSucceed(t *testing.T) 
 	assert.Equal(t, categoryID, *req.CategoryID)
 	assert.Equal(t, brandID, *req.BrandID)
 }
+
+// Regression test: MER-96 — POST /pim/products ignoraba array variants del request
+func TestCreateProductRequest_WithVariants_ShouldPreserveVariantsData(t *testing.T) {
+	// Arrange
+	variantName := "Coca Cola 500ml"
+	variantSKU := "COCA-500"
+	variantPrice := 1500.00
+	variantBarcode := "7790895000478"
+
+	req := &request.CreateProductRequest{
+		Name: "Coca Cola",
+		Variants: []request.CreateVariantInProductRequest{
+			{
+				Name:    &variantName,
+				SKU:     &variantSKU,
+				Price:   &variantPrice,
+				Barcode: &variantBarcode,
+			},
+		},
+	}
+
+	// Act
+	err := req.Validate()
+
+	// Assert
+	require.NoError(t, err)
+	assert.Len(t, req.Variants, 1)
+	assert.Equal(t, &variantName, req.Variants[0].Name)
+	assert.Equal(t, &variantSKU, req.Variants[0].SKU)
+	assert.Equal(t, &variantPrice, req.Variants[0].Price)
+	assert.Equal(t, &variantBarcode, req.Variants[0].Barcode)
+}
+
+func TestCreateProductRequest_WithMultipleVariants_ShouldPreserveAll(t *testing.T) {
+	// Arrange
+	name1 := "Coca Cola 500ml"
+	sku1 := "COCA-500"
+	price1 := 1500.00
+	name2 := "Coca Cola 1.5L"
+	sku2 := "COCA-1500"
+	price2 := 2500.00
+
+	req := &request.CreateProductRequest{
+		Name: "Coca Cola",
+		Variants: []request.CreateVariantInProductRequest{
+			{Name: &name1, SKU: &sku1, Price: &price1},
+			{Name: &name2, SKU: &sku2, Price: &price2},
+		},
+	}
+
+	// Act
+	err := req.Validate()
+
+	// Assert
+	require.NoError(t, err)
+	assert.Len(t, req.Variants, 2)
+	assert.Equal(t, &name1, req.Variants[0].Name)
+	assert.Equal(t, &name2, req.Variants[1].Name)
+}

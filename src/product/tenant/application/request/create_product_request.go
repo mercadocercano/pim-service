@@ -2,15 +2,24 @@ package request
 
 import "errors"
 
+// CreateVariantInProductRequest datos de una variante incluida al crear un producto
+type CreateVariantInProductRequest struct {
+	Name    *string  `json:"name,omitempty"`
+	SKU     *string  `json:"sku,omitempty"`
+	Price   *float64 `json:"price,omitempty"`
+	Barcode *string  `json:"barcode,omitempty"`
+}
+
 // CreateProductRequest representa la petición para crear un producto
 type CreateProductRequest struct {
-	Name        string   `json:"name" binding:"required" example:"iPhone 15 Pro"`
-	Description *string  `json:"description,omitempty" example:"Smartphone Apple con chip A17 Pro"`
-	SKU         *string  `json:"sku,omitempty" example:"IPHONE-15-PRO-256GB"`
-	CategoryID  *string  `json:"category_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440001"`
-	BrandID     *string  `json:"brand_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440006"`
-	Price       *float64 `json:"price,omitempty" example:"1299.99"`
-	Stock       *int     `json:"stock,omitempty" example:"100"`
+	Name        string                          `json:"name" binding:"required" example:"iPhone 15 Pro"`
+	Description *string                         `json:"description,omitempty" example:"Smartphone Apple con chip A17 Pro"`
+	SKU         *string                         `json:"sku,omitempty" example:"IPHONE-15-PRO-256GB"`
+	CategoryID  *string                         `json:"category_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440001"`
+	BrandID     *string                         `json:"brand_id,omitempty" example:"550e8400-e29b-41d4-a716-446655440006"`
+	Price       *float64                        `json:"price,omitempty" example:"1299.99"`
+	Stock       *int                            `json:"stock,omitempty" example:"100"`
+	Variants    []CreateVariantInProductRequest `json:"variants,omitempty"`
 }
 
 // Validate valida los datos de la petición

@@ -783,6 +783,8 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantProductsFromTemplate(ctx c
 			`, tenantID.String(), p.Brand).Scan(&foundBrandID)
 			if err == nil {
 				brandID = sql.NullString{String: foundBrandID, Valid: true}
+			} else if err != sql.ErrNoRows {
+				return productsCreated, variantsCreated, productNames, fmt.Errorf("failed to lookup brand %s: %w", p.Brand, err)
 			}
 		}
 
@@ -800,7 +802,7 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantProductsFromTemplate(ctx c
 				VALUES ($1, $2, $3, '', $4, $5, $6, $7, $8, 'active', $9, $9)
 			`, productID, tenantID.String(), name, sku, categoryID, categoryName, brandID, brandName, now)
 			if err != nil {
-				continue
+				return productsCreated, variantsCreated, productNames, fmt.Errorf("failed to insert product %s: %w", name, err)
 			}
 			productsCreated++
 			productNames = append(productNames, name)
@@ -810,11 +812,12 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantProductsFromTemplate(ctx c
 				INSERT INTO product_variants (id, tenant_id, product_id, name, sku, status, is_default, sort_order, price, stock, created_at, updated_at)
 				VALUES ($1, $2, $3, $4, $5, 'active', true, 0, $6, 0, $7, $7)
 			`, uuid.New().String(), tenantID.String(), productID, name, variantSKU, p.PriceReference, now)
-			if err == nil {
-				variantsCreated++
+			if err != nil {
+				return productsCreated, variantsCreated, productNames, fmt.Errorf("failed to insert default variant for product %s: %w", name, err)
 			}
+			variantsCreated++
 		} else if err != nil {
-			continue
+			return productsCreated, variantsCreated, productNames, fmt.Errorf("failed to check existing product %s: %w", name, err)
 		}
 	}
 
@@ -854,11 +857,11 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantAttributesFromTemplate(ctx
 				VALUES ($1, $2, $3, '', 'select', false, $4, 'active', $5, $5)
 			`, attrID, tenantID.String(), name, pq.Array(attr.Values), now)
 			if err != nil {
-				continue
+				return attributesCreated, linksCreated, fmt.Errorf("failed to insert attribute %s: %w", name, err)
 			}
 			attributesCreated++
 		} else if err != nil {
-			continue
+			return attributesCreated, linksCreated, fmt.Errorf("failed to check existing attribute %s: %w", name, err)
 		}
 
 		for _, catSlug := range attr.AppliesToCategories {
@@ -871,9 +874,10 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantAttributesFromTemplate(ctx
 				VALUES ($1, $2, $3, $4, 'active', $5, $5)
 				ON CONFLICT (tenant_id, category_id, attribute_id) DO NOTHING
 			`, uuid.New().String(), tenantID.String(), cat.ID, attrID, now)
-			if err == nil {
-				linksCreated++
+			if err != nil {
+				return attributesCreated, linksCreated, fmt.Errorf("failed to link attribute %s to category %s: %w", name, catSlug, err)
 			}
+			linksCreated++
 		}
 	}
 
