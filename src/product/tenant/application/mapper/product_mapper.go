@@ -58,6 +58,14 @@ func (m *ProductMapper) ToResponse(product *entity.Product) *response.ProductRes
 		}
 	}
 
+	// Price/stock de la variante default (si las variantes están cargadas)
+	if defaultVariant := product.GetDefaultVariant(); defaultVariant != nil {
+		price := defaultVariant.Price()
+		stock := defaultVariant.Stock()
+		resp.Price = &price
+		resp.Stock = &stock
+	}
+
 	return resp
 }
 

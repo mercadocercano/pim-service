@@ -151,58 +151,21 @@ func (p *ProductCSVFileImporter) ParseRow(row []string, headers []string, rowDat
 		return nil, errors
 	}
 	
-	// Parsear atributos adicionales si existen
-	// Nota: Los atributos adicionales del CSV se pueden usar para crear variantes con atributos
-	// pero el producto en sí no tiene un campo de atributos genéricos
-	attributes := p.parseAttributes(rowData)
-	
-	// Si tenemos un precio válido, crear una variante por defecto
-	if price > 0 && len(errors) == 0 {
-		// Convertir los atributos del CSV a VariantAttributes
-		variantAttributes := make([]*value_object.VariantAttribute, 0)
-		for key, value := range attributes {
-			if strValue, ok := value.(string); ok {
-				attr, err := value_object.NewVariantAttribute(key, strValue)
-				if err == nil {
-					variantAttributes = append(variantAttributes, attr)
-				}
-			}
+	// Aplicar price y stock a la variante default que ya creó NewProduct()
+	if defaultVariant := product.GetDefaultVariant(); defaultVariant != nil {
+		if price > 0 {
+			defaultVariant.UpdatePrice(price)
 		}
-		
-		// Crear la colección de atributos
-		attrCollection, err := value_object.NewVariantAttributeCollection(variantAttributes)
-		if err != nil {
-			errors = append(errors, fmt.Sprintf("Error al crear colección de atributos: %v", err))
-		}
-		
-		// Crear la variante usando el constructor apropiado
-		variant, err := entity.NewProductVariant(
-			tenantID,
-			product.ID(),
-			"Variante principal",
-			productSKU, // Usar el mismo SKU del producto
-			true,       // Es la variante por defecto
-			1,          // Primer orden
-			attrCollection,
-		)
-		if err != nil {
-			errors = append(errors, fmt.Sprintf("Error al crear variante: %v", err))
-		}
-		
-		// El producto necesita que se le agregue la variante usando AddVariant
-		// Pero eso se debe hacer después de guardar el producto en el repositorio
-		// Por ahora solo validamos que se puede crear
-		_ = variant
-		
-		// Parsear stock si existe (se manejará en el servicio de stock)
+
 		if stockStr := rowData["stock"]; stockStr != "" {
 			stock, err := strconv.Atoi(stockStr)
 			if err != nil {
 				errors = append(errors, fmt.Sprintf("stock inválido: %s", stockStr))
 			} else if stock < 0 {
 				errors = append(errors, "el stock no puede ser negativo")
+			} else {
+				defaultVariant.UpdateStock(stock)
 			}
-			// El stock se manejará en el servicio de stock, no en la variante
 		}
 	}
 	
