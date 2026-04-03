@@ -2,28 +2,21 @@ package usecase
 
 import (
 	"context"
+
+	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
-// GetCategoriesByBusinessTypeUseCase obtiene categorías por tipo de negocio
+// GetCategoriesByBusinessTypeUseCase obtiene categorías por tipo de negocio desde la DB
 type GetCategoriesByBusinessTypeUseCase struct {
-	// Por ahora retorna datos mock, después se conectará con business_type_templates
+	repo port.GetCategoriesByBusinessTypeRepository
 }
 
-// NewGetCategoriesByBusinessTypeUseCase crea una nueva instancia
-func NewGetCategoriesByBusinessTypeUseCase() *GetCategoriesByBusinessTypeUseCase {
-	return &GetCategoriesByBusinessTypeUseCase{}
+// NewGetCategoriesByBusinessTypeUseCase crea una nueva instancia con el repositorio inyectado
+func NewGetCategoriesByBusinessTypeUseCase(repo port.GetCategoriesByBusinessTypeRepository) *GetCategoriesByBusinessTypeUseCase {
+	return &GetCategoriesByBusinessTypeUseCase{repo: repo}
 }
 
-// Execute ejecuta el caso de uso
-func (uc *GetCategoriesByBusinessTypeUseCase) Execute(ctx context.Context, businessType string) (interface{}, error) {
-	// Mock data temporal - después vendrá de business_type_templates
-	categories := []map[string]interface{}{
-		{"id": 1, "name": "Bebidas", "code": "beverages"},
-		{"id": 2, "name": "Lácteos", "code": "dairy"},
-		{"id": 3, "name": "Panadería", "code": "bakery"},
-	}
-	
-	return map[string]interface{}{
-		"categories": categories,
-	}, nil
+// Execute obtiene las categorías asociadas al tipo de negocio dado su slug
+func (uc *GetCategoriesByBusinessTypeUseCase) Execute(ctx context.Context, businessTypeSlug string) ([]port.CategoryByBusinessType, error) {
+	return uc.repo.GetCategoriesByBusinessType(ctx, businessTypeSlug)
 }

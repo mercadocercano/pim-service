@@ -6,13 +6,12 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid/v5"
-	"saas-mt-pim-service/src/template_ai/application/mapper"
+	appPort "saas-mt-pim-service/src/template_ai/application/port"
 	"saas-mt-pim-service/src/template_ai/application/request"
 	"saas-mt-pim-service/src/template_ai/application/response"
 	"saas-mt-pim-service/src/template_ai/domain/entity"
 	"saas-mt-pim-service/src/template_ai/domain/exception"
 	"saas-mt-pim-service/src/template_ai/domain/port"
-	"saas-mt-pim-service/src/template_ai/domain/service"
 	"saas-mt-pim-service/src/template_ai/domain/value_object"
 )
 
@@ -30,16 +29,16 @@ type updateResult struct {
 type UpdateTemplateFromFeedbackUseCase struct {
 	aiTemplateRepo      port.AITemplateRepository
 	aiGenerationService port.AIGenerationService
-	domainService       *service.AITemplateDomainService
-	mapper              *mapper.TemplateMapper
+	domainService       port.AITemplateDomainServicePort
+	mapper              appPort.TemplateMapperPort
 }
 
 // NewUpdateTemplateFromFeedbackUseCase creates a new instance of the use case
 func NewUpdateTemplateFromFeedbackUseCase(
 	aiTemplateRepo port.AITemplateRepository,
 	aiGenerationService port.AIGenerationService,
-	domainService *service.AITemplateDomainService,
-	mapper *mapper.TemplateMapper,
+	domainService port.AITemplateDomainServicePort,
+	mapper appPort.TemplateMapperPort,
 ) *UpdateTemplateFromFeedbackUseCase {
 	return &UpdateTemplateFromFeedbackUseCase{
 		aiTemplateRepo:      aiTemplateRepo,

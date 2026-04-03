@@ -6,33 +6,28 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid/v5"
-	"saas-mt-pim-service/src/template_ai/application/mapper"
+	appPort "saas-mt-pim-service/src/template_ai/application/port"
 	"saas-mt-pim-service/src/template_ai/application/request"
 	"saas-mt-pim-service/src/template_ai/application/response"
 	"saas-mt-pim-service/src/template_ai/domain/entity"
 	"saas-mt-pim-service/src/template_ai/domain/exception"
 	"saas-mt-pim-service/src/template_ai/domain/port"
-	"saas-mt-pim-service/src/template_ai/domain/service"
 )
 
 // ApplyDynamicTemplateUseCase handles applying templates to tenant catalogs
 type ApplyDynamicTemplateUseCase struct {
 	aiTemplateRepo    port.AITemplateRepository
 	globalProductRepo port.GlobalProductRepository
-	domainService     *service.AITemplateDomainService
-	mapper            *mapper.TemplateMapper
-	// In a real implementation, we would also have:
-	// productService    port.ProductService
-	// categoryService   port.CategoryService
-	// brandService      port.BrandService
+	domainService     port.AITemplateDomainServicePort
+	mapper            appPort.TemplateMapperPort
 }
 
 // NewApplyDynamicTemplateUseCase creates a new instance of the use case
 func NewApplyDynamicTemplateUseCase(
 	aiTemplateRepo port.AITemplateRepository,
 	globalProductRepo port.GlobalProductRepository,
-	domainService *service.AITemplateDomainService,
-	mapper *mapper.TemplateMapper,
+	domainService port.AITemplateDomainServicePort,
+	mapper appPort.TemplateMapperPort,
 ) *ApplyDynamicTemplateUseCase {
 	return &ApplyDynamicTemplateUseCase{
 		aiTemplateRepo:    aiTemplateRepo,
