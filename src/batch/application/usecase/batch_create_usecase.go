@@ -2,11 +2,11 @@ package usecase
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
 	"saas-mt-pim-service/src/batch/application/request"
 	"saas-mt-pim-service/src/batch/application/response"
+	batchPort "saas-mt-pim-service/src/batch/domain/port"
 	"saas-mt-pim-service/src/brand/domain/entity"
 	brandPort "saas-mt-pim-service/src/brand/domain/port"
 	categoryEntity "saas-mt-pim-service/src/category/domain/entity"
@@ -20,7 +20,7 @@ import (
 
 // BatchCreateUseCase maneja la creación masiva de entidades
 type BatchCreateUseCase struct {
-	db                  *sql.DB
+	txBeginner          batchPort.TxBeginner
 	categoryRepo        categoryPort.CategoryRepository
 	brandRepo           brandPort.BrandRepository
 	productRepo         productPort.ProductCriteriaRepository
@@ -29,14 +29,14 @@ type BatchCreateUseCase struct {
 
 // NewBatchCreateUseCase crea una nueva instancia del caso de uso
 func NewBatchCreateUseCase(
-	db *sql.DB,
+	txBeginner batchPort.TxBeginner,
 	categoryRepo categoryPort.CategoryRepository,
 	brandRepo brandPort.BrandRepository,
 	productRepo productPort.ProductCriteriaRepository,
 	categoryMappingRepo categoryPort.TenantCategoryMappingRepository,
 ) *BatchCreateUseCase {
 	return &BatchCreateUseCase{
-		db:                  db,
+		txBeginner:          txBeginner,
 		categoryRepo:        categoryRepo,
 		brandRepo:           brandRepo,
 		productRepo:         productRepo,
@@ -56,7 +56,7 @@ func (uc *BatchCreateUseCase) Execute(ctx context.Context, req *request.BatchCre
 	}
 
 	// Iniciar transacción
-	tx, err := uc.db.BeginTx(ctx, nil)
+	tx, err := uc.txBeginner.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error al iniciar transacción: %w", err)
 	}

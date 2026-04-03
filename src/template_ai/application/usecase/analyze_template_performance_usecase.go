@@ -7,27 +7,26 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid/v5"
-	"saas-mt-pim-service/src/template_ai/application/mapper"
+	appPort "saas-mt-pim-service/src/template_ai/application/port"
 	"saas-mt-pim-service/src/template_ai/application/request"
 	"saas-mt-pim-service/src/template_ai/application/response"
 	"saas-mt-pim-service/src/template_ai/domain/exception"
 	"saas-mt-pim-service/src/template_ai/domain/port"
-	"saas-mt-pim-service/src/template_ai/domain/service"
 	"saas-mt-pim-service/src/template_ai/domain/value_object"
 )
 
 // AnalyzeTemplatePerformanceUseCase handles template performance analysis
 type AnalyzeTemplatePerformanceUseCase struct {
 	aiTemplateRepo port.AITemplateRepository
-	domainService  *service.AITemplateDomainService
-	mapper         *mapper.TemplateMapper
+	domainService  port.AITemplateDomainServicePort
+	mapper         appPort.TemplateMapperPort
 }
 
 // NewAnalyzeTemplatePerformanceUseCase creates a new instance of the use case
 func NewAnalyzeTemplatePerformanceUseCase(
 	aiTemplateRepo port.AITemplateRepository,
-	domainService *service.AITemplateDomainService,
-	mapper *mapper.TemplateMapper,
+	domainService port.AITemplateDomainServicePort,
+	mapper appPort.TemplateMapperPort,
 ) *AnalyzeTemplatePerformanceUseCase {
 	return &AnalyzeTemplatePerformanceUseCase{
 		aiTemplateRepo: aiTemplateRepo,
