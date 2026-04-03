@@ -31,7 +31,8 @@ func NewQuickstartModuleConfig(db *sql.DB) *QuickstartModuleConfig {
 	
 	// Crear casos de uso simplificados (sin YamlDataLoader)
 	getBusinessTypesUseCase := usecase.NewGetBusinessTypesUseCase(businessTypeRepo)
-	getCategoriesByBusinessTypeUseCase := usecase.NewGetCategoriesByBusinessTypeUseCase()
+	getCategoriesRepo := quickstartRepository.NewGetCategoriesByBusinessTypePostgresRepository(db)
+	getCategoriesByBusinessTypeUseCase := usecase.NewGetCategoriesByBusinessTypeUseCase(getCategoriesRepo)
 	getAttributesByBusinessTypeUseCase := usecase.NewGetAttributesByBusinessTypeUseCase()
 	getVariantsByBusinessTypeUseCase := usecase.NewGetVariantsByBusinessTypeUseCase()
 	getProductsByBusinessTypeUseCase := usecase.NewGetProductsByBusinessTypeUseCase()
