@@ -99,7 +99,7 @@ func (om *BusinessTypeTemplateObjectMother) Default() *businessTypeEntity.Busine
 				},
 			},
 		},
-		Brands:    []string{"Samsung", "LG", "Sony", "Philips", "Genérica"},
+		Brands:    []businessTypeEntity.BrandTemplate{{Name: "Samsung"}, {Name: "LG"}, {Name: "Sony"}, {Name: "Philips"}, {Name: "Genérica"}},
 		IsActive:  true,
 		IsDefault: true,
 		Metadata: map[string]interface{}{
@@ -182,7 +182,7 @@ func (om *BusinessTypeTemplateObjectMother) SimpleTemplate() *businessTypeEntity
 			},
 		},
 	}
-	template.Brands = []string{"Test"}
+	template.Brands = []businessTypeEntity.BrandTemplate{{Name: "Test"}}
 	return template
 }
 

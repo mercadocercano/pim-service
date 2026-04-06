@@ -31,7 +31,7 @@ type UpdateTemplateRequest struct {
 	Categories  []entity.CategoryTemplate        `json:"categories"`
 	Attributes  []entity.AttributeTemplate       `json:"attributes"`
 	Products    []entity.ProductTemplate         `json:"products"`
-	Brands      []string                         `json:"brands"`
+	Brands      []entity.BrandTemplate            `json:"brands"`
 	IsActive    bool                             `json:"is_active"`
 	IsDefault   bool                             `json:"is_default"`
 	Metadata    map[string]interface{}           `json:"metadata"`
