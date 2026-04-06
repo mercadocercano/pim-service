@@ -18,12 +18,18 @@ type BusinessTypeTemplate struct {
 	Categories     []CategoryTemplate     `json:"categories"`       // Categorías incluidas
 	Attributes     []AttributeTemplate    `json:"attributes"`       // Atributos incluidos
 	Products       []ProductTemplate      `json:"products"`         // Productos de ejemplo
-	Brands         []string               `json:"brands"`           // Marcas sugeridas
+	Brands         []BrandTemplate        `json:"brands"`           // Marcas sugeridas
 	IsActive       bool                   `json:"is_active"`
 	IsDefault      bool                   `json:"is_default"` // Si es la plantilla por defecto
 	Metadata       map[string]interface{} `json:"metadata"`   // Configuración adicional
 	CreatedAt      time.Time              `json:"created_at"`
 	UpdatedAt      time.Time              `json:"updated_at"`
+}
+
+// BrandTemplate representa una marca sugerida en la plantilla
+type BrandTemplate struct {
+	Name                   string   `json:"name"`
+	SuggestedForCategories []string `json:"suggested_for_categories,omitempty"`
 }
 
 // CategoryTemplate representa una categoría en la plantilla
@@ -87,7 +93,7 @@ func NewBusinessTypeTemplate(businessTypeID, name, description, version, region 
 		Categories:     []CategoryTemplate{},
 		Attributes:     []AttributeTemplate{},
 		Products:       []ProductTemplate{},
-		Brands:         []string{},
+		Brands:         []BrandTemplate{},
 		IsActive:       true,
 		IsDefault:      false,
 		Metadata:       make(map[string]interface{}),
