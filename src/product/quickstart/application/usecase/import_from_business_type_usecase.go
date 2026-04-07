@@ -3,45 +3,45 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"log"
 
+	globalPort "saas-mt-pim-service/src/product/global_catalog/domain/port"
+	tenantEntity "saas-mt-pim-service/src/product/tenant/domain/entity"
 	tenantPort "saas-mt-pim-service/src/product/tenant/domain/port"
 )
 
-// ImportFromBusinessTypeUseCase caso de uso para importar productos masivamente
 type ImportFromBusinessTypeUseCase struct {
 	tenantProductRepo tenantPort.ProductRepository
-	// TODO: Agregar repositorio del global catalog cuando esté disponible
+	globalCatalogRepo globalPort.GlobalProductRepository
 }
 
-// NewImportFromBusinessTypeUseCase crea una nueva instancia del caso de uso
 func NewImportFromBusinessTypeUseCase(
 	tenantProductRepo tenantPort.ProductRepository,
+	globalCatalogRepo globalPort.GlobalProductRepository,
 ) *ImportFromBusinessTypeUseCase {
 	return &ImportFromBusinessTypeUseCase{
 		tenantProductRepo: tenantProductRepo,
+		globalCatalogRepo: globalCatalogRepo,
 	}
 }
 
-// ImportFromBusinessTypeRequest request para importación masiva
 type ImportFromBusinessTypeRequest struct {
 	TenantID       string   `json:"tenant_id"`
 	BusinessTypeID string   `json:"business_type_id"`
-	CategoryIDs    []string `json:"category_ids,omitempty"`   // Filtrar por categorías específicas
-	ProductIDs     []string `json:"product_ids,omitempty"`    // Importar productos específicos
-	ImportAll      bool     `json:"import_all"`               // Importar todos los productos del tipo de negocio
-	InitialStatus  string   `json:"initial_status,omitempty"` // Estado inicial (default: "draft")
+	CategoryIDs    []string `json:"category_ids,omitempty"`
+	ProductIDs     []string `json:"product_ids,omitempty"`
+	ImportAll      bool     `json:"import_all"`
+	InitialStatus  string   `json:"initial_status,omitempty"`
 }
 
-// ImportFromBusinessTypeResponse response de importación masiva
 type ImportFromBusinessTypeResponse struct {
-	TenantID         string                   `json:"tenant_id"`
-	BusinessTypeID   string                   `json:"business_type_id"`
+	TenantID         string                  `json:"tenant_id"`
+	BusinessTypeID   string                  `json:"business_type_id"`
 	ImportedProducts []ImportedProductSummary `json:"imported_products"`
 	FailedImports    []FailedImportSummary    `json:"failed_imports"`
 	Summary          ImportSummary            `json:"summary"`
 }
 
-// ImportedProductSummary resumen de producto importado exitosamente
 type ImportedProductSummary struct {
 	ProductID    string `json:"product_id"`
 	TemplateID   string `json:"template_id"`
@@ -50,14 +50,12 @@ type ImportedProductSummary struct {
 	CategoryName string `json:"category_name"`
 }
 
-// FailedImportSummary resumen de importación fallida
 type FailedImportSummary struct {
 	TemplateID string `json:"template_id"`
 	Error      string `json:"error"`
 	Reason     string `json:"reason"`
 }
 
-// ImportSummary resumen general de la importación
 type ImportSummary struct {
 	TotalAttempted int `json:"total_attempted"`
 	TotalSuccess   int `json:"total_success"`
@@ -65,78 +63,102 @@ type ImportSummary struct {
 	SuccessRate    int `json:"success_rate_percentage"`
 }
 
-// Execute ejecuta la importación masiva desde tipo de negocio
 func (uc *ImportFromBusinessTypeUseCase) Execute(
 	ctx context.Context,
 	request ImportFromBusinessTypeRequest,
 ) (*ImportFromBusinessTypeResponse, error) {
-	// Validar request
 	if request.TenantID == "" {
 		return nil, fmt.Errorf("tenant_id es requerido")
 	}
 	if request.BusinessTypeID == "" {
 		return nil, fmt.Errorf("business_type_id es requerido")
 	}
-
-	// Establecer estado inicial por defecto
 	if request.InitialStatus == "" {
-		request.InitialStatus = "draft"
+		request.InitialStatus = "active"
 	}
 
-	// TODO: Implementar lógica real cuando esté disponible el repositorio del global catalog
-	// Por ahora simulamos la importación
-	response := uc.simulateImport(request)
+	globals, err := uc.globalCatalogRepo.FindByBusinessType(request.BusinessTypeID, 50)
+	if err != nil {
+		return nil, fmt.Errorf("buscando productos del catálogo global: %w", err)
+	}
 
-	return response, nil
-}
+	var imported []ImportedProductSummary
+	var failed []FailedImportSummary
 
-// simulateImport simula la importación hasta que tengamos el global catalog real
-func (uc *ImportFromBusinessTypeUseCase) simulateImport(request ImportFromBusinessTypeRequest) *ImportFromBusinessTypeResponse {
-	// Simulación de productos importados
-	importedProducts := []ImportedProductSummary{
-		{
-			ProductID:    "prod-001",
-			TemplateID:   "template-iphone-15",
-			ProductName:  "iPhone 15 Pro - " + request.TenantID,
+	for _, gp := range globals {
+		gpID := gp.IDString()
+		if len(request.ProductIDs) > 0 && !contains(request.ProductIDs, gpID) {
+			continue
+		}
+
+		product, createErr := tenantEntity.NewProduct(
+			request.TenantID,
+			gp.Name(),
+			gp.Description(),
+			nil,
+			nil,
+			nil,
+		)
+		if createErr != nil {
+			failed = append(failed, FailedImportSummary{
+				TemplateID: gpID,
+				Error:      createErr.Error(),
+				Reason:     "Error creando producto tenant",
+			})
+			continue
+		}
+
+		if saveErr := uc.tenantProductRepo.Save(ctx, product); saveErr != nil {
+			failed = append(failed, FailedImportSummary{
+				TemplateID: gpID,
+				Error:      saveErr.Error(),
+				Reason:     "Error guardando producto",
+			})
+			continue
+		}
+
+		categoryName := ""
+		if cat := gp.Category(); cat != nil {
+			categoryName = *cat
+		}
+
+		imported = append(imported, ImportedProductSummary{
+			ProductID:    product.IDString(),
+			TemplateID:   gpID,
+			ProductName:  gp.Name(),
 			Status:       request.InitialStatus,
-			CategoryName: "Smartphones",
-		},
-		{
-			ProductID:    "prod-002",
-			TemplateID:   "template-samsung-s24",
-			ProductName:  "Samsung Galaxy S24 - " + request.TenantID,
-			Status:       request.InitialStatus,
-			CategoryName: "Smartphones",
-		},
+			CategoryName: categoryName,
+		})
+
+		log.Printf("[quickstart] imported global product %s → tenant product %s for tenant %s",
+			gpID, product.IDString(), request.TenantID)
 	}
 
-	// Simulación de fallos
-	failedImports := []FailedImportSummary{
-		{
-			TemplateID: "template-invalid",
-			Error:      "Template no encontrado",
-			Reason:     "El template especificado no existe en el catálogo global",
-		},
-	}
-
-	totalAttempted := len(importedProducts) + len(failedImports)
-	totalSuccess := len(importedProducts)
-	totalFailed := len(failedImports)
+	totalAttempted := len(imported) + len(failed)
 	successRate := 0
 	if totalAttempted > 0 {
-		successRate = (totalSuccess * 100) / totalAttempted
+		successRate = (len(imported) * 100) / totalAttempted
 	}
 
 	return &ImportFromBusinessTypeResponse{
 		TenantID:         request.TenantID,
 		BusinessTypeID:   request.BusinessTypeID,
-		ImportedProducts: importedProducts,
-		FailedImports:    failedImports,
+		ImportedProducts: imported,
+		FailedImports:    failed,
 		Summary: ImportSummary{
 			TotalAttempted: totalAttempted,
-			TotalSuccess:   totalSuccess,
-			TotalFailed:    totalFailed,
+			TotalSuccess:   len(imported),
+			TotalFailed:    len(failed),
 			SuccessRate:    successRate,
 		},
+	}, nil
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
 	}
+	return false
 }

@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 
+	globalCatalogPort "saas-mt-pim-service/src/product/global_catalog/domain/port"
 	"saas-mt-pim-service/src/product/quickstart/application/usecase"
 	"saas-mt-pim-service/src/product/quickstart/infrastructure/controller"
 	"saas-mt-pim-service/src/product/tenant/domain/port"
@@ -23,10 +24,11 @@ type QuickstartConfig struct {
 func NewQuickstartConfig(
 	db *sql.DB,
 	productRepo port.ProductRepository,
+	globalCatalogRepo globalCatalogPort.GlobalProductRepository,
 ) *QuickstartConfig {
 	// Use Cases
 	createFromTemplateUseCase := usecase.NewCreateFromTemplateUseCase(productRepo)
-	importFromBusinessTypeUseCase := usecase.NewImportFromBusinessTypeUseCase(productRepo)
+	importFromBusinessTypeUseCase := usecase.NewImportFromBusinessTypeUseCase(productRepo, globalCatalogRepo)
 	getQuickstartProgressUseCase := usecase.NewGetQuickstartProgressUseCase(productRepo)
 
 	// Controllers

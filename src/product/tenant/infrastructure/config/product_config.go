@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 
+	globalCatalogPersistence "saas-mt-pim-service/src/product/global_catalog/infrastructure/persistence"
 	quickstartUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
 	quickstartCtrl "saas-mt-pim-service/src/product/quickstart/infrastructure/controller"
 	quickstartService "saas-mt-pim-service/src/product/quickstart/infrastructure/service"
@@ -168,7 +169,8 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 
 	// Use Cases - Quickstart
 	createFromTemplateUseCase := quickstartUseCase.NewCreateFromTemplateUseCase(productRepo)
-	importFromBusinessTypeUseCase := quickstartUseCase.NewImportFromBusinessTypeUseCase(productRepo)
+	globalCatalogRepo := globalCatalogPersistence.NewPostgresGlobalProductRepository(db)
+	importFromBusinessTypeUseCase := quickstartUseCase.NewImportFromBusinessTypeUseCase(productRepo, globalCatalogRepo)
 	getQuickstartProgressUseCase := quickstartUseCase.NewGetQuickstartProgressUseCase(productRepo)
 
 	// Servicios - Quickstart
