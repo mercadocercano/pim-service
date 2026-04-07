@@ -24,9 +24,15 @@ func (b *GlobalProductCriteriaBuilder) FromContext(c *gin.Context) *GlobalProduc
 	b.builder = b.helper.BuildBaseFromContext(c)
 
 	// Filtros específicos de productos globales
-	b.builder.AddEqualFilter("source", c.Query("source"))
-	b.builder.AddEqualFilter("business_type", c.Query("business_type"))
-	b.builder.AddLikeFilter("name", c.Query("search"))
+	if v := c.Query("source"); v != "" {
+		b.builder.AddEqualFilter("source", v)
+	}
+	if v := c.Query("business_type"); v != "" {
+		b.builder.AddEqualFilter("business_type", v)
+	}
+	if v := c.Query("search"); v != "" {
+		b.builder.AddLikeFilter("name", v)
+	}
 
 	// Filtros múltiples para marcas
 	if brands := c.QueryArray("brand"); len(brands) > 0 {
@@ -76,7 +82,9 @@ func (b *GlobalProductCriteriaBuilder) FromContext(c *gin.Context) *GlobalProduc
 		}
 	}
 
-	b.builder.AddEqualFilter("ean", c.Query("ean"))
+	if v := c.Query("ean"); v != "" {
+		b.builder.AddEqualFilter("ean", v)
+	}
 
 	// Filtros booleanos
 	if isVerified := c.Query("is_verified"); isVerified != "" && isVerified != "all" {

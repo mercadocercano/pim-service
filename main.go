@@ -90,6 +90,8 @@ func main() {
 			"/api/v1/marketplace-attributes*",
 			"/api/v1/business-types*",
 			"/api/v1/business-type-templates*",
+			"/api/v1/global-catalog*",
+			"/api/v1/public/global-catalog*",
 		},
 	}))
 
