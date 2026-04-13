@@ -90,6 +90,8 @@ func main() {
 			"/api/v1/marketplace-attributes*",
 			"/api/v1/business-types*",
 			"/api/v1/business-type-templates*",
+			"/api/v1/marketplace/products*",
+			"/api/v1/marketplace/store-types*",
 			"/api/v1/global-catalog*",
 			"/api/v1/public/global-catalog*",
 		},
@@ -186,6 +188,7 @@ func main() {
 	setupBusinessTypeTemplateModule(v1, db)
 	setupGlobalCatalogModule(v1, db)
 	setupMarketplaceCategoriesModule(v1, db)
+	setupMarketplaceProductsModule(v1, db)
 	setupBatchModule(v1, db)
 	setupSchemaValidationModule(v1, db)
 	setupAITemplateModule(v1, db)
@@ -561,4 +564,24 @@ func setupAITemplateModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  POST   /api/v1/templates/:id/apply")
 	log.Println("  GET    /api/v1/templates/:id/performance")
 	log.Println("  POST   /api/v1/templates/update-from-feedback")
+}
+
+// setupMarketplaceProductsModule configura el módulo de productos del marketplace (cross-tenant)
+func setupMarketplaceProductsModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Marketplace Products...")
+
+	// Crear repositorio
+	marketplaceProductRepo := categoryPersistence.NewMarketplaceProductPostgresRepository(db)
+
+	// Crear handler
+	marketplaceProductHandler := categoryController.NewMarketplaceProductHandler(marketplaceProductRepo)
+
+	// Registrar rutas
+	marketplaceProductHandler.RegisterRoutes(router)
+
+	log.Println("Módulo Marketplace Products configurado exitosamente")
+	log.Println("Rutas Marketplace Products disponibles:")
+	log.Println("  GET    /api/v1/marketplace/products")
+	log.Println("  GET    /api/v1/marketplace/products/by-store-type/:code")
+	log.Println("  GET    /api/v1/marketplace/store-types")
 }
