@@ -11,16 +11,18 @@ import (
 
 // GlobalCatalogConfig contiene la configuración del módulo global catalog
 type GlobalCatalogConfig struct {
-	DB                             *sql.DB
-	GlobalCatalogController        *controller.GlobalCatalogController
-	globalProductRepository        *persistence.PostgresGlobalProductRepository
-	createGlobalProductUseCase     *usecase.CreateGlobalProduct
-	searchByEANUseCase             *usecase.SearchByEAN
-	listGlobalProductsUseCase      *usecase.ListGlobalProducts
-	listGlobalProductsByCriteriaUseCase *usecase.ListGlobalProductsByCriteriaUseCase
-	getGlobalProductByIDUseCase    *usecase.GetGlobalProductByID
-	updateGlobalProductByIDUseCase *usecase.UpdateGlobalProductByID
-	criteriaBuilder               *criteria.GlobalProductCriteriaBuilder
+	DB                                      *sql.DB
+	GlobalCatalogController                 *controller.GlobalCatalogController
+	globalProductRepository                 *persistence.PostgresGlobalProductRepository
+	createGlobalProductUseCase              *usecase.CreateGlobalProduct
+	searchByEANUseCase                      *usecase.SearchByEAN
+	listGlobalProductsUseCase               *usecase.ListGlobalProducts
+	listGlobalProductsByCriteriaUseCase     *usecase.ListGlobalProductsByCriteriaUseCase
+	getGlobalProductByIDUseCase             *usecase.GetGlobalProductByID
+	updateGlobalProductByIDUseCase          *usecase.UpdateGlobalProductByID
+	getBusinessTypeFacetsUseCase            *usecase.GetBusinessTypeFacets
+	listProductsNeedingEnrichmentUseCase    *usecase.ListProductsNeedingEnrichment
+	criteriaBuilder                         *criteria.GlobalProductCriteriaBuilder
 }
 
 // NewGlobalCatalogConfig crea una nueva configuración del módulo
@@ -50,6 +52,8 @@ func (c *GlobalCatalogConfig) initializeUseCases() {
 	c.listGlobalProductsByCriteriaUseCase = usecase.NewListGlobalProductsByCriteriaUseCase(c.globalProductRepository)
 	c.getGlobalProductByIDUseCase = usecase.NewGetGlobalProductByID(c.globalProductRepository)
 	c.updateGlobalProductByIDUseCase = usecase.NewUpdateGlobalProductByID(c.globalProductRepository)
+	c.getBusinessTypeFacetsUseCase = usecase.NewGetBusinessTypeFacets(c.globalProductRepository)
+	c.listProductsNeedingEnrichmentUseCase = usecase.NewListProductsNeedingEnrichment(c.globalProductRepository)
 }
 
 // initializeControllers inicializa los controladores
@@ -62,6 +66,8 @@ func (c *GlobalCatalogConfig) initializeControllers() {
 		c.listGlobalProductsByCriteriaUseCase,
 		c.getGlobalProductByIDUseCase,
 		c.updateGlobalProductByIDUseCase,
+		c.getBusinessTypeFacetsUseCase,
+		c.listProductsNeedingEnrichmentUseCase,
 		c.criteriaBuilder,
 	)
 }

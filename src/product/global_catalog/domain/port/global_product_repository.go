@@ -39,6 +39,14 @@ type GlobalProductRepository interface {
 	// Productos que necesitan actualización
 	FindNeedingUpdate(maxAgeHours int, limit int) ([]*entity.GlobalProduct, error)
 
+	// Productos que necesitan enrichment (sin imagen, precio o marca, o quality_score < 70)
+	FindNeedingEnrichment(businessType *string, limit, offset int) ([]*entity.GlobalProduct, error)
+	CountNeedingEnrichment(businessType *string) (int, error)
+
+	// Agregaciones por business_type
+	FindDistinctBrandsByBusinessType(businessType string) ([]string, error)
+	FindDistinctCategoriesByBusinessType(businessType string) ([]string, error)
+
 	// Estadísticas
 	CountTotal() (int, error)
 	CountBySource(source string) (int, error)

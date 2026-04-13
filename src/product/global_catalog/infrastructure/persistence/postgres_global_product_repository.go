@@ -799,3 +799,116 @@ func (r *PostgresGlobalProductRepository) buildGlobalProductFromScan(
 
 	return globalProduct, nil
 }
+
+func (r *PostgresGlobalProductRepository) FindDistinctBrandsByBusinessType(businessType string) ([]string, error) {
+	query := `
+		SELECT DISTINCT brand FROM global_products
+		WHERE business_type = $1 AND is_active = true AND brand IS NOT NULL AND brand != ''
+		ORDER BY brand
+	`
+	rows, err := r.db.Query(query, businessType)
+	if err != nil {
+		return nil, fmt.Errorf("error buscando marcas por business_type: %w", err)
+	}
+	defer rows.Close()
+
+	var brands []string
+	for rows.Next() {
+		var brand string
+		if err := rows.Scan(&brand); err != nil {
+			return nil, fmt.Errorf("error escaneando marca: %w", err)
+		}
+		brands = append(brands, brand)
+	}
+	return brands, rows.Err()
+}
+
+// FindNeedingEnrichment devuelve productos con datos incompletos (quality_score < 70
+// o campos price/image_url/brand nulos). Usado por webdata-service para la cola de scraping.
+func (r *PostgresGlobalProductRepository) FindNeedingEnrichment(businessType *string, limit, offset int) ([]*entity.GlobalProduct, error) {
+	baseWhere := `
+		WHERE is_active = true
+		  AND (quality_score < 70 OR price IS NULL OR image_url IS NULL OR brand IS NULL)`
+
+	var query string
+	var args []interface{}
+
+	if businessType != nil && *businessType != "" {
+		query = fmt.Sprintf(`
+			SELECT id, ean, name, description, brand, category, price,
+			       image_url, image_urls, source, source_url, source_reliability,
+			       quality_score, is_verified, is_active, business_type, tags,
+			       metadata, created_at, updated_at, scraped_at, last_scraped_at
+			FROM global_products
+			%s AND business_type = $1
+			ORDER BY quality_score ASC, updated_at ASC
+			LIMIT $2 OFFSET $3`, baseWhere)
+		args = []interface{}{*businessType, limit, offset}
+	} else {
+		query = fmt.Sprintf(`
+			SELECT id, ean, name, description, brand, category, price,
+			       image_url, image_urls, source, source_url, source_reliability,
+			       quality_score, is_verified, is_active, business_type, tags,
+			       metadata, created_at, updated_at, scraped_at, last_scraped_at
+			FROM global_products
+			%s
+			ORDER BY quality_score ASC, updated_at ASC
+			LIMIT $1 OFFSET $2`, baseWhere)
+		args = []interface{}{limit, offset}
+	}
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("error buscando productos para enrichment: %w", err)
+	}
+	defer rows.Close()
+
+	return r.scanGlobalProducts(rows)
+}
+
+// CountNeedingEnrichment cuenta los productos que necesitan enrichment.
+func (r *PostgresGlobalProductRepository) CountNeedingEnrichment(businessType *string) (int, error) {
+	baseWhere := `
+		WHERE is_active = true
+		  AND (quality_score < 70 OR price IS NULL OR image_url IS NULL OR brand IS NULL)`
+
+	var query string
+	var args []interface{}
+
+	if businessType != nil && *businessType != "" {
+		query = fmt.Sprintf(`SELECT COUNT(*) FROM global_products %s AND business_type = $1`, baseWhere)
+		args = []interface{}{*businessType}
+	} else {
+		query = fmt.Sprintf(`SELECT COUNT(*) FROM global_products %s`, baseWhere)
+	}
+
+	var count int
+	err := r.db.QueryRow(query, args...).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("error contando productos para enrichment: %w", err)
+	}
+	return count, nil
+}
+
+func (r *PostgresGlobalProductRepository) FindDistinctCategoriesByBusinessType(businessType string) ([]string, error) {
+	query := `
+		SELECT DISTINCT category FROM global_products
+		WHERE business_type = $1 AND is_active = true AND category IS NOT NULL AND category != ''
+		ORDER BY category
+	`
+	rows, err := r.db.Query(query, businessType)
+	if err != nil {
+		return nil, fmt.Errorf("error buscando categorías por business_type: %w", err)
+	}
+	defer rows.Close()
+
+	var categories []string
+	for rows.Next() {
+		var cat string
+		if err := rows.Scan(&cat); err != nil {
+			return nil, fmt.Errorf("error escaneando categoría: %w", err)
+		}
+		categories = append(categories, cat)
+	}
+	return categories, rows.Err()
+}

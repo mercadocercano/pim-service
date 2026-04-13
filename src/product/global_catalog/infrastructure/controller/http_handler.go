@@ -15,13 +15,15 @@ import (
 
 // GlobalCatalogController maneja las requests HTTP para el catálogo global
 type GlobalCatalogController struct {
-	createGlobalProduct          *usecase.CreateGlobalProduct
-	searchByEAN                  *usecase.SearchByEAN
-	listGlobalProducts           *usecase.ListGlobalProducts
-	listGlobalProductsByCriteria *usecase.ListGlobalProductsByCriteriaUseCase
-	getGlobalProductByID         *usecase.GetGlobalProductByID
-	updateGlobalProductByID      *usecase.UpdateGlobalProductByID
-	criteriaBuilder              *criteria.GlobalProductCriteriaBuilder
+	createGlobalProduct              *usecase.CreateGlobalProduct
+	searchByEAN                      *usecase.SearchByEAN
+	listGlobalProducts               *usecase.ListGlobalProducts
+	listGlobalProductsByCriteria     *usecase.ListGlobalProductsByCriteriaUseCase
+	getGlobalProductByID             *usecase.GetGlobalProductByID
+	updateGlobalProductByID          *usecase.UpdateGlobalProductByID
+	getBusinessTypeFacets            *usecase.GetBusinessTypeFacets
+	listProductsNeedingEnrichment    *usecase.ListProductsNeedingEnrichment
+	criteriaBuilder                  *criteria.GlobalProductCriteriaBuilder
 }
 
 // NewGlobalCatalogController crea una nueva instancia del controlador
@@ -32,16 +34,20 @@ func NewGlobalCatalogController(
 	listGlobalProductsByCriteria *usecase.ListGlobalProductsByCriteriaUseCase,
 	getGlobalProductByID *usecase.GetGlobalProductByID,
 	updateGlobalProductByID *usecase.UpdateGlobalProductByID,
+	getBusinessTypeFacets *usecase.GetBusinessTypeFacets,
+	listProductsNeedingEnrichment *usecase.ListProductsNeedingEnrichment,
 	criteriaBuilder *criteria.GlobalProductCriteriaBuilder,
 ) *GlobalCatalogController {
 	return &GlobalCatalogController{
-		createGlobalProduct:          createGlobalProduct,
-		searchByEAN:                  searchByEAN,
-		listGlobalProducts:           listGlobalProducts,
-		listGlobalProductsByCriteria: listGlobalProductsByCriteria,
-		getGlobalProductByID:         getGlobalProductByID,
-		updateGlobalProductByID:      updateGlobalProductByID,
-		criteriaBuilder:              criteriaBuilder,
+		createGlobalProduct:           createGlobalProduct,
+		searchByEAN:                   searchByEAN,
+		listGlobalProducts:            listGlobalProducts,
+		listGlobalProductsByCriteria:  listGlobalProductsByCriteria,
+		getGlobalProductByID:          getGlobalProductByID,
+		updateGlobalProductByID:       updateGlobalProductByID,
+		getBusinessTypeFacets:         getBusinessTypeFacets,
+		listProductsNeedingEnrichment: listProductsNeedingEnrichment,
+		criteriaBuilder:               criteriaBuilder,
 	}
 }
 
@@ -54,15 +60,17 @@ func (gc *GlobalCatalogController) RegisterRoutes(router *gin.RouterGroup) {
 		public.GET("/search", gc.SearchByEANPublic)           // Búsqueda pública por EAN
 		public.GET("/suggestions", gc.GetProductsSuggestions) // Sugerencias por tipo de negocio
 		public.GET("/products/ean/:ean", gc.GetProductByEAN)  // Obtener producto por EAN
+		public.GET("/facets", gc.GetBusinessTypeFacets)       // Marcas y categorías por business_type
 	}
 
 	// Rutas privadas (para administración y scraping)
 	private := router.Group("/global-catalog")
 	{
-		private.POST("/products", gc.CreateProduct)           // Crear producto (para scrapers)
-		private.GET("/products", gc.ListProducts)             // Listar productos con filtros
-		private.GET("/products/search", gc.SearchByEAN)       // Búsqueda avanzada
-		private.GET("/products/:id", gc.GetProductByID)       // Obtener producto por ID
+		private.POST("/products", gc.CreateProduct)                              // Crear producto (para scrapers)
+		private.GET("/products", gc.ListProducts)                              // Listar productos con filtros
+		private.GET("/products/needs-enrichment", gc.ListProductsNeedingEnrichment) // Cola de scraping para webdata
+		private.GET("/products/search", gc.SearchByEAN)                        // Búsqueda avanzada
+		private.GET("/products/:id", gc.GetProductByID)                        // Obtener producto por ID
 		private.PUT("/products/:id", gc.UpdateProductByID)    // Actualizar producto por ID
 		private.DELETE("/products/:id", gc.DeleteProductByID) // Eliminar producto por ID
 	}
@@ -237,6 +245,26 @@ func (gc *GlobalCatalogController) GetProductsSuggestions(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// GetBusinessTypeFacets devuelve marcas y categorías únicas por business_type (público)
+// GET /api/v1/public/global-catalog/facets?business_type={type}
+func (gc *GlobalCatalogController) GetBusinessTypeFacets(c *gin.Context) {
+	businessType := c.Query("business_type")
+	if businessType == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Parámetro 'business_type' es obligatorio",
+		})
+		return
+	}
+
+	facets, err := gc.getBusinessTypeFacets.Execute(businessType)
+	if err != nil {
+		gc.handleUseCaseError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, facets)
+}
+
 // handleUseCaseError maneja los errores de casos de uso y los mapea a respuestas HTTP
 func (gc *GlobalCatalogController) handleUseCaseError(c *gin.Context, err error) {
 	switch e := err.(type) {
@@ -367,6 +395,36 @@ func (gc *GlobalCatalogController) UpdateProductByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"product": productDTO,
 	})
+}
+
+// ListProductsNeedingEnrichment devuelve productos con datos incompletos para la cola de scraping.
+// GET /api/v1/global-catalog/products/needs-enrichment?business_type=ferreteria&limit=100&offset=0
+func (gc *GlobalCatalogController) ListProductsNeedingEnrichment(c *gin.Context) {
+	req := usecase.ListProductsNeedingEnrichmentRequest{}
+
+	if bt := c.Query("business_type"); bt != "" {
+		req.BusinessType = &bt
+	}
+
+	if limitStr := c.Query("limit"); limitStr != "" {
+		if v, err := strconv.Atoi(limitStr); err == nil {
+			req.Limit = v
+		}
+	}
+
+	if offsetStr := c.Query("offset"); offsetStr != "" {
+		if v, err := strconv.Atoi(offsetStr); err == nil {
+			req.Offset = v
+		}
+	}
+
+	response, err := gc.listProductsNeedingEnrichment.Execute(req)
+	if err != nil {
+		gc.handleUseCaseError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // DeleteProductByID elimina un producto por su ID
