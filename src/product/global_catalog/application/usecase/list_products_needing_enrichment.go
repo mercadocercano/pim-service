@@ -55,7 +55,7 @@ func (uc *ListProductsNeedingEnrichment) Execute(req ListProductsNeedingEnrichme
 	for i, p := range products {
 		summaries[i] = &GlobalProductSummary{
 			ID:                p.IDString(),
-			EAN:               p.EAN().Value(),
+			EAN:               p.EANString(),
 			Name:              p.Name(),
 			Brand:             p.Brand(),
 			Category:          p.Category(),

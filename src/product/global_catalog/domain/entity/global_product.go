@@ -154,6 +154,12 @@ func NewGlobalProductFromRepository(
 func (gp *GlobalProduct) ID() uuid.UUID                            { return gp.id }
 func (gp *GlobalProduct) IDString() string                         { return gp.id.String() }
 func (gp *GlobalProduct) EAN() *value_object.EAN13                 { return gp.ean }
+func (gp *GlobalProduct) EANString() string {
+	if gp.ean == nil {
+		return ""
+	}
+	return gp.ean.Value()
+}
 func (gp *GlobalProduct) Name() string                             { return gp.name }
 func (gp *GlobalProduct) Description() *string                     { return gp.description }
 func (gp *GlobalProduct) Brand() *string                           { return gp.brand }
@@ -325,6 +331,9 @@ func (gp *GlobalProduct) GetMetadata(key string) interface{} {
 
 // IsArgentineProduct verifica si es un producto argentino usando el EAN
 func (gp *GlobalProduct) IsArgentineProduct() bool {
+	if gp.ean == nil {
+		return false
+	}
 	return gp.ean.IsArgentineProduct()
 }
 

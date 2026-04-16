@@ -66,11 +66,11 @@ func (gc *GlobalCatalogController) RegisterRoutes(router *gin.RouterGroup) {
 	// Rutas privadas (para administración y scraping)
 	private := router.Group("/global-catalog")
 	{
-		private.POST("/products", gc.CreateProduct)                              // Crear producto (para scrapers)
-		private.GET("/products", gc.ListProducts)                              // Listar productos con filtros
-		private.GET("/products/needs-enrichment", gc.ListProductsNeedingEnrichment) // Cola de scraping para webdata
-		private.GET("/products/search", gc.SearchByEAN)                        // Búsqueda avanzada
-		private.GET("/products/:id", gc.GetProductByID)                        // Obtener producto por ID
+		private.POST("/products", gc.CreateProduct)           // Crear producto (para scrapers)
+		private.GET("/products", gc.ListProducts)             // Listar productos con filtros
+		private.GET("/products/search", gc.SearchByEAN)       // Búsqueda avanzada
+		private.GET("/products/:id", gc.GetProductByID)       // Obtener producto por ID
+		private.GET("/enrichment-queue", gc.ListProductsNeedingEnrichment) // Cola de scraping para webdata
 		private.PUT("/products/:id", gc.UpdateProductByID)    // Actualizar producto por ID
 		private.DELETE("/products/:id", gc.DeleteProductByID) // Eliminar producto por ID
 	}
@@ -398,7 +398,7 @@ func (gc *GlobalCatalogController) UpdateProductByID(c *gin.Context) {
 }
 
 // ListProductsNeedingEnrichment devuelve productos con datos incompletos para la cola de scraping.
-// GET /api/v1/global-catalog/products/needs-enrichment?business_type=ferreteria&limit=100&offset=0
+// GET /api/v1/global-catalog/enrichment-queue?business_type=ferreteria&limit=100&offset=0
 func (gc *GlobalCatalogController) ListProductsNeedingEnrichment(c *gin.Context) {
 	req := usecase.ListProductsNeedingEnrichmentRequest{}
 

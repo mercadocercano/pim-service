@@ -55,6 +55,10 @@ import (
 	// Overview module imports
 	overviewConfig "saas-mt-pim-service/src/overview/infrastructure/config"
 
+	// Internal S2S module
+	s2sController "saas-mt-pim-service/src/s2s/controller"
+	s2sUsecase "saas-mt-pim-service/src/s2s/usecase"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // Driver de PostgreSQL
 	tenantmw "github.com/mercadocercano/middleware"
@@ -94,6 +98,7 @@ func main() {
 			"/api/v1/marketplace/store-types*",
 			"/api/v1/global-catalog*",
 			"/api/v1/public/global-catalog*",
+			"/api/v1/internal*",
 		},
 	}))
 
@@ -193,6 +198,7 @@ func main() {
 	setupSchemaValidationModule(v1, db)
 	setupAITemplateModule(v1, db)
 	overviewConfig.SetupOverviewModule(v1, db)
+	setupInternalModule(v1, db)
 
 	// Aquí se agregarían más módulos:
 	// - Ubicaciones de Stock
@@ -403,6 +409,7 @@ func setupGlobalCatalogModule(router *gin.RouterGroup, db *sql.DB) {
 		private.GET("/products/:id", globalCatalogController.GetProductByID)
 		private.PUT("/products/:id", globalCatalogController.UpdateProductByID)
 		private.DELETE("/products/:id", globalCatalogController.DeleteProductByID)
+		private.GET("/enrichment-queue", globalCatalogController.ListProductsNeedingEnrichment)
 	}
 
 	log.Println("Módulo Global Catalog configurado exitosamente")
@@ -584,4 +591,13 @@ func setupMarketplaceProductsModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  GET    /api/v1/marketplace/products")
 	log.Println("  GET    /api/v1/marketplace/products/by-store-type/:code")
 	log.Println("  GET    /api/v1/marketplace/store-types")
+}
+
+func setupInternalModule(router *gin.RouterGroup, db *sql.DB) {
+	log.Println("Configurando módulo Internal (S2S)...")
+	refreshUC := s2sUsecase.NewRefreshTemplateProductsUseCase(db)
+	handler := s2sController.NewInternalHandler(refreshUC)
+	handler.RegisterRoutes(router)
+	log.Println("Módulo Internal configurado exitosamente")
+	log.Println("  POST   /api/v1/internal/refresh-template-products")
 }

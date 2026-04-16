@@ -163,7 +163,7 @@ func (uc *ListGlobalProducts) Execute(request ListGlobalProductsRequest) (*ListG
 	for i, product := range products {
 		productSummaries[i] = &GlobalProductSummary{
 			ID:                 product.IDString(),
-			EAN:                product.EAN().Value(),
+			EAN:                product.EANString(),
 			Name:               product.Name(),
 			Brand:              product.Brand(),
 			Category:           product.Category(),
