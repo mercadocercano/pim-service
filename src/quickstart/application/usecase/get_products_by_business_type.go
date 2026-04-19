@@ -2,27 +2,28 @@ package usecase
 
 import (
 	"context"
+
+	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
-// GetProductsByBusinessTypeUseCase obtiene productos por tipo de negocio
+// GetProductsByBusinessTypeUseCase obtiene productos sugeridos por tipo de negocio
 type GetProductsByBusinessTypeUseCase struct {
+	repo port.GetProductsByBusinessTypeRepository
 }
 
 // NewGetProductsByBusinessTypeUseCase crea una nueva instancia
-func NewGetProductsByBusinessTypeUseCase() *GetProductsByBusinessTypeUseCase {
-	return &GetProductsByBusinessTypeUseCase{}
+func NewGetProductsByBusinessTypeUseCase(repo port.GetProductsByBusinessTypeRepository) *GetProductsByBusinessTypeUseCase {
+	return &GetProductsByBusinessTypeUseCase{repo: repo}
 }
 
 // Execute ejecuta el caso de uso
 func (uc *GetProductsByBusinessTypeUseCase) Execute(ctx context.Context, businessType string) (interface{}, error) {
-	// Mock data temporal
-	products := []map[string]interface{}{
-		{"id": 1, "name": "Coca-Cola 2.5L", "category": "beverages"},
-		{"id": 2, "name": "Leche Entera 1L", "category": "dairy"},
-		{"id": 3, "name": "Pan Blanco", "category": "bakery"},
+	products, err := uc.repo.GetProductsByBusinessType(ctx, businessType)
+	if err != nil {
+		return nil, err
 	}
-	
 	return map[string]interface{}{
 		"products": products,
+		"total":    len(products),
 	}, nil
 }

@@ -276,6 +276,24 @@ func (m *MockGlobalProductRepo) CountByCriteria(ctx context.Context, crit cr.Cri
 	return args.Int(0), args.Error(1)
 }
 
+func (m *MockGlobalProductRepo) FindDistinctBrandsByBusinessType(businessType string) ([]string, error) {
+	args := m.Called(businessType)
+	return args.Get(0).([]string), args.Error(1)
+}
+
+func (m *MockGlobalProductRepo) FindDistinctCategoriesByBusinessType(businessType string) ([]string, error) {
+	args := m.Called(businessType)
+	return args.Get(0).([]string), args.Error(1)
+}
+func (m *MockGlobalProductRepo) FindNeedingEnrichment(businessType *string, limit, offset int) ([]*globalEntity.GlobalProduct, error) {
+	args := m.Called(businessType, limit, offset)
+	return args.Get(0).([]*globalEntity.GlobalProduct), args.Error(1)
+}
+func (m *MockGlobalProductRepo) CountNeedingEnrichment(businessType *string) (int, error) {
+	args := m.Called(businessType)
+	return args.Int(0), args.Error(1)
+}
+
 func TestGetMarketplaceOverviewUseCase_Execute_DashboardSection(t *testing.T) {
 	// Arrange
 	mockCategoryRepo := new(MockMarketplaceCategoryRepo)

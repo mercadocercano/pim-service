@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"saas-mt-pim-service/src/businesstype/domain/entity"
 	"saas-mt-pim-service/src/businesstype/domain/port"
+
+	"github.com/google/uuid"
 )
 
-// GetBusinessTypeUseCase maneja la obtención de un business type por ID
+// GetBusinessTypeUseCase maneja la obtención de un business type por ID o código
 type GetBusinessTypeUseCase struct {
 	repository port.BusinessTypeRepository
 }
@@ -19,13 +21,22 @@ func NewGetBusinessTypeUseCase(repository port.BusinessTypeRepository) *GetBusin
 	}
 }
 
-// Execute ejecuta el caso de uso
-func (uc *GetBusinessTypeUseCase) Execute(ctx context.Context, id string) (*entity.BusinessType, error) {
-	if id == "" {
-		return nil, fmt.Errorf("ID es requerido")
+// Execute busca por UUID o por código (ej: "almacen")
+func (uc *GetBusinessTypeUseCase) Execute(ctx context.Context, idOrCode string) (*entity.BusinessType, error) {
+	if idOrCode == "" {
+		return nil, fmt.Errorf("ID o código es requerido")
 	}
 
-	businessType, err := uc.repository.FindByID(ctx, id)
+	// Si es UUID, buscar por ID; sino, buscar por código
+	var businessType *entity.BusinessType
+	var err error
+
+	if _, parseErr := uuid.Parse(idOrCode); parseErr == nil {
+		businessType, err = uc.repository.FindByID(ctx, idOrCode)
+	} else {
+		businessType, err = uc.repository.FindByCode(ctx, idOrCode)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("error buscando business type: %w", err)
 	}

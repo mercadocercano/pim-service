@@ -7,14 +7,22 @@ import (
 )
 
 // Template representa un template de quickstart disponible
+type TemplateBrand struct {
+	Name    string `json:"name"`
+	LogoURL string `json:"logo_url,omitempty"`
+}
+
 type Template struct {
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	Slug        string   `json:"slug"`
-	Description string   `json:"description"`
-	Icon        string   `json:"icon"`
-	Categories  []string `json:"categories"`
-	IsActive    bool     `json:"is_active"`
+	ID              string          `json:"id"`
+	Name            string          `json:"name"`
+	Slug            string          `json:"slug"`
+	Description     string          `json:"description"`
+	Icon            string          `json:"icon"`
+	Categories      []string        `json:"categories"`
+	Brands          []TemplateBrand `json:"brands,omitempty"`
+	TotalCategories int             `json:"total_categories"`
+	TotalProducts   int             `json:"total_products"`
+	IsActive        bool            `json:"is_active"`
 }
 
 // ListTemplatesResponse es la respuesta del caso de uso
@@ -46,14 +54,22 @@ func (uc *ListTemplatesUseCase) Execute(ctx context.Context) (*ListTemplatesResp
 
 	result := make([]Template, len(templates))
 	for i, t := range templates {
+		var brands []TemplateBrand
+		for _, b := range t.Brands {
+			brands = append(brands, TemplateBrand{Name: b.Name, LogoURL: b.LogoURL})
+		}
+
 		result[i] = Template{
-			ID:          t.ID,
-			Name:        t.Name,
-			Slug:        t.Slug,
-			Description: t.Description,
-			Icon:        t.Icon,
-			Categories:  t.Categories,
-			IsActive:    t.IsActive,
+			ID:              t.ID,
+			Name:            t.Name,
+			Slug:            t.Slug,
+			Description:     t.Description,
+			Icon:            t.Icon,
+			Categories:      t.Categories,
+			Brands:          brands,
+			TotalCategories: t.TotalCategories,
+			TotalProducts:   t.TotalProducts,
+			IsActive:        t.IsActive,
 		}
 	}
 

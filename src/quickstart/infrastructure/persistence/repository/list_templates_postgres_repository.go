@@ -30,8 +30,10 @@ type templateCategoryPayload struct {
 // LoadTemplatesFromBusinessTypeTemplates carga templates desde business_type_templates
 func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates(ctx context.Context) ([]port.ListTemplate, error) {
 	query := `
-		SELECT btt.id, btt.name, btt.description, btt.categories, btt.is_default, btt.region,
-		       COALESCE(bt.code, '') as slug, COALESCE(bt.icon, '') as icon
+		SELECT btt.id, btt.name, btt.description, btt.categories, btt.brands, btt.is_default, btt.region,
+		       COALESCE(bt.code, '') as slug, COALESCE(bt.icon, '') as icon,
+		       COALESCE(jsonb_array_length(btt.categories), 0) as total_categories,
+		       COALESCE(jsonb_array_length(btt.products), 0) as total_products
 		FROM business_type_templates btt
 		LEFT JOIN business_types bt ON bt.id = btt.business_type_id
 		WHERE btt.is_active = true
@@ -52,10 +54,11 @@ func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates
 	templates := make([]port.ListTemplate, 0)
 	for rows.Next() {
 		var id, name, description, slug, icon sql.NullString
-		var categoriesRaw []byte
+		var categoriesRaw, brandsRaw []byte
 		var isDefault sql.NullBool
 		var region sql.NullString
-		if err := rows.Scan(&id, &name, &description, &categoriesRaw, &isDefault, &region, &slug, &icon); err != nil {
+		var totalCategories, totalProducts int
+		if err := rows.Scan(&id, &name, &description, &categoriesRaw, &brandsRaw, &isDefault, &region, &slug, &icon, &totalCategories, &totalProducts); err != nil {
 			return nil, fmt.Errorf("error scanning business_type_template: %w", err)
 		}
 		if !id.Valid || id.String == "" {
@@ -67,6 +70,8 @@ func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates
 			return nil, err
 		}
 
+		brands := parseTemplateBrands(brandsRaw)
+
 		// Slug para CSV: business_type code si existe, sino id
 		templateSlug := id.String
 		if slug.Valid && slug.String != "" {
@@ -74,13 +79,16 @@ func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates
 		}
 
 		templates = append(templates, port.ListTemplate{
-			ID:          id.String,
-			Name:        name.String,
-			Slug:        templateSlug,
-			Description: description.String,
-			Icon:        icon.String,
-			Categories:  categories,
-			IsActive:    true,
+			ID:              id.String,
+			Name:            name.String,
+			Slug:            templateSlug,
+			Description:     description.String,
+			Icon:            icon.String,
+			Categories:      categories,
+			Brands:          brands,
+			TotalCategories: totalCategories,
+			TotalProducts:   totalProducts,
+			IsActive:        true,
 		})
 	}
 
@@ -89,6 +97,32 @@ func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates
 	}
 
 	return templates, nil
+}
+
+type templateBrandPayload struct {
+	Name    string `json:"name"`
+	LogoURL string `json:"logo_url"`
+}
+
+func parseTemplateBrands(brandsRaw []byte) []port.ListTemplateBrand {
+	if len(brandsRaw) == 0 {
+		return nil
+	}
+	var payload []templateBrandPayload
+	if err := json.Unmarshal(brandsRaw, &payload); err != nil {
+		return nil
+	}
+	brands := make([]port.ListTemplateBrand, 0, len(payload))
+	for _, b := range payload {
+		if b.Name == "" {
+			continue
+		}
+		brands = append(brands, port.ListTemplateBrand{
+			Name:    b.Name,
+			LogoURL: b.LogoURL,
+		})
+	}
+	return brands
 }
 
 func parseTemplateCategoryNames(categoriesRaw []byte) ([]string, error) {

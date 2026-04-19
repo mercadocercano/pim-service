@@ -193,19 +193,24 @@ func (gc *GlobalCatalogController) ListProducts(c *gin.Context) {
 		dtoItems[i] = dto.NewGlobalProductResponse(product)
 	}
 
-	// Crear respuesta con DTOs
+	// can_request: true cuando hay búsqueda activa pero 0 resultados
+	hasSearchFilters := c.Query("search") != "" || c.Query("brand") != "" || c.Query("category") != "" || c.Query("description") != "" || c.Query("ean") != ""
+	canRequest := hasSearchFilters && len(dtoItems) == 0
+
 	finalResponse := struct {
 		Items      []*dto.GlobalProductResponse `json:"items"`
 		TotalCount int                          `json:"total_count"`
 		Page       int                          `json:"page"`
 		PageSize   int                          `json:"page_size"`
 		TotalPages int                          `json:"total_pages"`
+		CanRequest bool                         `json:"can_request"`
 	}{
 		Items:      dtoItems,
 		TotalCount: response.TotalCount,
 		Page:       response.Page,
 		PageSize:   response.PageSize,
 		TotalPages: response.TotalPages,
+		CanRequest: canRequest,
 	}
 
 	c.JSON(http.StatusOK, finalResponse)

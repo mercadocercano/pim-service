@@ -13,7 +13,9 @@ import (
 type GlobalCatalogConfig struct {
 	DB                                      *sql.DB
 	GlobalCatalogController                 *controller.GlobalCatalogController
+	ProductRequestController                *controller.ProductRequestController
 	globalProductRepository                 *persistence.PostgresGlobalProductRepository
+	productRequestRepository                *persistence.PostgresProductRequestRepository
 	createGlobalProductUseCase              *usecase.CreateGlobalProduct
 	searchByEANUseCase                      *usecase.SearchByEAN
 	listGlobalProductsUseCase               *usecase.ListGlobalProducts
@@ -22,6 +24,9 @@ type GlobalCatalogConfig struct {
 	updateGlobalProductByIDUseCase          *usecase.UpdateGlobalProductByID
 	getBusinessTypeFacetsUseCase            *usecase.GetBusinessTypeFacets
 	listProductsNeedingEnrichmentUseCase    *usecase.ListProductsNeedingEnrichment
+	createProductRequestUseCase             *usecase.CreateProductRequestUseCase
+	listProductRequestsUseCase              *usecase.ListProductRequestsUseCase
+	resolveProductRequestUseCase            *usecase.ResolveProductRequestUseCase
 	criteriaBuilder                         *criteria.GlobalProductCriteriaBuilder
 }
 
@@ -42,6 +47,7 @@ func NewGlobalCatalogConfig(db *sql.DB) *GlobalCatalogConfig {
 // initializeRepositories inicializa los repositorios
 func (c *GlobalCatalogConfig) initializeRepositories() {
 	c.globalProductRepository = persistence.NewPostgresGlobalProductRepository(c.DB).(*persistence.PostgresGlobalProductRepository)
+	c.productRequestRepository = persistence.NewPostgresProductRequestRepository(c.DB)
 }
 
 // initializeUseCases inicializa los casos de uso
@@ -54,6 +60,9 @@ func (c *GlobalCatalogConfig) initializeUseCases() {
 	c.updateGlobalProductByIDUseCase = usecase.NewUpdateGlobalProductByID(c.globalProductRepository)
 	c.getBusinessTypeFacetsUseCase = usecase.NewGetBusinessTypeFacets(c.globalProductRepository)
 	c.listProductsNeedingEnrichmentUseCase = usecase.NewListProductsNeedingEnrichment(c.globalProductRepository)
+	c.createProductRequestUseCase = usecase.NewCreateProductRequestUseCase(c.productRequestRepository)
+	c.listProductRequestsUseCase = usecase.NewListProductRequestsUseCase(c.productRequestRepository)
+	c.resolveProductRequestUseCase = usecase.NewResolveProductRequestUseCase(c.productRequestRepository)
 }
 
 // initializeControllers inicializa los controladores
@@ -69,6 +78,11 @@ func (c *GlobalCatalogConfig) initializeControllers() {
 		c.getBusinessTypeFacetsUseCase,
 		c.listProductsNeedingEnrichmentUseCase,
 		c.criteriaBuilder,
+	)
+	c.ProductRequestController = controller.NewProductRequestController(
+		c.createProductRequestUseCase,
+		c.listProductRequestsUseCase,
+		c.resolveProductRequestUseCase,
 	)
 }
 

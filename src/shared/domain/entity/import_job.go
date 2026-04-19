@@ -23,7 +23,6 @@ type ImportJobType string
 const (
 	ImportJobTypeCSVProducts  ImportJobType = "csv_products"
 	ImportJobTypeJSONProducts ImportJobType = "json_products"
-	ImportJobTypeBatchCreate  ImportJobType = "batch_create"
 )
 
 // ImportJob representa un trabajo de importación asíncrono

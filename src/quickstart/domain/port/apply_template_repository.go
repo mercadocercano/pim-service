@@ -38,18 +38,20 @@ type GlobalProductCandidate struct {
 
 // TemplateBrand represents a brand from the template JSONB
 type TemplateBrand struct {
-	Name                    string   `json:"name"`
+	Name                   string   `json:"name"`
+	LogoURL                string   `json:"logo_url,omitempty"`
 	SuggestedForCategories []string `json:"suggested_for_categories"`
 }
 
 // TemplateProduct represents a curated product from the template JSONB
 type TemplateProduct struct {
-	Name          string  `json:"name"`
-	CategorySlug  string  `json:"category_slug"`
-	Brand         string  `json:"brand"`
+	Name           string  `json:"name"`
+	CategorySlug   string  `json:"category_slug"`
+	Brand          string  `json:"brand"`
 	PriceReference float64 `json:"price_reference"`
-	Unit          string  `json:"unit"`
-	SkuPrefix     string  `json:"sku_prefix"`
+	Unit           string  `json:"unit"`
+	SkuPrefix      string  `json:"sku_prefix"`
+	ImageURL       string  `json:"image_url,omitempty"`
 }
 
 // TemplateAttribute represents an attribute definition from the template JSONB

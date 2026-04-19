@@ -15,6 +15,7 @@ type Product struct {
 	tenantID    string
 	name        string
 	description *string
+	imageURL    *string
 	sku         *value_object.ProductSKU
 	categoryRef *value_object.CategoryReference
 	brandRef    *value_object.BrandReference
@@ -28,6 +29,18 @@ type Product struct {
 func NewProduct(
 	tenantID, name string,
 	description *string,
+	sku *value_object.ProductSKU,
+	categoryRef *value_object.CategoryReference,
+	brandRef *value_object.BrandReference,
+) (*Product, error) {
+	return NewProductWithImage(tenantID, name, description, nil, sku, categoryRef, brandRef)
+}
+
+// NewProductWithImage crea una nueva instancia de Product con imagen
+func NewProductWithImage(
+	tenantID, name string,
+	description *string,
+	imageURL *string,
 	sku *value_object.ProductSKU,
 	categoryRef *value_object.CategoryReference,
 	brandRef *value_object.BrandReference,
@@ -48,6 +61,7 @@ func NewProduct(
 		tenantID:    tenantID,
 		name:        name,
 		description: description,
+		imageURL:    imageURL,
 		sku:         sku,
 		categoryRef: categoryRef,
 		brandRef:    brandRef,
@@ -72,6 +86,7 @@ func NewProductFromRepository(
 	id uuid.UUID,
 	tenantID, name string,
 	description *string,
+	imageURL *string,
 	sku *value_object.ProductSKU,
 	categoryRef *value_object.CategoryReference,
 	brandRef *value_object.BrandReference,
@@ -91,11 +106,12 @@ func NewProductFromRepository(
 		tenantID:    tenantID,
 		name:        name,
 		description: description,
+		imageURL:    imageURL,
 		sku:         sku,
 		categoryRef: categoryRef,
 		brandRef:    brandRef,
 		status:      status,
-		variants:    make([]*ProductVariant, 0), // Se cargarán por separado
+		variants:    make([]*ProductVariant, 0),
 		createdAt:   createdAt,
 		updatedAt:   updatedAt,
 	}, nil
@@ -125,6 +141,7 @@ func (p *Product) IDString() string                                   { return p
 func (p *Product) TenantID() string                                   { return p.tenantID }
 func (p *Product) Name() string                                       { return p.name }
 func (p *Product) Description() *string                               { return p.description }
+func (p *Product) ImageURL() *string                                   { return p.imageURL }
 func (p *Product) SKU() *value_object.ProductSKU                      { return p.sku }
 func (p *Product) CategoryReference() *value_object.CategoryReference { return p.categoryRef }
 func (p *Product) BrandReference() *value_object.BrandReference       { return p.brandRef }

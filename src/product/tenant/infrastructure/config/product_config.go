@@ -47,9 +47,10 @@ type ProductConfig struct {
 	ListProductVariantsByCriteriaUseCase *usecase.ListProductVariantsByCriteriaUseCase
 
 	// Use Cases - Quickstart
-	CreateFromTemplateUseCase     *quickstartUseCase.CreateFromTemplateUseCase
-	ImportFromBusinessTypeUseCase *quickstartUseCase.ImportFromBusinessTypeUseCase
-	GetQuickstartProgressUseCase  *quickstartUseCase.GetQuickstartProgressUseCase
+	CreateFromTemplateUseCase      *quickstartUseCase.CreateFromTemplateUseCase
+	ImportFromBusinessTypeUseCase  *quickstartUseCase.ImportFromBusinessTypeUseCase
+	ImportFromGlobalCatalogUseCase *quickstartUseCase.ImportFromGlobalCatalogUseCase
+	GetQuickstartProgressUseCase   *quickstartUseCase.GetQuickstartProgressUseCase
 
 	// Servicios - Quickstart
 	QuickstartProductService port.ProductService
@@ -171,6 +172,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 	createFromTemplateUseCase := quickstartUseCase.NewCreateFromTemplateUseCase(productRepo)
 	globalCatalogRepo := globalCatalogPersistence.NewPostgresGlobalProductRepository(db)
 	importFromBusinessTypeUseCase := quickstartUseCase.NewImportFromBusinessTypeUseCase(productRepo, globalCatalogRepo)
+	importFromGlobalCatalogUseCase := quickstartUseCase.NewImportFromGlobalCatalogUseCase(productRepo, globalCatalogRepo)
 	getQuickstartProgressUseCase := quickstartUseCase.NewGetQuickstartProgressUseCase(productRepo)
 
 	// Servicios - Quickstart
@@ -203,6 +205,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 	quickstartController := quickstartCtrl.NewQuickstartController(
 		createFromTemplateUseCase,
 		importFromBusinessTypeUseCase,
+		importFromGlobalCatalogUseCase,
 		getQuickstartProgressUseCase,
 	)
 
@@ -236,6 +239,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		ListProductVariantsByCriteriaUseCase: listProductVariantsByCriteriaUseCase,
 		CreateFromTemplateUseCase:            createFromTemplateUseCase,
 		ImportFromBusinessTypeUseCase:        importFromBusinessTypeUseCase,
+		ImportFromGlobalCatalogUseCase:       importFromGlobalCatalogUseCase,
 		GetQuickstartProgressUseCase:         getQuickstartProgressUseCase,
 		QuickstartProductService:             quickstartProductService,
 		ProductController:                    productController,

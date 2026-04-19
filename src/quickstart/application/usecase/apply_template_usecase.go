@@ -111,8 +111,9 @@ func (uc *ApplyTemplateUseCase) Execute(ctx context.Context, req ApplyTemplateRe
 	if useCuratedFlow {
 		// FLUJO CURADO: usar datos del template JSONB
 
-		// PASO 2: Crear marcas del template
-		brandsCreated, createdBrands, err := uc.repo.CreateTenantBrandsFromTemplate(ctx, tx, tenantUUID, fullData.Brands)
+		// PASO 2: Crear marcas del template + marcas extraídas de productos
+		allBrands := extractBrandsFromProducts(fullData.Brands, fullData.Products)
+		brandsCreated, createdBrands, err := uc.repo.CreateTenantBrandsFromTemplate(ctx, tx, tenantUUID, allBrands)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create brands from template: %w", err)
 		}
@@ -229,6 +230,28 @@ func (list createdCategoryList) ByMarketplaceID() map[string]port.CreatedCategor
 		if item.MarketplaceID != "" {
 			result[item.MarketplaceID] = item
 		}
+	}
+	return result
+}
+
+// extractBrandsFromProducts combina las marcas explícitas del template con las
+// marcas que aparecen en los productos pero no en el array de brands.
+func extractBrandsFromProducts(templateBrands []port.TemplateBrand, products []port.TemplateProduct) []port.TemplateBrand {
+	seen := make(map[string]bool, len(templateBrands))
+	for _, b := range templateBrands {
+		seen[strings.TrimSpace(b.Name)] = true
+	}
+
+	result := make([]port.TemplateBrand, len(templateBrands))
+	copy(result, templateBrands)
+
+	for _, p := range products {
+		brand := strings.TrimSpace(p.Brand)
+		if brand == "" || seen[brand] {
+			continue
+		}
+		seen[brand] = true
+		result = append(result, port.TemplateBrand{Name: brand})
 	}
 	return result
 }

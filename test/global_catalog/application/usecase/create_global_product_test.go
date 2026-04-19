@@ -159,6 +159,26 @@ func (m *MockGlobalProductRepository) CountByCriteria(ctx context.Context, crit 
 	return args.Int(0), args.Error(1)
 }
 
+func (m *MockGlobalProductRepository) FindDistinctBrandsByBusinessType(businessType string) ([]string, error) {
+	args := m.Called(businessType)
+	return args.Get(0).([]string), args.Error(1)
+}
+
+func (m *MockGlobalProductRepository) FindDistinctCategoriesByBusinessType(businessType string) ([]string, error) {
+	args := m.Called(businessType)
+	return args.Get(0).([]string), args.Error(1)
+}
+
+func (m *MockGlobalProductRepository) FindNeedingEnrichment(businessType *string, limit, offset int) ([]*entity.GlobalProduct, error) {
+	args := m.Called(businessType, limit, offset)
+	return args.Get(0).([]*entity.GlobalProduct), args.Error(1)
+}
+
+func (m *MockGlobalProductRepository) CountNeedingEnrichment(businessType *string) (int, error) {
+	args := m.Called(businessType)
+	return args.Int(0), args.Error(1)
+}
+
 func TestCreateGlobalProduct_ValidRequest_Success(t *testing.T) {
 	// Arrange
 	mockRepo := new(MockGlobalProductRepository)

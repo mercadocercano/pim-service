@@ -36,6 +36,11 @@ func (m *ProductMapper) ToResponse(product *entity.Product) *response.ProductRes
 		resp.Description = product.Description()
 	}
 
+	// Imagen opcional
+	if product.ImageURL() != nil {
+		resp.ImageURL = product.ImageURL()
+	}
+
 	// SKU opcional
 	if product.HasSKU() {
 		sku := product.SKU().Value()

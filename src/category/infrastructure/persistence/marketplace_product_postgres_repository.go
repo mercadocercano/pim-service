@@ -32,7 +32,7 @@ func (r *MarketplaceProductPostgresRepository) FindProductsByStoreType(
 	countQuery := `
 		SELECT COUNT(DISTINCT p.id)
 		FROM products p
-		JOIN tenant_business_type_setup tbts ON tbts.tenant_id = p.tenant_id
+		JOIN tenant_quickstart_history tbts ON tbts.tenant_id = p.tenant_id
 		JOIN business_types bt ON bt.id = tbts.business_type_id
 		WHERE bt.code = $1 AND p.status = 'active'
 	`
@@ -49,7 +49,7 @@ func (r *MarketplaceProductPostgresRepository) FindProductsByStoreType(
 			bt.code, bt.name, bt.icon, bt.color,
 			pv.id, pv.name, pv.sku, pv.price, pv.stock
 		FROM products p
-		JOIN tenant_business_type_setup tbts ON tbts.tenant_id = p.tenant_id
+		JOIN tenant_quickstart_history tbts ON tbts.tenant_id = p.tenant_id
 		JOIN business_types bt ON bt.id = tbts.business_type_id
 		LEFT JOIN product_variants pv ON pv.product_id = p.id
 			AND pv.is_default = true
@@ -62,73 +62,83 @@ func (r *MarketplaceProductPostgresRepository) FindProductsByStoreType(
 	return r.scanProducts(ctx, query, storeTypeCode, pageSize, offset, total)
 }
 
-// FindAllProducts busca todos los productos activos cross-tenant
+// FindAllProducts busca todos los productos activos cross-tenant con filtros opcionales
 func (r *MarketplaceProductPostgresRepository) FindAllProducts(
 	ctx context.Context,
-	search string,
+	search, businessType string,
 	page, pageSize int,
 ) ([]*response.MarketplaceProductResponse, int, error) {
 	offset := (page - 1) * pageSize
 
 	var total int
-	var countQuery string
-	var dataQuery string
+	var conditions []string
 	var countArgs []interface{}
-	var dataArgs []interface{}
+	argIdx := 1
+
+	conditions = append(conditions, "p.status = 'active'")
+
+	// Filtro por business_type requiere JOIN con tenant_quickstart_history + business_types
+	needsBusinessTypeJoin := businessType != ""
 
 	if search != "" {
 		searchPattern := "%" + search + "%"
-
-		countQuery = `
-			SELECT COUNT(DISTINCT p.id)
-			FROM products p
-			WHERE p.status = 'active' AND (p.name ILIKE $1 OR p.category_name ILIKE $1 OR p.brand_name ILIKE $1)
-		`
-		countArgs = []interface{}{searchPattern}
-
-		dataQuery = `
-			SELECT
-				p.id, p.tenant_id, p.name, p.description,
-				p.category_name, p.brand_name, p.image_url,
-				bt.code, bt.name, bt.icon, bt.color,
-				pv.id, pv.name, pv.sku, pv.price, pv.stock
-			FROM products p
-			LEFT JOIN tenant_business_type_setup tbts ON tbts.tenant_id = p.tenant_id
-			LEFT JOIN business_types bt ON bt.id = tbts.business_type_id
-			LEFT JOIN product_variants pv ON pv.product_id = p.id
-				AND pv.is_default = true
-				AND pv.status != 'deleted'
-			WHERE p.status = 'active' AND (p.name ILIKE $1 OR p.category_name ILIKE $1 OR p.brand_name ILIKE $1)
-			ORDER BY p.created_at DESC
-			LIMIT $2 OFFSET $3
-		`
-		dataArgs = []interface{}{searchPattern, pageSize, offset}
-	} else {
-		countQuery = `SELECT COUNT(*) FROM products WHERE status = 'active'`
-		countArgs = nil
-
-		dataQuery = `
-			SELECT
-				p.id, p.tenant_id, p.name, p.description,
-				p.category_name, p.brand_name, p.image_url,
-				bt.code, bt.name, bt.icon, bt.color,
-				pv.id, pv.name, pv.sku, pv.price, pv.stock
-			FROM products p
-			LEFT JOIN tenant_business_type_setup tbts ON tbts.tenant_id = p.tenant_id
-			LEFT JOIN business_types bt ON bt.id = tbts.business_type_id
-			LEFT JOIN product_variants pv ON pv.product_id = p.id
-				AND pv.is_default = true
-				AND pv.status != 'deleted'
-			WHERE p.status = 'active'
-			ORDER BY p.created_at DESC
-			LIMIT $1 OFFSET $2
-		`
-		dataArgs = []interface{}{pageSize, offset}
+		conditions = append(conditions, fmt.Sprintf(
+			"(p.name ILIKE $%d OR p.category_name ILIKE $%d OR p.brand_name ILIKE $%d)",
+			argIdx, argIdx, argIdx,
+		))
+		countArgs = append(countArgs, searchPattern)
+		argIdx++
 	}
+
+	if needsBusinessTypeJoin {
+		conditions = append(conditions, fmt.Sprintf("bt.code = $%d", argIdx))
+		countArgs = append(countArgs, businessType)
+		argIdx++
+	}
+
+	whereClause := "WHERE " + joinConditions(conditions)
+
+	// Construir JOIN para count
+	countJoin := ""
+	if needsBusinessTypeJoin {
+		countJoin = `
+			JOIN tenant_quickstart_history tbts ON tbts.tenant_id = p.tenant_id
+			JOIN business_types bt ON bt.id = tbts.business_type_id`
+	}
+
+	countQuery := fmt.Sprintf(`SELECT COUNT(DISTINCT p.id) FROM products p %s %s`, countJoin, whereClause)
 
 	if err := r.db.QueryRowContext(ctx, countQuery, countArgs...).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("error contando productos: %w", err)
 	}
+
+	// Construir query de datos
+	dataArgs := make([]interface{}, len(countArgs))
+	copy(dataArgs, countArgs)
+
+	dataJoinType := "LEFT"
+	if needsBusinessTypeJoin {
+		dataJoinType = "INNER"
+	}
+
+	dataQuery := fmt.Sprintf(`
+		SELECT
+			p.id, p.tenant_id, p.name, p.description,
+			p.category_name, p.brand_name, p.image_url,
+			bt.code, bt.name, bt.icon, bt.color,
+			pv.id, pv.name, pv.sku, pv.price, pv.stock
+		FROM products p
+		%s JOIN tenant_quickstart_history tbts ON tbts.tenant_id = p.tenant_id
+		%s JOIN business_types bt ON bt.id = tbts.business_type_id
+		LEFT JOIN product_variants pv ON pv.product_id = p.id
+			AND pv.is_default = true
+			AND pv.status != 'deleted'
+		%s
+		ORDER BY p.created_at DESC
+		LIMIT $%d OFFSET $%d
+	`, dataJoinType, dataJoinType, whereClause, argIdx, argIdx+1)
+
+	dataArgs = append(dataArgs, pageSize, offset)
 
 	rows, err := r.db.QueryContext(ctx, dataQuery, dataArgs...)
 	if err != nil {
@@ -148,6 +158,15 @@ func (r *MarketplaceProductPostgresRepository) FindAllProducts(
 	return products, total, nil
 }
 
+// joinConditions une condiciones SQL con AND
+func joinConditions(conditions []string) string {
+	result := conditions[0]
+	for i := 1; i < len(conditions); i++ {
+		result += " AND " + conditions[i]
+	}
+	return result
+}
+
 // FindProductByID busca un producto por ID (cross-tenant)
 func (r *MarketplaceProductPostgresRepository) FindProductByID(
 	ctx context.Context,
@@ -160,7 +179,7 @@ func (r *MarketplaceProductPostgresRepository) FindProductByID(
 			bt.code, bt.name, bt.icon, bt.color,
 			pv.id, pv.name, pv.sku, pv.price, pv.stock
 		FROM products p
-		LEFT JOIN tenant_business_type_setup tbts ON tbts.tenant_id = p.tenant_id
+		LEFT JOIN tenant_quickstart_history tbts ON tbts.tenant_id = p.tenant_id
 		LEFT JOIN business_types bt ON bt.id = tbts.business_type_id
 		LEFT JOIN product_variants pv ON pv.product_id = p.id
 			AND pv.is_default = true
@@ -203,7 +222,7 @@ func (r *MarketplaceProductPostgresRepository) FindProductsByTenantID(
 			bt.code, bt.name, bt.icon, bt.color,
 			pv.id, pv.name, pv.sku, pv.price, pv.stock
 		FROM products p
-		LEFT JOIN tenant_business_type_setup tbts ON tbts.tenant_id = p.tenant_id
+		LEFT JOIN tenant_quickstart_history tbts ON tbts.tenant_id = p.tenant_id
 		LEFT JOIN business_types bt ON bt.id = tbts.business_type_id
 		LEFT JOIN product_variants pv ON pv.product_id = p.id
 			AND pv.is_default = true
@@ -243,7 +262,7 @@ func (r *MarketplaceProductPostgresRepository) GetStoreTypesWithCounts(ctx conte
 			COUNT(DISTINCT p.id) as product_count
 		FROM business_types bt
 		INNER JOIN business_type_templates btt ON btt.business_type_id = bt.id AND btt.is_active = true
-		LEFT JOIN tenant_business_type_setup tbts ON tbts.business_type_id = bt.id
+		LEFT JOIN tenant_quickstart_history tbts ON tbts.business_type_id = bt.id
 		LEFT JOIN products p ON p.tenant_id = tbts.tenant_id AND p.status = 'active'
 		WHERE bt.is_active = true
 		GROUP BY bt.code, bt.name, bt.icon, bt.color, bt.sort_order

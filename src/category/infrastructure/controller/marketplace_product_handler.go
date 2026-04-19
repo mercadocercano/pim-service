@@ -36,8 +36,9 @@ func (h *MarketplaceProductHandler) RegisterRoutes(router *gin.RouterGroup) {
 func (h *MarketplaceProductHandler) ListProducts(c *gin.Context) {
 	page, pageSize := parsePagination(c)
 	search := c.Query("search")
+	businessType := c.Query("business_type")
 
-	products, total, err := h.productRepo.FindAllProducts(c.Request.Context(), search, page, pageSize)
+	products, total, err := h.productRepo.FindAllProducts(c.Request.Context(), search, businessType, page, pageSize)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener productos: " + err.Error()})
 		return

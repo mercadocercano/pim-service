@@ -762,7 +762,7 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantProductsFromTemplate(ctx c
 	variantsCreated := 0
 	var productNames []string
 
-	for i, p := range products {
+	for _, p := range products {
 		name := strings.TrimSpace(p.Name)
 		if name == "" {
 			continue
@@ -788,7 +788,7 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantProductsFromTemplate(ctx c
 			}
 		}
 
-		sku := fmt.Sprintf("%s-%03d", p.SkuPrefix, i+1)
+		sku := fmt.Sprintf("%s-%s", p.SkuPrefix, uuid.New().String()[:8])
 
 		var existingID string
 		err := exec.QueryRowContext(ctx, `
@@ -797,10 +797,14 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantProductsFromTemplate(ctx c
 
 		if err == sql.ErrNoRows {
 			productID := uuid.New().String()
+			var imageURL sql.NullString
+			if p.ImageURL != "" {
+				imageURL = sql.NullString{String: p.ImageURL, Valid: true}
+			}
 			_, err = exec.ExecContext(ctx, `
-				INSERT INTO products (id, tenant_id, name, description, sku, category_id, category_name, brand_id, brand_name, status, created_at, updated_at)
-				VALUES ($1, $2, $3, '', $4, $5, $6, $7, $8, 'active', $9, $9)
-			`, productID, tenantID.String(), name, sku, categoryID, categoryName, brandID, brandName, now)
+				INSERT INTO products (id, tenant_id, name, description, image_url, sku, category_id, category_name, brand_id, brand_name, status, created_at, updated_at)
+				VALUES ($1, $2, $3, '', $4, $5, $6, $7, $8, $9, 'active', $10, $10)
+			`, productID, tenantID.String(), name, imageURL, sku, categoryID, categoryName, brandID, brandName, now)
 			if err != nil {
 				return productsCreated, variantsCreated, productNames, fmt.Errorf("failed to insert product %s: %w", name, err)
 			}

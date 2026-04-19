@@ -9,6 +9,7 @@ type ProductResponse struct {
 	ID          string                     `json:"id"`
 	Name        string                     `json:"name"`
 	Description *string                    `json:"description,omitempty"`
+	ImageURL    *string                    `json:"image_url,omitempty"`
 	SKU         *string                    `json:"sku,omitempty"`
 	Category    *CategoryReferenceResponse `json:"category,omitempty"`
 	Brand       *BrandReferenceResponse    `json:"brand,omitempty"`

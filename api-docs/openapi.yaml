@@ -1,34 +1,37 @@
 openapi: 3.1.0
 info:
   title: Multi-Tenant PIM API
-  version: 2.2.1
+  version: 2.3.0
   description: |
     API para gestión de información de productos multi-tenant.
-    
-    ## 🏗️ Arquitectura Modular
-    
+
+    ## Arquitectura Modular
+
     El sistema está organizado en módulos especializados:
     - **Health**: Estado del sistema
     - **Business Types**: Tipos de negocio
     - **Brands**: Gestión de marcas
     - **Products**: Gestión de productos y variantes
-    - **Variants**: Gestión de variantes de productos ✨ HITO 2.1
+    - **Variants**: Gestión de variantes de productos (HITO 2.1)
     - **Categories**: Gestión de categorías
     - **Attributes**: Gestión de atributos
     - **Category-Attributes**: Relación categoría-atributo
-    - **Global Catalog**: Catálogo global público
-    - **Quickstart**: Configuración rápida ✨ HITO 2
-    - **Import**: Importación masiva con variantes ✨ HITO 2.1
-    
-    ## 🔄 Actualizado v2.2.0 (HITO 2 + 2.1)
-    
-    - ✅ **Variantes de productos**: Product → Variants con SKU único
-    - ✅ **Templates Quickstart**: Configuración rápida por tipo de negocio
-    - ✅ **Importación con variantes**: CSV/JSON con atributos dinámicos
-    - ✅ **Parser CSV genérico**: Detecta atributos automáticamente
-    - 🛡️ **Seguridad consistente**: Headers y roles validados
-    - 📋 **Tests de integración**: Cobertura completa
-    - 🔍 **Filtros avanzados**: Criterios y paginación
+    - **Global Catalog**: Catálogo global de productos con enrichment y quality score
+    - **Global Catalog Public**: Endpoints públicos del catálogo global (sin auth)
+    - **Product Requests**: Solicitudes de productos por tenants
+    - **Quickstart**: Configuración rápida e importación desde global catalog
+    - **Import**: Importación masiva con variantes (HITO 2.1)
+
+    ## Actualizado v2.3.0
+
+    - Global Catalog: CRUD completo, búsqueda por EAN, enrichment queue
+    - Product Requests: Solicitudes de tenants con flujo approve/reject/fulfill
+    - Quickstart: Import desde global catalog, import masivo por business type
+    - Public endpoints: Búsqueda, sugerencias, facets sin autenticación
+    - Variantes de productos: Product -> Variants con SKU único
+    - Templates Quickstart: Configuración rápida por tipo de negocio
+    - Importación con variantes: CSV/JSON con atributos dinámicos
+    - Filtros avanzados: Criterios y paginación
 
 servers:
   - url: /api/v1
@@ -57,12 +60,11 @@ components:
       description: |
         Rol del usuario para autorización:
         - `super_admin`: Acceso completo
-        - `marketplace_admin`: Gestión de marketplace  
+        - `marketplace_admin`: Gestión de marketplace
         - `tenant_admin`: Administración del tenant
         - `tenant_user`: Usuario del tenant
 
   parameters:
-    # Parámetros básicos de paginación
     PageParam:
       name: page
       in: query
@@ -72,7 +74,7 @@ components:
         type: integer
         minimum: 1
         default: 1
-    
+
     PageSizeParam:
       name: page_size
       in: query
@@ -83,7 +85,7 @@ components:
         minimum: 1
         maximum: 100
         default: 10
-    
+
     SortByParam:
       name: sort_by
       in: query
@@ -92,7 +94,7 @@ components:
       schema:
         type: string
         default: "created_at"
-    
+
     SortDirParam:
       name: sort_dir
       in: query
@@ -103,7 +105,6 @@ components:
         enum: ["asc", "desc"]
         default: "desc"
 
-    # Headers comunes
     TenantIdHeader:
       name: X-Tenant-ID
       in: header
@@ -181,7 +182,7 @@ components:
         status:
           type: string
           enum: ["valid", "warning", "error", "info"]
-          description: Estado de validación (valid=verde, warning=amarillo, error=rojo, info=azul)
+          description: Estado de validación
         type_expected:
           type: string
           description: Tipo de dato esperado según el schema
@@ -343,6 +344,388 @@ components:
         required_columns:
           type: integer
           description: Columnas requeridas según el schema
+
+    # ==========================================
+    # GLOBAL CATALOG SCHEMAS
+    # ==========================================
+    GlobalProduct:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Coca-Cola 500ml"
+        ean:
+          type: string
+          example: "7790895000782"
+        brand:
+          type: string
+          example: "Coca-Cola"
+        category:
+          type: string
+          example: "Bebidas"
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+          example: 850.00
+        image_url:
+          type: string
+          format: uri
+        source:
+          type: string
+          example: "scraper_coto"
+        business_type:
+          type: string
+          example: "almacen"
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        quality_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Puntaje de calidad del producto (0-100)
+        is_verified:
+          type: boolean
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    GlobalProductCreateRequest:
+      type: object
+      required: [name, business_type]
+      properties:
+        name:
+          type: string
+          example: "Coca-Cola 500ml"
+        ean:
+          type: string
+          example: "7790895000782"
+        brand:
+          type: string
+          example: "Coca-Cola"
+        category:
+          type: string
+          example: "Bebidas"
+        price:
+          type: number
+          format: float
+          example: 850.00
+        image_url:
+          type: string
+          format: uri
+        source:
+          type: string
+          example: "scraper_coto"
+        business_type:
+          type: string
+          example: "almacen"
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    GlobalProductUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        ean:
+          type: string
+        brand:
+          type: string
+        category:
+          type: string
+        price:
+          type: number
+          format: float
+        image_url:
+          type: string
+          format: uri
+        source:
+          type: string
+        business_type:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        is_verified:
+          type: boolean
+        is_active:
+          type: boolean
+
+    GlobalProductListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalProduct'
+        total_count:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+        can_request:
+          type: boolean
+          description: Indica si el tenant puede solicitar productos nuevos
+
+    EnrichmentQueueResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalProduct'
+          description: Productos con quality_score menor a 70
+        total_count:
+          type: integer
+
+    GlobalCatalogFacetsResponse:
+      type: object
+      properties:
+        brands:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              count:
+                type: integer
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              count:
+                type: integer
+
+    # ==========================================
+    # PRODUCT REQUESTS SCHEMAS
+    # ==========================================
+    ProductRequestCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          example: "Yerba Mate Playadito 1kg"
+        brand:
+          type: string
+          example: "Playadito"
+        category:
+          type: string
+          example: "Infusiones"
+        description:
+          type: string
+          example: "Yerba mate suave con palo"
+        business_type:
+          type: string
+          example: "almacen"
+
+    ProductRequestCreateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        message:
+          type: string
+          example: "Solicitud creada exitosamente"
+
+    ProductRequestListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              tenant_id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              brand:
+                type: string
+              category:
+                type: string
+              description:
+                type: string
+              business_type:
+                type: string
+              status:
+                type: string
+                enum: ["pending", "approved", "rejected", "fulfilled"]
+              admin_notes:
+                type: string
+              global_product_id:
+                type: string
+                format: uuid
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+        pending_count:
+          type: integer
+
+    ProductRequestMetricsResponse:
+      type: object
+      properties:
+        pending_requests:
+          type: integer
+        alert:
+          type: boolean
+          description: Indica si hay solicitudes que requieren atención urgente
+        alert_level:
+          type: string
+          enum: ["none", "low", "medium", "high"]
+          description: Nivel de alerta basado en cantidad y antigüedad
+
+    ProductRequestResolveRequest:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: ["approve", "reject", "fulfill"]
+        admin_notes:
+          type: string
+          example: "Producto agregado al catálogo global"
+        global_product_id:
+          type: string
+          format: uuid
+          description: ID del producto global (requerido para action=fulfill)
+
+    ProductRequestResolveResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: ["approved", "rejected", "fulfilled"]
+        admin_notes:
+          type: string
+        global_product_id:
+          type: string
+          format: uuid
+
+    # ==========================================
+    # QUICKSTART SCHEMAS (nuevos)
+    # ==========================================
+    QuickstartFromTemplateRequest:
+      type: object
+      required: [template_id]
+      properties:
+        template_id:
+          type: string
+          format: uuid
+        skip_existing:
+          type: boolean
+          default: true
+
+    QuickstartImportFromBusinessTypeRequest:
+      type: object
+      required: [business_type]
+      properties:
+        business_type:
+          type: string
+          example: "almacen"
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 100
+        categories:
+          type: array
+          items:
+            type: string
+          description: Filtrar por categorías específicas
+
+    QuickstartImportFromGlobalRequest:
+      type: object
+      required: [global_product_id]
+      properties:
+        global_product_id:
+          type: string
+          format: uuid
+
+    QuickstartImportFromGlobalResponse:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        global_product_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        brand:
+          type: string
+        category:
+          type: string
+        image_url:
+          type: string
+          format: uri
+        price:
+          type: number
+          format: float
+
+    QuickstartProgressResponse:
+      type: object
+      properties:
+        total_products:
+          type: integer
+        total_categories:
+          type: integer
+        total_brands:
+          type: integer
+        has_products:
+          type: boolean
+        has_categories:
+          type: boolean
+        has_brands:
+          type: boolean
+        completion_percentage:
+          type: integer
+          minimum: 0
+          maximum: 100
 
 paths:
   # ==========================================
@@ -424,225 +807,6 @@ paths:
         '500':
           description: Error interno del servidor
 
-  schemas:
-    SchemaValidationResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: ID único de la validación
-        is_valid:
-          type: boolean
-          description: Indica si el schema es completamente válido
-        can_import:
-          type: boolean
-          description: Indica si se puede proceder con la importación
-        columns:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/ColumnValidation'
-          description: Validación detallada por columna
-        table_preview:
-          $ref: '#/components/schemas/TablePreview'
-          description: Vista previa de la tabla con colores de validación
-        summary:
-          $ref: '#/components/schemas/ValidationSummary'
-          description: Resumen estadístico de la validación
-        recommendations:
-          type: array
-          items:
-            type: string
-          description: Recomendaciones para mejorar el archivo
-        suggested_mappings:
-          type: object
-          additionalProperties:
-            type: string
-          description: Mapeos sugeridos automáticamente
-        created_at:
-          type: string
-          format: date-time
-          description: Fecha de creación de la validación
-        expires_at:
-          type: string
-          format: date-time
-          description: Fecha de expiración (30 minutos)
-
-    ColumnValidation:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Nombre de la columna
-        index:
-          type: integer
-          description: Índice de la columna (0-based)
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado de validación (valid=verde, warning=amarillo, error=rojo, info=azul)
-        type_expected:
-          type: string
-          description: Tipo de dato esperado según el schema
-        type_detected:
-          type: string
-          description: Tipo de dato detectado automáticamente
-        required:
-          type: boolean
-          description: Indica si la columna es requerida
-        mapped_to:
-          type: string
-          description: Campo del producto al que está mapeada
-        statistics:
-          $ref: '#/components/schemas/ColumnStatistics'
-        issues:
-          type: array
-          items:
-            type: string
-          description: Lista de problemas encontrados
-        sample_values:
-          type: array
-          items:
-            type: string
-          description: Valores de muestra
-        invalid_examples:
-          type: array
-          items:
-            $ref: '#/components/schemas/InvalidExample'
-          description: Ejemplos de valores inválidos
-
-    ColumnStatistics:
-      type: object
-      properties:
-        valid_count:
-          type: integer
-          description: Cantidad de valores válidos
-        invalid_count:
-          type: integer
-          description: Cantidad de valores inválidos
-        null_count:
-          type: integer
-          description: Cantidad de valores nulos/vacíos
-        unique_count:
-          type: integer
-          description: Cantidad de valores únicos
-        total_count:
-          type: integer
-          description: Total de valores analizados
-        valid_rate:
-          type: number
-          format: float
-          description: Porcentaje de valores válidos (0-100)
-
-    InvalidExample:
-      type: object
-      properties:
-        row:
-          type: integer
-          description: Número de fila (1-based)
-        value:
-          type: string
-          description: Valor inválido
-        reason:
-          type: string
-          description: Razón de la invalidez
-
-    TablePreview:
-      type: object
-      properties:
-        headers:
-          type: array
-          items:
-            $ref: '#/components/schemas/HeaderInfo'
-          description: Información de los encabezados
-        rows:
-          type: array
-          items:
-            $ref: '#/components/schemas/RowPreview'
-          description: Filas de preview con validación
-
-    HeaderInfo:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Nombre del header
-        index:
-          type: integer
-          description: Índice de la columna
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado visual del header
-        mapped_to:
-          type: string
-          description: Campo mapeado
-
-    RowPreview:
-      type: object
-      properties:
-        row_number:
-          type: integer
-          description: Número de fila (1-based)
-        cells:
-          type: array
-          items:
-            $ref: '#/components/schemas/CellValidation'
-          description: Celdas de la fila
-        row_status:
-          type: string
-          enum: ["valid", "warning", "error"]
-          description: Estado general de la fila
-
-    CellValidation:
-      type: object
-      properties:
-        value:
-          type: string
-          description: Valor de la celda
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado visual de la celda
-        message:
-          type: string
-          description: Mensaje de error/advertencia
-        corrected_value:
-          type: string
-          description: Valor corregido sugerido
-        column_index:
-          type: integer
-          description: Índice de la columna
-
-    ValidationSummary:
-      type: object
-      properties:
-        total_rows:
-          type: integer
-          description: Total de filas analizadas
-        valid_rows:
-          type: integer
-          description: Filas completamente válidas
-        rows_with_errors:
-          type: integer
-          description: Filas con errores
-        rows_with_warnings:
-          type: integer
-          description: Filas con advertencias
-        estimated_success_rate:
-          type: number
-          format: float
-          description: Tasa de éxito estimada (0-100)
-        total_columns:
-          type: integer
-          description: Total de columnas encontradas
-        mapped_columns:
-          type: integer
-          description: Columnas mapeadas correctamente
-        required_columns:
-          type: integer
-          description: Columnas requeridas según el schema
-
     post:
       summary: Crear tipo de negocio
       tags: [Business Types]
@@ -697,7 +861,7 @@ paths:
           type: string
           format: uuid
         description: ID del tipo de negocio
-    
+
     get:
       summary: Obtener tipo de negocio por ID
       tags: [Business Types]
@@ -713,225 +877,6 @@ paths:
           description: No autorizado
         '500':
           description: Error interno del servidor
-
-  schemas:
-    SchemaValidationResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: ID único de la validación
-        is_valid:
-          type: boolean
-          description: Indica si el schema es completamente válido
-        can_import:
-          type: boolean
-          description: Indica si se puede proceder con la importación
-        columns:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/ColumnValidation'
-          description: Validación detallada por columna
-        table_preview:
-          $ref: '#/components/schemas/TablePreview'
-          description: Vista previa de la tabla con colores de validación
-        summary:
-          $ref: '#/components/schemas/ValidationSummary'
-          description: Resumen estadístico de la validación
-        recommendations:
-          type: array
-          items:
-            type: string
-          description: Recomendaciones para mejorar el archivo
-        suggested_mappings:
-          type: object
-          additionalProperties:
-            type: string
-          description: Mapeos sugeridos automáticamente
-        created_at:
-          type: string
-          format: date-time
-          description: Fecha de creación de la validación
-        expires_at:
-          type: string
-          format: date-time
-          description: Fecha de expiración (30 minutos)
-
-    ColumnValidation:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Nombre de la columna
-        index:
-          type: integer
-          description: Índice de la columna (0-based)
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado de validación (valid=verde, warning=amarillo, error=rojo, info=azul)
-        type_expected:
-          type: string
-          description: Tipo de dato esperado según el schema
-        type_detected:
-          type: string
-          description: Tipo de dato detectado automáticamente
-        required:
-          type: boolean
-          description: Indica si la columna es requerida
-        mapped_to:
-          type: string
-          description: Campo del producto al que está mapeada
-        statistics:
-          $ref: '#/components/schemas/ColumnStatistics'
-        issues:
-          type: array
-          items:
-            type: string
-          description: Lista de problemas encontrados
-        sample_values:
-          type: array
-          items:
-            type: string
-          description: Valores de muestra
-        invalid_examples:
-          type: array
-          items:
-            $ref: '#/components/schemas/InvalidExample'
-          description: Ejemplos de valores inválidos
-
-    ColumnStatistics:
-      type: object
-      properties:
-        valid_count:
-          type: integer
-          description: Cantidad de valores válidos
-        invalid_count:
-          type: integer
-          description: Cantidad de valores inválidos
-        null_count:
-          type: integer
-          description: Cantidad de valores nulos/vacíos
-        unique_count:
-          type: integer
-          description: Cantidad de valores únicos
-        total_count:
-          type: integer
-          description: Total de valores analizados
-        valid_rate:
-          type: number
-          format: float
-          description: Porcentaje de valores válidos (0-100)
-
-    InvalidExample:
-      type: object
-      properties:
-        row:
-          type: integer
-          description: Número de fila (1-based)
-        value:
-          type: string
-          description: Valor inválido
-        reason:
-          type: string
-          description: Razón de la invalidez
-
-    TablePreview:
-      type: object
-      properties:
-        headers:
-          type: array
-          items:
-            $ref: '#/components/schemas/HeaderInfo'
-          description: Información de los encabezados
-        rows:
-          type: array
-          items:
-            $ref: '#/components/schemas/RowPreview'
-          description: Filas de preview con validación
-
-    HeaderInfo:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Nombre del header
-        index:
-          type: integer
-          description: Índice de la columna
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado visual del header
-        mapped_to:
-          type: string
-          description: Campo mapeado
-
-    RowPreview:
-      type: object
-      properties:
-        row_number:
-          type: integer
-          description: Número de fila (1-based)
-        cells:
-          type: array
-          items:
-            $ref: '#/components/schemas/CellValidation'
-          description: Celdas de la fila
-        row_status:
-          type: string
-          enum: ["valid", "warning", "error"]
-          description: Estado general de la fila
-
-    CellValidation:
-      type: object
-      properties:
-        value:
-          type: string
-          description: Valor de la celda
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado visual de la celda
-        message:
-          type: string
-          description: Mensaje de error/advertencia
-        corrected_value:
-          type: string
-          description: Valor corregido sugerido
-        column_index:
-          type: integer
-          description: Índice de la columna
-
-    ValidationSummary:
-      type: object
-      properties:
-        total_rows:
-          type: integer
-          description: Total de filas analizadas
-        valid_rows:
-          type: integer
-          description: Filas completamente válidas
-        rows_with_errors:
-          type: integer
-          description: Filas con errores
-        rows_with_warnings:
-          type: integer
-          description: Filas con advertencias
-        estimated_success_rate:
-          type: number
-          format: float
-          description: Tasa de éxito estimada (0-100)
-        total_columns:
-          type: integer
-          description: Total de columnas encontradas
-        mapped_columns:
-          type: integer
-          description: Columnas mapeadas correctamente
-        required_columns:
-          type: integer
-          description: Columnas requeridas según el schema
 
     put:
       summary: Actualizar tipo de negocio
@@ -1104,7 +1049,7 @@ paths:
         schema:
           type: string
           format: uuid
-    
+
     get:
       summary: Obtener marca por ID
       tags: [Brands]
@@ -1217,225 +1162,6 @@ paths:
         '500':
           description: Error interno del servidor
 
-  schemas:
-    SchemaValidationResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: ID único de la validación
-        is_valid:
-          type: boolean
-          description: Indica si el schema es completamente válido
-        can_import:
-          type: boolean
-          description: Indica si se puede proceder con la importación
-        columns:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/ColumnValidation'
-          description: Validación detallada por columna
-        table_preview:
-          $ref: '#/components/schemas/TablePreview'
-          description: Vista previa de la tabla con colores de validación
-        summary:
-          $ref: '#/components/schemas/ValidationSummary'
-          description: Resumen estadístico de la validación
-        recommendations:
-          type: array
-          items:
-            type: string
-          description: Recomendaciones para mejorar el archivo
-        suggested_mappings:
-          type: object
-          additionalProperties:
-            type: string
-          description: Mapeos sugeridos automáticamente
-        created_at:
-          type: string
-          format: date-time
-          description: Fecha de creación de la validación
-        expires_at:
-          type: string
-          format: date-time
-          description: Fecha de expiración (30 minutos)
-
-    ColumnValidation:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Nombre de la columna
-        index:
-          type: integer
-          description: Índice de la columna (0-based)
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado de validación (valid=verde, warning=amarillo, error=rojo, info=azul)
-        type_expected:
-          type: string
-          description: Tipo de dato esperado según el schema
-        type_detected:
-          type: string
-          description: Tipo de dato detectado automáticamente
-        required:
-          type: boolean
-          description: Indica si la columna es requerida
-        mapped_to:
-          type: string
-          description: Campo del producto al que está mapeada
-        statistics:
-          $ref: '#/components/schemas/ColumnStatistics'
-        issues:
-          type: array
-          items:
-            type: string
-          description: Lista de problemas encontrados
-        sample_values:
-          type: array
-          items:
-            type: string
-          description: Valores de muestra
-        invalid_examples:
-          type: array
-          items:
-            $ref: '#/components/schemas/InvalidExample'
-          description: Ejemplos de valores inválidos
-
-    ColumnStatistics:
-      type: object
-      properties:
-        valid_count:
-          type: integer
-          description: Cantidad de valores válidos
-        invalid_count:
-          type: integer
-          description: Cantidad de valores inválidos
-        null_count:
-          type: integer
-          description: Cantidad de valores nulos/vacíos
-        unique_count:
-          type: integer
-          description: Cantidad de valores únicos
-        total_count:
-          type: integer
-          description: Total de valores analizados
-        valid_rate:
-          type: number
-          format: float
-          description: Porcentaje de valores válidos (0-100)
-
-    InvalidExample:
-      type: object
-      properties:
-        row:
-          type: integer
-          description: Número de fila (1-based)
-        value:
-          type: string
-          description: Valor inválido
-        reason:
-          type: string
-          description: Razón de la invalidez
-
-    TablePreview:
-      type: object
-      properties:
-        headers:
-          type: array
-          items:
-            $ref: '#/components/schemas/HeaderInfo'
-          description: Información de los encabezados
-        rows:
-          type: array
-          items:
-            $ref: '#/components/schemas/RowPreview'
-          description: Filas de preview con validación
-
-    HeaderInfo:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Nombre del header
-        index:
-          type: integer
-          description: Índice de la columna
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado visual del header
-        mapped_to:
-          type: string
-          description: Campo mapeado
-
-    RowPreview:
-      type: object
-      properties:
-        row_number:
-          type: integer
-          description: Número de fila (1-based)
-        cells:
-          type: array
-          items:
-            $ref: '#/components/schemas/CellValidation'
-          description: Celdas de la fila
-        row_status:
-          type: string
-          enum: ["valid", "warning", "error"]
-          description: Estado general de la fila
-
-    CellValidation:
-      type: object
-      properties:
-        value:
-          type: string
-          description: Valor de la celda
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado visual de la celda
-        message:
-          type: string
-          description: Mensaje de error/advertencia
-        corrected_value:
-          type: string
-          description: Valor corregido sugerido
-        column_index:
-          type: integer
-          description: Índice de la columna
-
-    ValidationSummary:
-      type: object
-      properties:
-        total_rows:
-          type: integer
-          description: Total de filas analizadas
-        valid_rows:
-          type: integer
-          description: Filas completamente válidas
-        rows_with_errors:
-          type: integer
-          description: Filas con errores
-        rows_with_warnings:
-          type: integer
-          description: Filas con advertencias
-        estimated_success_rate:
-          type: number
-          format: float
-          description: Tasa de éxito estimada (0-100)
-        total_columns:
-          type: integer
-          description: Total de columnas encontradas
-        mapped_columns:
-          type: integer
-          description: Columnas mapeadas correctamente
-        required_columns:
-          type: integer
-          description: Columnas requeridas según el schema
-
     post:
       summary: Crear nuevo producto
       tags: [Products]
@@ -1483,7 +1209,7 @@ paths:
         schema:
           type: string
           format: uuid
-    
+
     get:
       summary: Obtener producto por ID
       tags: [Products]
@@ -1754,227 +1480,6 @@ paths:
           description: No autorizado
         '500':
           description: Error interno del servidor
-
-  schemas:
-    SchemaValidationResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: ID único de la validación
-        is_valid:
-          type: boolean
-          description: Indica si el schema es completamente válido
-        can_import:
-          type: boolean
-          description: Indica si se puede proceder con la importación
-        columns:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/ColumnValidation'
-          description: Validación detallada por columna
-        table_preview:
-          $ref: '#/components/schemas/TablePreview'
-          description: Vista previa de la tabla con colores de validación
-        summary:
-          $ref: '#/components/schemas/ValidationSummary'
-          description: Resumen estadístico de la validación
-        recommendations:
-          type: array
-          items:
-            type: string
-          description: Recomendaciones para mejorar el archivo
-        suggested_mappings:
-          type: object
-          additionalProperties:
-            type: string
-          description: Mapeos sugeridos automáticamente
-        created_at:
-          type: string
-          format: date-time
-          description: Fecha de creación de la validación
-        expires_at:
-          type: string
-          format: date-time
-          description: Fecha de expiración (30 minutos)
-
-    ColumnValidation:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Nombre de la columna
-        index:
-          type: integer
-          description: Índice de la columna (0-based)
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado de validación (valid=verde, warning=amarillo, error=rojo, info=azul)
-        type_expected:
-          type: string
-          description: Tipo de dato esperado según el schema
-        type_detected:
-          type: string
-          description: Tipo de dato detectado automáticamente
-        required:
-          type: boolean
-          description: Indica si la columna es requerida
-        mapped_to:
-          type: string
-          description: Campo del producto al que está mapeada
-        statistics:
-          $ref: '#/components/schemas/ColumnStatistics'
-        issues:
-          type: array
-          items:
-            type: string
-          description: Lista de problemas encontrados
-        sample_values:
-          type: array
-          items:
-            type: string
-          description: Valores de muestra
-        invalid_examples:
-          type: array
-          items:
-            $ref: '#/components/schemas/InvalidExample'
-          description: Ejemplos de valores inválidos
-
-    ColumnStatistics:
-      type: object
-      properties:
-        valid_count:
-          type: integer
-          description: Cantidad de valores válidos
-        invalid_count:
-          type: integer
-          description: Cantidad de valores inválidos
-        null_count:
-          type: integer
-          description: Cantidad de valores nulos/vacíos
-        unique_count:
-          type: integer
-          description: Cantidad de valores únicos
-        total_count:
-          type: integer
-          description: Total de valores analizados
-        valid_rate:
-          type: number
-          format: float
-          description: Porcentaje de valores válidos (0-100)
-
-    InvalidExample:
-      type: object
-      properties:
-        row:
-          type: integer
-          description: Número de fila (1-based)
-        value:
-          type: string
-          description: Valor inválido
-        reason:
-          type: string
-          description: Razón de la invalidez
-
-    TablePreview:
-      type: object
-      properties:
-        headers:
-          type: array
-          items:
-            $ref: '#/components/schemas/HeaderInfo'
-          description: Información de los encabezados
-        rows:
-          type: array
-          items:
-            $ref: '#/components/schemas/RowPreview'
-          description: Filas de preview con validación
-
-    HeaderInfo:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Nombre del header
-        index:
-          type: integer
-          description: Índice de la columna
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado visual del header
-        mapped_to:
-          type: string
-          description: Campo mapeado
-
-    RowPreview:
-      type: object
-      properties:
-        row_number:
-          type: integer
-          description: Número de fila (1-based)
-        cells:
-          type: array
-          items:
-            $ref: '#/components/schemas/CellValidation'
-          description: Celdas de la fila
-        row_status:
-          type: string
-          enum: ["valid", "warning", "error"]
-          description: Estado general de la fila
-
-    CellValidation:
-      type: object
-      properties:
-        value:
-          type: string
-          description: Valor de la celda
-        status:
-          type: string
-          enum: ["valid", "warning", "error", "info"]
-          description: Estado visual de la celda
-        message:
-          type: string
-          description: Mensaje de error/advertencia
-        corrected_value:
-          type: string
-          description: Valor corregido sugerido
-        column_index:
-          type: integer
-          description: Índice de la columna
-
-    ValidationSummary:
-      type: object
-      properties:
-        total_rows:
-          type: integer
-          description: Total de filas analizadas
-        valid_rows:
-          type: integer
-          description: Filas completamente válidas
-        rows_with_errors:
-          type: integer
-          description: Filas con errores
-        rows_with_warnings:
-          type: integer
-          description: Filas con advertencias
-        estimated_success_rate:
-          type: number
-          format: float
-          description: Tasa de éxito estimada (0-100)
-        total_columns:
-          type: integer
-          description: Total de columnas encontradas
-        mapped_columns:
-          type: integer
-          description: Columnas mapeadas correctamente
-        required_columns:
-          type: integer
-          description: Columnas requeridas según el schema
-
-
 
   /products/json-template:
     get:
@@ -2365,8 +1870,6 @@ paths:
       description: |
         Obtiene todas las variantes de un producto.
         Las variantes tienen SKU único y atributos dinámicos.
-        
-        **Implementado en HITO 2.1**
       security:
         - BearerAuth: []
         - tenantId: []
@@ -2518,30 +2021,22 @@ paths:
                         variant_id:
                           type: string
                           format: uuid
-                          description: ID de la variante
                         product_id:
                           type: string
                           format: uuid
-                          description: ID del producto
                         sku:
                           type: string
-                          description: Código SKU
                         variant_name:
                           type: string
-                          description: Nombre de la variante
                         product_name:
                           type: string
-                          description: Nombre del producto
                         category_id:
                           type: string
-                          description: ID de la categoría
                         category_name:
                           type: string
-                          description: Nombre de la categoría
                         price:
                           type: number
                           format: float
-                          description: Precio
         '400':
           description: Datos de entrada inválidos
         '401':
@@ -2557,7 +2052,7 @@ paths:
         schema:
           type: string
           format: uuid
-    
+
     get:
       summary: Obtener variante por ID
       tags: [Variants]
@@ -2628,14 +2123,12 @@ paths:
       tags: [Import]
       description: |
         Importa productos con sus variantes desde CSV o JSON.
-        
-        **Implementado en HITO 2.1**
-        
+
         El parser detecta automáticamente:
         - Columnas estándar (name, sku, price, category, brand)
         - Atributos dinámicos (potencia, voltaje, color, etc.)
         - Agrupa filas por product_name para crear variantes
-        
+
         Formato CSV esperado:
         ```
         product_name,variant_sku,category,brand,potencia,voltaje,price
@@ -2750,8 +2243,6 @@ paths:
         Obtiene la lista de templates predefinidos para configuración rápida.
         Cada template incluye categorías, marcas y estructura de catálogo
         para un tipo de negocio específico.
-        
-        **Implementado en HITO 2** - Template Ferretería disponible
       security:
         - BearerAuth: []
         - tenantId: []
@@ -2806,8 +2297,6 @@ paths:
       description: |
         Aplica un template predefinido al catálogo del tenant.
         Crea automáticamente categorías, marcas y estructura base.
-        
-        **Implementado en HITO 2** para el flujo de Quickstart
       security:
         - BearerAuth: []
         - tenantId: []
@@ -2855,5 +2344,692 @@ paths:
           description: Error al aplicar template
         '404':
           description: Template no encontrado
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # QUICKSTART NEW ENDPOINTS (v2.3.0)
+  # ==========================================
+  /quickstart/products/from-template:
+    post:
+      summary: Crear producto desde template
+      tags: [Quickstart]
+      description: |
+        Crea un producto en el catálogo del tenant a partir de un template
+        de quickstart predefinido.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuickstartFromTemplateRequest'
+      responses:
+        '201':
+          description: Producto creado desde template
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '404':
+          description: Template no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/products/import-from-business-type:
+    post:
+      summary: Import masivo por business type
+      tags: [Quickstart]
+      description: |
+        Importa productos del catálogo global filtrando por tipo de negocio.
+        Crea productos, categorías y marcas automáticamente en el tenant.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuickstartImportFromBusinessTypeRequest'
+      responses:
+        '200':
+          description: Resultado de la importación masiva
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  products_imported:
+                    type: integer
+                  categories_created:
+                    type: integer
+                  brands_created:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/products/import-from-global:
+    post:
+      summary: Import individual desde global catalog
+      tags: [Quickstart]
+      description: |
+        Importa un producto individual del catálogo global al catálogo del tenant.
+        Crea el producto con toda su información (nombre, marca, categoría, imagen, precio).
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuickstartImportFromGlobalRequest'
+      responses:
+        '201':
+          description: Producto importado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuickstartImportFromGlobalResponse'
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '404':
+          description: Producto global no encontrado
+        '409':
+          description: Producto ya existe en el catálogo del tenant
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/progress:
+    get:
+      summary: Progreso del quickstart
+      tags: [Quickstart]
+      description: |
+        Retorna el progreso actual del quickstart del tenant,
+        incluyendo cantidad de productos, categorías y marcas creadas.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Progreso del quickstart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuickstartProgressResponse'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # GLOBAL CATALOG ENDPOINTS (v2.3.0)
+  # ==========================================
+  /global-catalog/products:
+    post:
+      summary: Crear producto global
+      tags: [Global Catalog]
+      description: |
+        Crea un producto en el catálogo global. Usado principalmente por scrapers
+        y procesos de enrichment automatizado.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserRoleHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalProductCreateRequest'
+      responses:
+        '201':
+          description: Producto global creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalProduct'
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '409':
+          description: Producto con EAN duplicado
+        '500':
+          description: Error interno del servidor
+
+    get:
+      summary: Listar productos globales con filtros avanzados
+      tags: [Global Catalog]
+      description: |
+        Lista productos del catálogo global con filtros avanzados.
+        Soporta búsqueda por texto (ILIKE), filtros exactos y paginación.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          description: Búsqueda por nombre (ILIKE)
+          schema:
+            type: string
+        - name: description
+          in: query
+          description: Búsqueda por descripción (ILIKE)
+          schema:
+            type: string
+        - name: brand
+          in: query
+          description: Filtrar por marca exacta
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Filtrar por categoría exacta
+          schema:
+            type: string
+        - name: business_type
+          in: query
+          description: Filtrar por tipo de negocio
+          schema:
+            type: string
+        - name: source
+          in: query
+          description: Filtrar por fuente (scraper)
+          schema:
+            type: string
+        - name: ean
+          in: query
+          description: Filtrar por código EAN
+          schema:
+            type: string
+        - name: is_verified
+          in: query
+          description: Solo productos verificados
+          schema:
+            type: boolean
+        - name: is_active
+          in: query
+          description: Solo productos activos
+          schema:
+            type: boolean
+        - name: min_quality
+          in: query
+          description: Quality score mínimo (0-100)
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+        - name: max_quality
+          in: query
+          description: Quality score máximo (0-100)
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+      responses:
+        '200':
+          description: Lista paginada de productos globales
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalProductListResponse'
+        '400':
+          description: Parámetros de filtrado inválidos
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /global-catalog/products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: ID del producto global
+
+    get:
+      summary: Obtener producto global por ID
+      tags: [Global Catalog]
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Detalles del producto global
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalProduct'
+        '404':
+          description: Producto no encontrado
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar producto global
+      tags: [Global Catalog]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserRoleHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlobalProductUpdateRequest'
+      responses:
+        '200':
+          description: Producto global actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalProduct'
+        '400':
+          description: Datos de entrada inválidos
+        '404':
+          description: Producto no encontrado
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+    delete:
+      summary: Eliminar producto global
+      tags: [Global Catalog]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserRoleHeader'
+      responses:
+        '204':
+          description: Producto global eliminado
+        '404':
+          description: Producto no encontrado
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /global-catalog/products/search:
+    get:
+      summary: Búsqueda de productos por EAN
+      tags: [Global Catalog]
+      description: Busca productos en el catálogo global por código EAN.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: ean
+          in: query
+          required: true
+          description: Código EAN del producto
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalProduct'
+        '404':
+          description: Producto no encontrado por EAN
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /global-catalog/enrichment-queue:
+    get:
+      summary: Cola de enrichment
+      tags: [Global Catalog]
+      description: |
+        Retorna productos del catálogo global con quality_score menor a 70,
+        priorizados para enrichment (mejora de datos).
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: business_type
+          in: query
+          description: Filtrar por tipo de negocio
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Cantidad máxima de resultados
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Offset para paginación
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Productos pendientes de enrichment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrichmentQueueResponse'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # PRODUCT REQUESTS ENDPOINTS (v2.3.0)
+  # ==========================================
+  /global-catalog/product-requests:
+    post:
+      summary: Solicitar producto al catálogo global
+      tags: [Product Requests]
+      description: |
+        Permite a un tenant solicitar la incorporación de un producto
+        al catálogo global. El admin lo revisará y resolverá.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductRequestCreateRequest'
+      responses:
+        '201':
+          description: Solicitud creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductRequestCreateResponse'
+        '400':
+          description: Datos de entrada inválidos
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+    get:
+      summary: Listar solicitudes pendientes
+      tags: [Product Requests]
+      description: |
+        Lista las solicitudes de productos pendientes.
+        Endpoint para administradores del marketplace.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserRoleHeader'
+        - name: limit
+          in: query
+          description: Cantidad máxima de resultados
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Offset para paginación
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Lista de solicitudes pendientes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductRequestListResponse'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /global-catalog/product-requests/metrics:
+    get:
+      summary: Métricas de solicitudes (alarma)
+      tags: [Product Requests]
+      description: |
+        Retorna métricas resumidas de las solicitudes pendientes,
+        incluyendo nivel de alerta basado en cantidad y antigüedad.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserRoleHeader'
+      responses:
+        '200':
+          description: Métricas de solicitudes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductRequestMetricsResponse'
+        '401':
+          description: No autorizado
+        '500':
+          description: Error interno del servidor
+
+  /global-catalog/product-requests/{id}/resolve:
+    put:
+      summary: Resolver solicitud de producto
+      tags: [Product Requests]
+      description: |
+        Permite al administrador resolver una solicitud de producto.
+        Acciones disponibles: approve, reject, fulfill.
+        Para fulfill se requiere global_product_id.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID de la solicitud
+        - $ref: '#/components/parameters/UserRoleHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductRequestResolveRequest'
+      responses:
+        '200':
+          description: Solicitud resuelta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductRequestResolveResponse'
+        '400':
+          description: Acción inválida o datos faltantes
+        '401':
+          description: No autorizado
+        '404':
+          description: Solicitud no encontrada
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # PUBLIC GLOBAL CATALOG ENDPOINTS (v2.3.0)
+  # ==========================================
+  /public/global-catalog/health:
+    get:
+      summary: Health check público del catálogo global
+      tags: [Global Catalog Public]
+      description: Endpoint de salud público, no requiere autenticación.
+      responses:
+        '200':
+          description: Estado del catálogo global
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  service:
+                    type: string
+                    example: "global-catalog"
+        '500':
+          description: Error interno del servidor
+
+  /public/global-catalog/search:
+    get:
+      summary: Búsqueda pública por EAN
+      tags: [Global Catalog Public]
+      description: |
+        Busca productos en el catálogo global por código EAN.
+        No requiere autenticación.
+      parameters:
+        - name: ean
+          in: query
+          required: true
+          description: Código EAN del producto
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalProduct'
+        '404':
+          description: Producto no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /public/global-catalog/suggestions:
+    get:
+      summary: Sugerencias de productos por business type
+      tags: [Global Catalog Public]
+      description: |
+        Retorna sugerencias de productos del catálogo global
+        filtrados por tipo de negocio. No requiere autenticación.
+      parameters:
+        - name: business_type
+          in: query
+          required: true
+          description: Tipo de negocio para filtrar sugerencias
+          schema:
+            type: string
+            example: "almacen"
+        - name: limit
+          in: query
+          description: Cantidad máxima de sugerencias
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        '200':
+          description: Lista de sugerencias
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GlobalProduct'
+                  total_count:
+                    type: integer
+        '400':
+          description: business_type es requerido
+        '500':
+          description: Error interno del servidor
+
+  /public/global-catalog/products/ean/{ean}:
+    get:
+      summary: Obtener producto por EAN público
+      tags: [Global Catalog Public]
+      description: |
+        Obtiene un producto del catálogo global por su código EAN.
+        No requiere autenticación.
+      parameters:
+        - name: ean
+          in: path
+          required: true
+          description: Código EAN del producto
+          schema:
+            type: string
+            example: "7790895000782"
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalProduct'
+        '404':
+          description: Producto no encontrado con ese EAN
+        '500':
+          description: Error interno del servidor
+
+  /public/global-catalog/facets:
+    get:
+      summary: Marcas y categorías por business type
+      tags: [Global Catalog Public]
+      description: |
+        Retorna las marcas y categorías disponibles en el catálogo global
+        filtradas por tipo de negocio. Usado para construir filtros en el frontend.
+        No requiere autenticación.
+      parameters:
+        - name: business_type
+          in: query
+          required: true
+          description: Tipo de negocio para filtrar facets
+          schema:
+            type: string
+            example: "almacen"
+      responses:
+        '200':
+          description: Facets disponibles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalCatalogFacetsResponse'
+        '400':
+          description: business_type es requerido
         '500':
           description: Error interno del servidor

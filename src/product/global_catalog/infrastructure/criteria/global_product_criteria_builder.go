@@ -33,6 +33,9 @@ func (b *GlobalProductCriteriaBuilder) FromContext(c *gin.Context) *GlobalProduc
 	if v := c.Query("search"); v != "" {
 		b.builder.AddLikeFilter("name", v)
 	}
+	if v := c.Query("description"); v != "" {
+		b.builder.AddLikeFilter("description", v)
+	}
 
 	// Filtros múltiples para marcas
 	if brands := c.QueryArray("brand"); len(brands) > 0 {

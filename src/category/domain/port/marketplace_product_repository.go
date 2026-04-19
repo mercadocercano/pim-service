@@ -11,8 +11,8 @@ type MarketplaceProductRepository interface {
 	// FindProductsByStoreType busca productos de tenants con un business_type específico
 	FindProductsByStoreType(ctx context.Context, storeTypeCode string, page, pageSize int) ([]*response.MarketplaceProductResponse, int, error)
 
-	// FindAllProducts busca todos los productos activos cross-tenant
-	FindAllProducts(ctx context.Context, search string, page, pageSize int) ([]*response.MarketplaceProductResponse, int, error)
+	// FindAllProducts busca todos los productos activos cross-tenant con filtros opcionales
+	FindAllProducts(ctx context.Context, search, businessType string, page, pageSize int) ([]*response.MarketplaceProductResponse, int, error)
 
 	// FindProductByID busca un producto por ID (cross-tenant)
 	FindProductByID(ctx context.Context, productID string) (*response.MarketplaceProductResponse, error)

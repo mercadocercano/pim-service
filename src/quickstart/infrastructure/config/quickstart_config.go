@@ -35,7 +35,8 @@ func NewQuickstartModuleConfig(db *sql.DB) *QuickstartModuleConfig {
 	getCategoriesByBusinessTypeUseCase := usecase.NewGetCategoriesByBusinessTypeUseCase(getCategoriesRepo)
 	getAttributesByBusinessTypeUseCase := usecase.NewGetAttributesByBusinessTypeUseCase()
 	getVariantsByBusinessTypeUseCase := usecase.NewGetVariantsByBusinessTypeUseCase()
-	getProductsByBusinessTypeUseCase := usecase.NewGetProductsByBusinessTypeUseCase()
+	getProductsByBusinessTypeRepo := quickstartRepository.NewGetProductsByBusinessTypePostgresRepository(db)
+	getProductsByBusinessTypeUseCase := usecase.NewGetProductsByBusinessTypeUseCase(getProductsByBusinessTypeRepo)
 	getBrandsByBusinessTypeUseCase := usecase.NewGetBrandsByBusinessTypeUseCase()
 	setupTenantUseCase := usecase.NewSetupTenantUseCase()
 	

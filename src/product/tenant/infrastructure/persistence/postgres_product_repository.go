@@ -55,10 +55,10 @@ func (r *PostgresProductRepository) Save(ctx context.Context, product *entity.Pr
 	// Guardar el producto
 	productQuery := `
 		INSERT INTO products (
-			id, tenant_id, name, description, sku, 
+			id, tenant_id, name, description, image_url, sku,
 			category_id, category_name, brand_id, brand_name,
 			status, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 	`
 
 	var sku *string
@@ -88,6 +88,7 @@ func (r *PostgresProductRepository) Save(ctx context.Context, product *entity.Pr
 		product.TenantID(),
 		product.Name(),
 		product.Description(),
+		product.ImageURL(),
 		sku,
 		categoryID,
 		categoryName,
@@ -117,7 +118,7 @@ func (r *PostgresProductRepository) Save(ctx context.Context, product *entity.Pr
 // FindByID busca un producto por ID
 func (r *PostgresProductRepository) FindByID(ctx context.Context, id uuid.UUID, tenantID string) (*entity.Product, error) {
 	query := `
-		SELECT id, tenant_id, name, description, sku,
+		SELECT id, tenant_id, name, description, image_url, sku,
 			   category_id, category_name, brand_id, brand_name,
 			   status, created_at, updated_at
 		FROM products 
@@ -151,7 +152,7 @@ func (r *PostgresProductRepository) FindByIDWithVariants(ctx context.Context, id
 // FindBySKU busca un producto por SKU
 func (r *PostgresProductRepository) FindBySKU(ctx context.Context, sku, tenantID string) (*entity.Product, error) {
 	query := `
-		SELECT id, tenant_id, name, description, sku,
+		SELECT id, tenant_id, name, description, image_url, sku,
 			   category_id, category_name, brand_id, brand_name,
 			   status, created_at, updated_at
 		FROM products 
@@ -165,11 +166,11 @@ func (r *PostgresProductRepository) FindBySKU(ctx context.Context, sku, tenantID
 // Update actualiza un producto existente
 func (r *PostgresProductRepository) Update(ctx context.Context, product *entity.Product) error {
 	query := `
-		UPDATE products SET 
-			name = $3, description = $4, sku = $5,
-			category_id = $6, category_name = $7, 
-			brand_id = $8, brand_name = $9,
-			status = $10, updated_at = $11
+		UPDATE products SET
+			name = $3, description = $4, image_url = $5, sku = $6,
+			category_id = $7, category_name = $8,
+			brand_id = $9, brand_name = $10,
+			status = $11, updated_at = $12
 		WHERE id = $1 AND tenant_id = $2
 	`
 
@@ -200,6 +201,7 @@ func (r *PostgresProductRepository) Update(ctx context.Context, product *entity.
 		product.TenantID(),
 		product.Name(),
 		product.Description(),
+		product.ImageURL(),
 		sku,
 		categoryID,
 		categoryName,
@@ -274,7 +276,7 @@ func (r *PostgresProductRepository) ExistsBySKUExcludingID(ctx context.Context, 
 // Incluye price y stock de la variante default para mostrar en listados
 func (r *PostgresProductRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.Product, error) {
 	baseQuery := `
-		SELECT p.id, p.tenant_id, p.name, p.description,
+		SELECT p.id, p.tenant_id, p.name, p.description, p.image_url,
 			   COALESCE(p.sku, (SELECT pv.sku FROM product_variants pv WHERE pv.product_id = p.id AND pv.is_default = true AND pv.status != 'deleted' LIMIT 1)) as sku,
 			   p.category_id, p.category_name, p.brand_id, p.brand_name,
 			   p.status, p.created_at, p.updated_at,
@@ -316,11 +318,11 @@ func (r *PostgresProductRepository) CountByCriteria(ctx context.Context, crit cr
 // scanProduct escanea una fila a una entidad Product
 func (r *PostgresProductRepository) scanProduct(row *sql.Row) (*entity.Product, error) {
 	var id, tenantID, name, statusStr string
-	var description, sku, categoryID, categoryName, brandID, brandName *string
+	var description, imageURL, sku, categoryID, categoryName, brandID, brandName *string
 	var createdAt, updatedAt sql.NullTime
 
 	err := row.Scan(
-		&id, &tenantID, &name, &description, &sku,
+		&id, &tenantID, &name, &description, &imageURL, &sku,
 		&categoryID, &categoryName, &brandID, &brandName,
 		&statusStr, &createdAt, &updatedAt,
 	)
@@ -333,7 +335,7 @@ func (r *PostgresProductRepository) scanProduct(row *sql.Row) (*entity.Product, 
 	}
 
 	return r.buildProductFromScan(
-		id, tenantID, name, description, sku,
+		id, tenantID, name, description, imageURL, sku,
 		categoryID, categoryName, brandID, brandName,
 		statusStr, createdAt, updatedAt,
 	)
@@ -345,11 +347,11 @@ func (r *PostgresProductRepository) scanProducts(rows *sql.Rows) ([]*entity.Prod
 
 	for rows.Next() {
 		var id, tenantID, name, statusStr string
-		var description, sku, categoryID, categoryName, brandID, brandName *string
+		var description, imageURL, sku, categoryID, categoryName, brandID, brandName *string
 		var createdAt, updatedAt sql.NullTime
 
 		err := rows.Scan(
-			&id, &tenantID, &name, &description, &sku,
+			&id, &tenantID, &name, &description, &imageURL, &sku,
 			&categoryID, &categoryName, &brandID, &brandName,
 			&statusStr, &createdAt, &updatedAt,
 		)
@@ -359,7 +361,7 @@ func (r *PostgresProductRepository) scanProducts(rows *sql.Rows) ([]*entity.Prod
 		}
 
 		product, err := r.buildProductFromScan(
-			id, tenantID, name, description, sku,
+			id, tenantID, name, description, imageURL, sku,
 			categoryID, categoryName, brandID, brandName,
 			statusStr, createdAt, updatedAt,
 		)
@@ -380,13 +382,13 @@ func (r *PostgresProductRepository) scanProductsWithVariantInfo(rows *sql.Rows) 
 
 	for rows.Next() {
 		var id, tenantID, name, statusStr string
-		var description, sku, categoryID, categoryName, brandID, brandName *string
+		var description, imageURL, sku, categoryID, categoryName, brandID, brandName *string
 		var createdAt, updatedAt sql.NullTime
 		var defaultPrice sql.NullFloat64
 		var defaultStock sql.NullInt64
 
 		err := rows.Scan(
-			&id, &tenantID, &name, &description, &sku,
+			&id, &tenantID, &name, &description, &imageURL, &sku,
 			&categoryID, &categoryName, &brandID, &brandName,
 			&statusStr, &createdAt, &updatedAt,
 			&defaultPrice, &defaultStock,
@@ -397,7 +399,7 @@ func (r *PostgresProductRepository) scanProductsWithVariantInfo(rows *sql.Rows) 
 		}
 
 		product, err := r.buildProductFromScan(
-			id, tenantID, name, description, sku,
+			id, tenantID, name, description, imageURL, sku,
 			categoryID, categoryName, brandID, brandName,
 			statusStr, createdAt, updatedAt,
 		)
@@ -430,7 +432,7 @@ func (r *PostgresProductRepository) scanProductsWithVariantInfo(rows *sql.Rows) 
 // buildProductFromScan construye una entidad Product desde los datos escaneados
 func (r *PostgresProductRepository) buildProductFromScan(
 	idStr, tenantID, name string,
-	description, sku, categoryID, categoryName, brandID, brandName *string,
+	description, imageURL, sku, categoryID, categoryName, brandID, brandName *string,
 	statusStr string,
 	createdAt, updatedAt sql.NullTime,
 ) (*entity.Product, error) {
@@ -487,6 +489,7 @@ func (r *PostgresProductRepository) buildProductFromScan(
 		tenantID,
 		name,
 		description,
+		imageURL,
 		productSKU,
 		categoryRef,
 		brandRef,

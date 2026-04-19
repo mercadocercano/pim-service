@@ -133,6 +133,7 @@ func (p ProductMother) ActiveProduct() (*entity.Product, error) {
 		"tenant-123",
 		"Producto de Prueba",
 		&description,
+		nil,
 		sku,
 		categoryRef,
 		brandRef,

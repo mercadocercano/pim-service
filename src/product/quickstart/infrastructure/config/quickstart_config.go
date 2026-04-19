@@ -12,9 +12,10 @@ import (
 // QuickstartConfig contiene todas las dependencias del módulo quickstart
 type QuickstartConfig struct {
 	// Use Cases
-	CreateFromTemplateUseCase     *usecase.CreateFromTemplateUseCase
-	ImportFromBusinessTypeUseCase *usecase.ImportFromBusinessTypeUseCase
-	GetQuickstartProgressUseCase  *usecase.GetQuickstartProgressUseCase
+	CreateFromTemplateUseCase      *usecase.CreateFromTemplateUseCase
+	ImportFromBusinessTypeUseCase  *usecase.ImportFromBusinessTypeUseCase
+	ImportFromGlobalCatalogUseCase *usecase.ImportFromGlobalCatalogUseCase
+	GetQuickstartProgressUseCase   *usecase.GetQuickstartProgressUseCase
 
 	// Controllers
 	QuickstartController *controller.QuickstartController
@@ -29,20 +30,23 @@ func NewQuickstartConfig(
 	// Use Cases
 	createFromTemplateUseCase := usecase.NewCreateFromTemplateUseCase(productRepo)
 	importFromBusinessTypeUseCase := usecase.NewImportFromBusinessTypeUseCase(productRepo, globalCatalogRepo)
+	importFromGlobalCatalogUseCase := usecase.NewImportFromGlobalCatalogUseCase(productRepo, globalCatalogRepo)
 	getQuickstartProgressUseCase := usecase.NewGetQuickstartProgressUseCase(productRepo)
 
 	// Controllers
 	quickstartController := controller.NewQuickstartController(
 		createFromTemplateUseCase,
 		importFromBusinessTypeUseCase,
+		importFromGlobalCatalogUseCase,
 		getQuickstartProgressUseCase,
 	)
 
 	return &QuickstartConfig{
-		CreateFromTemplateUseCase:     createFromTemplateUseCase,
-		ImportFromBusinessTypeUseCase: importFromBusinessTypeUseCase,
-		GetQuickstartProgressUseCase:  getQuickstartProgressUseCase,
-		QuickstartController:          quickstartController,
+		CreateFromTemplateUseCase:      createFromTemplateUseCase,
+		ImportFromBusinessTypeUseCase:  importFromBusinessTypeUseCase,
+		ImportFromGlobalCatalogUseCase: importFromGlobalCatalogUseCase,
+		GetQuickstartProgressUseCase:   getQuickstartProgressUseCase,
+		QuickstartController:           quickstartController,
 	}
 }
 

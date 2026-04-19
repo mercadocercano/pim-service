@@ -2,12 +2,17 @@ package usecase
 
 import (
 	"context"
+	"crypto/sha1"
 	"fmt"
 	"log"
 
+	globalEntity "saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	globalPort "saas-mt-pim-service/src/product/global_catalog/domain/port"
 	tenantEntity "saas-mt-pim-service/src/product/tenant/domain/entity"
 	tenantPort "saas-mt-pim-service/src/product/tenant/domain/port"
+	"saas-mt-pim-service/src/product/tenant/domain/value_object"
+
+	"github.com/google/uuid"
 )
 
 type ImportFromBusinessTypeUseCase struct {
@@ -77,7 +82,7 @@ func (uc *ImportFromBusinessTypeUseCase) Execute(
 		request.InitialStatus = "active"
 	}
 
-	globals, err := uc.globalCatalogRepo.FindByBusinessType(request.BusinessTypeID, 50)
+	globals, err := uc.globalCatalogRepo.FindByBusinessType(request.BusinessTypeID, 500)
 	if err != nil {
 		return nil, fmt.Errorf("buscando productos del catálogo global: %w", err)
 	}
@@ -91,13 +96,17 @@ func (uc *ImportFromBusinessTypeUseCase) Execute(
 			continue
 		}
 
-		product, createErr := tenantEntity.NewProduct(
+		categoryRef := buildCategoryRef(gp)
+		brandRef := buildBrandRef(gp)
+
+		product, createErr := tenantEntity.NewProductWithImage(
 			request.TenantID,
 			gp.Name(),
 			gp.Description(),
+			gp.ImageURL(),
 			nil,
-			nil,
-			nil,
+			categoryRef,
+			brandRef,
 		)
 		if createErr != nil {
 			failed = append(failed, FailedImportSummary{
@@ -106,6 +115,12 @@ func (uc *ImportFromBusinessTypeUseCase) Execute(
 				Reason:     "Error creando producto tenant",
 			})
 			continue
+		}
+
+		if price := gp.Price(); price != nil && *price > 0 {
+			if defaultVariant := product.GetDefaultVariant(); defaultVariant != nil {
+				defaultVariant.UpdatePrice(*price)
+			}
 		}
 
 		if saveErr := uc.tenantProductRepo.Save(ctx, product); saveErr != nil {
@@ -161,4 +176,42 @@ func contains(slice []string, item string) bool {
 		}
 	}
 	return false
+}
+
+// deterministicUUID genera un UUID determinístico a partir de un namespace y un nombre.
+// El mismo nombre siempre produce el mismo UUID, evitando duplicados.
+func deterministicUUID(namespace, name string) uuid.UUID {
+	h := sha1.New()
+	h.Write([]byte(namespace + ":" + name))
+	var b [16]byte
+	copy(b[:], h.Sum(nil)[:16])
+	b[6] = (b[6] & 0x0f) | 0x50 // version 5
+	b[8] = (b[8] & 0x3f) | 0x80 // variant RFC4122
+	return uuid.UUID(b)
+}
+
+func buildCategoryRef(gp *globalEntity.GlobalProduct) *value_object.CategoryReference {
+	cat := gp.Category()
+	if cat == nil || *cat == "" {
+		return nil
+	}
+	id := deterministicUUID("category", *cat)
+	ref, err := value_object.NewCategoryReference(id.String(), *cat)
+	if err != nil {
+		return nil
+	}
+	return ref
+}
+
+func buildBrandRef(gp *globalEntity.GlobalProduct) *value_object.BrandReference {
+	brand := gp.Brand()
+	if brand == nil || *brand == "" {
+		return nil
+	}
+	id := deterministicUUID("brand", *brand)
+	ref, err := value_object.NewBrandReference(id.String(), *brand)
+	if err != nil {
+		return nil
+	}
+	return ref
 }

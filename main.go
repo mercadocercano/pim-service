@@ -21,7 +21,6 @@ import (
 
 	// Brand imports
 	brandController "saas-mt-pim-service/src/brand/infrastructure/controller"
-	brandPersistence "saas-mt-pim-service/src/brand/infrastructure/persistence"
 	brandRepository "saas-mt-pim-service/src/brand/infrastructure/persistence/repository"
 
 	// Attribute imports
@@ -36,21 +35,9 @@ import (
 	categoryUsecase "saas-mt-pim-service/src/category/application/usecase"
 	categoryController "saas-mt-pim-service/src/category/infrastructure/controller"
 	categoryPersistence "saas-mt-pim-service/src/category/infrastructure/persistence"
-	categoryRepository "saas-mt-pim-service/src/category/infrastructure/persistence/repository"
-
-	// Batch imports
-	batchPort "saas-mt-pim-service/src/batch/domain/port"
-	batchUseCase "saas-mt-pim-service/src/batch/application/usecase"
-	batchController "saas-mt-pim-service/src/batch/infrastructure/controller"
-
-	// Product persistence
-	persistence "saas-mt-pim-service/src/product/tenant/infrastructure/persistence"
 
 	// Schema validation imports
 	schemaValidationConfig "saas-mt-pim-service/src/schema_validation/infrastructure/config"
-
-	// AI Template imports
-	aiTemplateConfig "saas-mt-pim-service/src/template_ai/infrastructure/config"
 
 	// Overview module imports
 	overviewConfig "saas-mt-pim-service/src/overview/infrastructure/config"
@@ -194,9 +181,7 @@ func main() {
 	setupGlobalCatalogModule(v1, db)
 	setupMarketplaceCategoriesModule(v1, db)
 	setupMarketplaceProductsModule(v1, db)
-	setupBatchModule(v1, db)
 	setupSchemaValidationModule(v1, db)
-	setupAITemplateModule(v1, db)
 	overviewConfig.SetupOverviewModule(v1, db)
 	setupInternalModule(v1, db)
 
@@ -412,6 +397,9 @@ func setupGlobalCatalogModule(router *gin.RouterGroup, db *sql.DB) {
 		private.GET("/enrichment-queue", globalCatalogController.ListProductsNeedingEnrichment)
 	}
 
+	// Solicitudes de productos no encontrados
+	globalCatalogCfg.ProductRequestController.RegisterRoutes(router)
+
 	log.Println("Módulo Global Catalog configurado exitosamente")
 	log.Println("Rutas Global Catalog públicas disponibles:")
 	log.Println("  GET    /api/v1/public/global-catalog/health")
@@ -506,40 +494,6 @@ func setupAttributeModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  DELETE /api/v1/attributes/:id")
 }
 
-// setupBatchModule configura el módulo Batch
-func setupBatchModule(router *gin.RouterGroup, db *sql.DB) {
-	log.Println("Configurando módulo Batch...")
-
-	// Importar dependencias necesarias
-	// TODO: Mejorar importaciones cuando se refactorice
-	categoryRepo := categoryRepository.NewCategoryPostgresRepository(db)
-	brandRepo := brandPersistence.NewPostgresBrandRepository(db)
-	productRepo := persistence.NewPostgresProductRepository(db)
-
-	// Repository para mapeo de categorías
-	categoryMappingRepo := categoryPersistence.NewTenantCategoryMappingPostgresRepository(db)
-
-	// Crear caso de uso batch
-	txBeginner := &batchPort.SQLDBTxBeginner{DB: db}
-	batchUseCase := batchUseCase.NewBatchCreateUseCase(
-		txBeginner,
-		categoryRepo,
-		brandRepo,
-		productRepo,
-		categoryMappingRepo,
-	)
-
-	// Crear controller
-	batchController := batchController.NewBatchController(batchUseCase)
-
-	// Registrar rutas
-	batchController.RegisterRoutes(router)
-
-	log.Println("Módulo Batch configurado exitosamente")
-	log.Println("Rutas Batch disponibles:")
-	log.Println("  POST   /api/v1/batch/create")
-}
-
 // setupSchemaValidationModule configura el módulo de validación de schema
 func setupSchemaValidationModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("Configurando módulo Schema Validation...")
@@ -552,25 +506,6 @@ func setupSchemaValidationModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  POST   /api/v1/products/validate-schema")
 	log.Println("  POST   /api/v1/products/apply-mapping")
 	log.Println("  GET    /api/v1/products/csv-template")
-}
-
-// setupAITemplateModule configura el módulo de AI Templates
-func setupAITemplateModule(router *gin.RouterGroup, db *sql.DB) {
-	log.Println("Configurando módulo AI Template...")
-
-	// Crear configuración y obtener controller
-	config := aiTemplateConfig.NewAITemplateConfig(db)
-	controller := config.GetController()
-
-	// Registrar rutas
-	controller.RegisterRoutes(router)
-
-	log.Println("Módulo AI Template configurado exitosamente")
-	log.Println("Rutas AI Template disponibles:")
-	log.Println("  POST   /api/v1/templates/generate")
-	log.Println("  POST   /api/v1/templates/:id/apply")
-	log.Println("  GET    /api/v1/templates/:id/performance")
-	log.Println("  POST   /api/v1/templates/update-from-feedback")
 }
 
 // setupMarketplaceProductsModule configura el módulo de productos del marketplace (cross-tenant)

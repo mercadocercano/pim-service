@@ -10,21 +10,24 @@ import (
 
 // QuickstartController maneja las peticiones HTTP para quickstart
 type QuickstartController struct {
-	createFromTemplateUseCase     *usecase.CreateFromTemplateUseCase
-	importFromBusinessTypeUseCase *usecase.ImportFromBusinessTypeUseCase
-	getQuickstartProgressUseCase  *usecase.GetQuickstartProgressUseCase
+	createFromTemplateUseCase      *usecase.CreateFromTemplateUseCase
+	importFromBusinessTypeUseCase  *usecase.ImportFromBusinessTypeUseCase
+	importFromGlobalCatalogUseCase *usecase.ImportFromGlobalCatalogUseCase
+	getQuickstartProgressUseCase   *usecase.GetQuickstartProgressUseCase
 }
 
 // NewQuickstartController crea una nueva instancia del controller
 func NewQuickstartController(
 	createFromTemplateUseCase *usecase.CreateFromTemplateUseCase,
 	importFromBusinessTypeUseCase *usecase.ImportFromBusinessTypeUseCase,
+	importFromGlobalCatalogUseCase *usecase.ImportFromGlobalCatalogUseCase,
 	getQuickstartProgressUseCase *usecase.GetQuickstartProgressUseCase,
 ) *QuickstartController {
 	return &QuickstartController{
-		createFromTemplateUseCase:     createFromTemplateUseCase,
-		importFromBusinessTypeUseCase: importFromBusinessTypeUseCase,
-		getQuickstartProgressUseCase:  getQuickstartProgressUseCase,
+		createFromTemplateUseCase:      createFromTemplateUseCase,
+		importFromBusinessTypeUseCase:  importFromBusinessTypeUseCase,
+		importFromGlobalCatalogUseCase: importFromGlobalCatalogUseCase,
+		getQuickstartProgressUseCase:   getQuickstartProgressUseCase,
 	}
 }
 
@@ -102,6 +105,41 @@ func (ctrl *QuickstartController) ImportProductsFromBusinessType(c *gin.Context)
 	c.JSON(http.StatusCreated, response)
 }
 
+// ImportFromGlobalCatalog godoc
+// @Summary Importar un producto del catálogo global al catálogo del tenant
+// @Description Busca un producto en el catálogo global por ID y lo copia al catálogo del tenant con todos sus datos
+// @Tags quickstart
+// @Accept json
+// @Produce json
+// @Param import_request body usecase.ImportFromGlobalCatalogRequest true "ID del producto global"
+// @Success 201 {object} usecase.ImportFromGlobalCatalogResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /quickstart/products/import-from-global [post]
+// @Security BearerAuth
+func (ctrl *QuickstartController) ImportFromGlobalCatalog(c *gin.Context) {
+	var req usecase.ImportFromGlobalCatalogRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		return
+	}
+
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		return
+	}
+	req.TenantID = tenantID
+
+	response, err := ctrl.importFromGlobalCatalogUseCase.Execute(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, response)
+}
+
 // GetQuickstartProgress godoc
 // @Summary Obtener progreso del quickstart
 // @Description Retorna el progreso del proceso de quickstart para un tenant
@@ -143,6 +181,7 @@ func (ctrl *QuickstartController) RegisterRoutes(router *gin.RouterGroup) {
 		{
 			products.POST("/from-template", ctrl.CreateProductFromTemplate)
 			products.POST("/import-from-business-type", ctrl.ImportProductsFromBusinessType)
+			products.POST("/import-from-global", ctrl.ImportFromGlobalCatalog)
 		}
 
 		// Progreso del quickstart
