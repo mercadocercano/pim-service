@@ -21,6 +21,9 @@ type MarketplaceBrandResponse struct {
 	Aliases            []string `json:"aliases"`
 	Sources            []string `json:"sources"`
 	IsActive           bool     `json:"is_active"`
+	BackgroundColor    string   `json:"background_color"`
+	TextColor          string   `json:"text_color"`
+	Typography         string   `json:"typography"`
 	CreatedAt          string   `json:"created_at"`
 	UpdatedAt          string   `json:"updated_at"`
 }
@@ -42,6 +45,9 @@ func NewMarketplaceBrandResponse(brand *entity.Marketplacebrand) *MarketplaceBra
 		Aliases:            brand.Aliases,
 		Sources:            brand.Sources,
 		IsActive:           brand.IsActive,
+		BackgroundColor:    brand.BackgroundColor,
+		TextColor:          brand.TextColor,
+		Typography:         brand.Typography,
 		CreatedAt:          brand.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:          brand.UpdatedAt.Format(time.RFC3339),
 	}

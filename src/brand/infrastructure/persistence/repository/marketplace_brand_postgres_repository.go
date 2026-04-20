@@ -30,24 +30,40 @@ func NewMarketplacebrandPostgresRepository(db *sql.DB) *MarketplacebrandPostgres
 func (r *MarketplacebrandPostgresRepository) Create(ctx context.Context, marketplace_brand *entity.Marketplacebrand) error {
 	query := `
 		INSERT INTO marketplace_brands (
-			name, description, logo_url, website, aliases, category_tags, 
+			name, description, logo_url, website, aliases, category_tags,
 			quality_score, product_count, verification_status, is_active,
+			background_color, text_color, typography,
 			created_at, updated_at
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
 		)
 		RETURNING id
 	`
 
-	// Convertir strings vacíos a NULL para logo_url y website (requerido por restricciones de BD)
+	// Convertir strings vacíos a NULL para campos opcionales (requerido por restricciones de BD)
 	var logoURL interface{} = nil
 	if marketplace_brand.LogoURL != "" {
 		logoURL = marketplace_brand.LogoURL
 	}
-	
+
 	var website interface{} = nil
 	if marketplace_brand.Website != "" {
 		website = marketplace_brand.Website
+	}
+
+	var backgroundColor interface{} = nil
+	if marketplace_brand.BackgroundColor != "" {
+		backgroundColor = marketplace_brand.BackgroundColor
+	}
+
+	var textColor interface{} = nil
+	if marketplace_brand.TextColor != "" {
+		textColor = marketplace_brand.TextColor
+	}
+
+	var typography interface{} = nil
+	if marketplace_brand.Typography != "" {
+		typography = marketplace_brand.Typography
 	}
 
 	var id string
@@ -62,6 +78,9 @@ func (r *MarketplacebrandPostgresRepository) Create(ctx context.Context, marketp
 		marketplace_brand.ProductCount,
 		marketplace_brand.VerificationStatus,
 		marketplace_brand.IsActive,
+		backgroundColor,
+		textColor,
+		typography,
 		marketplace_brand.CreatedAt,
 		marketplace_brand.UpdatedAt,
 	).Scan(&id)
@@ -90,19 +109,37 @@ func (r *MarketplacebrandPostgresRepository) Update(ctx context.Context, marketp
 			product_count = $9,
 			verification_status = $10,
 			is_active = $11,
-			updated_at = $12
+			background_color = $12,
+			text_color = $13,
+			typography = $14,
+			updated_at = $15
 		WHERE id = $1
 	`
 
-	// Convertir strings vacíos a NULL para logo_url y website (requerido por restricciones de BD)
+	// Convertir strings vacíos a NULL para campos opcionales (requerido por restricciones de BD)
 	var logoURL interface{} = nil
 	if marketplace_brand.LogoURL != "" {
 		logoURL = marketplace_brand.LogoURL
 	}
-	
+
 	var website interface{} = nil
 	if marketplace_brand.Website != "" {
 		website = marketplace_brand.Website
+	}
+
+	var backgroundColor interface{} = nil
+	if marketplace_brand.BackgroundColor != "" {
+		backgroundColor = marketplace_brand.BackgroundColor
+	}
+
+	var textColor interface{} = nil
+	if marketplace_brand.TextColor != "" {
+		textColor = marketplace_brand.TextColor
+	}
+
+	var typography interface{} = nil
+	if marketplace_brand.Typography != "" {
+		typography = marketplace_brand.Typography
 	}
 
 	result, err := r.db.ExecContext(ctx, query,
@@ -117,6 +154,9 @@ func (r *MarketplacebrandPostgresRepository) Update(ctx context.Context, marketp
 		marketplace_brand.ProductCount,
 		marketplace_brand.VerificationStatus,
 		marketplace_brand.IsActive,
+		backgroundColor,
+		textColor,
+		typography,
 		marketplace_brand.UpdatedAt,
 	)
 
@@ -138,8 +178,9 @@ func (r *MarketplacebrandPostgresRepository) FindByID(ctx context.Context, id st
 	query := `
 		SELECT id, name, description, logo_url, website, aliases, category_tags,
 		       quality_score, product_count, verification_status, is_active,
+		       background_color, text_color, typography,
 		       created_at, updated_at
-		FROM marketplace_brands 
+		FROM marketplace_brands
 		WHERE id = $1
 	`
 
@@ -152,8 +193,9 @@ func (r *MarketplacebrandPostgresRepository) FindAll(ctx context.Context) ([]*en
 	query := `
 		SELECT id, name, description, logo_url, website, aliases, category_tags,
 		       quality_score, product_count, verification_status, is_active,
+		       background_color, text_color, typography,
 		       created_at, updated_at
-		FROM marketplace_brands 
+		FROM marketplace_brands
 		ORDER BY quality_score DESC, name ASC
 	`
 
@@ -189,6 +231,7 @@ func (r *MarketplacebrandPostgresRepository) SearchByCriteria(ctx context.Contex
 	baseQuery := `
 		SELECT id, name, description, logo_url, website, aliases, category_tags,
 		       quality_score, product_count, verification_status, is_active,
+		       background_color, text_color, typography,
 		       created_at, updated_at
 		FROM marketplace_brands
 	`
@@ -227,6 +270,7 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrand(row *sql.Row) 
 	var aliases pq.StringArray
 	var categoryTags pq.StringArray
 	var description, logoURL, website sql.NullString
+	var backgroundColor, textColor, typography sql.NullString
 
 	err := row.Scan(
 		&marketplace_brand.ID,
@@ -240,6 +284,9 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrand(row *sql.Row) 
 		&marketplace_brand.ProductCount,
 		&marketplace_brand.VerificationStatus,
 		&marketplace_brand.IsActive,
+		&backgroundColor,
+		&textColor,
+		&typography,
 		&marketplace_brand.CreatedAt,
 		&marketplace_brand.UpdatedAt,
 	)
@@ -251,14 +298,16 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrand(row *sql.Row) 
 		return nil, err
 	}
 
-	// Convertir arrays de PostgreSQL a slices de Go
 	marketplace_brand.Description = description.String
 	marketplace_brand.LogoURL = logoURL.String
 	marketplace_brand.Website = website.String
 	marketplace_brand.Aliases = []string(aliases)
 	marketplace_brand.CategoryTags = []string(categoryTags)
 	marketplace_brand.Sources = []string{} // Campo no existe en DB, inicializar vacío
-	marketplace_brand.IsVerified = marketplace_brand.VerificationStatus == "verified" // Derivar de verification_status
+	marketplace_brand.IsVerified = marketplace_brand.VerificationStatus == "verified"
+	marketplace_brand.BackgroundColor = backgroundColor.String
+	marketplace_brand.TextColor = textColor.String
+	marketplace_brand.Typography = typography.String
 
 	return &marketplace_brand, nil
 }
@@ -272,6 +321,7 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrands(rows *sql.Row
 		var aliases pq.StringArray
 		var categoryTags pq.StringArray
 		var description, logoURL, website sql.NullString
+		var backgroundColor, textColor, typography sql.NullString
 
 		err := rows.Scan(
 			&marketplace_brand.ID,
@@ -285,6 +335,9 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrands(rows *sql.Row
 			&marketplace_brand.ProductCount,
 			&marketplace_brand.VerificationStatus,
 			&marketplace_brand.IsActive,
+			&backgroundColor,
+			&textColor,
+			&typography,
 			&marketplace_brand.CreatedAt,
 			&marketplace_brand.UpdatedAt,
 		)
@@ -293,14 +346,16 @@ func (r *MarketplacebrandPostgresRepository) scanMarketplacebrands(rows *sql.Row
 			return nil, err
 		}
 
-		// Convertir arrays de PostgreSQL a slices de Go
 		marketplace_brand.Description = description.String
 		marketplace_brand.LogoURL = logoURL.String
 		marketplace_brand.Website = website.String
 		marketplace_brand.Aliases = []string(aliases)
 		marketplace_brand.CategoryTags = []string(categoryTags)
 		marketplace_brand.Sources = []string{} // Campo no existe en DB, inicializar vacío
-		marketplace_brand.IsVerified = marketplace_brand.VerificationStatus == "verified" // Derivar de verification_status
+		marketplace_brand.IsVerified = marketplace_brand.VerificationStatus == "verified"
+		marketplace_brand.BackgroundColor = backgroundColor.String
+		marketplace_brand.TextColor = textColor.String
+		marketplace_brand.Typography = typography.String
 
 		// Actualizar verification status basado en is_verified
 		if marketplace_brand.IsVerified {
