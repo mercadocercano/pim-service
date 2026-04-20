@@ -2,10 +2,14 @@ package entity
 
 import (
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+// hexColorRegexp valida formato #RRGGBB
+var hexColorRegexp = regexp.MustCompile(`^#[0-9A-Fa-f]{6}$`)
 
 // Marketplacebrand representa la entidad marketplace_brand (tabla global)
 type Marketplacebrand struct {
@@ -22,8 +26,34 @@ type Marketplacebrand struct {
 	IsVerified         bool      `json:"is_verified"`
 	VerificationStatus string    `json:"verification_status"`
 	IsActive           bool      `json:"is_active"`
+	BackgroundColor    string    `json:"background_color"`
+	TextColor          string    `json:"text_color"`
+	Typography         string    `json:"typography"`
 	CreatedAt          time.Time `json:"created_at"`
 	UpdatedAt          time.Time `json:"updated_at"`
+}
+
+// VisualIdentityParams agrupa los campos de identidad visual para evitar listas largas de parámetros.
+type VisualIdentityParams struct {
+	BackgroundColor string
+	TextColor       string
+	Typography      string
+}
+
+// validateHexColor devuelve true si s es "" (sin color) o un hex válido #RRGGBB.
+func validateHexColor(s string) bool {
+	if s == "" {
+		return true
+	}
+	return hexColorRegexp.MatchString(s)
+}
+
+// validateTypography devuelve true si s es "" o tiene entre 1 y 100 caracteres no vacíos.
+func validateTypography(s string) bool {
+	if s == "" {
+		return true
+	}
+	return len([]rune(s)) <= 100
 }
 
 // NewMarketplacebrand crea una nueva instancia de Marketplacebrand
@@ -47,9 +77,32 @@ func NewMarketplacebrand(name string) (*Marketplacebrand, error) {
 		IsVerified:         false,
 		VerificationStatus: "unverified",
 		IsActive:           true, // Default activo
+		BackgroundColor:    "",
+		TextColor:          "",
+		Typography:         "",
 		CreatedAt:          now,
 		UpdatedAt:          now,
 	}, nil
+}
+
+// SetVisualIdentity valida y asigna los campos de identidad visual.
+// String vacío ("") es válido — significa usar el fallback del design system.
+func (e *Marketplacebrand) SetVisualIdentity(params VisualIdentityParams) error {
+	if !validateHexColor(params.BackgroundColor) {
+		return fmt.Errorf("background_color inválido: debe ser #RRGGBB o vacío, recibido: %q", params.BackgroundColor)
+	}
+	if !validateHexColor(params.TextColor) {
+		return fmt.Errorf("text_color inválido: debe ser #RRGGBB o vacío, recibido: %q", params.TextColor)
+	}
+	if !validateTypography(params.Typography) {
+		return fmt.Errorf("typography inválido: máximo 100 caracteres, recibido: %d", len([]rune(params.Typography)))
+	}
+
+	e.BackgroundColor = params.BackgroundColor
+	e.TextColor = params.TextColor
+	e.Typography = params.Typography
+	e.UpdatedAt = time.Now()
+	return nil
 }
 
 // UpdateFields actualiza los campos de la entidad
