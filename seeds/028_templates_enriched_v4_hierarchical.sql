@@ -113,7 +113,6 @@ SET
     {"name": "Tipo Envase", "slug": "tipo-envase", "values": ["Botella PET","Lata","Paquete","Caja","Bolsa","Sobre"], "applies_to_categories": ["gaseosas","aguas-saborizadas","jugos","energizantes","cervezas","chocolates","papas-fritas","galletitas-dulces","galletitas-saladas"]}
   ]'::jsonb,
   version = '4.0.0-enriched',
-  generated_by = 'manual-curation-v4',
   updated_at = CURRENT_TIMESTAMP
 WHERE business_type_id = (SELECT id FROM business_types WHERE code = 'kiosco') AND is_default = true;
 
@@ -220,7 +219,6 @@ SET
     {"name": "Tipo Envase", "slug": "tipo-envase", "values": ["Botella","Sachet","Caja","Bolsa","Lata","Frasco","Tetra Brik","Bidón"], "applies_to_categories": ["gaseosas-aguas","leches","aceites-vinagres","conservas-enlatados","detergentes-jabones"]}
   ]'::jsonb,
   version = '4.0.0-enriched',
-  generated_by = 'manual-curation-v4',
   updated_at = CURRENT_TIMESTAMP
 WHERE business_type_id = (SELECT id FROM business_types WHERE code = 'almacen') AND is_default = true;
 
@@ -340,7 +338,6 @@ SET
     {"name": "Potencia", "slug": "potencia", "values": ["500W","700W","800W","1000W","1200W"], "applies_to_categories": ["taladros-percutores","amoladoras","sierras-electricas"]}
   ]'::jsonb,
   version = '4.0.0-enriched',
-  generated_by = 'manual-curation-v4',
   updated_at = CURRENT_TIMESTAMP
 WHERE business_type_id = (SELECT id FROM business_types WHERE code = 'ferreteria') AND is_default = true;
 
@@ -421,7 +418,6 @@ SET
     {"name": "Color", "slug": "color", "values": ["Blanco","Negro","Gris","Beige","Celeste","Verde","Rojo","Amarillo","Natural","Nogal"], "applies_to_categories": ["latex-interior","latex-exterior","esmalte-sintetico","barniz"]}
   ]'::jsonb,
   version = '4.0.0-enriched',
-  generated_by = 'manual-curation-v4',
   updated_at = CURRENT_TIMESTAMP
 WHERE business_type_id = (SELECT id FROM business_types WHERE code = 'pintureria') AND is_default = true;
 
@@ -513,7 +509,6 @@ SET
     {"name": "Color", "slug": "color", "values": ["Negro","Azul","Rojo","Verde","Rosa","Amarillo"], "applies_to_categories": ["lapiceras-boligrafos","cartucheras","mochilas"]}
   ]'::jsonb,
   version = '4.0.0-enriched',
-  generated_by = 'manual-curation-v4',
   updated_at = CURRENT_TIMESTAMP
 WHERE business_type_id = (SELECT id FROM business_types WHERE code = 'libreria') AND is_default = true;
 
@@ -599,7 +594,6 @@ SET
     {"name": "Talle Calzado", "slug": "talle-calzado", "values": ["34","35","36","37","38","39","40","41","42","43","44","45"], "applies_to_categories": ["zapatillas-urbanas","zapatos-formales","botas-borcegos","sandalias-ojotas"]}
   ]'::jsonb,
   version = '4.0.0-enriched',
-  generated_by = 'manual-curation-v4',
   updated_at = CURRENT_TIMESTAMP
 WHERE business_type_id = (SELECT id FROM business_types WHERE code = 'ropa') AND is_default = true;
 
@@ -688,7 +682,6 @@ SET
     {"name": "Talle Calzado", "slug": "talle-calzado", "values": ["36","37","38","39","40","41","42","43","44","45"], "applies_to_categories": ["botines","zapatillas-running","zapatillas-training","calzado-outdoor"]}
   ]'::jsonb,
   version = '4.0.0-enriched',
-  generated_by = 'manual-curation-v4',
   updated_at = CURRENT_TIMESTAMP
 WHERE business_type_id = (SELECT id FROM business_types WHERE code = 'deportes') AND is_default = true;
 
@@ -697,7 +690,7 @@ WHERE business_type_id = (SELECT id FROM business_types WHERE code = 'deportes')
 -- =====================================================
 INSERT INTO business_type_templates (
   business_type_id, name, description, region, categories, brands, products, attributes,
-  is_default, is_active, generated_by, version
+  is_default, is_active, version
 )
 SELECT bt.id, 'Bazar', 'Template curado para bazares argentinos', 'AR',
   '[
@@ -769,12 +762,12 @@ SELECT bt.id, 'Bazar', 'Template curado para bazares argentinos', 'AR',
     {"name": "Material", "slug": "material-bazar", "values": ["Acero Inoxidable","Aluminio","Vidrio","Plástico","Cerámica","Madera","Silicona"], "applies_to_categories": ["ollas-cacerolas","sartenes","fuentes-asaderas","platos","vasos-copas","cubiertos"]},
     {"name": "Tamaño", "slug": "tamano-bazar", "values": ["Chico","Mediano","Grande","Familiar"], "applies_to_categories": ["ollas-cacerolas","sartenes","fuentes-asaderas","contenedores-hermeticos","cestos-basura"]}
   ]'::jsonb,
-  true, true, 'manual-curation-v4', '4.0.0-enriched'
+  true, true, '4.0.0-enriched'
 FROM business_types bt WHERE bt.code = 'bazar'
 ON CONFLICT (business_type_id, region) WHERE is_default = true
 DO UPDATE SET
   categories = EXCLUDED.categories, brands = EXCLUDED.brands, products = EXCLUDED.products,
-  attributes = EXCLUDED.attributes, version = EXCLUDED.version, generated_by = EXCLUDED.generated_by,
+  attributes = EXCLUDED.attributes, version = EXCLUDED.version,
   updated_at = CURRENT_TIMESTAMP;
 
 -- =====================================================
@@ -782,7 +775,7 @@ DO UPDATE SET
 -- =====================================================
 INSERT INTO business_type_templates (
   business_type_id, name, description, region, categories, brands, products, attributes,
-  is_default, is_active, generated_by, version
+  is_default, is_active, version
 )
 SELECT bt.id, 'Materiales Eléctricos', 'Template curado para casas de materiales eléctricos', 'AR',
   '[
@@ -866,12 +859,12 @@ SELECT bt.id, 'Materiales Eléctricos', 'Template curado para casas de materiale
     {"name": "Potencia LED", "slug": "potencia-led", "values": ["5W","7W","9W","12W","15W","18W","20W","50W","100W"], "applies_to_categories": ["lamparas-led","tubos-led","plafones-apliques","proyectores-led"]},
     {"name": "Color Luz", "slug": "color-luz", "values": ["Cálida (3000K)","Neutra (4000K)","Fría (6500K)"], "applies_to_categories": ["lamparas-led","tubos-led","plafones-apliques","proyectores-led"]}
   ]'::jsonb,
-  true, true, 'manual-curation-v4', '4.0.0-enriched'
+  true, true, '4.0.0-enriched'
 FROM business_types bt WHERE bt.code = 'electricidad'
 ON CONFLICT (business_type_id, region) WHERE is_default = true
 DO UPDATE SET
   categories = EXCLUDED.categories, brands = EXCLUDED.brands, products = EXCLUDED.products,
-  attributes = EXCLUDED.attributes, version = EXCLUDED.version, generated_by = EXCLUDED.generated_by,
+  attributes = EXCLUDED.attributes, version = EXCLUDED.version,
   updated_at = CURRENT_TIMESTAMP;
 
 -- =====================================================
@@ -879,7 +872,7 @@ DO UPDATE SET
 -- =====================================================
 INSERT INTO business_type_templates (
   business_type_id, name, description, region, categories, brands, products, attributes,
-  is_default, is_active, generated_by, version
+  is_default, is_active, version
 )
 SELECT bt.id, 'Sanitarios y Griferías', 'Template curado para casas de sanitarios y griferías', 'AR',
   '[
@@ -950,12 +943,12 @@ SELECT bt.id, 'Sanitarios y Griferías', 'Template curado para casas de sanitari
     {"name": "Color", "slug": "color-sanit", "values": ["Blanco","Blanco Brillante","Bone","Gris"], "applies_to_categories": ["inodoros","bidets","depositos-tapas","bachas-apoyar"]},
     {"name": "Medida", "slug": "medida-sanit", "values": ["40cm","50cm","60cm","80cm","100cm","120cm","150cm","170cm"], "applies_to_categories": ["vanitorys","baneras","boxes-ducha","mamparas","piletas-cocina"]}
   ]'::jsonb,
-  true, true, 'manual-curation-v4', '4.0.0-enriched'
+  true, true, '4.0.0-enriched'
 FROM business_types bt WHERE bt.code = 'sanitarios'
 ON CONFLICT (business_type_id, region) WHERE is_default = true
 DO UPDATE SET
   categories = EXCLUDED.categories, brands = EXCLUDED.brands, products = EXCLUDED.products,
-  attributes = EXCLUDED.attributes, version = EXCLUDED.version, generated_by = EXCLUDED.generated_by,
+  attributes = EXCLUDED.attributes, version = EXCLUDED.version,
   updated_at = CURRENT_TIMESTAMP;
 
 -- =====================================================
@@ -963,7 +956,7 @@ DO UPDATE SET
 -- =====================================================
 INSERT INTO business_type_templates (
   business_type_id, name, description, region, categories, brands, products, attributes,
-  is_default, is_active, generated_by, version
+  is_default, is_active, version
 )
 SELECT bt.id, 'Zapatería', 'Template curado para zapaterías argentinas', 'AR',
   '[
@@ -1043,12 +1036,12 @@ SELECT bt.id, 'Zapatería', 'Template curado para zapaterías argentinas', 'AR',
     {"name": "Color", "slug": "color", "values": ["Negro","Blanco","Marrón","Azul","Gris","Rojo","Rosa","Beige","Bordo"], "applies_to_categories": ["zapatos-vestir-h","zapatillas-urbanas-h","zapatillas-urbanas-m","botas-botinetas","zapatillas-running-zap"]},
     {"name": "Material", "slug": "material-calzado", "values": ["Cuero","Cuero Sintético","Lona","Textil","Gamuza","Goma"], "applies_to_categories": ["zapatos-vestir-h","botas-borcegos-h","mocasines","zapatos-stilettos","botas-botinetas","chatitas-ballerinas"]}
   ]'::jsonb,
-  true, true, 'manual-curation-v4', '4.0.0-enriched'
+  true, true, '4.0.0-enriched'
 FROM business_types bt WHERE bt.code = 'zapateria'
 ON CONFLICT (business_type_id, region) WHERE is_default = true
 DO UPDATE SET
   categories = EXCLUDED.categories, brands = EXCLUDED.brands, products = EXCLUDED.products,
-  attributes = EXCLUDED.attributes, version = EXCLUDED.version, generated_by = EXCLUDED.generated_by,
+  attributes = EXCLUDED.attributes, version = EXCLUDED.version,
   updated_at = CURRENT_TIMESTAMP;
 
 -- =====================================================
