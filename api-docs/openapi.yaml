@@ -992,6 +992,21 @@ paths:
                         created_at:
                           type: string
                           format: date-time
+                        background_color:
+                          type: string
+                          nullable: true
+                          description: Color de fondo de la marca en formato hex (#RRGGBB). Vacío si no definido.
+                          example: "#FF6600"
+                        text_color:
+                          type: string
+                          nullable: true
+                          description: Color de texto de la marca en formato hex (#RRGGBB). Vacío si no definido.
+                          example: "#FFFFFF"
+                        typography:
+                          type: string
+                          nullable: true
+                          description: Nombre de la fuente tipográfica (Google Fonts). Vacío si no definida.
+                          example: "Roboto"
                   total_count:
                     type: integer
                   page:

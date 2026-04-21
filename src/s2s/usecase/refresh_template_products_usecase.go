@@ -28,8 +28,10 @@ func (uc *RefreshTemplateProductsUseCase) Execute(ctx context.Context) (*Refresh
 	WITH template_categories AS (
 	  SELECT
 	    btt.id AS template_id,
+	    bt.code AS business_type_code,
 	    (cat_obj->>'slug') AS category_slug
 	  FROM business_type_templates btt
+	  JOIN business_types bt ON bt.id = btt.business_type_id
 	  CROSS JOIN LATERAL jsonb_array_elements(btt.categories) AS cat_obj
 	  WHERE btt.is_default = true
 	    AND btt.is_active = true
@@ -47,6 +49,7 @@ func (uc *RefreshTemplateProductsUseCase) Execute(ctx context.Context) (*Refresh
 	  FROM template_categories tc
 	  JOIN global_products gp
 	    ON gp.category = tc.category_slug
+	   AND gp.business_type = tc.business_type_code
 	  WHERE gp.is_active = true
 	    AND gp.is_verified = true
 	),
