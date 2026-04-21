@@ -62,7 +62,7 @@ VALUES
   -- === CUIDADO PERSONAL ===
   ('sedal',             'Sedal',                '#C8102E', '#FFFFFF', 'Lato'),
   ('colgate',           'Colgate',              '#E31837', '#FFFFFF', 'Open Sans'),  -- wcag_adjusted
-  ('rexona',            'Rexona',               '#009FDB', '#000000', 'Open Sans'),  -- wcag_adjusted (ratio 3.50, frágil)
+  -- rexona: excluida — ratio WCAG 3.50 insuficiente incluso ajustado; queda NULL → fallback neutro Flutter
   ('natura',            'Natura',               '#005B3A', '#FFFFFF', 'Open Sans'),
   ('avon',              'Avon',                 '#FF007F', '#000000', 'Open Sans'),  -- wcag_adjusted
   ('nivea',             'Nivea',                '#003DA5', '#FFFFFF', 'Open Sans'),
