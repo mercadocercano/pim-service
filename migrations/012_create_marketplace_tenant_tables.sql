@@ -2,6 +2,10 @@
 -- PROPÓSITO: Crear tablas de mapeo y atributos tenant con tipos de datos correctos
 -- CORRECCIÓN: Usar VARCHAR(36) para category_id para coincidir con la tabla categories existente
 
+-- Reemplaza versión incorrecta de 009 (category_id era UUID, debe ser VARCHAR(36))
+DROP TABLE IF EXISTS tenant_custom_attributes CASCADE;
+DROP TABLE IF EXISTS tenant_category_mappings CASCADE;
+
 -- Mapeo de categorías tenant a categorías marketplace
 CREATE TABLE tenant_category_mappings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

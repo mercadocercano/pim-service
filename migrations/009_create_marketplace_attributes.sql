@@ -2,7 +2,7 @@
 -- PROPÓSITO: Atributos globales para filtros consistentes cross-tenant
 -- BENEFICIO: Filtros estándares que funcionan en todo el marketplace
 
-CREATE TABLE marketplace_attributes (
+CREATE TABLE IF NOT EXISTS marketplace_attributes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
@@ -22,7 +22,7 @@ CREATE TABLE marketplace_attributes (
 );
 
 -- Valores predefinidos para atributos tipo select y multi_select
-CREATE TABLE marketplace_attribute_values (
+CREATE TABLE IF NOT EXISTS marketplace_attribute_values (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     attribute_id UUID NOT NULL REFERENCES marketplace_attributes(id) ON DELETE CASCADE,
     value VARCHAR(255) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE marketplace_attribute_values (
 );
 
 -- Relación entre categorías marketplace y atributos
-CREATE TABLE marketplace_category_attributes (
+CREATE TABLE IF NOT EXISTS marketplace_category_attributes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     category_id UUID NOT NULL REFERENCES marketplace_categories(id) ON DELETE CASCADE,
     attribute_id UUID NOT NULL REFERENCES marketplace_attributes(id) ON DELETE CASCADE,
@@ -50,10 +50,10 @@ CREATE TABLE marketplace_category_attributes (
 );
 
 -- Mapeo de categorías tenant a categorías marketplace
-CREATE TABLE tenant_category_mappings (
+CREATE TABLE IF NOT EXISTS tenant_category_mappings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id UUID NOT NULL,
-    category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE, -- categoría tenant existente
+    tenant_id VARCHAR(36) NOT NULL,
+    category_id VARCHAR(36) NOT NULL REFERENCES categories(id) ON DELETE CASCADE, -- categoría tenant existente
     marketplace_category_id UUID NOT NULL REFERENCES marketplace_categories(id) ON DELETE CASCADE,
     custom_name VARCHAR(255), -- Nombre personalizado que ve el tenant
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -64,7 +64,7 @@ CREATE TABLE tenant_category_mappings (
 );
 
 -- Extensiones de atributos por tenant
-CREATE TABLE tenant_attribute_extensions (
+CREATE TABLE IF NOT EXISTS tenant_attribute_extensions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL,
     marketplace_attribute_id UUID NOT NULL REFERENCES marketplace_attributes(id) ON DELETE CASCADE,
@@ -78,7 +78,7 @@ CREATE TABLE tenant_attribute_extensions (
 );
 
 -- Atributos completamente custom por tenant
-CREATE TABLE tenant_custom_attributes (
+CREATE TABLE IF NOT EXISTS tenant_custom_attributes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL,
     marketplace_category_id UUID REFERENCES marketplace_categories(id) ON DELETE CASCADE,
@@ -101,7 +101,7 @@ CREATE TABLE tenant_custom_attributes (
 
 -- NUEVA TABLA: variant_marketplace_attributes (CORRIGIENDO EL DISEÑO)
 -- JUSTIFICACIÓN: Los atributos van en variantes, no en productos directamente
-CREATE TABLE variant_marketplace_attributes (
+CREATE TABLE IF NOT EXISTS variant_marketplace_attributes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     variant_id UUID NOT NULL REFERENCES product_variants(id) ON DELETE CASCADE,
     marketplace_attribute_id UUID REFERENCES marketplace_attributes(id) ON DELETE CASCADE,
