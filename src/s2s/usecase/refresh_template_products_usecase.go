@@ -49,7 +49,12 @@ func (uc *RefreshTemplateProductsUseCase) Execute(ctx context.Context) (*Refresh
 	  FROM template_categories tc
 	  JOIN global_products gp
 	    ON gp.category = tc.category_slug
-	   AND gp.business_type = tc.business_type_code
+	   AND (
+	     gp.business_type = tc.business_type_code
+	     OR tc.business_type_code = ANY(
+	       SELECT jsonb_array_elements_text(gp.also_sold_in)
+	     )
+	   )
 	  WHERE gp.is_active = true
 	    AND gp.is_verified = true
 	),
