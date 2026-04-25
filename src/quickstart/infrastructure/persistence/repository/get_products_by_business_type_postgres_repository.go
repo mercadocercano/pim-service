@@ -79,7 +79,7 @@ func (r *GetProductsByBusinessTypePostgresRepository) resolveGlobalProducts(ctx 
 	query := `
 		SELECT gp.name, COALESCE(gp.brand, ''), COALESCE(gp.category, ''), gp.quality_score
 		FROM global_products gp
-		WHERE gp.id = ANY($1)
+		WHERE gp.id = ANY($1::uuid[])
 		  AND gp.is_active = true
 		ORDER BY gp.quality_score DESC
 		LIMIT 30
