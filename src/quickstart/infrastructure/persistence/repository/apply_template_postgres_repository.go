@@ -427,7 +427,7 @@ func (r *ApplyTemplatePostgresRepository) FindGlobalProduct(ctx context.Context,
 	hasEAN := r.GlobalProductsHasColumn(ctx, exec, "ean")
 
 	query := `
-		SELECT name, brand, description
+		SELECT name, brand, description, COALESCE(image_url, '')
 	`
 	if hasEAN {
 		query += ", ean"
@@ -461,7 +461,7 @@ func (r *ApplyTemplatePostgresRepository) FindGlobalProduct(ctx context.Context,
 	}
 
 	row := exec.QueryRowContext(ctx, query, args...)
-	scanTargets := []interface{}{&candidate.Name, &candidate.Brand, &candidate.Description}
+	scanTargets := []interface{}{&candidate.Name, &candidate.Brand, &candidate.Description, &candidate.ImageURL}
 	if hasEAN {
 		scanTargets = append(scanTargets, &candidate.EAN)
 	}

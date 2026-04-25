@@ -34,6 +34,7 @@ type GlobalProductCandidate struct {
 	MarketplaceCategoryID string
 	EAN                   sql.NullString
 	SkuGlobal             sql.NullString
+	ImageURL              string
 }
 
 // TemplateBrand represents a brand from the template JSONB
