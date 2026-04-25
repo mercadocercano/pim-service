@@ -86,6 +86,8 @@ func main() {
 			"/api/v1/global-catalog*",
 			"/api/v1/public/global-catalog*",
 			"/api/v1/internal*",
+			// S2S: autenticado via API-Key en Kong, no requiere JWT del tenant
+			"/api/v1/s2s*",
 		},
 	}))
 
@@ -395,6 +397,7 @@ func setupGlobalCatalogModule(router *gin.RouterGroup, db *sql.DB) {
 		private.PUT("/products/:id", globalCatalogController.UpdateProductByID)
 		private.DELETE("/products/:id", globalCatalogController.DeleteProductByID)
 		private.GET("/enrichment-queue", globalCatalogController.ListProductsNeedingEnrichment)
+		private.GET("/business-types", globalCatalogController.GetDistinctBusinessTypes)
 	}
 
 	// Solicitudes de productos no encontrados
@@ -534,5 +537,6 @@ func setupInternalModule(router *gin.RouterGroup, db *sql.DB) {
 	handler := s2sController.NewInternalHandler(refreshUC)
 	handler.RegisterRoutes(router)
 	log.Println("Módulo Internal configurado exitosamente")
-	log.Println("  POST   /api/v1/internal/refresh-template-products")
+	log.Println("  POST   /api/v1/internal/refresh-template-products [DEPRECATED]")
+	log.Println("  POST   /api/v1/s2s/refresh-template-products [API-Key via Kong]")
 }

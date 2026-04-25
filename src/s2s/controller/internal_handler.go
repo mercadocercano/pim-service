@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,8 +17,19 @@ func NewInternalHandler(refreshUC *usecase.RefreshTemplateProductsUseCase) *Inte
 }
 
 func (h *InternalHandler) RegisterRoutes(router *gin.RouterGroup) {
+	// Ruta legacy — mantenida para no romper integraciones existentes
 	internal := router.Group("/internal")
-	internal.POST("/refresh-template-products", h.RefreshTemplateProducts)
+	internal.POST("/refresh-template-products", h.deprecatedRefreshTemplateProducts)
+
+	// Ruta S2S — autenticada via API-Key en Kong, sin JWT
+	s2s := router.Group("/s2s")
+	s2s.POST("/refresh-template-products", h.RefreshTemplateProducts)
+}
+
+// deprecatedRefreshTemplateProducts mantiene compatibilidad con la ruta /internal legacy.
+func (h *InternalHandler) deprecatedRefreshTemplateProducts(c *gin.Context) {
+	log.Println("[DEPRECATED] /internal/refresh-template-products - use /s2s/refresh-template-products")
+	h.RefreshTemplateProducts(c)
 }
 
 func (h *InternalHandler) RefreshTemplateProducts(c *gin.Context) {
