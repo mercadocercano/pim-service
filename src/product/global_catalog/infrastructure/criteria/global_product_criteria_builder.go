@@ -98,6 +98,10 @@ func (b *GlobalProductCriteriaBuilder) FromContext(c *gin.Context) *GlobalProduc
 		}
 	}
 
+	if hasImage := c.Query("has_image"); hasImage == "true" {
+		b.builder.AddFilter("image_url", cr.OpIsNotNull, nil)
+	}
+
 	if isActive := c.Query("is_active"); isActive != "" && isActive != "all" {
 		if isActive == "true" {
 			b.builder.AddEqualFilter("is_active", true)
@@ -140,7 +144,7 @@ func (b *GlobalProductCriteriaBuilder) GetAllowedFields() []string {
 	return []string{
 		"id", "ean", "name", "description", "brand", "category",
 		"price", "source", "quality_score", "is_verified", "is_active",
-		"business_type", "created_at", "updated_at",
+		"business_type", "created_at", "updated_at", "image_url",
 	}
 }
 
