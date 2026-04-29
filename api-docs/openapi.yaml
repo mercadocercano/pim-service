@@ -729,6 +729,99 @@ components:
 
 paths:
   # ==========================================
+  # S2S ENDPOINTS (API-Key via Kong, sin JWT)
+  # ==========================================
+  /s2s/refresh-template-products:
+    post:
+      summary: Recomputar templates de quickstart desde global_products
+      tags: [S2S]
+      description: |
+        Endpoint S2S (service-to-service) que regenera la tabla `business_type_product_templates`
+        a partir de los productos verificados en `global_products`. Idempotente.
+        Requiere API-Key (`X-API-Key`) en lugar de JWT.
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Templates actualizados exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "template products refreshed from global_products"
+                  data:
+                    type: object
+                    properties:
+                      templates_updated:
+                        type: integer
+                        example: 16
+        '500':
+          description: Error interno del servidor
+
+  /s2s/business-types/{slug}/template-status:
+    get:
+      summary: Estado del template de quickstart para un tipo de negocio
+      tags: [S2S]
+      description: |
+        Retorna si el template del rubro usa productos computados (desde `global_products`)
+        o el JSONB editorial, junto con la cantidad de productos disponibles en cada fuente.
+        Requiere API-Key (`X-API-Key`) en lugar de JWT.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Código del tipo de negocio (ej. "almacen", "kiosco")
+          schema:
+            type: string
+            example: "almacen"
+      responses:
+        '200':
+          description: Estado del template
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      business_type_slug:
+                        type: string
+                        example: "almacen"
+                      source:
+                        type: string
+                        enum: [computed, editorial]
+                        example: "computed"
+                      computed_count:
+                        type: integer
+                        example: 155
+                      editorial_count:
+                        type: integer
+                        example: 20
+                      last_refresh:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        example: "2026-04-25T18:00:00Z"
+        '404':
+          description: Tipo de negocio no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ==========================================
   # HEALTH ENDPOINTS
   # ==========================================
   /health:

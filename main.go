@@ -534,9 +534,11 @@ func setupMarketplaceProductsModule(router *gin.RouterGroup, db *sql.DB) {
 func setupInternalModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("Configurando módulo Internal (S2S)...")
 	refreshUC := s2sUsecase.NewRefreshTemplateProductsUseCase(db)
-	handler := s2sController.NewInternalHandler(refreshUC)
+	templateUC := s2sUsecase.NewGetTemplateStatusUseCase(db)
+	handler := s2sController.NewInternalHandler(refreshUC, templateUC)
 	handler.RegisterRoutes(router)
 	log.Println("Módulo Internal configurado exitosamente")
 	log.Println("  POST   /api/v1/internal/refresh-template-products [DEPRECATED]")
 	log.Println("  POST   /api/v1/s2s/refresh-template-products [API-Key via Kong]")
+	log.Println("  GET    /api/v1/s2s/business-types/:slug/template-status [API-Key via Kong]")
 }
