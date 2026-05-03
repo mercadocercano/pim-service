@@ -88,6 +88,9 @@ func main() {
 			"/api/v1/internal*",
 			// S2S: autenticado via API-Key en Kong, no requiere JWT del tenant
 			"/api/v1/s2s*",
+			// Admin: operan sobre múltiples tenants, no validan X-Tenant-ID contra token
+			"/api/v1/quickstart/backfill-tenant-images",
+			"/api/v1/quickstart/backfill-all-tenant-images",
 		},
 	}))
 
