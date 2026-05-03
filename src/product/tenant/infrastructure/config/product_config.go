@@ -51,6 +51,7 @@ type ProductConfig struct {
 	ImportFromBusinessTypeUseCase  *quickstartUseCase.ImportFromBusinessTypeUseCase
 	ImportFromGlobalCatalogUseCase *quickstartUseCase.ImportFromGlobalCatalogUseCase
 	GetQuickstartProgressUseCase   *quickstartUseCase.GetQuickstartProgressUseCase
+	BackfillTenantImagesUseCase    *quickstartUseCase.BackfillTenantImagesUseCase
 
 	// Servicios - Quickstart
 	QuickstartProductService port.ProductService
@@ -174,6 +175,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 	importFromBusinessTypeUseCase := quickstartUseCase.NewImportFromBusinessTypeUseCase(productRepo, globalCatalogRepo)
 	importFromGlobalCatalogUseCase := quickstartUseCase.NewImportFromGlobalCatalogUseCase(productRepo, globalCatalogRepo)
 	getQuickstartProgressUseCase := quickstartUseCase.NewGetQuickstartProgressUseCase(productRepo)
+	backfillTenantImagesUseCase := quickstartUseCase.NewBackfillTenantImagesUseCase(globalCatalogRepo, productRepo)
 
 	// Servicios - Quickstart
 	quickstartProductService := quickstartService.NewQuickstartProductService(createFromTemplateUseCase)
@@ -207,6 +209,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		importFromBusinessTypeUseCase,
 		importFromGlobalCatalogUseCase,
 		getQuickstartProgressUseCase,
+		backfillTenantImagesUseCase,
 	)
 
 	// HITO 2: Configurar BulkImportController
@@ -241,6 +244,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		ImportFromBusinessTypeUseCase:        importFromBusinessTypeUseCase,
 		ImportFromGlobalCatalogUseCase:       importFromGlobalCatalogUseCase,
 		GetQuickstartProgressUseCase:         getQuickstartProgressUseCase,
+		BackfillTenantImagesUseCase:          backfillTenantImagesUseCase,
 		QuickstartProductService:             quickstartProductService,
 		ProductController:                    productController,
 		ProductVariantController:             productVariantController,

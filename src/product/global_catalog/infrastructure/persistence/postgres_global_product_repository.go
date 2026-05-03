@@ -37,11 +37,11 @@ func (r *PostgresGlobalProductRepository) Save(globalProduct *entity.GlobalProdu
 		INSERT INTO global_products (
 			id, ean, name, description, brand, category, price, image_url, image_urls,
 			source, source_url, source_reliability, quality_score, is_verified, is_active,
-			business_type, tags, metadata, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+			business_type, tags, metadata, created_at, updated_at, gtin
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
 		RETURNING id, ean, name, description, brand, category, price, image_url, image_urls,
 				  source, source_url, source_reliability, quality_score, is_verified, is_active,
-				  business_type, tags, metadata, created_at, updated_at, scraped_at, last_scraped_at
+				  business_type, tags, metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 	`
 
 	// Preparar datos para inserción
@@ -87,6 +87,7 @@ func (r *PostgresGlobalProductRepository) Save(globalProduct *entity.GlobalProdu
 		string(metadataJSON),
 		globalProduct.CreatedAt(),
 		globalProduct.UpdatedAt(),
+		globalProduct.GTIN(),
 	)
 
 	return r.scanGlobalProduct(row)
@@ -95,16 +96,16 @@ func (r *PostgresGlobalProductRepository) Save(globalProduct *entity.GlobalProdu
 // Update actualiza un producto global existente
 func (r *PostgresGlobalProductRepository) Update(globalProduct *entity.GlobalProduct) (*entity.GlobalProduct, error) {
 	query := `
-		UPDATE global_products SET 
+		UPDATE global_products SET
 			name = $2, description = $3, brand = $4, category = $5, price = $6,
 			image_url = $7, image_urls = $8, source = $9, source_url = $10,
 			source_reliability = $11, quality_score = $12, is_verified = $13,
 			is_active = $14, business_type = $15, tags = $16, metadata = $17,
-			updated_at = $18
+			updated_at = $18, gtin = COALESCE($19, gtin)
 		WHERE id = $1
 		RETURNING id, ean, name, description, brand, category, price, image_url, image_urls,
 				  source, source_url, source_reliability, quality_score, is_verified, is_active,
-				  business_type, tags, metadata, created_at, updated_at, scraped_at, last_scraped_at
+				  business_type, tags, metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 	`
 
 	metadataJSON, err := json.Marshal(globalProduct.Metadata())
@@ -141,6 +142,7 @@ func (r *PostgresGlobalProductRepository) Update(globalProduct *entity.GlobalPro
 		tagsArray,
 		string(metadataJSON),
 		time.Now(),
+		globalProduct.GTIN(),
 	)
 
 	return r.scanGlobalProduct(row)
@@ -152,7 +154,7 @@ func (r *PostgresGlobalProductRepository) FindByID(id string) (*entity.GlobalPro
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE id = $1
 	`
@@ -187,7 +189,7 @@ func (r *PostgresGlobalProductRepository) FindByEAN(ean string) (*entity.GlobalP
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE ean = $1
 		ORDER BY quality_score DESC, created_at DESC
@@ -212,7 +214,7 @@ func (r *PostgresGlobalProductRepository) FindActiveByEAN(ean string) (*entity.G
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE ean = $1 AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -236,7 +238,7 @@ func (r *PostgresGlobalProductRepository) FindByBusinessType(businessType string
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE business_type = $1 AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -258,7 +260,7 @@ func (r *PostgresGlobalProductRepository) FindBySource(source string, limit int)
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE source = $1 AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -280,7 +282,7 @@ func (r *PostgresGlobalProductRepository) FindByQualityScoreRange(minScore, maxS
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE quality_score >= $1 AND quality_score <= $2 AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -302,7 +304,7 @@ func (r *PostgresGlobalProductRepository) SearchByName(name string, limit int) (
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE name ILIKE $1 AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -325,7 +327,7 @@ func (r *PostgresGlobalProductRepository) SearchByBrand(brand string, limit int)
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE brand ILIKE $1 AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -348,7 +350,7 @@ func (r *PostgresGlobalProductRepository) SearchByCategory(category string, limi
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE category ILIKE $1 AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -385,7 +387,7 @@ func (r *PostgresGlobalProductRepository) SearchByTags(tags []string, limit int)
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE (%s) AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -407,7 +409,7 @@ func (r *PostgresGlobalProductRepository) FindAll(offset, limit int) ([]*entity.
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		ORDER BY quality_score DESC, created_at DESC
 		OFFSET $1 LIMIT $2
@@ -428,7 +430,7 @@ func (r *PostgresGlobalProductRepository) FindActive(offset, limit int) ([]*enti
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -450,7 +452,7 @@ func (r *PostgresGlobalProductRepository) FindVerified(offset, limit int) ([]*en
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE is_verified = true AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -472,7 +474,7 @@ func (r *PostgresGlobalProductRepository) FindArgentineProducts(offset, limit in
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE source IN ('disco', 'carrefour', 'fravega', 'coto', 'jumbo') AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -494,7 +496,7 @@ func (r *PostgresGlobalProductRepository) FindHighQualityProducts(offset, limit 
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE quality_score >= 70 AND is_active = true
 		ORDER BY quality_score DESC, created_at DESC
@@ -516,7 +518,7 @@ func (r *PostgresGlobalProductRepository) FindNeedingUpdate(maxAgeHours int, lim
 		SELECT id, ean, name, description, brand, category, price, 
 			   image_url, image_urls, source, source_url, source_reliability, 
 			   quality_score, is_verified, is_active, business_type, tags, 
-			   metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products 
 		WHERE updated_at < NOW() - INTERVAL '%d hours' AND is_active = true
 		ORDER BY updated_at ASC
@@ -578,7 +580,7 @@ func (r *PostgresGlobalProductRepository) SearchByCriteria(ctx context.Context, 
 	baseQuery := `
 		SELECT id, ean, name, description, brand, category, price, image_url, image_urls,
 			   source, source_url, source_reliability, quality_score, is_verified, is_active,
-			   business_type, tags, metadata, created_at, updated_at, scraped_at, last_scraped_at
+			   business_type, tags, metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products
 	`
 	
@@ -628,13 +630,14 @@ func (r *PostgresGlobalProductRepository) scanGlobalProduct(row *sql.Row) (*enti
 		metadataJSON                                         string
 		createdAt, updatedAt                                 time.Time
 		scrapedAt, lastScrapedAt                             *time.Time
+		gtin                                                 *string
 	)
 
 	err := row.Scan(
 		&idStr, &ean, &name, &description, &brand, &category, &price,
 		&imageURL, &imageURLsArray, &source, &sourceURL, &sourceReliability,
 		&qualityScore, &isVerified, &isActive, &businessType, &tagsArray,
-		&metadataJSON, &createdAt, &updatedAt, &scrapedAt, &lastScrapedAt,
+		&metadataJSON, &createdAt, &updatedAt, &scrapedAt, &lastScrapedAt, &gtin,
 	)
 
 	if err != nil {
@@ -645,7 +648,7 @@ func (r *PostgresGlobalProductRepository) scanGlobalProduct(row *sql.Row) (*enti
 		idStr, ean, name, description, brand, category, price,
 		sourceReliability, &source, sourceURL, qualityScore,
 		isVerified, isActive, businessType, imageURLsArray, tagsArray,
-		imageURL, metadataJSON, createdAt, updatedAt, lastScrapedAt,
+		imageURL, metadataJSON, createdAt, updatedAt, lastScrapedAt, gtin,
 	)
 }
 
@@ -656,7 +659,7 @@ func (r *PostgresGlobalProductRepository) scanGlobalProducts(rows *sql.Rows) ([]
 	for rows.Next() {
 		var (
 			idStr, name, source                                  string
-		ean                                                  *string
+			ean                                                  *string
 			description, brand, category, imageURL, businessType *string
 			price, sourceReliability                             *float64
 			sourceURL                                            *string
@@ -666,13 +669,14 @@ func (r *PostgresGlobalProductRepository) scanGlobalProducts(rows *sql.Rows) ([]
 			metadataJSON                                         string
 			createdAt, updatedAt                                 time.Time
 			scrapedAt, lastScrapedAt                             *time.Time
+			gtin                                                 *string
 		)
 
 		err := rows.Scan(
 			&idStr, &ean, &name, &description, &brand, &category, &price,
 			&imageURL, &imageURLsArray, &source, &sourceURL, &sourceReliability,
 			&qualityScore, &isVerified, &isActive, &businessType, &tagsArray,
-			&metadataJSON, &createdAt, &updatedAt, &scrapedAt, &lastScrapedAt,
+			&metadataJSON, &createdAt, &updatedAt, &scrapedAt, &lastScrapedAt, &gtin,
 		)
 
 		if err != nil {
@@ -683,7 +687,7 @@ func (r *PostgresGlobalProductRepository) scanGlobalProducts(rows *sql.Rows) ([]
 			idStr, ean, name, description, brand, category, price,
 			sourceReliability, &source, sourceURL, qualityScore,
 			isVerified, isActive, businessType, imageURLsArray, tagsArray,
-			imageURL, metadataJSON, createdAt, updatedAt, lastScrapedAt,
+			imageURL, metadataJSON, createdAt, updatedAt, lastScrapedAt, gtin,
 		)
 
 		if err != nil {
@@ -714,6 +718,7 @@ func (r *PostgresGlobalProductRepository) buildGlobalProductFromScan(
 	metadataJSON string,
 	createdAt, updatedAt time.Time,
 	lastScrapedAt *time.Time,
+	gtin *string,
 ) (*entity.GlobalProduct, error) {
 
 	// Parsear UUID
@@ -722,14 +727,10 @@ func (r *PostgresGlobalProductRepository) buildGlobalProductFromScan(
 		return nil, fmt.Errorf("ID inválido: %w", err)
 	}
 
-	// Crear EAN si existe
+	// Crear EAN si existe — EAN inválido se ignora para no romper la query
 	var eanVO *value_object.EAN13
 	if ean != nil && *ean != "" {
-		var err error
-		eanVO, err = value_object.NewEAN13(*ean)
-		if err != nil {
-			return nil, fmt.Errorf("EAN inválido: %w", err)
-		}
+		eanVO, _ = value_object.NewEAN13(*ean) // nolint: errcheck — EAN inválido → nil
 	}
 
 	// Crear QualityScore
@@ -791,6 +792,7 @@ func (r *PostgresGlobalProductRepository) buildGlobalProductFromScan(
 		createdAt,
 		updatedAt,
 		lastScrapedAt,
+		gtin,
 	)
 
 	if err != nil {
@@ -838,7 +840,7 @@ func (r *PostgresGlobalProductRepository) FindNeedingEnrichment(businessType *st
 			SELECT id, ean, name, description, brand, category, price,
 			       image_url, image_urls, source, source_url, source_reliability,
 			       quality_score, is_verified, is_active, business_type, tags,
-			       metadata, created_at, updated_at, scraped_at, last_scraped_at
+			       metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 			FROM global_products
 			%s AND business_type = $1
 			ORDER BY quality_score ASC, updated_at ASC
@@ -849,7 +851,7 @@ func (r *PostgresGlobalProductRepository) FindNeedingEnrichment(businessType *st
 			SELECT id, ean, name, description, brand, category, price,
 			       image_url, image_urls, source, source_url, source_reliability,
 			       quality_score, is_verified, is_active, business_type, tags,
-			       metadata, created_at, updated_at, scraped_at, last_scraped_at
+			       metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 			FROM global_products
 			%s
 			ORDER BY quality_score ASC, updated_at ASC
@@ -911,4 +913,58 @@ func (r *PostgresGlobalProductRepository) FindDistinctCategoriesByBusinessType(b
 		categories = append(categories, cat)
 	}
 	return categories, rows.Err()
+}
+
+func (r *PostgresGlobalProductRepository) FindDistinctBusinessTypes() ([]string, error) {
+	query := `
+		SELECT DISTINCT business_type FROM global_products
+		WHERE is_active = true AND business_type IS NOT NULL AND business_type != ''
+		ORDER BY business_type
+	`
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("error buscando business_types: %w", err)
+	}
+	defer rows.Close()
+
+	var types []string
+	for rows.Next() {
+		var bt string
+		if err := rows.Scan(&bt); err != nil {
+			return nil, fmt.Errorf("error escaneando business_type: %w", err)
+		}
+		types = append(types, bt)
+	}
+	return types, rows.Err()
+}
+
+// FindByNameAndBrand busca un producto global por nombre y marca (insensible a mayúsculas).
+// Si brand es vacío, omite el filtro de marca.
+// Solo retorna productos que tienen image_url.
+func (r *PostgresGlobalProductRepository) FindByNameAndBrand(ctx context.Context, name, brand string) (*entity.GlobalProduct, error) {
+	query := `
+		SELECT id, ean, name, description, brand, category, price,
+		       image_url, image_urls, source, source_url, source_reliability,
+		       quality_score, is_verified, is_active, business_type, tags,
+		       metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
+		FROM global_products
+		WHERE LOWER(name) = LOWER($1)
+		  AND ($2 = '' OR LOWER(brand) = LOWER($2))
+		  AND image_url IS NOT NULL
+		  AND image_url != ''
+		  AND is_active = true
+		ORDER BY quality_score DESC
+		LIMIT 1
+	`
+
+	row := r.db.QueryRowContext(ctx, query, name, brand)
+	product, err := r.scanGlobalProduct(row)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("error buscando producto global por nombre y marca: %w", err)
+	}
+
+	return product, nil
 }

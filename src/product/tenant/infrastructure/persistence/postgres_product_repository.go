@@ -876,6 +876,58 @@ func (r *PostgresProductRepository) FindVariantsByCriteria(ctx context.Context, 
 	return variants, rows.Err()
 }
 
+// FindWithoutImage retorna productos del tenant que no tienen image_url
+func (r *PostgresProductRepository) FindWithoutImage(ctx context.Context, tenantID string) ([]*entity.Product, error) {
+	query := `
+		SELECT id, tenant_id, name, description, image_url, sku,
+		       category_id, category_name, brand_id, brand_name,
+		       status, created_at, updated_at
+		FROM products
+		WHERE tenant_id = $1 AND (image_url IS NULL OR image_url = '') AND status != 'deleted'
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return r.scanProducts(rows)
+}
+
+// UpdateImageURL actualiza la image_url de un producto específico del tenant
+func (r *PostgresProductRepository) UpdateImageURL(ctx context.Context, tenantID, productID, imageURL string) error {
+	query := `
+		UPDATE products SET image_url = $3, updated_at = NOW()
+		WHERE tenant_id = $1 AND id = $2
+	`
+
+	_, err := r.db.ExecContext(ctx, query, tenantID, productID, imageURL)
+	return err
+}
+
+// FindDistinctTenantIDs retorna todos los tenant_id distintos presentes en products
+func (r *PostgresProductRepository) FindDistinctTenantIDs(ctx context.Context) ([]string, error) {
+	query := `SELECT DISTINCT tenant_id FROM products`
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tenantIDs []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		tenantIDs = append(tenantIDs, id)
+	}
+
+	return tenantIDs, rows.Err()
+}
+
 // CountVariantsByCriteria cuenta variantes por criterios
 func (r *PostgresProductRepository) CountVariantsByCriteria(ctx context.Context, crit *cr.Criteria) (int, error) {
 	baseQuery := "SELECT COUNT(*) FROM product_variants"

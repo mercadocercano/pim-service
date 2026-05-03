@@ -14,6 +14,7 @@ type QuickstartController struct {
 	importFromBusinessTypeUseCase  *usecase.ImportFromBusinessTypeUseCase
 	importFromGlobalCatalogUseCase *usecase.ImportFromGlobalCatalogUseCase
 	getQuickstartProgressUseCase   *usecase.GetQuickstartProgressUseCase
+	backfillUseCase                *usecase.BackfillTenantImagesUseCase
 }
 
 // NewQuickstartController crea una nueva instancia del controller
@@ -22,12 +23,14 @@ func NewQuickstartController(
 	importFromBusinessTypeUseCase *usecase.ImportFromBusinessTypeUseCase,
 	importFromGlobalCatalogUseCase *usecase.ImportFromGlobalCatalogUseCase,
 	getQuickstartProgressUseCase *usecase.GetQuickstartProgressUseCase,
+	backfillUseCase *usecase.BackfillTenantImagesUseCase,
 ) *QuickstartController {
 	return &QuickstartController{
 		createFromTemplateUseCase:      createFromTemplateUseCase,
 		importFromBusinessTypeUseCase:  importFromBusinessTypeUseCase,
 		importFromGlobalCatalogUseCase: importFromGlobalCatalogUseCase,
 		getQuickstartProgressUseCase:   getQuickstartProgressUseCase,
+		backfillUseCase:                backfillUseCase,
 	}
 }
 
@@ -172,6 +175,51 @@ func (ctrl *QuickstartController) GetQuickstartProgress(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+// BackfillTenantImages godoc
+// @Summary Rellenar imágenes faltantes del tenant desde el catálogo global
+// @Description Copia image_url desde global_products a los productos del tenant sin imagen, usando match por nombre y marca
+// @Tags quickstart
+// @Produce json
+// @Success 200 {object} usecase.BackfillResult
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /quickstart/backfill-tenant-images [post]
+// @Security BearerAuth
+func (ctrl *QuickstartController) BackfillTenantImages(c *gin.Context) {
+	tenantID := c.GetHeader("X-Tenant-ID")
+	if tenantID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		return
+	}
+
+	result, err := ctrl.backfillUseCase.Execute(c.Request.Context(), tenantID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+// BackfillAllTenantImages godoc
+// @Summary Rellenar imágenes para todos los tenants
+// @Description Ejecuta el backfill de imágenes para todos los tenants que tienen productos registrados
+// @Tags quickstart
+// @Produce json
+// @Success 200 {object} map[string]usecase.BackfillResult
+// @Failure 500 {object} map[string]interface{}
+// @Router /quickstart/backfill-all-tenant-images [post]
+// @Security BearerAuth
+func (ctrl *QuickstartController) BackfillAllTenantImages(c *gin.Context) {
+	results, err := ctrl.backfillUseCase.ExecuteAll(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, results)
+}
+
 // RegisterRoutes registra las rutas del controller
 func (ctrl *QuickstartController) RegisterRoutes(router *gin.RouterGroup) {
 	quickstart := router.Group("/quickstart")
@@ -186,5 +234,9 @@ func (ctrl *QuickstartController) RegisterRoutes(router *gin.RouterGroup) {
 
 		// Progreso del quickstart
 		quickstart.GET("/progress", ctrl.GetQuickstartProgress)
+
+		// Backfill de imágenes
+		quickstart.POST("/backfill-tenant-images", ctrl.BackfillTenantImages)
+		quickstart.POST("/backfill-all-tenant-images", ctrl.BackfillAllTenantImages)
 	}
 }

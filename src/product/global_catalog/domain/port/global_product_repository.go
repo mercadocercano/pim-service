@@ -46,6 +46,7 @@ type GlobalProductRepository interface {
 	// Agregaciones por business_type
 	FindDistinctBrandsByBusinessType(businessType string) ([]string, error)
 	FindDistinctCategoriesByBusinessType(businessType string) ([]string, error)
+	FindDistinctBusinessTypes() ([]string, error)
 
 	// Estadísticas
 	CountTotal() (int, error)
@@ -56,4 +57,7 @@ type GlobalProductRepository interface {
 	// Búsqueda con criterios (para compatibilidad con el sistema existente)
 	SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.GlobalProduct, error)
 	CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error)
+
+	// Backfill de imágenes: match por nombre+marca, retorna solo si tiene imagen
+	FindByNameAndBrand(ctx context.Context, name, brand string) (*entity.GlobalProduct, error)
 }

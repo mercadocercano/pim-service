@@ -43,6 +43,11 @@ type ProductRepository interface {
 	FindVariantsEnrichedBySKUs(ctx context.Context, tenantID string, skus []string) ([]VariantEnrichedRow, error)
 	FindByProduct(ctx context.Context, tenantID string, productID uuid.UUID) ([]*entity.ProductVariant, error)
 	GetBySKU(ctx context.Context, sku string, tenantID uuid.UUID) (*entity.ProductVariant, error) // HITO A
+
+	// Backfill de imágenes
+	FindWithoutImage(ctx context.Context, tenantID string) ([]*entity.Product, error)
+	UpdateImageURL(ctx context.Context, tenantID, productID, imageURL string) error
+	FindDistinctTenantIDs(ctx context.Context) ([]string, error)
 }
 
 // ProductCriteriaRepository extiende ProductRepository con capacidades de búsqueda por criterios

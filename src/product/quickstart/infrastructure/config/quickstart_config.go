@@ -16,6 +16,7 @@ type QuickstartConfig struct {
 	ImportFromBusinessTypeUseCase  *usecase.ImportFromBusinessTypeUseCase
 	ImportFromGlobalCatalogUseCase *usecase.ImportFromGlobalCatalogUseCase
 	GetQuickstartProgressUseCase   *usecase.GetQuickstartProgressUseCase
+	BackfillTenantImagesUseCase    *usecase.BackfillTenantImagesUseCase
 
 	// Controllers
 	QuickstartController *controller.QuickstartController
@@ -32,6 +33,7 @@ func NewQuickstartConfig(
 	importFromBusinessTypeUseCase := usecase.NewImportFromBusinessTypeUseCase(productRepo, globalCatalogRepo)
 	importFromGlobalCatalogUseCase := usecase.NewImportFromGlobalCatalogUseCase(productRepo, globalCatalogRepo)
 	getQuickstartProgressUseCase := usecase.NewGetQuickstartProgressUseCase(productRepo)
+	backfillTenantImagesUseCase := usecase.NewBackfillTenantImagesUseCase(globalCatalogRepo, productRepo)
 
 	// Controllers
 	quickstartController := controller.NewQuickstartController(
@@ -39,6 +41,7 @@ func NewQuickstartConfig(
 		importFromBusinessTypeUseCase,
 		importFromGlobalCatalogUseCase,
 		getQuickstartProgressUseCase,
+		backfillTenantImagesUseCase,
 	)
 
 	return &QuickstartConfig{
@@ -46,6 +49,7 @@ func NewQuickstartConfig(
 		ImportFromBusinessTypeUseCase:  importFromBusinessTypeUseCase,
 		ImportFromGlobalCatalogUseCase: importFromGlobalCatalogUseCase,
 		GetQuickstartProgressUseCase:   getQuickstartProgressUseCase,
+		BackfillTenantImagesUseCase:    backfillTenantImagesUseCase,
 		QuickstartController:           quickstartController,
 	}
 }
