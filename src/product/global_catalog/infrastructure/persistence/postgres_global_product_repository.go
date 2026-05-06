@@ -938,6 +938,28 @@ func (r *PostgresGlobalProductRepository) FindDistinctBusinessTypes() ([]string,
 	return types, rows.Err()
 }
 
+// FindByIDs busca productos por una lista de IDs (on-demand enrichment).
+// Usa ANY($1) con pq.Array para evitar concatenación de SQL.
+func (r *PostgresGlobalProductRepository) FindByIDs(ctx context.Context, ids []string) ([]*entity.GlobalProduct, error) {
+	query := `
+		SELECT id, ean, name, description, brand, category, price,
+		       image_url, image_urls, source, source_url, source_reliability,
+		       quality_score, is_verified, is_active, business_type, tags,
+		       metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
+		FROM global_products
+		WHERE id = ANY($1)
+		ORDER BY quality_score DESC, created_at DESC
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, pq.Array(ids))
+	if err != nil {
+		return nil, fmt.Errorf("error buscando productos por IDs: %w", err)
+	}
+	defer rows.Close()
+
+	return r.scanGlobalProducts(rows)
+}
+
 // FindByNameAndBrand busca un producto global por nombre y marca (insensible a mayúsculas).
 // Si brand es vacío, omite el filtro de marca.
 // Solo retorna productos que tienen image_url.

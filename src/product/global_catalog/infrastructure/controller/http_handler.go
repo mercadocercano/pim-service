@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,7 @@ type GlobalCatalogController struct {
 	updateGlobalProductByID          *usecase.UpdateGlobalProductByID
 	getBusinessTypeFacets            *usecase.GetBusinessTypeFacets
 	listProductsNeedingEnrichment    *usecase.ListProductsNeedingEnrichment
+	getGlobalProductsByIDs           *usecase.GetGlobalProductsByIDs
 	criteriaBuilder                  *criteria.GlobalProductCriteriaBuilder
 }
 
@@ -36,6 +38,7 @@ func NewGlobalCatalogController(
 	updateGlobalProductByID *usecase.UpdateGlobalProductByID,
 	getBusinessTypeFacets *usecase.GetBusinessTypeFacets,
 	listProductsNeedingEnrichment *usecase.ListProductsNeedingEnrichment,
+	getGlobalProductsByIDs *usecase.GetGlobalProductsByIDs,
 	criteriaBuilder *criteria.GlobalProductCriteriaBuilder,
 ) *GlobalCatalogController {
 	return &GlobalCatalogController{
@@ -47,6 +50,7 @@ func NewGlobalCatalogController(
 		updateGlobalProductByID:       updateGlobalProductByID,
 		getBusinessTypeFacets:         getBusinessTypeFacets,
 		listProductsNeedingEnrichment: listProductsNeedingEnrichment,
+		getGlobalProductsByIDs:        getGlobalProductsByIDs,
 		criteriaBuilder:               criteriaBuilder,
 	}
 }
@@ -71,6 +75,7 @@ func (gc *GlobalCatalogController) RegisterRoutes(router *gin.RouterGroup) {
 		private.GET("/products/search", gc.SearchByEAN)       // Búsqueda avanzada
 		private.GET("/products/:id", gc.GetProductByID)       // Obtener producto por ID
 		private.GET("/enrichment-queue", gc.ListProductsNeedingEnrichment) // Cola de scraping para webdata
+		private.GET("/by-ids", gc.GetProductsByIDs)           // On-demand enrichment por IDs
 		private.PUT("/products/:id", gc.UpdateProductByID)    // Actualizar producto por ID
 		private.DELETE("/products/:id", gc.DeleteProductByID) // Eliminar producto por ID
 	}
@@ -430,6 +435,47 @@ func (gc *GlobalCatalogController) ListProductsNeedingEnrichment(c *gin.Context)
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+// GetProductsByIDs devuelve productos por lista de IDs para on-demand enrichment.
+// GET /api/v1/global-catalog/by-ids?ids=uuid1,uuid2,...
+func (gc *GlobalCatalogController) GetProductsByIDs(c *gin.Context) {
+	idsParam := c.Query("ids")
+	if idsParam == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "parámetro 'ids' es obligatorio",
+		})
+		return
+	}
+
+	ids := splitAndTrim(idsParam)
+	if len(ids) > 100 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "se permiten máximo 100 IDs por request",
+		})
+		return
+	}
+
+	req := usecase.GetGlobalProductsByIDsRequest{IDs: ids}
+	response, err := gc.getGlobalProductsByIDs.Execute(c.Request.Context(), req)
+	if err != nil {
+		gc.handleUseCaseError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// splitAndTrim divide una cadena por coma y elimina espacios de cada elemento.
+func splitAndTrim(s string) []string {
+	parts := strings.Split(s, ",")
+	result := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if trimmed := strings.TrimSpace(p); trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
 }
 
 // DeleteProductByID elimina un producto por su ID

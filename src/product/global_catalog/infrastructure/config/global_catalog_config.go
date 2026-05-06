@@ -24,6 +24,7 @@ type GlobalCatalogConfig struct {
 	updateGlobalProductByIDUseCase          *usecase.UpdateGlobalProductByID
 	getBusinessTypeFacetsUseCase            *usecase.GetBusinessTypeFacets
 	listProductsNeedingEnrichmentUseCase    *usecase.ListProductsNeedingEnrichment
+	getGlobalProductsByIDsUseCase           *usecase.GetGlobalProductsByIDs
 	createProductRequestUseCase             *usecase.CreateProductRequestUseCase
 	listProductRequestsUseCase              *usecase.ListProductRequestsUseCase
 	resolveProductRequestUseCase            *usecase.ResolveProductRequestUseCase
@@ -60,6 +61,7 @@ func (c *GlobalCatalogConfig) initializeUseCases() {
 	c.updateGlobalProductByIDUseCase = usecase.NewUpdateGlobalProductByID(c.globalProductRepository)
 	c.getBusinessTypeFacetsUseCase = usecase.NewGetBusinessTypeFacets(c.globalProductRepository)
 	c.listProductsNeedingEnrichmentUseCase = usecase.NewListProductsNeedingEnrichment(c.globalProductRepository)
+	c.getGlobalProductsByIDsUseCase = usecase.NewGetGlobalProductsByIDs(c.globalProductRepository)
 	c.createProductRequestUseCase = usecase.NewCreateProductRequestUseCase(c.productRequestRepository)
 	c.listProductRequestsUseCase = usecase.NewListProductRequestsUseCase(c.productRequestRepository)
 	c.resolveProductRequestUseCase = usecase.NewResolveProductRequestUseCase(c.productRequestRepository)
@@ -77,6 +79,7 @@ func (c *GlobalCatalogConfig) initializeControllers() {
 		c.updateGlobalProductByIDUseCase,
 		c.getBusinessTypeFacetsUseCase,
 		c.listProductsNeedingEnrichmentUseCase,
+		c.getGlobalProductsByIDsUseCase,
 		c.criteriaBuilder,
 	)
 	c.ProductRequestController = controller.NewProductRequestController(

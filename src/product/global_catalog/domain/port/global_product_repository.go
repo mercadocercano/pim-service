@@ -60,4 +60,7 @@ type GlobalProductRepository interface {
 
 	// Backfill de imágenes: match por nombre+marca, retorna solo si tiene imagen
 	FindByNameAndBrand(ctx context.Context, name, brand string) (*entity.GlobalProduct, error)
+
+	// Búsqueda por múltiples IDs (on-demand enrichment)
+	FindByIDs(ctx context.Context, ids []string) ([]*entity.GlobalProduct, error)
 }
