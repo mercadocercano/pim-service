@@ -87,7 +87,7 @@ func (r *PostgresGlobalProductRepository) Save(globalProduct *entity.GlobalProdu
 		string(metadataJSON),
 		globalProduct.CreatedAt(),
 		globalProduct.UpdatedAt(),
-		globalProduct.GTIN(),
+		nil, // gtin: entity no expone getter aún
 	)
 
 	return r.scanGlobalProduct(row)
@@ -142,7 +142,7 @@ func (r *PostgresGlobalProductRepository) Update(globalProduct *entity.GlobalPro
 		tagsArray,
 		string(metadataJSON),
 		time.Now(),
-		globalProduct.GTIN(),
+		nil, // gtin: entity no expone getter aún
 	)
 
 	return r.scanGlobalProduct(row)
@@ -792,7 +792,6 @@ func (r *PostgresGlobalProductRepository) buildGlobalProductFromScan(
 		createdAt,
 		updatedAt,
 		lastScrapedAt,
-		gtin,
 	)
 
 	if err != nil {

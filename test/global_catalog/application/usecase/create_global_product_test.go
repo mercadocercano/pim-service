@@ -178,6 +178,18 @@ func (m *MockGlobalProductRepository) CountNeedingEnrichment(businessType *strin
 	args := m.Called(businessType)
 	return args.Int(0), args.Error(1)
 }
+func (m *MockGlobalProductRepository) FindByIDs(ctx context.Context, ids []string) ([]*entity.GlobalProduct, error) {
+	args := m.Called(ctx, ids)
+	return args.Get(0).([]*entity.GlobalProduct), args.Error(1)
+}
+func (m *MockGlobalProductRepository) FindByNameAndBrand(ctx context.Context, name, brand string) (*entity.GlobalProduct, error) {
+	args := m.Called(ctx, name, brand)
+	return args.Get(0).(*entity.GlobalProduct), args.Error(1)
+}
+func (m *MockGlobalProductRepository) FindDistinctBusinessTypes() ([]string, error) {
+	args := m.Called()
+	return args.Get(0).([]string), args.Error(1)
+}
 
 func TestCreateGlobalProduct_ValidRequest_Success(t *testing.T) {
 	// Arrange

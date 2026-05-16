@@ -58,6 +58,9 @@ func (m *mockGlobalProductRepo) CountByQualityScore(_ int) (int, error)         
 func (m *mockGlobalProductRepo) CountArgentineProducts() (int, error)                                      { return 0, nil }
 func (m *mockGlobalProductRepo) SearchByCriteria(_ context.Context, _ cr.Criteria) ([]*globalEntity.GlobalProduct, error) { return nil, nil }
 func (m *mockGlobalProductRepo) CountByCriteria(_ context.Context, _ cr.Criteria) (int, error)             { return 0, nil }
+func (m *mockGlobalProductRepo) FindByIDs(_ context.Context, _ []string) ([]*globalEntity.GlobalProduct, error) { return nil, nil }
+func (m *mockGlobalProductRepo) FindByNameAndBrand(_ context.Context, _, _ string) (*globalEntity.GlobalProduct, error) { return nil, nil }
+func (m *mockGlobalProductRepo) FindDistinctBusinessTypes() ([]string, error)                                            { return nil, nil }
 
 type mockTenantProductRepo struct {
 	saved *tenantEntity.Product
@@ -92,6 +95,9 @@ func (m *mockTenantProductRepo) FindBySKUs(_ context.Context, _ string, _ []stri
 func (m *mockTenantProductRepo) FindVariantsEnrichedBySKUs(_ context.Context, _ string, _ []string) ([]tenantPort.VariantEnrichedRow, error) { return nil, nil }
 func (m *mockTenantProductRepo) FindByProduct(_ context.Context, _ string, _ uuid.UUID) ([]*tenantEntity.ProductVariant, error) { return nil, nil }
 func (m *mockTenantProductRepo) GetBySKU(_ context.Context, _ string, _ uuid.UUID) (*tenantEntity.ProductVariant, error) { return nil, nil }
+func (m *mockTenantProductRepo) FindDistinctTenantIDs(_ context.Context) ([]string, error)                               { return nil, nil }
+func (m *mockTenantProductRepo) FindWithoutImage(_ context.Context, _ string) ([]*tenantEntity.Product, error)           { return nil, nil }
+func (m *mockTenantProductRepo) UpdateImageURL(_ context.Context, _, _, _ string) error                                  { return nil }
 
 // --- Helpers ---
 

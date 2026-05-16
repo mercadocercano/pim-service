@@ -401,6 +401,7 @@ func setupGlobalCatalogModule(router *gin.RouterGroup, db *sql.DB) {
 		private.DELETE("/products/:id", globalCatalogController.DeleteProductByID)
 		private.GET("/enrichment-queue", globalCatalogController.ListProductsNeedingEnrichment)
 		private.GET("/business-types", globalCatalogController.GetDistinctBusinessTypes)
+		private.GET("/by-ids", globalCatalogController.GetProductsByIDs)
 	}
 
 	// Solicitudes de productos no encontrados

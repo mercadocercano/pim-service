@@ -25,6 +25,7 @@ type GlobalCatalogController struct {
 	getBusinessTypeFacets            *usecase.GetBusinessTypeFacets
 	listProductsNeedingEnrichment    *usecase.ListProductsNeedingEnrichment
 	getGlobalProductsByIDs           *usecase.GetGlobalProductsByIDs
+	getDistinctBusinessTypes         *usecase.GetDistinctBusinessTypes
 	criteriaBuilder                  *criteria.GlobalProductCriteriaBuilder
 }
 
@@ -39,6 +40,7 @@ func NewGlobalCatalogController(
 	getBusinessTypeFacets *usecase.GetBusinessTypeFacets,
 	listProductsNeedingEnrichment *usecase.ListProductsNeedingEnrichment,
 	getGlobalProductsByIDs *usecase.GetGlobalProductsByIDs,
+	getDistinctBusinessTypes *usecase.GetDistinctBusinessTypes,
 	criteriaBuilder *criteria.GlobalProductCriteriaBuilder,
 ) *GlobalCatalogController {
 	return &GlobalCatalogController{
@@ -51,6 +53,7 @@ func NewGlobalCatalogController(
 		getBusinessTypeFacets:         getBusinessTypeFacets,
 		listProductsNeedingEnrichment: listProductsNeedingEnrichment,
 		getGlobalProductsByIDs:        getGlobalProductsByIDs,
+		getDistinctBusinessTypes:      getDistinctBusinessTypes,
 		criteriaBuilder:               criteriaBuilder,
 	}
 }
@@ -495,4 +498,15 @@ func (gc *GlobalCatalogController) DeleteProductByID(c *gin.Context) {
 		"error":   "Endpoint no implementado aún",
 		"message": "La funcionalidad de eliminación por ID está en desarrollo",
 	})
+}
+
+// GetDistinctBusinessTypes devuelve todos los business types distintos del catálogo global.
+// GET /api/v1/global-catalog/business-types
+func (gc *GlobalCatalogController) GetDistinctBusinessTypes(c *gin.Context) {
+	types, err := gc.getDistinctBusinessTypes.Execute()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"business_types": types})
 }

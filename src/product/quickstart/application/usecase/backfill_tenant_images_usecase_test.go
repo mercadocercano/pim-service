@@ -99,6 +99,9 @@ func (m *mockGlobalRepo) SearchByCriteria(ctx context.Context, crit cr.Criteria)
 func (m *mockGlobalRepo) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	return 0, nil
 }
+func (m *mockGlobalRepo) FindByIDs(ctx context.Context, ids []string) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
 
 type mockTenantRepo struct {
 	findWithoutImageFn    func(ctx context.Context, tenantID string) ([]*tenantEntity.Product, error)
@@ -223,7 +226,7 @@ func buildGlobalProductWithImage(t *testing.T, name, imageURL string) *globalEnt
 		src, qs,
 		false, true,
 		nil, nil, nil,
-		time.Now(), time.Now(), nil, nil,
+		time.Now(), time.Now(), nil,
 	)
 	if err != nil {
 		t.Fatalf("NewGlobalProductFromRepository: %v", err)
