@@ -959,33 +959,62 @@ func (r *PostgresGlobalProductRepository) FindByIDs(ctx context.Context, ids []s
 	return r.scanGlobalProducts(rows)
 }
 
-// FindByNameAndBrand busca un producto global por nombre y marca (insensible a mayúsculas).
-// Si brand es vacío, omite el filtro de marca.
+// FindByNameAndBrand busca un producto global por nombre y marca usando matching en cascada:
+// 1. Nombre exacto + marca exacta
+// 2. Primeras 2 palabras del nombre + marca exacta
+// 3. Primera palabra del nombre + marca exacta
+// 4. Primeras 2 palabras del nombre (sin filtro de marca)
+// 5. Primera palabra del nombre (sin filtro de marca)
 // Solo retorna productos que tienen image_url.
 func (r *PostgresGlobalProductRepository) FindByNameAndBrand(ctx context.Context, name, brand string) (*entity.GlobalProduct, error) {
-	query := `
-		SELECT id, ean, name, description, brand, category, price,
-		       image_url, image_urls, source, source_url, source_reliability,
-		       quality_score, is_verified, is_active, business_type, tags,
-		       metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
-		FROM global_products
-		WHERE LOWER(name) = LOWER($1)
-		  AND ($2 = '' OR LOWER(brand) = LOWER($2))
-		  AND image_url IS NOT NULL
-		  AND image_url != ''
-		  AND is_active = true
-		ORDER BY quality_score DESC
-		LIMIT 1
-	`
-
-	row := r.db.QueryRowContext(ctx, query, name, brand)
-	product, err := r.scanGlobalProduct(row)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("error buscando producto global por nombre y marca: %w", err)
+	queries := []struct {
+		nameFilter  string
+		useBrand    bool
+	}{
+		{`LOWER(name) = LOWER($1)`, true},
+		{`LOWER(name) ILIKE LOWER(SPLIT_PART($1, ' ', 1) || ' ' || SPLIT_PART($1, ' ', 2) || '%')`, true},
+		{`LOWER(name) ILIKE LOWER(SPLIT_PART($1, ' ', 1) || '%')`, true},
+		{`LOWER(name) ILIKE LOWER(SPLIT_PART($1, ' ', 1) || ' ' || SPLIT_PART($1, ' ', 2) || '%')`, false},
+		{`LOWER(name) ILIKE LOWER(SPLIT_PART($1, ' ', 1) || '%')`, false},
 	}
 
-	return product, nil
+	for _, q := range queries {
+		var row *sql.Row
+		if q.useBrand && brand != "" {
+			query := fmt.Sprintf(`
+				SELECT id, ean, name, description, brand, category, price,
+				       image_url, image_urls, source, source_url, source_reliability,
+				       quality_score, is_verified, is_active, business_type, tags,
+				       metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
+				FROM global_products
+				WHERE %s
+				  AND LOWER(brand) = LOWER($2)
+				  AND image_url IS NOT NULL AND image_url != ''
+				  AND is_active = true
+				ORDER BY quality_score DESC LIMIT 1`, q.nameFilter)
+			row = r.db.QueryRowContext(ctx, query, name, brand)
+		} else {
+			query := fmt.Sprintf(`
+				SELECT id, ean, name, description, brand, category, price,
+				       image_url, image_urls, source, source_url, source_reliability,
+				       quality_score, is_verified, is_active, business_type, tags,
+				       metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
+				FROM global_products
+				WHERE %s
+				  AND image_url IS NOT NULL AND image_url != ''
+				  AND is_active = true
+				ORDER BY quality_score DESC LIMIT 1`, q.nameFilter)
+			row = r.db.QueryRowContext(ctx, query, name)
+		}
+
+		product, err := r.scanGlobalProduct(row)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, fmt.Errorf("error buscando producto global por nombre y marca: %w", err)
+		}
+		if product != nil {
+			return product, nil
+		}
+	}
+
+	return nil, nil
 }

@@ -1,8 +1,11 @@
 package controller
 
 import (
+	"context"
+	"log"
 	"net/http"
 	"saas-mt-pim-service/src/quickstart/application/usecase"
+	backfillUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,6 +20,7 @@ type QuickstartHandler struct {
 	setupTenantUseCase                 *usecase.SetupTenantUseCase
 	listTemplatesUseCase               *usecase.ListTemplatesUseCase
 	applyTemplateUseCase               *usecase.ApplyTemplateUseCase
+	backfillImagesUseCase              *backfillUseCase.BackfillTenantImagesUseCase
 }
 
 // NewQuickstartHandler crea una nueva instancia del handler
@@ -30,6 +34,7 @@ func NewQuickstartHandler(
 	setupTenantUseCase *usecase.SetupTenantUseCase,
 	listTemplatesUseCase *usecase.ListTemplatesUseCase,
 	applyTemplateUseCase *usecase.ApplyTemplateUseCase,
+	backfillImagesUseCase *backfillUseCase.BackfillTenantImagesUseCase,
 ) *QuickstartHandler {
 	return &QuickstartHandler{
 		getBusinessTypesUseCase:            getBusinessTypesUseCase,
@@ -41,6 +46,7 @@ func NewQuickstartHandler(
 		setupTenantUseCase:                 setupTenantUseCase,
 		listTemplatesUseCase:               listTemplatesUseCase,
 		applyTemplateUseCase:               applyTemplateUseCase,
+		backfillImagesUseCase:              backfillImagesUseCase,
 	}
 }
 
@@ -189,6 +195,8 @@ func (h *QuickstartHandler) ApplyTemplate(c *gin.Context) {
 		return
 	}
 
+	h.triggerBackfill(tenantID)
+
 	c.JSON(http.StatusCreated, response)
 }
 
@@ -217,5 +225,23 @@ func (h *QuickstartHandler) ApplyTemplateByID(c *gin.Context) {
 		return
 	}
 
+	h.triggerBackfill(tenantID)
+
 	c.JSON(http.StatusCreated, response)
+}
+
+// triggerBackfill lanza el backfill de imágenes en background, sin bloquear la respuesta.
+func (h *QuickstartHandler) triggerBackfill(tenantID string) {
+	if h.backfillImagesUseCase == nil {
+		return
+	}
+	go func() {
+		result, err := h.backfillImagesUseCase.Execute(context.Background(), tenantID)
+		if err != nil {
+			log.Printf("[quickstart] backfill de imágenes falló para tenant %s: %v", tenantID, err)
+			return
+		}
+		log.Printf("[quickstart] backfill completado tenant=%s updated=%d skipped=%d errors=%d",
+			tenantID, result.Updated, result.Skipped, result.Errors)
+	}()
 }

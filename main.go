@@ -14,6 +14,7 @@ import (
 	categoryConfig "saas-mt-pim-service/src/category/infrastructure/config"
 	categoryAttributeConfig "saas-mt-pim-service/src/category_attribute/infrastructure/config"
 	globalCatalogConfig "saas-mt-pim-service/src/product/global_catalog/infrastructure/config"
+	backfillUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
 	productConfig "saas-mt-pim-service/src/product/tenant/infrastructure/config"
 	quickstartConfig "saas-mt-pim-service/src/quickstart/infrastructure/config"
 	sharedConfig "saas-mt-pim-service/src/shared/infrastructure/config"
@@ -180,8 +181,8 @@ func main() {
 	setupBrandModule(v1, db)
 	setupMarketplaceBrandModule(v1, db)
 	setupAttributeModule(v1, db)
-	setupProductModule(v1, db)
-	setupQuickstartModule(v1, db)
+	productCfg := setupProductModule(v1, db)
+	setupQuickstartModule(v1, db, productCfg.BackfillTenantImagesUseCase)
 	setupBusinessTypeModule(v1, db)
 	setupBusinessTypeTemplateModule(v1, db)
 	setupGlobalCatalogModule(v1, db)
@@ -230,7 +231,7 @@ func setupBrandModule(router *gin.RouterGroup, db *sql.DB) {
 }
 
 // setupProductModule configura el módulo Product
-func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
+func setupProductModule(router *gin.RouterGroup, db *sql.DB) *productConfig.ProductConfig {
 	log.Println("Configurando módulo Product...")
 
 	// Crear configuración del módulo Product
@@ -284,14 +285,15 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  POST   /api/v1/quickstart/products/from-template")
 	log.Println("  POST   /api/v1/quickstart/products/import-from-business-type")
 	log.Println("  GET    /api/v1/quickstart/progress")
+	return productCfg
 }
 
 // setupQuickstartModule configura el módulo Quickstart
-func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB) {
+func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB, backfillImages *backfillUseCase.BackfillTenantImagesUseCase) {
 	log.Println("Configurando módulo Quickstart...")
 
 	// Crear configuración del módulo Quickstart
-	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db)
+	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db, backfillImages)
 
 	// Obtener el handler principal de quickstart (incluye /templates)
 	quickstartHandler := quickstartCfg.GetQuickstartHandler()
