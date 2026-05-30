@@ -502,6 +502,10 @@ func (ctrl *ProductController) ValidateSKUs(c *gin.Context) {
 // @Router /products/import-csv/async [post]
 // @Security BearerAuth
 func (ctrl *ProductController) ImportProductsCSVAsync(c *gin.Context) {
+	if ctrl.importProductsAsyncUseCase == nil {
+		c.JSON(http.StatusNotImplemented, gin.H{"error": "async import not available"})
+		return
+	}
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {

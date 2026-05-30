@@ -23,7 +23,7 @@ func NewMongoDBClient() (*MongoDBClient, error) {
 	host := getEnvOrDefault("MONGO_HOST", "localhost")
 	port := getEnvOrDefault("MONGO_PORT", "27017")
 	user := getEnvOrDefault("MONGO_USER", "admin")
-	password := getEnvOrDefault("MONGO_PASSWORD", "admin123")
+	password := getEnvOrDefault("MONGO_PASSWORD", "")
 	database := getEnvOrDefault("MONGO_DATABASE", "pim_marketplace")
 
 	// Construir URI de conexión
