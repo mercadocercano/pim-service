@@ -221,7 +221,7 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 	if data.Brand != "" && uc.brandRepo != nil {
 		brand, brandErr := uc.brandRepo.FindByName(ctx, data.Brand, tenantID.String())
 		if brandErr != nil && createBrands {
-			newBrand, createErr := brandEntity.NewBrand(tenantID.String(), data.Brand, "", nil, nil)
+			newBrand, createErr := brandEntity.NewBrand(tenantID.String(), data.Brand, "", nil, nil, nil)
 			if createErr == nil {
 				if persistErr := uc.brandRepo.Create(ctx, newBrand); persistErr == nil {
 					brand = newBrand

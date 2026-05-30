@@ -21,7 +21,7 @@ func TestNewBrand(t *testing.T) {
 		website := stringPtr("https://nike.com")
 
 		// Act
-		brand, err := entity.NewBrand(tenantID, name, description, logoURL, website)
+		brand, err := entity.NewBrand(tenantID, name, description, logoURL, website, nil)
 
 		// Assert
 		require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestNewBrand(t *testing.T) {
 		description := "Generic description"
 
 		// Act
-		brand, err := entity.NewBrand(tenantID, name, description, nil, nil)
+		brand, err := entity.NewBrand(tenantID, name, description, nil, nil, nil)
 
 		// Assert
 		require.NoError(t, err)
@@ -59,7 +59,7 @@ func TestNewBrand(t *testing.T) {
 		description := "Marca deportiva"
 
 		// Act
-		brand, err := entity.NewBrand(tenantID, name, description, nil, nil)
+		brand, err := entity.NewBrand(tenantID, name, description, nil, nil, nil)
 
 		// Assert
 		assert.Error(t, err)
@@ -74,7 +74,7 @@ func TestNewBrand(t *testing.T) {
 		description := "Marca deportiva"
 
 		// Act
-		brand, err := entity.NewBrand(tenantID, name, description, nil, nil)
+		brand, err := entity.NewBrand(tenantID, name, description, nil, nil, nil)
 
 		// Assert
 		assert.Error(t, err)
@@ -95,7 +95,7 @@ func TestBrand_Update(t *testing.T) {
 		newWebsite := stringPtr("https://updated.com")
 
 		// Act
-		err := brand.Update(newName, newDescription, newLogoURL, newWebsite)
+		err := brand.Update(newName, newDescription, newLogoURL, newWebsite, nil)
 
 		// Assert
 		require.NoError(t, err)
@@ -112,7 +112,7 @@ func TestBrand_Update(t *testing.T) {
 		originalName := brand.Name
 
 		// Act
-		err := brand.Update("", "New description", nil, nil)
+		err := brand.Update("", "New description", nil, nil, nil)
 
 		// Assert
 		assert.Error(t, err)

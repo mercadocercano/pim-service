@@ -28,10 +28,19 @@ func (m *BrandMapper) ToResponse(brand *entity.Brand) *response.BrandResponse {
 		Description: brand.Description,
 		LogoURL:     brand.LogoURL,
 		Website:     brand.Website,
+		Color:       derefString(brand.Color),
 		Status:      brand.Status.String(),
 		CreatedAt:   brand.CreatedAt,
 		UpdatedAt:   brand.UpdatedAt,
 	}
+}
+
+// derefString retorna el valor del puntero o cadena vacía si es nil
+func derefString(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }
 
 // ToResponseList convierte una lista de entidades Brand a BrandListResponse
@@ -67,10 +76,10 @@ func (m *BrandMapper) ToReferenceResponse(ref *value_object.BrandReference) *res
 
 // FromCreateRequest convierte un CreateBrandRequest a entidad Brand
 func (m *BrandMapper) FromCreateRequest(req *request.CreateBrandRequest, tenantID string) (*entity.Brand, error) {
-	return entity.NewBrand(tenantID, req.Name, req.Description, req.LogoURL, req.Website)
+	return entity.NewBrand(tenantID, req.Name, req.Description, req.LogoURL, req.Website, req.Color)
 }
 
 // ApplyUpdateRequest aplica los cambios de un UpdateBrandRequest a una entidad Brand
 func (m *BrandMapper) ApplyUpdateRequest(brand *entity.Brand, req *request.UpdateBrandRequest) error {
-	return brand.Update(req.Name, req.Description, req.LogoURL, req.Website)
+	return brand.Update(req.Name, req.Description, req.LogoURL, req.Website, req.Color)
 }

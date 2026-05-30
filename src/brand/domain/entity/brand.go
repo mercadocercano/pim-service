@@ -17,13 +17,14 @@ type Brand struct {
 	Description string
 	LogoURL     *string
 	Website     *string
+	Color       *string
 	Status      value_object.BrandStatus
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
 
 // NewBrand crea una nueva instancia de Brand con validaciones
-func NewBrand(tenantID, name, description string, logoURL, website *string) (*Brand, error) {
+func NewBrand(tenantID, name, description string, logoURL, website, color *string) (*Brand, error) {
 	if tenantID == "" {
 		return nil, exception.ErrBrandTenantRequired
 	}
@@ -40,6 +41,7 @@ func NewBrand(tenantID, name, description string, logoURL, website *string) (*Br
 		Description: description,
 		LogoURL:     logoURL,
 		Website:     website,
+		Color:       color,
 		Status:      value_object.BrandStatusActive,
 		CreatedAt:   now,
 		UpdatedAt:   now,
@@ -47,7 +49,7 @@ func NewBrand(tenantID, name, description string, logoURL, website *string) (*Br
 }
 
 // Update actualiza los campos de la marca
-func (b *Brand) Update(name, description string, logoURL, website *string) error {
+func (b *Brand) Update(name, description string, logoURL, website, color *string) error {
 	if name == "" {
 		return exception.ErrBrandNameRequired
 	}
@@ -56,6 +58,7 @@ func (b *Brand) Update(name, description string, logoURL, website *string) error
 	b.Description = description
 	b.LogoURL = logoURL
 	b.Website = website
+	b.Color = color
 	b.UpdatedAt = time.Now()
 	return nil
 }

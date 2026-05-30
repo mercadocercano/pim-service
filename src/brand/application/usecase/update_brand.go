@@ -67,6 +67,7 @@ func (uc *UpdateBrandUseCase) Execute(ctx context.Context, brandID string, req *
 		Description: normalizedDescription,
 		LogoURL:     normalizedLogoURL,
 		Website:     normalizedWebsite,
+		Color:       req.Color,
 	}); err != nil {
 		return nil, err
 	}

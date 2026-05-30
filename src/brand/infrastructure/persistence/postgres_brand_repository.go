@@ -26,8 +26,8 @@ func NewPostgresBrandRepository(db *sql.DB) *PostgresBrandRepository {
 // Create guarda una nueva marca en la base de datos
 func (r *PostgresBrandRepository) Create(ctx context.Context, brand *entity.Brand) error {
 	query := `
-		INSERT INTO brands (id, tenant_id, name, description, logo_url, website, status, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO brands (id, tenant_id, name, description, logo_url, website, color, status, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 	`
 
 	_, err := r.db.ExecContext(ctx, query,
@@ -37,6 +37,7 @@ func (r *PostgresBrandRepository) Create(ctx context.Context, brand *entity.Bran
 		brand.Description,
 		brand.LogoURL,
 		brand.Website,
+		brand.Color,
 		brand.Status.String(),
 		brand.CreatedAt,
 		brand.UpdatedAt,
@@ -56,7 +57,7 @@ func (r *PostgresBrandRepository) Create(ctx context.Context, brand *entity.Bran
 // FindByID busca una marca por su ID y tenantID
 func (r *PostgresBrandRepository) FindByID(ctx context.Context, id string, tenantID string) (*entity.Brand, error) {
 	query := `
-		SELECT id, tenant_id, name, description, logo_url, website, status, created_at, updated_at
+		SELECT id, tenant_id, name, description, logo_url, website, color, status, created_at, updated_at
 		FROM brands
 		WHERE id = $1 AND tenant_id = $2 AND status != 'deleted'
 	`
@@ -68,7 +69,7 @@ func (r *PostgresBrandRepository) FindByID(ctx context.Context, id string, tenan
 // FindByName busca una marca por su nombre y tenantID
 func (r *PostgresBrandRepository) FindByName(ctx context.Context, name string, tenantID string) (*entity.Brand, error) {
 	query := `
-		SELECT id, tenant_id, name, description, logo_url, website, status, created_at, updated_at
+		SELECT id, tenant_id, name, description, logo_url, website, color, status, created_at, updated_at
 		FROM brands
 		WHERE name = $1 AND tenant_id = $2 AND status != 'deleted'
 	`
@@ -80,7 +81,7 @@ func (r *PostgresBrandRepository) FindByName(ctx context.Context, name string, t
 // FindAll recupera todas las marcas de un tenant
 func (r *PostgresBrandRepository) FindAll(ctx context.Context, tenantID string) ([]*entity.Brand, error) {
 	query := `
-		SELECT id, tenant_id, name, description, logo_url, website, status, created_at, updated_at
+		SELECT id, tenant_id, name, description, logo_url, website, color, status, created_at, updated_at
 		FROM brands
 		WHERE tenant_id = $1 AND status != 'deleted'
 		ORDER BY name ASC
@@ -99,7 +100,7 @@ func (r *PostgresBrandRepository) FindAll(ctx context.Context, tenantID string) 
 func (r *PostgresBrandRepository) Update(ctx context.Context, brand *entity.Brand) error {
 	query := `
 		UPDATE brands
-		SET name = $3, description = $4, logo_url = $5, website = $6, status = $7, updated_at = $8
+		SET name = $3, description = $4, logo_url = $5, website = $6, color = $7, status = $8, updated_at = $9
 		WHERE id = $1 AND tenant_id = $2
 	`
 
@@ -110,6 +111,7 @@ func (r *PostgresBrandRepository) Update(ctx context.Context, brand *entity.Bran
 		brand.Description,
 		brand.LogoURL,
 		brand.Website,
+		brand.Color,
 		brand.Status.String(),
 		brand.UpdatedAt,
 	)
@@ -180,7 +182,7 @@ func (r *PostgresBrandRepository) ExistsByName(ctx context.Context, name string,
 // SearchByCriteria implementa la búsqueda con criteria pattern
 func (r *PostgresBrandRepository) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.Brand, error) {
 	baseQuery := `
-		SELECT id, tenant_id, name, description, logo_url, website, status, created_at, updated_at
+		SELECT id, tenant_id, name, description, logo_url, website, color, status, created_at, updated_at
 		FROM brands
 	`
 
@@ -240,6 +242,7 @@ func (r *PostgresBrandRepository) ListByCriteria(ctx context.Context, crit cr.Cr
 func (r *PostgresBrandRepository) scanBrand(row *sql.Row) (*entity.Brand, error) {
 	var brand entity.Brand
 	var statusStr string
+	var color sql.NullString
 
 	err := row.Scan(
 		&brand.ID,
@@ -248,6 +251,7 @@ func (r *PostgresBrandRepository) scanBrand(row *sql.Row) (*entity.Brand, error)
 		&brand.Description,
 		&brand.LogoURL,
 		&brand.Website,
+		&color,
 		&statusStr,
 		&brand.CreatedAt,
 		&brand.UpdatedAt,
@@ -266,6 +270,9 @@ func (r *PostgresBrandRepository) scanBrand(row *sql.Row) (*entity.Brand, error)
 	}
 
 	brand.Status = status
+	if color.Valid {
+		brand.Color = &color.String
+	}
 	return &brand, nil
 }
 
@@ -276,6 +283,7 @@ func (r *PostgresBrandRepository) scanBrands(rows *sql.Rows) ([]*entity.Brand, e
 	for rows.Next() {
 		var brand entity.Brand
 		var statusStr string
+		var color sql.NullString
 
 		err := rows.Scan(
 			&brand.ID,
@@ -284,6 +292,7 @@ func (r *PostgresBrandRepository) scanBrands(rows *sql.Rows) ([]*entity.Brand, e
 			&brand.Description,
 			&brand.LogoURL,
 			&brand.Website,
+			&color,
 			&statusStr,
 			&brand.CreatedAt,
 			&brand.UpdatedAt,
@@ -299,6 +308,9 @@ func (r *PostgresBrandRepository) scanBrands(rows *sql.Rows) ([]*entity.Brand, e
 		}
 
 		brand.Status = status
+		if color.Valid {
+			brand.Color = &color.String
+		}
 		brands = append(brands, &brand)
 	}
 

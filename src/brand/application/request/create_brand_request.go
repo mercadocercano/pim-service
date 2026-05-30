@@ -6,6 +6,7 @@ type CreateBrandRequest struct {
 	Description string  `json:"description" binding:"max=500" example:"Marca deportiva internacional"`
 	LogoURL     *string `json:"logo_url,omitempty" binding:"omitempty,url" example:"https://example.com/logo.png"`
 	Website     *string `json:"website,omitempty" binding:"omitempty,url" example:"https://nike.com"`
+	Color       *string `json:"color,omitempty" example:"#FF5733"`
 }
 
 // Validate realiza validaciones adicionales del request

@@ -9,6 +9,7 @@ type BrandResponse struct {
 	Description string    `json:"description" example:"Marca deportiva internacional"`
 	LogoURL     *string   `json:"logo_url,omitempty" example:"https://example.com/logo.png"`
 	Website     *string   `json:"website,omitempty" example:"https://nike.com"`
+	Color       string    `json:"color" example:"#FF5733"`
 	Status      string    `json:"status" example:"active"`
 	CreatedAt   time.Time `json:"created_at" example:"2023-01-01T00:00:00Z"`
 	UpdatedAt   time.Time `json:"updated_at" example:"2023-01-01T00:00:00Z"`

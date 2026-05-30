@@ -56,6 +56,7 @@ func (uc *CreateBrandUseCase) Execute(ctx context.Context, req *request.CreateBr
 		Description: normalizedDescription,
 		LogoURL:     normalizedLogoURL,
 		Website:     normalizedWebsite,
+		Color:       req.Color,
 	}, tenantID)
 	if err != nil {
 		return nil, err
