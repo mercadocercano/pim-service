@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"saas-mt-pim-service/src/category/application/request"
 	"saas-mt-pim-service/src/category/application/response"
@@ -47,7 +48,9 @@ func (h *MarketplaceCategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
 		marketplace.GET("/categories", h.GetAllMarketplaceCategories)
 		marketplace.GET("/categories/tree", h.GetMarketplaceCategoriesTree)
 		marketplace.POST("/categories", h.CreateMarketplaceCategory)
+		marketplace.GET("/categories/:id", h.GetMarketplaceCategoryByID)
 		marketplace.PUT("/categories/:id", h.UpdateMarketplaceCategory)
+		marketplace.DELETE("/categories/:id", h.DeleteMarketplaceCategory)
 		marketplace.POST("/categories/validate-hierarchy", h.ValidateCategoryHierarchy)
 		
 		// RUTAS TEMPORALMENTE DESHABILITADAS - casos de uso eliminados
@@ -74,6 +77,10 @@ func (h *MarketplaceCategoryHandler) CreateMarketplaceCategory(c *gin.Context) {
 
 	category, err := h.createMarketplaceCategoryUseCase.Execute(c.Request.Context(), &req)
 	if err != nil {
+		if strings.Contains(err.Error(), "already exists") {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -315,6 +322,74 @@ func (h *MarketplaceCategoryHandler) UpdateMarketplaceCategory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, category)
+}
+
+// GetMarketplaceCategoryByID maneja la solicitud para obtener una categoría marketplace por ID
+func (h *MarketplaceCategoryHandler) GetMarketplaceCategoryByID(c *gin.Context) {
+	categoryID := c.Param("id")
+	if categoryID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de categoría es requerido"})
+		return
+	}
+
+	category, err := h.categoryRepository.GetByID(c.Request.Context(), categoryID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Categoría no encontrada"})
+		return
+	}
+
+	var description *string
+	if category.Description != "" {
+		description = &category.Description
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"category": &response.MarketplaceCategoryResponse{
+			ID:          category.ID,
+			Name:        category.Name,
+			Slug:        category.Slug,
+			Description: description,
+			ParentID:    category.ParentID,
+			Level:       category.Level,
+			IsActive:    category.IsActive,
+			SortOrder:   category.SortOrder,
+			CreatedAt:   category.CreatedAt,
+			UpdatedAt:   category.UpdatedAt,
+		},
+	})
+}
+
+// DeleteMarketplaceCategory maneja la solicitud para eliminar una categoría marketplace
+// Solo disponible para administradores del marketplace
+func (h *MarketplaceCategoryHandler) DeleteMarketplaceCategory(c *gin.Context) {
+	userRole := c.GetHeader("X-User-Role")
+	if userRole != "marketplace_admin" && userRole != "super_admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden eliminar categorías marketplace"})
+		return
+	}
+
+	categoryID := c.Param("id")
+	if categoryID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de categoría es requerido"})
+		return
+	}
+
+	children, err := h.categoryRepository.GetByParentID(c.Request.Context(), &categoryID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al verificar subcategorías: " + err.Error()})
+		return
+	}
+	if len(children) > 0 {
+		c.JSON(http.StatusConflict, gin.H{"error": "No se puede eliminar: la categoría tiene subcategorías"})
+		return
+	}
+
+	if err := h.categoryRepository.Delete(c.Request.Context(), categoryID); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Categoría no encontrada"})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 // GetTenantTaxonomy maneja la solicitud para obtener la taxonomía personalizada de un tenant
