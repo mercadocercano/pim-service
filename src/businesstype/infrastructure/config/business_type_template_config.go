@@ -11,49 +11,54 @@ import (
 
 // BusinessTypeTemplateModuleConfig contiene la configuración del módulo de templates
 type BusinessTypeTemplateModuleConfig struct {
-	DB                      *sql.DB
-	TemplateRepository      *repository.BusinessTypeTemplatePostgresRepository
+	DB                     *sql.DB
+	TemplateRepository     *repository.BusinessTypeTemplatePostgresRepository
 	BusinessTypeRepository *businessTypeRepository.BusinessTypePostgresRepository
-	CreateUseCase           *usecase.CreateBusinessTypeTemplateUseCase
-	UpdateUseCase           *usecase.UpdateBusinessTypeTemplateUseCase
-	ListUseCase             *usecase.ListBusinessTypeTemplatesUseCase
-	GetUseCase              *usecase.GetBusinessTypeTemplateUseCase
-	DeleteUseCase           *usecase.DeleteBusinessTypeTemplateUseCase
-	Handler                 *controller.BusinessTypeTemplateHandler
+	CreateUseCase          *usecase.CreateBusinessTypeTemplateUseCase
+	UpdateUseCase          *usecase.UpdateBusinessTypeTemplateUseCase
+	ListUseCase            *usecase.ListBusinessTypeTemplatesUseCase
+	GetUseCase             *usecase.GetBusinessTypeTemplateUseCase
+	DeleteUseCase          *usecase.DeleteBusinessTypeTemplateUseCase
+	AnalyticsUseCase       *usecase.GetTemplateAnalyticsUseCase
+	DuplicateUseCase       *usecase.DuplicateTemplateUseCase
+	Handler                *controller.BusinessTypeTemplateHandler
 }
 
 // NewBusinessTypeTemplateModuleConfig crea una nueva configuración del módulo
 func NewBusinessTypeTemplateModuleConfig(db *sql.DB) *BusinessTypeTemplateModuleConfig {
-	// Crear repositorios
 	templateRepo := repository.NewBusinessTypeTemplatePostgresRepository(db).(*repository.BusinessTypeTemplatePostgresRepository)
 	businessTypeRepo := businessTypeRepository.NewBusinessTypePostgresRepository(db).(*businessTypeRepository.BusinessTypePostgresRepository)
+	analyticsRepo := repository.NewTemplateAnalyticsPostgresRepository(db)
 
-	// Crear casos de uso
 	createUseCase := usecase.NewCreateBusinessTypeTemplateUseCase(templateRepo, businessTypeRepo)
 	updateUseCase := usecase.NewUpdateBusinessTypeTemplateUseCase(templateRepo)
 	listUseCase := usecase.NewListBusinessTypeTemplatesUseCase(templateRepo)
 	getUseCase := usecase.NewGetBusinessTypeTemplateUseCase(templateRepo)
 	deleteUseCase := usecase.NewDeleteBusinessTypeTemplateUseCase(templateRepo)
+	analyticsUseCase := usecase.NewGetTemplateAnalyticsUseCase(templateRepo, analyticsRepo)
+	duplicateUseCase := usecase.NewDuplicateTemplateUseCase(templateRepo)
 
-	// Crear handler
 	handler := controller.NewBusinessTypeTemplateHandler(
 		createUseCase,
 		updateUseCase,
 		listUseCase,
 		getUseCase,
 		deleteUseCase,
-	)
+	).WithAnalyticsUseCase(analyticsUseCase).
+		WithDuplicateUseCase(duplicateUseCase)
 
 	return &BusinessTypeTemplateModuleConfig{
-		DB:                      db,
-		TemplateRepository:      templateRepo,
+		DB:                     db,
+		TemplateRepository:     templateRepo,
 		BusinessTypeRepository: businessTypeRepo,
-		CreateUseCase:           createUseCase,
-		UpdateUseCase:           updateUseCase,
-		ListUseCase:             listUseCase,
-		GetUseCase:              getUseCase,
-		DeleteUseCase:           deleteUseCase,
-		Handler:                 handler,
+		CreateUseCase:          createUseCase,
+		UpdateUseCase:          updateUseCase,
+		ListUseCase:            listUseCase,
+		GetUseCase:             getUseCase,
+		DeleteUseCase:          deleteUseCase,
+		AnalyticsUseCase:       analyticsUseCase,
+		DuplicateUseCase:       duplicateUseCase,
+		Handler:                handler,
 	}
 }
 

@@ -2,20 +2,24 @@ package controller
 
 import (
 	"net/http"
+
+	cr "github.com/mercadocercano/criteria"
+	"github.com/gin-gonic/gin"
+
 	"saas-mt-pim-service/src/businesstype/application/usecase"
 	"saas-mt-pim-service/src/businesstype/domain/port"
-	cr "github.com/mercadocercano/criteria"
-
-	"github.com/gin-gonic/gin"
 )
 
 // BusinessTypeHandler maneja las peticiones HTTP para business types
 type BusinessTypeHandler struct {
-	createUseCase *usecase.CreateBusinessTypeUseCase
-	listUseCase   *usecase.ListBusinessTypesUseCase
-	getUseCase    *usecase.GetBusinessTypeUseCase
-	updateUseCase *usecase.UpdateBusinessTypeUseCase
-	repository    port.BusinessTypeRepository
+	createUseCase     *usecase.CreateBusinessTypeUseCase
+	listUseCase       *usecase.ListBusinessTypesUseCase
+	getUseCase        *usecase.GetBusinessTypeUseCase
+	updateUseCase     *usecase.UpdateBusinessTypeUseCase
+	deleteUseCase     *usecase.DeleteBusinessTypeUseCase
+	activateUseCase   *usecase.ActivateBusinessTypeUseCase
+	deactivateUseCase *usecase.DeactivateBusinessTypeUseCase
+	repository        port.BusinessTypeRepository
 }
 
 // NewBusinessTypeHandler crea una nueva instancia del handler
@@ -27,11 +31,14 @@ func NewBusinessTypeHandler(
 	repository port.BusinessTypeRepository,
 ) *BusinessTypeHandler {
 	return &BusinessTypeHandler{
-		createUseCase: createUseCase,
-		listUseCase:   listUseCase,
-		getUseCase:    getUseCase,
-		updateUseCase: updateUseCase,
-		repository:    repository,
+		createUseCase:     createUseCase,
+		listUseCase:       listUseCase,
+		getUseCase:        getUseCase,
+		updateUseCase:     updateUseCase,
+		deleteUseCase:     usecase.NewDeleteBusinessTypeUseCase(repository),
+		activateUseCase:   usecase.NewActivateBusinessTypeUseCase(repository),
+		deactivateUseCase: usecase.NewDeactivateBusinessTypeUseCase(repository),
+		repository:        repository,
 	}
 }
 
@@ -44,6 +51,8 @@ func (h *BusinessTypeHandler) RegisterRoutes(router *gin.RouterGroup) {
 		businessTypes.GET("/:id", h.GetBusinessType)
 		businessTypes.PUT("/:id", h.UpdateBusinessType)
 		businessTypes.DELETE("/:id", h.DeleteBusinessType)
+		businessTypes.PATCH("/:id/activate", h.ActivateBusinessType)
+		businessTypes.PATCH("/:id/deactivate", h.DeactivateBusinessType)
 	}
 }
 
@@ -55,16 +64,14 @@ func (h *BusinessTypeHandler) CreateBusinessType(c *gin.Context) {
 		return
 	}
 
-	// Validar rol admin
-	role := c.GetHeader("X-User-Role")
-	if role != "marketplace_admin" && role != "super_admin" {
+	if !isAdmin(c) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden crear business types"})
 		return
 	}
 
 	businessType, err := h.createUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creando business type: " + err.Error()})
+		c.JSON(http.StatusConflict, gin.H{"error": "Error creando business type: " + err.Error()})
 		return
 	}
 
@@ -73,24 +80,15 @@ func (h *BusinessTypeHandler) CreateBusinessType(c *gin.Context) {
 
 // ListBusinessTypes maneja el listado de business types
 func (h *BusinessTypeHandler) ListBusinessTypes(c *gin.Context) {
-	// Construir criterios usando el builder correcto
 	criteriaBuilder := cr.NewCriteriaBuilder()
-
-	// Poblar desde query parameters (paginación, ordenamiento básico)
 	criteriaBuilder.FromURLValues(c.Request.URL.Query())
 
-	// Filtro only_active
 	if c.Query("only_active") == "true" {
 		criteriaBuilder.AddEqualFilter("is_active", true)
 	}
 
-	// Filtros adicionales que pueden venir del frontend
 	if search := c.Query("search"); search != "" {
 		criteriaBuilder.AddLikeFilter("name", search)
-	}
-
-	if code := c.Query("code"); code != "" {
-		criteriaBuilder.AddLikeFilter("code", code)
 	}
 
 	if isActive := c.Query("is_active"); isActive != "" {
@@ -101,43 +99,31 @@ func (h *BusinessTypeHandler) ListBusinessTypes(c *gin.Context) {
 		}
 	}
 
-	// Establecer valores por defecto si no se especifican
 	if c.Query("sort_by") == "" {
 		criteriaBuilder.SetOrder("sort_order", cr.OrderAsc)
 	}
 
-	// Construir criterios finales
 	searchCriteria := criteriaBuilder.Build()
 
-	// Buscar usando criterios
 	businessTypes, err := h.repository.SearchByCriteria(c.Request.Context(), searchCriteria)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listando business types: " + err.Error()})
 		return
 	}
 
-	// Contar total usando criterios (sin paginación)
-	countCriteria := cr.NewCriteria(
-		searchCriteria.Filters,
-		[]cr.Order{},    // Sin ordenamiento para conteo
-		cr.Pagination{}, // Sin paginación para conteo
-	)
-
+	countCriteria := cr.NewCriteria(searchCriteria.Filters, []cr.Order{}, cr.Pagination{})
 	total, err := h.repository.CountByCriteria(c.Request.Context(), countCriteria)
 	if err != nil {
-		total = len(businessTypes) // Fallback
+		total = len(businessTypes)
 	}
 
-	// Respuesta con formato compatible con frontend
-	response := map[string]interface{}{
+	c.JSON(http.StatusOK, map[string]interface{}{
 		"items":       businessTypes,
 		"total_count": total,
 		"page":        searchCriteria.Pagination.Page,
 		"page_size":   searchCriteria.Pagination.Limit,
-		"total_pages": (total + searchCriteria.Pagination.Limit - 1) / searchCriteria.Pagination.Limit,
-	}
-
-	c.JSON(http.StatusOK, response)
+		"total_pages": calcTotalPages(total, searchCriteria.Pagination.Limit),
+	})
 }
 
 // GetBusinessType obtiene un business type por ID
@@ -169,9 +155,7 @@ func (h *BusinessTypeHandler) UpdateBusinessType(c *gin.Context) {
 		return
 	}
 
-	// Validar rol admin
-	role := c.GetHeader("X-User-Role")
-	if role != "marketplace_admin" && role != "super_admin" {
+	if !isAdmin(c) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden actualizar business types"})
 		return
 	}
@@ -203,13 +187,75 @@ func (h *BusinessTypeHandler) DeleteBusinessType(c *gin.Context) {
 		return
 	}
 
-	// Validar rol admin
-	role := c.GetHeader("X-User-Role")
-	if role != "marketplace_admin" && role != "super_admin" {
+	if !isAdmin(c) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden eliminar business types"})
 		return
 	}
 
-	// TODO: Implementar caso de uso DeleteBusinessType
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Endpoint no implementado"})
+	if err := h.deleteUseCase.Execute(c.Request.Context(), id); err != nil {
+		if err.Error() == "business type no encontrado" {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error eliminando business type: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+// ActivateBusinessType activa un business type
+func (h *BusinessTypeHandler) ActivateBusinessType(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID es requerido"})
+		return
+	}
+
+	bt, err := h.activateUseCase.Execute(c.Request.Context(), id)
+	if err != nil {
+		if err.Error() == "business type no encontrado" {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error activando business type: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, bt)
+}
+
+// DeactivateBusinessType desactiva un business type
+func (h *BusinessTypeHandler) DeactivateBusinessType(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID es requerido"})
+		return
+	}
+
+	bt, err := h.deactivateUseCase.Execute(c.Request.Context(), id)
+	if err != nil {
+		if err.Error() == "business type no encontrado" {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error desactivando business type: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, bt)
+}
+
+// isAdmin verifica que el header X-User-Role sea admin
+func isAdmin(c *gin.Context) bool {
+	role := c.GetHeader("X-User-Role")
+	return role == "marketplace_admin" || role == "super_admin"
+}
+
+// calcTotalPages calcula el total de páginas evitando división por cero
+func calcTotalPages(total, pageSize int) int {
+	if pageSize <= 0 {
+		return 1
+	}
+	return (total + pageSize - 1) / pageSize
 }
