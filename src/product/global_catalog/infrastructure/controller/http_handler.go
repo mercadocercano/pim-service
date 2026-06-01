@@ -22,11 +22,34 @@ type GlobalCatalogController struct {
 	listGlobalProductsByCriteria     *usecase.ListGlobalProductsByCriteriaUseCase
 	getGlobalProductByID             *usecase.GetGlobalProductByID
 	updateGlobalProductByID          *usecase.UpdateGlobalProductByID
+	deleteGlobalProduct              *usecase.DeleteGlobalProduct
+	verifyGlobalProduct              *usecase.VerifyGlobalProduct
+	unverifyGlobalProduct            *usecase.UnverifyGlobalProduct
+	bulkImportGlobalProducts         *usecase.BulkImportGlobalProducts
 	getBusinessTypeFacets            *usecase.GetBusinessTypeFacets
 	listProductsNeedingEnrichment    *usecase.ListProductsNeedingEnrichment
 	getGlobalProductsByIDs           *usecase.GetGlobalProductsByIDs
 	getDistinctBusinessTypes         *usecase.GetDistinctBusinessTypes
 	criteriaBuilder                  *criteria.GlobalProductCriteriaBuilder
+}
+
+// GlobalCatalogControllerDeps agrupa todas las dependencias del controlador
+type GlobalCatalogControllerDeps struct {
+	CreateGlobalProduct           *usecase.CreateGlobalProduct
+	SearchByEAN                   *usecase.SearchByEAN
+	ListGlobalProducts            *usecase.ListGlobalProducts
+	ListGlobalProductsByCriteria  *usecase.ListGlobalProductsByCriteriaUseCase
+	GetGlobalProductByID          *usecase.GetGlobalProductByID
+	UpdateGlobalProductByID       *usecase.UpdateGlobalProductByID
+	DeleteGlobalProduct           *usecase.DeleteGlobalProduct
+	VerifyGlobalProduct           *usecase.VerifyGlobalProduct
+	UnverifyGlobalProduct         *usecase.UnverifyGlobalProduct
+	BulkImportGlobalProducts      *usecase.BulkImportGlobalProducts
+	GetBusinessTypeFacets         *usecase.GetBusinessTypeFacets
+	ListProductsNeedingEnrichment *usecase.ListProductsNeedingEnrichment
+	GetGlobalProductsByIDs        *usecase.GetGlobalProductsByIDs
+	GetDistinctBusinessTypes      *usecase.GetDistinctBusinessTypes
+	CriteriaBuilder               *criteria.GlobalProductCriteriaBuilder
 }
 
 // NewGlobalCatalogController crea una nueva instancia del controlador
@@ -58,6 +81,27 @@ func NewGlobalCatalogController(
 	}
 }
 
+// NewGlobalCatalogControllerWithDeps crea el controlador con las dependencias extendidas (incluyendo delete/verify/bulk)
+func NewGlobalCatalogControllerWithDeps(deps GlobalCatalogControllerDeps) *GlobalCatalogController {
+	return &GlobalCatalogController{
+		createGlobalProduct:           deps.CreateGlobalProduct,
+		searchByEAN:                   deps.SearchByEAN,
+		listGlobalProducts:            deps.ListGlobalProducts,
+		listGlobalProductsByCriteria:  deps.ListGlobalProductsByCriteria,
+		getGlobalProductByID:          deps.GetGlobalProductByID,
+		updateGlobalProductByID:       deps.UpdateGlobalProductByID,
+		deleteGlobalProduct:           deps.DeleteGlobalProduct,
+		verifyGlobalProduct:           deps.VerifyGlobalProduct,
+		unverifyGlobalProduct:         deps.UnverifyGlobalProduct,
+		bulkImportGlobalProducts:      deps.BulkImportGlobalProducts,
+		getBusinessTypeFacets:         deps.GetBusinessTypeFacets,
+		listProductsNeedingEnrichment: deps.ListProductsNeedingEnrichment,
+		getGlobalProductsByIDs:        deps.GetGlobalProductsByIDs,
+		getDistinctBusinessTypes:      deps.GetDistinctBusinessTypes,
+		criteriaBuilder:               deps.CriteriaBuilder,
+	}
+}
+
 // RegisterRoutes registra las rutas del API
 func (gc *GlobalCatalogController) RegisterRoutes(router *gin.RouterGroup) {
 	// Rutas públicas (sin autenticación)
@@ -73,14 +117,17 @@ func (gc *GlobalCatalogController) RegisterRoutes(router *gin.RouterGroup) {
 	// Rutas privadas (para administración y scraping)
 	private := router.Group("/global-catalog")
 	{
-		private.POST("/products", gc.CreateProduct)           // Crear producto (para scrapers)
-		private.GET("/products", gc.ListProducts)             // Listar productos con filtros
-		private.GET("/products/search", gc.SearchByEAN)       // Búsqueda avanzada
-		private.GET("/products/:id", gc.GetProductByID)       // Obtener producto por ID
-		private.GET("/enrichment-queue", gc.ListProductsNeedingEnrichment) // Cola de scraping para webdata
-		private.GET("/by-ids", gc.GetProductsByIDs)           // On-demand enrichment por IDs
-		private.PUT("/products/:id", gc.UpdateProductByID)    // Actualizar producto por ID
-		private.DELETE("/products/:id", gc.DeleteProductByID) // Eliminar producto por ID
+		private.POST("/products", gc.CreateProduct)                         // Crear producto (para scrapers)
+		private.POST("/products/bulk-import", gc.BulkImportProducts)       // Importación masiva
+		private.GET("/products", gc.ListProducts)                           // Listar productos con filtros
+		private.GET("/products/search", gc.SearchByEAN)                     // Búsqueda avanzada
+		private.GET("/products/:id", gc.GetProductByID)                     // Obtener producto por ID
+		private.GET("/enrichment-queue", gc.ListProductsNeedingEnrichment)  // Cola de scraping para webdata
+		private.GET("/by-ids", gc.GetProductsByIDs)                         // On-demand enrichment por IDs
+		private.PUT("/products/:id", gc.UpdateProductByID)                  // Actualizar producto por ID
+		private.DELETE("/products/:id", gc.DeleteProductByID)               // Eliminar producto por ID
+		private.PATCH("/products/:id/verify", gc.VerifyProduct)             // Verificar producto
+		private.PATCH("/products/:id/unverify", gc.UnverifyProduct)         // Desverificar producto
 	}
 }
 
@@ -282,10 +329,11 @@ func (gc *GlobalCatalogController) GetBusinessTypeFacets(c *gin.Context) {
 func (gc *GlobalCatalogController) handleUseCaseError(c *gin.Context, err error) {
 	switch e := err.(type) {
 	case *exception.ValidationError:
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   e.Message,
-			"details": e.Cause.Error(),
-		})
+		body := gin.H{"error": e.Message}
+		if e.Cause != nil {
+			body["details"] = e.Cause.Error()
+		}
+		c.JSON(http.StatusBadRequest, body)
 	case *exception.ConflictError:
 		c.JSON(http.StatusConflict, gin.H{
 			"error": e.Message,
@@ -486,18 +534,91 @@ func splitAndTrim(s string) []string {
 func (gc *GlobalCatalogController) DeleteProductByID(c *gin.Context) {
 	productID := c.Param("id")
 	if productID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "ID del producto no especificado",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto no especificado"})
 		return
 	}
 
-	// Por ahora, devolvemos un error 501 (Not Implemented)
-	// TODO: Implementar use case DeleteGlobalProductByID
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"error":   "Endpoint no implementado aún",
-		"message": "La funcionalidad de eliminación por ID está en desarrollo",
-	})
+	if gc.deleteGlobalProduct == nil {
+		c.JSON(http.StatusNotImplemented, gin.H{"error": "Endpoint no implementado"})
+		return
+	}
+
+	req := usecase.DeleteGlobalProductRequest{ID: productID}
+	if err := gc.deleteGlobalProduct.Execute(c.Request.Context(), req); err != nil {
+		gc.handleUseCaseError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+// VerifyProduct marca un producto como verificado
+// PATCH /api/v1/global-catalog/products/{id}/verify
+func (gc *GlobalCatalogController) VerifyProduct(c *gin.Context) {
+	productID := c.Param("id")
+	if productID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto no especificado"})
+		return
+	}
+
+	if gc.verifyGlobalProduct == nil {
+		c.JSON(http.StatusNotImplemented, gin.H{"error": "Endpoint no implementado"})
+		return
+	}
+
+	req := usecase.VerifyGlobalProductRequest{ID: productID}
+	if err := gc.verifyGlobalProduct.Execute(c.Request.Context(), req); err != nil {
+		gc.handleUseCaseError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Producto verificado"})
+}
+
+// UnverifyProduct marca un producto como no verificado
+// PATCH /api/v1/global-catalog/products/{id}/unverify
+func (gc *GlobalCatalogController) UnverifyProduct(c *gin.Context) {
+	productID := c.Param("id")
+	if productID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto no especificado"})
+		return
+	}
+
+	if gc.unverifyGlobalProduct == nil {
+		c.JSON(http.StatusNotImplemented, gin.H{"error": "Endpoint no implementado"})
+		return
+	}
+
+	req := usecase.UnverifyGlobalProductRequest{ID: productID}
+	if err := gc.unverifyGlobalProduct.Execute(c.Request.Context(), req); err != nil {
+		gc.handleUseCaseError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Producto desverificado"})
+}
+
+// BulkImportProducts importa productos en lote
+// POST /api/v1/global-catalog/products/bulk-import
+func (gc *GlobalCatalogController) BulkImportProducts(c *gin.Context) {
+	if gc.bulkImportGlobalProducts == nil {
+		c.JSON(http.StatusNotImplemented, gin.H{"error": "Endpoint no implementado"})
+		return
+	}
+
+	var req usecase.BulkImportRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "JSON inválido", "details": err.Error()})
+		return
+	}
+
+	result, err := gc.bulkImportGlobalProducts.Execute(req)
+	if err != nil {
+		gc.handleUseCaseError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }
 
 // GetDistinctBusinessTypes devuelve todos los business types distintos del catálogo global.

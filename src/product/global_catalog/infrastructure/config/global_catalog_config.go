@@ -22,6 +22,10 @@ type GlobalCatalogConfig struct {
 	listGlobalProductsByCriteriaUseCase     *usecase.ListGlobalProductsByCriteriaUseCase
 	getGlobalProductByIDUseCase             *usecase.GetGlobalProductByID
 	updateGlobalProductByIDUseCase          *usecase.UpdateGlobalProductByID
+	deleteGlobalProductUseCase              *usecase.DeleteGlobalProduct
+	verifyGlobalProductUseCase              *usecase.VerifyGlobalProduct
+	unverifyGlobalProductUseCase            *usecase.UnverifyGlobalProduct
+	bulkImportGlobalProductsUseCase         *usecase.BulkImportGlobalProducts
 	getBusinessTypeFacetsUseCase            *usecase.GetBusinessTypeFacets
 	listProductsNeedingEnrichmentUseCase    *usecase.ListProductsNeedingEnrichment
 	getGlobalProductsByIDsUseCase           *usecase.GetGlobalProductsByIDs
@@ -60,6 +64,10 @@ func (c *GlobalCatalogConfig) initializeUseCases() {
 	c.listGlobalProductsByCriteriaUseCase = usecase.NewListGlobalProductsByCriteriaUseCase(c.globalProductRepository)
 	c.getGlobalProductByIDUseCase = usecase.NewGetGlobalProductByID(c.globalProductRepository)
 	c.updateGlobalProductByIDUseCase = usecase.NewUpdateGlobalProductByID(c.globalProductRepository)
+	c.deleteGlobalProductUseCase = usecase.NewDeleteGlobalProduct(c.globalProductRepository, c.DB)
+	c.verifyGlobalProductUseCase = usecase.NewVerifyGlobalProduct(c.globalProductRepository)
+	c.unverifyGlobalProductUseCase = usecase.NewUnverifyGlobalProduct(c.globalProductRepository)
+	c.bulkImportGlobalProductsUseCase = usecase.NewBulkImportGlobalProducts(c.globalProductRepository)
 	c.getBusinessTypeFacetsUseCase = usecase.NewGetBusinessTypeFacets(c.globalProductRepository)
 	c.listProductsNeedingEnrichmentUseCase = usecase.NewListProductsNeedingEnrichment(c.globalProductRepository)
 	c.getGlobalProductsByIDsUseCase = usecase.NewGetGlobalProductsByIDs(c.globalProductRepository)
@@ -72,19 +80,23 @@ func (c *GlobalCatalogConfig) initializeUseCases() {
 // initializeControllers inicializa los controladores
 func (c *GlobalCatalogConfig) initializeControllers() {
 	c.criteriaBuilder = criteria.NewGlobalProductCriteriaBuilder()
-	c.GlobalCatalogController = controller.NewGlobalCatalogController(
-		c.createGlobalProductUseCase,
-		c.searchByEANUseCase,
-		c.listGlobalProductsUseCase,
-		c.listGlobalProductsByCriteriaUseCase,
-		c.getGlobalProductByIDUseCase,
-		c.updateGlobalProductByIDUseCase,
-		c.getBusinessTypeFacetsUseCase,
-		c.listProductsNeedingEnrichmentUseCase,
-		c.getGlobalProductsByIDsUseCase,
-		c.getDistinctBusinessTypesUseCase,
-		c.criteriaBuilder,
-	)
+	c.GlobalCatalogController = controller.NewGlobalCatalogControllerWithDeps(controller.GlobalCatalogControllerDeps{
+		CreateGlobalProduct:           c.createGlobalProductUseCase,
+		SearchByEAN:                   c.searchByEANUseCase,
+		ListGlobalProducts:            c.listGlobalProductsUseCase,
+		ListGlobalProductsByCriteria:  c.listGlobalProductsByCriteriaUseCase,
+		GetGlobalProductByID:          c.getGlobalProductByIDUseCase,
+		UpdateGlobalProductByID:       c.updateGlobalProductByIDUseCase,
+		DeleteGlobalProduct:           c.deleteGlobalProductUseCase,
+		VerifyGlobalProduct:           c.verifyGlobalProductUseCase,
+		UnverifyGlobalProduct:         c.unverifyGlobalProductUseCase,
+		BulkImportGlobalProducts:      c.bulkImportGlobalProductsUseCase,
+		GetBusinessTypeFacets:         c.getBusinessTypeFacetsUseCase,
+		ListProductsNeedingEnrichment: c.listProductsNeedingEnrichmentUseCase,
+		GetGlobalProductsByIDs:        c.getGlobalProductsByIDsUseCase,
+		GetDistinctBusinessTypes:      c.getDistinctBusinessTypesUseCase,
+		CriteriaBuilder:               c.criteriaBuilder,
+	})
 	c.ProductRequestController = controller.NewProductRequestController(
 		c.createProductRequestUseCase,
 		c.listProductRequestsUseCase,
