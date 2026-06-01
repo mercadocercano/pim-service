@@ -16,6 +16,7 @@ type AttributeModuleConfig struct {
 	// Repositories
 	MarketplaceAttributeRepository *repository.MarketplaceAttributePostgresRepository
 	AttributeRepository            *repository.AttributePostgresRepository
+	AttributeValueRepository       *repository.AttributeValuePostgresRepository
 
 	// Use Cases - Marketplace
 	CreateMarketplaceAttributeUseCase          *usecase.CreateMarketplaceAttributeUseCase
@@ -24,6 +25,12 @@ type AttributeModuleConfig struct {
 	GetMarketplaceAttributeByIDUseCase         *usecase.GetMarketplaceAttributeByIDUseCase
 	UpdateMarketplaceAttributeUseCase          *usecase.UpdateMarketplaceAttributeUseCase
 	DeleteMarketplaceAttributeUseCase          *usecase.DeleteMarketplaceAttributeUseCase
+
+	// Use Cases - Attribute Values
+	ListAttributeValuesUseCase   *usecase.ListAttributeValuesUseCase
+	CreateAttributeValueUseCase  *usecase.CreateAttributeValueUseCase
+	UpdateAttributeValueUseCase  *usecase.UpdateAttributeValueUseCase
+	DeleteAttributeValueUseCase  *usecase.DeleteAttributeValueUseCase
 
 	// Use Cases - Tenant
 	CreateAttributeUseCase  *usecase.CreateAttributeUseCase
@@ -45,6 +52,7 @@ func NewAttributeModuleConfig(db *sql.DB) *AttributeModuleConfig {
 	// Repositories
 	marketplaceAttributeRepo := repository.NewMarketplaceAttributePostgresRepository(db)
 	attributeRepo := repository.NewAttributePostgresRepository(db)
+	attributeValueRepo := repository.NewAttributeValuePostgresRepository(db)
 
 	// Infrastructure
 	marketplaceAttributeCriteriaBuilder := criteria.NewMarketplaceAttributeCriteriaBuilder()
@@ -56,6 +64,12 @@ func NewAttributeModuleConfig(db *sql.DB) *AttributeModuleConfig {
 	getMarketplaceAttributeByIDUseCase := usecase.NewGetMarketplaceAttributeByIDUseCase(marketplaceAttributeRepo)
 	updateMarketplaceAttributeUseCase := usecase.NewUpdateMarketplaceAttributeUseCase(marketplaceAttributeRepo)
 	deleteMarketplaceAttributeUseCase := usecase.NewDeleteMarketplaceAttributeUseCase(marketplaceAttributeRepo)
+
+	// Use Cases para Attribute Values
+	listAttributeValuesUseCase := usecase.NewListAttributeValuesUseCase(attributeValueRepo)
+	createAttributeValueUseCase := usecase.NewCreateAttributeValueUseCase(attributeValueRepo, marketplaceAttributeRepo)
+	updateAttributeValueUseCase := usecase.NewUpdateAttributeValueUseCase(attributeValueRepo)
+	deleteAttributeValueUseCase := usecase.NewDeleteAttributeValueUseCase(attributeValueRepo)
 
 	// Use Cases para Tenant Attributes
 	createAttributeUseCase := usecase.NewCreateAttributeUseCase(attributeRepo)
@@ -73,6 +87,11 @@ func NewAttributeModuleConfig(db *sql.DB) *AttributeModuleConfig {
 		updateMarketplaceAttributeUseCase,
 		deleteMarketplaceAttributeUseCase,
 		marketplaceAttributeCriteriaBuilder,
+	).WithValueUseCases(
+		listAttributeValuesUseCase,
+		createAttributeValueUseCase,
+		updateAttributeValueUseCase,
+		deleteAttributeValueUseCase,
 	)
 
 	attributeHandler := controller.NewAttributeHandler(
@@ -86,12 +105,17 @@ func NewAttributeModuleConfig(db *sql.DB) *AttributeModuleConfig {
 	return &AttributeModuleConfig{
 		MarketplaceAttributeRepository:             marketplaceAttributeRepo,
 		AttributeRepository:                        attributeRepo,
+		AttributeValueRepository:                   attributeValueRepo,
 		CreateMarketplaceAttributeUseCase:          createMarketplaceAttributeUseCase,
 		ListMarketplaceAttributesUseCase:           listMarketplaceAttributesUseCase,
 		ListMarketplaceAttributesByCriteriaUseCase: listMarketplaceAttributesByCriteriaUseCase,
 		GetMarketplaceAttributeByIDUseCase:         getMarketplaceAttributeByIDUseCase,
 		UpdateMarketplaceAttributeUseCase:          updateMarketplaceAttributeUseCase,
 		DeleteMarketplaceAttributeUseCase:          deleteMarketplaceAttributeUseCase,
+		ListAttributeValuesUseCase:                 listAttributeValuesUseCase,
+		CreateAttributeValueUseCase:                createAttributeValueUseCase,
+		UpdateAttributeValueUseCase:                updateAttributeValueUseCase,
+		DeleteAttributeValueUseCase:                deleteAttributeValueUseCase,
 		CreateAttributeUseCase:                     createAttributeUseCase,
 		ListAttributesUseCase:                      listAttributesUseCase,
 		GetAttributeByIDUseCase:                    getAttributeByIDUseCase,

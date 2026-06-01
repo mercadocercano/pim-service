@@ -157,6 +157,10 @@ func (m *MockMarketplaceAttributeRepo) CountByCriteria(ctx context.Context, crit
 	args := m.Called(ctx, crit)
 	return args.Int(0), args.Error(1)
 }
+func (m *MockMarketplaceAttributeRepo) IsInUse(ctx context.Context, id string) (bool, error) {
+	args := m.Called(ctx, id)
+	return args.Bool(0), args.Error(1)
+}
 
 // MockGlobalProductRepo mock para productos globales
 type MockGlobalProductRepo struct {

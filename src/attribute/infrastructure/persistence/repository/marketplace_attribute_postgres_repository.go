@@ -265,6 +265,17 @@ func (r *MarketplaceAttributePostgresRepository) scanMarketplaceAttribute(row *s
 	}, nil
 }
 
+// IsInUse verifica si el atributo está asignado a alguna variante de producto
+func (r *MarketplaceAttributePostgresRepository) IsInUse(ctx context.Context, id string) (bool, error) {
+	var count int
+	query := `SELECT COUNT(*) FROM variant_marketplace_attributes WHERE marketplace_attribute_id = $1`
+	err := r.db.QueryRowContext(ctx, query, id).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("error checking attribute usage: %w", err)
+	}
+	return count > 0, nil
+}
+
 // scanMarketplaceAttributes escanea múltiples filas y devuelve un slice de marketplace attributes
 func (r *MarketplaceAttributePostgresRepository) scanMarketplaceAttributes(rows *sql.Rows) ([]*entity.MarketplaceAttribute, error) {
 	var attributes []*entity.MarketplaceAttribute

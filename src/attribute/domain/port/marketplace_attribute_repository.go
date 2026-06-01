@@ -17,4 +17,5 @@ type MarketplaceAttributeRepository interface {
 	Delete(ctx context.Context, id string) error
 	SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*entity.MarketplaceAttribute, error)
 	CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error)
+	IsInUse(ctx context.Context, id string) (bool, error)
 }

@@ -42,8 +42,9 @@ func (uc *UpdateMarketplaceAttributeUseCase) Execute(
 		return nil, ErrInvalidAttributeName
 	}
 
+	// Generar slug desde el nombre si no se proporciona
 	if slug == "" {
-		return nil, errors.New("slug es requerido")
+		slug = generateSlug(name)
 	}
 
 	if attributeType == "" {
