@@ -11,8 +11,9 @@ import (
 	"saas-mt-pim-service/src/product/tenant/application/request"
 	"saas-mt-pim-service/src/product/tenant/application/response"
 	"saas-mt-pim-service/src/product/tenant/application/usecase"
+	tenantport "saas-mt-pim-service/src/product/tenant/domain/port"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/criteria"
-	"saas-mt-pim-service/src/shared/infrastructure/metrics"
+	sharedport "github.com/mercadocercano/go-shared/domain/port"
 )
 
 // ProductController maneja las peticiones HTTP para productos
@@ -27,6 +28,7 @@ type ProductController struct {
 	importProductsAsyncUseCase    *usecase.ImportProductsAsyncUseCase
 	validateSKUsUseCase           *usecase.ValidateSKUsUseCase
 	criteriaBuilder               *criteria.ProductCriteriaBuilder
+	metrics                       sharedport.MetricsRecorder
 }
 
 // NewProductController crea una nueva instancia del controller
@@ -41,6 +43,7 @@ func NewProductController(
 	importProductsAsyncUseCase *usecase.ImportProductsAsyncUseCase,
 	validateSKUsUseCase *usecase.ValidateSKUsUseCase,
 	criteriaBuilder *criteria.ProductCriteriaBuilder,
+	metricsRecorder sharedport.MetricsRecorder,
 ) *ProductController {
 	return &ProductController{
 		createProductUseCase:          createProductUseCase,
@@ -53,6 +56,7 @@ func NewProductController(
 		importProductsAsyncUseCase:    importProductsAsyncUseCase,
 		validateSKUsUseCase:           validateSKUsUseCase,
 		criteriaBuilder:               criteriaBuilder,
+		metrics:                       metricsRecorder,
 	}
 }
 
@@ -424,8 +428,16 @@ func (ctrl *ProductController) ImportProductsCSV(c *gin.Context) {
 		return
 	}
 
-	// Registrar tamaño del archivo
-	metrics.RecordFileSize(tenantID, "csv_products", header.Size)
+	ctrl.metrics.Record(sharedport.MetricEvent{
+		Name:  tenantport.MetricImportFileSize,
+		Kind:  sharedport.MetricKindHistogram,
+		Unit:  sharedport.MetricUnitBytes,
+		Value: float64(header.Size),
+		Labels: map[string]string{
+			"tenant_id": tenantID,
+			"type":      "csv_products",
+		},
+	})
 
 	// Ejecutar caso de uso
 	result, err := ctrl.importProductsFromCSVUseCase.Execute(c.Request.Context(), file, tenantID)
@@ -480,9 +492,20 @@ func (ctrl *ProductController) ValidateSKUs(c *gin.Context) {
 		return
 	}
 
-	// Registrar métricas
 	duration := time.Since(startTime).Seconds()
-	metrics.RecordSKUValidation(tenantID, len(req.SKUs), duration)
+	ctrl.metrics.Record(sharedport.MetricEvent{
+		Name:  tenantport.MetricSKUValidation,
+		Kind:  sharedport.MetricKindHistogram,
+		Unit:  sharedport.MetricUnitSeconds,
+		Value: duration,
+		Labels: map[string]string{"tenant_id": tenantID},
+	})
+	ctrl.metrics.Record(sharedport.MetricEvent{
+		Name:  tenantport.MetricSKUBatchSize,
+		Kind:  sharedport.MetricKindHistogram,
+		Value: float64(len(req.SKUs)),
+		Labels: map[string]string{"tenant_id": tenantID},
+	})
 
 	c.JSON(http.StatusOK, result)
 }

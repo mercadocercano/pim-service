@@ -13,7 +13,7 @@ import (
 	"github.com/lib/pq"
 
 	"saas-mt-pim-service/src/quickstart/domain/port"
-	sharedport "saas-mt-pim-service/src/shared/domain/port"
+	sharedport "github.com/mercadocercano/go-shared/domain/port"
 )
 
 const (

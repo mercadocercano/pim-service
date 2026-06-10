@@ -18,6 +18,7 @@ import (
 	productConfig "saas-mt-pim-service/src/product/tenant/infrastructure/config"
 	quickstartConfig "saas-mt-pim-service/src/quickstart/infrastructure/config"
 	sharedConfig "saas-mt-pim-service/src/shared/infrastructure/config"
+	sharedmetrics "github.com/mercadocercano/go-shared/infrastructure/metrics"
 
 	// Brand imports
 	brandController "saas-mt-pim-service/src/brand/infrastructure/controller"
@@ -217,7 +218,7 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) *productConfig.Prod
 	log.Println("Configurando módulo Product...")
 
 	// Crear configuración del módulo Product
-	productCfg := productConfig.NewProductConfig(db)
+	productCfg := productConfig.NewProductConfig(db, sharedmetrics.NewPrometheusRecorder())
 
 	// Registrar rutas del Product
 	productCfg.ProductController.RegisterRoutes(router)

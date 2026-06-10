@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"saas-mt-pim-service/src/shared/domain/port"
+	sharedport "github.com/mercadocercano/go-shared/domain/port"
 )
 
 // BaseCSVFileImporter implementación base para importar archivos CSV
@@ -35,8 +35,8 @@ func NewBaseCSVFileImporter[T any](delimiter rune, hasHeader bool, requiredColum
 }
 
 // Import procesa el archivo CSV y devuelve el resultado
-func (b *BaseCSVFileImporter[T]) Import(ctx context.Context, reader io.Reader, tenantID string, parser RowParser[T]) (*port.ImportResult[T], error) {
-	result := port.NewImportResult[T]()
+func (b *BaseCSVFileImporter[T]) Import(ctx context.Context, reader io.Reader, tenantID string, parser RowParser[T]) (*sharedport.ImportResult[T], error) {
+	result := sharedport.NewImportResult[T]()
 
 	// Crear lector CSV
 	csvReader := csv.NewReader(reader)
@@ -149,6 +149,6 @@ type RowParser[T any] interface {
 
 // CSVFileImporter interfaz concreta que deben implementar los importadores específicos
 type CSVFileImporter[T any] interface {
-	port.FileImporter[T]
+	sharedport.FileImporter[T]
 	RowParser[T]
 }

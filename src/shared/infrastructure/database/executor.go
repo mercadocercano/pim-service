@@ -1,15 +1,13 @@
 package database
 
 import (
-	"context"
 	"database/sql"
+
+	sharedport "github.com/mercadocercano/go-shared/domain/port"
 )
 
-// Executor define la interfaz mínima para ejecutar queries SQL.
-// Tanto *sql.DB como *sql.Tx implementan esta interfaz, permitiendo
-// usar el mismo código con o sin transacción.
-type Executor interface {
-	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
-	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
-	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
-}
+// Compile-time checks: both *sql.DB and *sql.Tx satisfy the shared Executor port.
+var (
+	_ sharedport.Executor = (*sql.DB)(nil)
+	_ sharedport.Executor = (*sql.Tx)(nil)
+)

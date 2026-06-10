@@ -1,23 +1,17 @@
 package config
 
 import (
-	"saas-mt-pim-service/src/api/infrastructure/middleware"
-	sharedMiddleware "saas-mt-pim-service/src/shared/infrastructure/middleware"
+	apimiddleware "saas-mt-pim-service/src/api/infrastructure/middleware"
 
 	"github.com/gin-gonic/gin"
+	sharedconfig "github.com/mercadocercano/go-shared/infrastructure/config"
+	sharedmiddleware "github.com/mercadocercano/go-shared/infrastructure/middleware"
 )
 
-// SharedConfig contiene la configuración para el módulo compartido
-type SharedConfig struct {
-	EnableGzip            bool
-	AlwaysTryDecompress   bool
-	ForceGzipCompression  bool
-	ForceGzipCheckSupport bool     // Verifica si el cliente soporta gzip antes de forzar compresión
-	ForceGzipPaths        []string // Rutas donde forzar compresión
-	GzipExcludedPaths     []string
-}
+// SharedConfig is an alias for go-shared's SharedConfig, extended with pim defaults.
+type SharedConfig = sharedconfig.SharedConfig
 
-// DefaultSharedConfig devuelve una configuración por defecto
+// DefaultSharedConfig returns pim-service-specific defaults.
 func DefaultSharedConfig() SharedConfig {
 	return SharedConfig{
 		EnableGzip:            true,
@@ -29,40 +23,24 @@ func DefaultSharedConfig() SharedConfig {
 	}
 }
 
-// SetupSharedMiddleware configura los middlewares compartidos
-func SetupSharedMiddleware(router *gin.Engine, config SharedConfig) {
-	// Aplicar middleware CORS para todas las rutas
-	router.Use(middleware.CORSMiddleware())
+// SetupSharedMiddleware configures CORS (pim-specific) and the shared gzip/decompress middleware.
+func SetupSharedMiddleware(router *gin.Engine, cfg SharedConfig) {
+	router.Use(apimiddleware.CORSMiddleware())
 
-	// Aplicar middleware para intentar descomprimir todas las solicitudes entrantes si está habilitado
-	if config.AlwaysTryDecompress {
-		router.Use(sharedMiddleware.GzipReader())
+	if cfg.AlwaysTryDecompress {
+		router.Use(sharedmiddleware.GzipReader())
 	}
 
-	// Aplicar middleware de compresión gzip si está habilitado
-	if config.EnableGzip {
-		gzipOpts := sharedMiddleware.GzipOptions{
-			ExcludedPaths: config.GzipExcludedPaths,
-		}
-		router.Use(sharedMiddleware.GzipMiddleware(gzipOpts))
+	if cfg.EnableGzip {
+		router.Use(sharedmiddleware.GzipMiddleware(sharedmiddleware.GzipOptions{
+			ExcludedPaths: cfg.GzipExcludedPaths,
+		}))
 
-		// Configurar rutas que siempre deben usar compresión gzip
-		if config.ForceGzipCompression && len(config.ForceGzipPaths) > 0 {
-			forceGzipOpts := sharedMiddleware.ForceGzipOptions{
-				CheckClientSupport: config.ForceGzipCheckSupport,
-			}
-
-			// Ejemplo de cómo aplicar compresión forzada a rutas específicas
-			for _, path := range config.ForceGzipPaths {
-				router.Group(path).Use(sharedMiddleware.ForceGzipMiddleware(forceGzipOpts))
+		if cfg.ForceGzipCompression && len(cfg.ForceGzipPaths) > 0 {
+			opts := sharedmiddleware.ForceGzipOptions{CheckClientSupport: cfg.ForceGzipCheckSupport}
+			for _, path := range cfg.ForceGzipPaths {
+				router.Group(path).Use(sharedmiddleware.ForceGzipMiddleware(opts))
 			}
 		}
 	}
-
-	// Aquí se pueden agregar más middlewares compartidos en el futuro
-	// Por ejemplo:
-	// - Logging
-	// - CORS
-	// - Medición de rendimiento
-	// - Autenticación/Autorización
 }

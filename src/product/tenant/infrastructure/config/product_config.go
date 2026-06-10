@@ -17,6 +17,7 @@ import (
 	"saas-mt-pim-service/src/product/tenant/infrastructure/criteria"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/persistence"
 	"saas-mt-pim-service/src/quickstart/domain/port"
+	sharedport "github.com/mercadocercano/go-shared/domain/port"
 )
 
 // ProductConfig contiene todas las dependencias del módulo Product
@@ -68,7 +69,7 @@ type ProductConfig struct {
 }
 
 // NewProductConfig crea y configura todas las dependencias del módulo Product
-func NewProductConfig(db *sql.DB) *ProductConfig {
+func NewProductConfig(db *sql.DB, metricsRecorder sharedport.MetricsRecorder) *ProductConfig {
 	// Repositorios
 	productRepo := persistence.NewPostgresProductRepository(db)
 
@@ -124,6 +125,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 	importProductsFromCSVUseCase := usecase.NewImportProductsFromCSVUseCase(
 		productRepo,
 		productCSVFileImporter,
+		metricsRecorder,
 	)
 
 	// Use Case de validación de SKUs
@@ -192,6 +194,7 @@ func NewProductConfig(db *sql.DB) *ProductConfig {
 		nil, // importProductsAsyncUseCase - TODO: implementar cuando las dependencias estén disponibles
 		validateSKUsUseCase,
 		productCriteriaBuilder,
+		metricsRecorder,
 	)
 
 	productVariantController := controller.NewProductVariantController(

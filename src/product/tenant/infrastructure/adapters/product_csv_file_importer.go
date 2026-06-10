@@ -9,7 +9,7 @@ import (
 
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	"saas-mt-pim-service/src/product/tenant/domain/value_object"
-	"saas-mt-pim-service/src/shared/domain/port"
+	sharedport "github.com/mercadocercano/go-shared/domain/port"
 	"saas-mt-pim-service/src/shared/infrastructure/adapters"
 
 	"github.com/google/uuid"
@@ -49,7 +49,7 @@ func NewProductCSVFileImporter(categoryService CategoryValidator, brandService B
 }
 
 // Import implementa la interfaz FileImporter
-func (p *ProductCSVFileImporter) Import(ctx context.Context, reader io.Reader, tenantID string) (*port.ImportResult[entity.Product], error) {
+func (p *ProductCSVFileImporter) Import(ctx context.Context, reader io.Reader, tenantID string) (*sharedport.ImportResult[entity.Product], error) {
 	return p.BaseCSVFileImporter.Import(ctx, reader, tenantID, p)
 }
 

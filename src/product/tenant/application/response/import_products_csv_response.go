@@ -2,7 +2,7 @@ package response
 
 import (
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
-	"saas-mt-pim-service/src/shared/domain/port"
+	sharedport "github.com/mercadocercano/go-shared/domain/port"
 )
 
 // ImportProductsCSVResponse respuesta de la importación de productos desde CSV
@@ -10,7 +10,7 @@ type ImportProductsCSVResponse struct {
 	Success          bool                      `json:"success"`
 	Summary          ImportSummary             `json:"summary"`
 	Products         []ProductResponse         `json:"imported_products,omitempty"`
-	Errors           []port.ImportError        `json:"errors,omitempty"`
+	Errors           []sharedport.ImportError        `json:"errors,omitempty"`
 	ProcessingErrors []ProcessingErrorResponse `json:"processing_errors,omitempty"`
 }
 
@@ -38,7 +38,7 @@ type ProcessingErrorResponse struct {
 
 // NewImportProductsCSVResponse crea una nueva respuesta de importación
 func NewImportProductsCSVResponse(
-	result *port.ImportResult[entity.Product],
+	result *sharedport.ImportResult[entity.Product],
 	savedProducts []*entity.Product,
 	processingErrors []ProcessingError,
 ) *ImportProductsCSVResponse {
