@@ -23,19 +23,18 @@ levantan un PostgreSQL real en Docker automáticamente, corren las migraciones y
 
 ```bash
 # Ejecutar todos los tests de integración
-./run_tests.sh
-
-# O directamente con Go
-go test ./test-integration/... -v -timeout 120s
+go test -tags=integration ./integration_test/... -v -timeout 120s
 ```
 
-Los tests de integración están organizados por módulo:
+Los tests de integración están organizados por módulo en `integration_test/`:
 
-| Módulo | Archivo test |
-|--------|-------------|
-| Global Catalog | `test-integration/global_catalog_*_test.go` |
-| Attributes | `test-integration/attributes_*_test.go` |
-| Quickstart | `test-integration/quickstart_*_test.go` |
+| Módulo | Directorio |
+|--------|-----------|
+| Attributes | `integration_test/attributes/` |
+| Brands | `integration_test/brands/` |
+| Global Catalog | `integration_test/global_catalog/` |
+| Quickstart | `integration_test/quickstart/` |
+| Taxonomy | `integration_test/taxonomy/` |
 
 ---
 

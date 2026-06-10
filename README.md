@@ -171,4 +171,5 @@ docker compose up -d pim-service
 Ver [`docs/`](docs/README.md) para arquitectura, ADRs, setup y guías operativas.
 
 - `api-docs/openapi.yaml` — especificación OpenAPI 3.1.0 (fuente de verdad de la API)
+- `postman/` — colección Postman + runner Newman (`./postman/run.sh`)
 - `docs/archive/` — auditorías y reportes históricos (2026-02)

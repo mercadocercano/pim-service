@@ -38,6 +38,12 @@ dist/
 coverage.html
 coverage.out
 
+# Next.js (no pertenece a este proyecto — residual)
+.next/
+
+# Newman reports
+postman/reports/
+
 # Logs
 *.log
 logs/

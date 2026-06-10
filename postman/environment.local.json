@@ -1,0 +1,31 @@
+{
+  "id": "pim-local-env",
+  "name": "PIM — Local",
+  "_postman_variable_scope": "environment",
+  "values": [
+    {
+      "key": "hostUrl",
+      "value": "http://localhost:8090",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "base_url",
+      "value": "http://localhost:8090/api/v1",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "tenantId",
+      "value": "9a4c3eb9-2471-4688-bfc8-973e5b3e4ce8",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "jwtToken",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    }
+  ]
+}
