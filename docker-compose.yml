@@ -1,7 +1,19 @@
 version: '3.8'
 
 services:
-  # PIM Service
+  postgres-setup:
+    image: pgvector/pgvector:pg15
+    container_name: mc-pim-postgres-setup
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    command: >
+      sh -c "
+        psql -h lab-postgres -U ${POSTGRES_USER:-postgres} -c 'CREATE DATABASE pim_db;' || true &&
+        echo 'Databases ready.'
+      "
+    networks:
+      - lab-network
+
   pim-service:
     build:
       context: .
@@ -9,30 +21,24 @@ services:
       target: development
     container_name: mc-pim-service
     environment:
-      # PostgreSQL configuration (using shared postgres)
-      DB_HOST: postgres
+      DB_HOST: lab-postgres
       DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DB_NAME: pim_db
       DB_SSLMODE: disable
-      # MongoDB configuration (using shared mongodb)
-      MONGO_HOST: mongodb
-      MONGO_PORT: 27017
-      MONGO_USER: admin
-      MONGO_PASSWORD: admin123
-      MONGO_DATABASE: pim_marketplace
-      # Development environment
       GIN_MODE: debug
       LOG_LEVEL: debug
+      PROMETHEUS_ENABLED: "true"
     ports:
       - "8090:8090"
     volumes:
       - ./src:/app/src:ro
       - ./migrations:/app/migrations:ro
-    # Dependencies are handled externally via docker-compose.infra.yml
+    depends_on:
+      - postgres-setup
     networks:
-      - saas-network
+      - lab-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
@@ -44,7 +50,6 @@ services:
       - "logging=promtail"
       - "service_name=pim-service"
 
-
 networks:
-  saas-network:
+  lab-network:
     external: true
