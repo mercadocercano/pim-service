@@ -5,7 +5,7 @@
 # ==============================================
 # Stage 1: Dependencies and cache optimization
 # ==============================================
-FROM golang:1.24-alpine AS deps
+FROM golang:1.25-alpine AS deps
 WORKDIR /app
 
 # Install build dependencies
@@ -43,7 +43,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
 # ==============================================
 # Stage 3: Development stage (with Air hot reload)
 # ==============================================
-FROM mercado-cercano/go-dev:1.24 AS development
+FROM mercado-cercano/go-dev:1.25 AS development
 
 # Configure private Go modules
 ARG GITHUB_TOKEN
