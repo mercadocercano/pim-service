@@ -119,8 +119,8 @@ github.com/mdelapenya/tlscert v0.1.0 h1:YTpF579PYUX475eOL+6zyEO3ngLTOUWck78NBuJV
 github.com/mdelapenya/tlscert v0.1.0/go.mod h1:wrbyM/DwbFCeCeqdPX/8c6hNOqQgbf0rUDErE1uD+64=
 github.com/mercadocercano/criteria v0.3.0 h1:9COhrXG37JY+DNL3EZsKeM8RJkmS3h/6cpqP7cJfgLM=
 github.com/mercadocercano/criteria v0.3.0/go.mod h1:mbH7KZM/AAdNL+OLFfUK3pWrg3kKHOIxtnVaauTurVE=
-github.com/mercadocercano/go-shared v0.1.0 h1:+SJ7sqsKYE2QBZ90nbvW6pvm7SVsPGSmJF/E4v6C7tk=
-github.com/mercadocercano/go-shared v0.1.0/go.mod h1:bW5YcFwj1XMNwbWW+BNdhAxZPj4XrePXpThs8sxhG9o=
+github.com/mercadocercano/go-shared v0.2.0 h1:wEDvSNytOZN+MXyMzvztgUUPjM/sqKbdUaUPnkxMbXE=
+github.com/mercadocercano/go-shared v0.2.0/go.mod h1:bW5YcFwj1XMNwbWW+BNdhAxZPj4XrePXpThs8sxhG9o=
 github.com/mercadocercano/middleware v0.1.0 h1:79JBG55KB3UmhVQT1w++j5Dom8el5KkBGaO0TsVg+Cc=
 github.com/mercadocercano/middleware v0.1.0/go.mod h1:9/pm5Sf5OxVQHH8GK6XSnNSafd+6VJndmLHnZnsrqec=
 github.com/moby/docker-image-spec v1.3.1 h1:jMKff3w6PgbfSa69GfNg+zN/XLhfXJGnEx3Nl2EsFP0=
