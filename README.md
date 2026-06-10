@@ -168,9 +168,7 @@ docker compose up -d pim-service
 
 ## Documentación
 
-- `docs/architecture.md` — arquitectura modular, diagramas de flujo
-- `docs/testing.md` — guía de tests de integración
-- `docs/deployment.md` — variables de entorno, Docker, producción
+Ver [`docs/`](docs/README.md) para arquitectura, ADRs, setup y guías operativas.
+
 - `api-docs/openapi.yaml` — especificación OpenAPI 3.1.0 (fuente de verdad de la API)
-- `src/category_attribute/README.md` — documentación detallada del módulo category_attribute
 - `docs/archive/` — auditorías y reportes históricos (2026-02)
