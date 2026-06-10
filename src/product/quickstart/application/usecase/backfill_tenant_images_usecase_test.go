@@ -102,6 +102,9 @@ func (m *mockGlobalRepo) CountByCriteria(ctx context.Context, crit cr.Criteria) 
 func (m *mockGlobalRepo) FindByIDs(ctx context.Context, ids []string) ([]*globalEntity.GlobalProduct, error) {
 	return nil, nil
 }
+func (m *mockGlobalRepo) CountTenantLinks(ctx context.Context, productID string) (int, error) {
+	return 0, nil
+}
 
 type mockTenantRepo struct {
 	findWithoutImageFn    func(ctx context.Context, tenantID string) ([]*tenantEntity.Product, error)

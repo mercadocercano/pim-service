@@ -1,19 +1,20 @@
 package controller_test
 
 import (
-	"database/sql"
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
-	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"saas-mt-pim-service/src/s2s/controller"
+	s2sport "saas-mt-pim-service/src/s2s/domain/port"
 	"saas-mt-pim-service/src/s2s/usecase"
 )
 
@@ -21,9 +22,23 @@ func init() {
 	gin.SetMode(gin.TestMode)
 }
 
-func setupRouter(db *sql.DB) *gin.Engine {
-	refreshUC := usecase.NewRefreshTemplateProductsUseCase(db)
-	templateUC := usecase.NewGetTemplateStatusUseCase(db)
+// mockTemplateRepo implementa port.TemplateRepository para tests del handler.
+type mockTemplateRepo struct {
+	getStatusFn func(ctx context.Context, slug string) (*s2sport.TemplateStatusRow, error)
+	refreshFn   func(ctx context.Context) (int64, error)
+}
+
+func (m *mockTemplateRepo) GetTemplateStatus(ctx context.Context, slug string) (*s2sport.TemplateStatusRow, error) {
+	return m.getStatusFn(ctx, slug)
+}
+
+func (m *mockTemplateRepo) RefreshProductTemplates(ctx context.Context) (int64, error) {
+	return m.refreshFn(ctx)
+}
+
+func setupRouter(repo s2sport.TemplateRepository) *gin.Engine {
+	refreshUC := usecase.NewRefreshTemplateProductsUseCase(repo)
+	templateUC := usecase.NewGetTemplateStatusUseCase(repo)
 	h := controller.NewInternalHandler(refreshUC, templateUC)
 
 	r := gin.New()
@@ -35,26 +50,19 @@ func setupRouter(db *sql.DB) *gin.Engine {
 // TestTemplateStatusHandler_ComputedSource_Returns200 verifica que cuando el use case
 // retorna source=computed, el handler responde 200 con data.source="computed".
 func TestTemplateStatusHandler_ComputedSource_Returns200(t *testing.T) {
-	// Arrange
-	db, mock, err := sqlmock.New()
-	require.NoError(t, err)
-	defer db.Close()
-
 	now := time.Now().UTC()
-	rows := sqlmock.NewRows([]string{"computed_count", "editorial_count", "last_refresh"}).
-		AddRow(25, 20, sql.NullTime{Time: now, Valid: true})
-	mock.ExpectQuery(`business_type_product_templates`).
-		WithArgs("almacen").
-		WillReturnRows(rows)
+	repo := &mockTemplateRepo{
+		getStatusFn: func(_ context.Context, _ string) (*s2sport.TemplateStatusRow, error) {
+			return &s2sport.TemplateStatusRow{ComputedCount: 25, EditorialCount: 20, LastRefresh: &now}, nil
+		},
+	}
 
-	r := setupRouter(db)
+	r := setupRouter(repo)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/s2s/business-types/almacen/template-status", nil)
 
-	// Act
 	r.ServeHTTP(w, req)
 
-	// Assert
 	assert.Equal(t, http.StatusOK, w.Code)
 	var body map[string]interface{}
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
@@ -66,25 +74,18 @@ func TestTemplateStatusHandler_ComputedSource_Returns200(t *testing.T) {
 // TestTemplateStatusHandler_EditorialSource_Returns200 verifica que cuando computed_count=0
 // el handler responde 200 con data.source="editorial".
 func TestTemplateStatusHandler_EditorialSource_Returns200(t *testing.T) {
-	// Arrange
-	db, mock, err := sqlmock.New()
-	require.NoError(t, err)
-	defer db.Close()
+	repo := &mockTemplateRepo{
+		getStatusFn: func(_ context.Context, _ string) (*s2sport.TemplateStatusRow, error) {
+			return &s2sport.TemplateStatusRow{ComputedCount: 0, EditorialCount: 15, LastRefresh: nil}, nil
+		},
+	}
 
-	rows := sqlmock.NewRows([]string{"computed_count", "editorial_count", "last_refresh"}).
-		AddRow(0, 15, sql.NullTime{Valid: false})
-	mock.ExpectQuery(`business_type_product_templates`).
-		WithArgs("relojeria").
-		WillReturnRows(rows)
-
-	r := setupRouter(db)
+	r := setupRouter(repo)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/s2s/business-types/relojeria/template-status", nil)
 
-	// Act
 	r.ServeHTTP(w, req)
 
-	// Assert
 	assert.Equal(t, http.StatusOK, w.Code)
 	var body map[string]interface{}
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
@@ -96,23 +97,18 @@ func TestTemplateStatusHandler_EditorialSource_Returns200(t *testing.T) {
 // TestTemplateStatusHandler_UnknownSlug_Returns404 verifica que un slug inexistente
 // retorna 404 con error.code="NOT_FOUND".
 func TestTemplateStatusHandler_UnknownSlug_Returns404(t *testing.T) {
-	// Arrange
-	db, mock, err := sqlmock.New()
-	require.NoError(t, err)
-	defer db.Close()
+	repo := &mockTemplateRepo{
+		getStatusFn: func(_ context.Context, _ string) (*s2sport.TemplateStatusRow, error) {
+			return nil, nil // nil,nil = no encontrado
+		},
+	}
 
-	mock.ExpectQuery(`business_type_product_templates`).
-		WithArgs("no-existe").
-		WillReturnError(sql.ErrNoRows)
-
-	r := setupRouter(db)
+	r := setupRouter(repo)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/s2s/business-types/no-existe/template-status", nil)
 
-	// Act
 	r.ServeHTTP(w, req)
 
-	// Assert
 	assert.Equal(t, http.StatusNotFound, w.Code)
 	var body map[string]interface{}
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
@@ -120,26 +116,21 @@ func TestTemplateStatusHandler_UnknownSlug_Returns404(t *testing.T) {
 	assert.Equal(t, "NOT_FOUND", errObj["code"])
 }
 
-// TestTemplateStatusHandler_DBError_Returns500 verifica que un error de DB genérico
+// TestTemplateStatusHandler_DBError_Returns500 verifica que un error de repo genérico
 // retorna 500 con error.code="INTERNAL_ERROR".
 func TestTemplateStatusHandler_DBError_Returns500(t *testing.T) {
-	// Arrange
-	db, mock, err := sqlmock.New()
-	require.NoError(t, err)
-	defer db.Close()
+	repo := &mockTemplateRepo{
+		getStatusFn: func(_ context.Context, _ string) (*s2sport.TemplateStatusRow, error) {
+			return nil, errors.New("connection refused")
+		},
+	}
 
-	mock.ExpectQuery(`business_type_product_templates`).
-		WithArgs("almacen").
-		WillReturnError(assert.AnError)
-
-	r := setupRouter(db)
+	r := setupRouter(repo)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/s2s/business-types/almacen/template-status", nil)
 
-	// Act
 	r.ServeHTTP(w, req)
 
-	// Assert
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	var body map[string]interface{}
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))

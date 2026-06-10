@@ -109,6 +109,9 @@ func (m *mockGlobalProductRepo) FindByNameAndBrand(_ context.Context, _, _ strin
 	return nil, nil
 }
 func (m *mockGlobalProductRepo) FindDistinctBusinessTypes() ([]string, error) { return nil, nil }
+func (m *mockGlobalProductRepo) CountTenantLinks(_ context.Context, _ string) (int, error) {
+	return 0, nil
+}
 
 type mockTenantProductRepo struct {
 	saved *tenantEntity.Product

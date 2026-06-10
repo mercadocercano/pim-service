@@ -309,6 +309,10 @@ func (m *MockGlobalProductRepo) FindDistinctBusinessTypes() ([]string, error) {
 	args := m.Called()
 	return args.Get(0).([]string), args.Error(1)
 }
+func (m *MockGlobalProductRepo) CountTenantLinks(ctx context.Context, productID string) (int, error) {
+	args := m.Called(ctx, productID)
+	return args.Int(0), args.Error(1)
+}
 
 func TestGetMarketplaceOverviewUseCase_Execute_DashboardSection(t *testing.T) {
 	// Arrange

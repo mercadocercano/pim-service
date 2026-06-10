@@ -190,6 +190,10 @@ func (m *MockGlobalProductRepository) FindDistinctBusinessTypes() ([]string, err
 	args := m.Called()
 	return args.Get(0).([]string), args.Error(1)
 }
+func (m *MockGlobalProductRepository) CountTenantLinks(ctx context.Context, productID string) (int, error) {
+	args := m.Called(ctx, productID)
+	return args.Int(0), args.Error(1)
+}
 
 func TestCreateGlobalProduct_ValidRequest_Success(t *testing.T) {
 	// Arrange
