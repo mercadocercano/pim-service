@@ -4,13 +4,13 @@ import "errors"
 
 // Errores de validación
 var (
-	ErrMarketplacebrandInvalidName = errors.New("nombre de marketplace_brand inválido")
+	ErrMarketplacebrandInvalidName  = errors.New("nombre de marketplace_brand inválido")
 	ErrMarketplacebrandNameRequired = errors.New("nombre de marketplace_brand es requerido")
 )
 
 // Errores de negocio
 var (
-	ErrMarketplacebrandNotFound = errors.New("marketplace_brand no encontrado")
+	ErrMarketplacebrandNotFound      = errors.New("marketplace_brand no encontrado")
 	ErrMarketplacebrandAlreadyExists = errors.New("marketplace_brand ya existe")
 )
 

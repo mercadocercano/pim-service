@@ -14,9 +14,9 @@ import (
 	categoryEntity "saas-mt-pim-service/src/category/domain/entity"
 	globalEntity "saas-mt-pim-service/src/product/global_catalog/domain/entity"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/overview/application/request"
 	"saas-mt-pim-service/src/overview/application/usecase"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // MockMarketplaceCategoryRepo mock para categorías marketplace
@@ -188,7 +188,7 @@ func (m *MockGlobalProductRepo) FindByID(id string) (*globalEntity.GlobalProduct
 	}
 	return args.Get(0).(*globalEntity.GlobalProduct), args.Error(1)
 }
-func (m *MockGlobalProductRepo) Delete(id string) error                   { return m.Called(id).Error(0) }
+func (m *MockGlobalProductRepo) Delete(id string) error { return m.Called(id).Error(0) }
 func (m *MockGlobalProductRepo) FindByEAN(ean string) (*globalEntity.GlobalProduct, error) {
 	args := m.Called(ean)
 	if args.Get(0) == nil {
@@ -450,8 +450,8 @@ func TestGetMarketplaceOverviewUseCase_Execute_DefaultsApplied(t *testing.T) {
 
 	req := &request.GetMarketplaceOverviewRequest{
 		Sections:      []string{"dashboard"},
-		TimeRangeDays: 0,  // Should be defaulted to 7
-		Limit:         0,  // Should be defaulted to 10
+		TimeRangeDays: 0, // Should be defaulted to 7
+		Limit:         0, // Should be defaulted to 10
 	}
 
 	// Act

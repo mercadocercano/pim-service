@@ -17,7 +17,7 @@ type ListTemplate struct {
 	Description     string              `json:"description"`
 	Icon            string              `json:"icon"`
 	Categories      []string            `json:"categories"`
-	Brands          []ListTemplateBrand  `json:"brands,omitempty"`
+	Brands          []ListTemplateBrand `json:"brands,omitempty"`
 	TotalCategories int                 `json:"total_categories"`
 	TotalProducts   int                 `json:"total_products"`
 	IsActive        bool                `json:"is_active"`

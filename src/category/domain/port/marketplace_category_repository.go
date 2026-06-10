@@ -3,8 +3,8 @@ package port
 import (
 	"context"
 
-	"saas-mt-pim-service/src/category/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/category/domain/entity"
 )
 
 // MarketplaceCategoryRepository define las operaciones de persistencia para categorías marketplace

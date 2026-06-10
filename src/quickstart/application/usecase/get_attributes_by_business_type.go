@@ -22,7 +22,7 @@ func (uc *GetAttributesByBusinessTypeUseCase) Execute(ctx context.Context, busin
 		{"id": 2, "name": "Stock", "type": "number"},
 		{"id": 3, "name": "Código de barras", "type": "text"},
 	}
-	
+
 	return map[string]interface{}{
 		"attributes": attributes,
 	}, nil

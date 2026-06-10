@@ -15,16 +15,16 @@ type FileImporter[T any] interface {
 type ImportResult[T any] struct {
 	// TotalRows número total de filas procesadas
 	TotalRows int `json:"total_rows"`
-	
+
 	// SuccessfulImports número de importaciones exitosas
 	SuccessfulImports int `json:"successful_imports"`
-	
+
 	// FailedImports número de importaciones fallidas
 	FailedImports int `json:"failed_imports"`
-	
+
 	// ImportedItems elementos importados exitosamente
 	ImportedItems []T `json:"imported_items"`
-	
+
 	// Errors errores encontrados durante la importación
 	Errors []ImportError `json:"errors"`
 }
@@ -33,10 +33,10 @@ type ImportResult[T any] struct {
 type ImportError struct {
 	// Row número de fila donde ocurrió el error (1-indexed)
 	Row int `json:"row"`
-	
+
 	// Data datos de la fila que falló
 	Data map[string]string `json:"data"`
-	
+
 	// Errors lista de errores encontrados en esta fila
 	Errors []string `json:"errors"`
 }

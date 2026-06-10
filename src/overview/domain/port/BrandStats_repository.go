@@ -2,8 +2,8 @@ package port
 
 import (
 	"context"
-	"saas-mt-pim-service/src/overview/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/overview/domain/entity"
 )
 
 // BrandStatsRepository define los métodos para persistir BrandStats

@@ -458,7 +458,7 @@ func (ctrl *ProductController) ImportProductsCSV(c *gin.Context) {
 // @Security BearerAuth
 func (ctrl *ProductController) ValidateSKUs(c *gin.Context) {
 	startTime := time.Now()
-	
+
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
@@ -641,7 +641,7 @@ func (ctrl *ProductController) RegisterRoutes(router *gin.RouterGroup) {
 		products.POST("/import-csv", ctrl.ImportProductsCSV)
 		products.POST("/import-csv/async", ctrl.ImportProductsCSVAsync)
 		products.POST("/validate-skus", ctrl.ValidateSKUs)
-		
+
 		// Luego rutas con /:id
 		products.GET("/:id", ctrl.GetProduct)
 		products.PUT("/:id", ctrl.UpdateProduct)

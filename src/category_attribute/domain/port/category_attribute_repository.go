@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"saas-mt-pim-service/src/category_attribute/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/category_attribute/domain/entity"
 )
 
 // CategoryAttributeRepository define el contrato para acceder a los datos de atributos de categoría

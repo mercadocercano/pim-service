@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
+	cr "github.com/mercadocercano/criteria"
 	businessTypeEntity "saas-mt-pim-service/src/businesstype/domain/entity"
-	quickstartEntity "saas-mt-pim-service/src/quickstart/domain/entity"
 	"saas-mt-pim-service/src/quickstart/application/usecase"
+	quickstartEntity "saas-mt-pim-service/src/quickstart/domain/entity"
 	"saas-mt-pim-service/src/quickstart/domain/service"
 	"saas-mt-pim-service/src/quickstart/test/domain/entity"
-	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

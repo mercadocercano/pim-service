@@ -23,4 +23,3 @@ type TenantQuickstartHistoryRepository interface {
 	Update(ctx context.Context, history *entity.TenantQuickstartHistory) error
 	GetLatestByTenantID(ctx context.Context, tenantID string) (*entity.TenantQuickstartHistory, error)
 }
-

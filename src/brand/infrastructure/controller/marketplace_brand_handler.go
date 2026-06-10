@@ -4,12 +4,12 @@ import (
 	"net/http"
 	"strconv"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/brand/application/request"
 	"saas-mt-pim-service/src/brand/application/response"
 	"saas-mt-pim-service/src/brand/application/usecase"
 	"saas-mt-pim-service/src/brand/domain/entity"
 	"saas-mt-pim-service/src/brand/domain/port"
-	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )

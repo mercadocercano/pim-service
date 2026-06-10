@@ -74,4 +74,3 @@ func (ctrl *BulkImportController) RegisterRoutes(router *gin.RouterGroup) {
 		products.POST("/import", ctrl.BulkImportProducts)
 	}
 }
-

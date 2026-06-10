@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	cr "github.com/mercadocercano/criteria"
 	"log"
 	"saas-mt-pim-service/src/brand/domain/entity"
 	"saas-mt-pim-service/src/brand/domain/exception"
-	cr "github.com/mercadocercano/criteria"
 
 	"github.com/lib/pq"
 )

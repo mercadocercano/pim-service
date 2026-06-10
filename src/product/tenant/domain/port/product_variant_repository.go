@@ -3,8 +3,8 @@ package port
 import (
 	"context"
 
-	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
 
 	"github.com/google/uuid"
 )

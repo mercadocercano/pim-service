@@ -10,7 +10,7 @@ import (
 
 // CreateBusinessTypeTemplateUseCase maneja la creación de templates de business type
 type CreateBusinessTypeTemplateUseCase struct {
-	templateRepo    port.BusinessTypeTemplateRepository
+	templateRepo     port.BusinessTypeTemplateRepository
 	businessTypeRepo port.BusinessTypeRepository
 }
 
@@ -27,17 +27,17 @@ func NewCreateBusinessTypeTemplateUseCase(
 
 // CreateTemplateRequest representa la request para crear un template
 type CreateTemplateRequest struct {
-	BusinessTypeID string                           `json:"business_type_id"`
-	Name           string                           `json:"name"`
-	Description    string                           `json:"description"`
-	Version        string                           `json:"version"`
-	Region         string                           `json:"region"`
-	Categories     []entity.CategoryTemplate        `json:"categories"`
-	Attributes     []entity.AttributeTemplate       `json:"attributes"`
-	Products       []entity.ProductTemplate         `json:"products"`
-	Brands         []entity.BrandTemplate            `json:"brands"`
-	IsDefault      bool                             `json:"is_default"`
-	Metadata       map[string]interface{}           `json:"metadata"`
+	BusinessTypeID string                     `json:"business_type_id"`
+	Name           string                     `json:"name"`
+	Description    string                     `json:"description"`
+	Version        string                     `json:"version"`
+	Region         string                     `json:"region"`
+	Categories     []entity.CategoryTemplate  `json:"categories"`
+	Attributes     []entity.AttributeTemplate `json:"attributes"`
+	Products       []entity.ProductTemplate   `json:"products"`
+	Brands         []entity.BrandTemplate     `json:"brands"`
+	IsDefault      bool                       `json:"is_default"`
+	Metadata       map[string]interface{}     `json:"metadata"`
 }
 
 // Execute ejecuta el caso de uso para crear un template

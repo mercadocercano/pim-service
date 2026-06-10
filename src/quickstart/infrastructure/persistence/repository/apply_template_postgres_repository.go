@@ -13,7 +13,7 @@ import (
 	"github.com/lib/pq"
 
 	"saas-mt-pim-service/src/quickstart/domain/port"
-	"saas-mt-pim-service/src/shared/infrastructure/database"
+	sharedport "saas-mt-pim-service/src/shared/domain/port"
 )
 
 const (
@@ -155,14 +155,14 @@ func (r *ApplyTemplatePostgresRepository) LoadTemplateCategories(ctx context.Con
 }
 
 // CreateTenantCategoriesLegacy INSERT desde marketplace_categories
-func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesLegacy(ctx context.Context, exec database.Executor, tenantID uuid.UUID, parentID string) (int, []port.CreatedCategory, error) {
+func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesLegacy(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, parentID string) (int, []port.CreatedCategory, error) {
 	if parentID == "" {
 		return 0, nil, fmt.Errorf("template parent id is empty")
 	}
 
 	query := `
 		INSERT INTO categories (id, tenant_id, name, slug, description, parent_id, status, created_at, updated_at)
-		SELECT 
+		SELECT
 			gen_random_uuid(),
 			$1,
 			name,
@@ -212,7 +212,7 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesLegacy(ctx conte
 // CreateTenantCategoriesFromTemplate INSERT categorías desde template JSON
 // Soporta jerarquía: primero crea categorías raíz (level=0 o sin parent_slug),
 // luego crea hijas resolviendo parent_id desde el slug del padre.
-func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, categories []port.TemplateCategory) (int, []port.CreatedCategory, error) {
+func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesFromTemplate(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, categories []port.TemplateCategory) (int, []port.CreatedCategory, error) {
 	if len(categories) == 0 {
 		return 0, nil, nil
 	}
@@ -274,7 +274,7 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantCategoriesFromTemplate(ctx
 }
 
 // upsertCategory busca o crea una categoría individual, retornando (id, name, slug, isNew, error)
-func (r *ApplyTemplatePostgresRepository) upsertCategory(ctx context.Context, exec database.Executor, tenantID uuid.UUID, category port.TemplateCategory, parentID string, now time.Time) (string, string, string, bool, error) {
+func (r *ApplyTemplatePostgresRepository) upsertCategory(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, category port.TemplateCategory, parentID string, now time.Time) (string, string, string, bool, error) {
 	name := strings.TrimSpace(category.Name)
 	slug := strings.TrimSpace(category.Slug)
 
@@ -319,7 +319,7 @@ func (r *ApplyTemplatePostgresRepository) upsertCategory(ctx context.Context, ex
 }
 
 // GetMarketplaceCategoryIDsBySlug SELECT id FROM marketplace_categories
-func (r *ApplyTemplatePostgresRepository) GetMarketplaceCategoryIDsBySlug(ctx context.Context, exec database.Executor, slugs []string) ([]string, error) {
+func (r *ApplyTemplatePostgresRepository) GetMarketplaceCategoryIDsBySlug(ctx context.Context, exec sharedport.Executor, slugs []string) ([]string, error) {
 	if len(slugs) == 0 {
 		return nil, nil
 	}
@@ -354,7 +354,7 @@ func (r *ApplyTemplatePostgresRepository) GetMarketplaceCategoryIDsBySlug(ctx co
 }
 
 // CreateTenantBrandsFromGlobalProducts crea marcas desde global_products
-func (r *ApplyTemplatePostgresRepository) CreateTenantBrandsFromGlobalProducts(ctx context.Context, exec database.Executor, tenantID uuid.UUID, marketplaceIDs []string, categorySlugs []string, useMarketplaceID bool) (int, []string, error) {
+func (r *ApplyTemplatePostgresRepository) CreateTenantBrandsFromGlobalProducts(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, marketplaceIDs []string, categorySlugs []string, useMarketplaceID bool) (int, []string, error) {
 	if useMarketplaceID && len(marketplaceIDs) == 0 {
 		return 0, nil, nil
 	}
@@ -421,7 +421,7 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantBrandsFromGlobalProducts(c
 }
 
 // FindGlobalProduct busca un producto candidato
-func (r *ApplyTemplatePostgresRepository) FindGlobalProduct(ctx context.Context, exec database.Executor, marketplaceIDs []string, categorySlugs []string, useMarketplaceID bool, brandNames []string) (port.GlobalProductCandidate, error) {
+func (r *ApplyTemplatePostgresRepository) FindGlobalProduct(ctx context.Context, exec sharedport.Executor, marketplaceIDs []string, categorySlugs []string, useMarketplaceID bool, brandNames []string) (port.GlobalProductCandidate, error) {
 	var candidate port.GlobalProductCandidate
 	hasSkuGlobal := r.GlobalProductsHasColumn(ctx, exec, "sku_global")
 	hasEAN := r.GlobalProductsHasColumn(ctx, exec, "ean")
@@ -460,17 +460,27 @@ func (r *ApplyTemplatePostgresRepository) FindGlobalProduct(ctx context.Context,
 		query += " ORDER BY COALESCE(quality_score, 0) DESC LIMIT 1"
 	}
 
+	var descNull sql.NullString
+	var eanNull, skuNull sql.NullString
+
 	row := exec.QueryRowContext(ctx, query, args...)
-	scanTargets := []interface{}{&candidate.Name, &candidate.Brand, &candidate.Description, &candidate.ImageURL}
+	scanTargets := []interface{}{&candidate.Name, &candidate.Brand, &descNull, &candidate.ImageURL}
 	if hasEAN {
-		scanTargets = append(scanTargets, &candidate.EAN)
+		scanTargets = append(scanTargets, &eanNull)
 	}
 	if hasSkuGlobal {
-		scanTargets = append(scanTargets, &candidate.SkuGlobal)
+		scanTargets = append(scanTargets, &skuNull)
 	}
-	err := row.Scan(scanTargets...)
-	if err != nil {
+	if err := row.Scan(scanTargets...); err != nil {
 		return candidate, err
+	}
+
+	candidate.Description = nullStringToPtr(descNull)
+	if hasEAN {
+		candidate.EAN = nullStringToPtr(eanNull)
+	}
+	if hasSkuGlobal {
+		candidate.SkuGlobal = nullStringToPtr(skuNull)
 	}
 
 	if useMarketplaceID && len(marketplaceIDs) > 0 {
@@ -481,7 +491,7 @@ func (r *ApplyTemplatePostgresRepository) FindGlobalProduct(ctx context.Context,
 }
 
 // EnsureTenantBrand busca o inserta marca
-func (r *ApplyTemplatePostgresRepository) EnsureTenantBrand(ctx context.Context, exec database.Executor, tenantID uuid.UUID, brandName string) (string, string, error) {
+func (r *ApplyTemplatePostgresRepository) EnsureTenantBrand(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, brandName string) (string, string, error) {
 	if brandName == "" {
 		return "", "", nil
 	}
@@ -514,15 +524,19 @@ func (r *ApplyTemplatePostgresRepository) EnsureTenantBrand(ctx context.Context,
 }
 
 // ResolveTenantCategory busca categoría por slug (o usa mapas en memoria)
-func (r *ApplyTemplatePostgresRepository) ResolveTenantCategory(ctx context.Context, exec database.Executor, tenantID uuid.UUID, tenantCategoriesByMarketplaceID map[string]port.CreatedCategory, tenantCategoriesBySlug map[string]port.CreatedCategory, categorySlugByMarketplaceID map[string]string, marketplaceCategoryID string) (sql.NullString, sql.NullString, error) {
+func (r *ApplyTemplatePostgresRepository) ResolveTenantCategory(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, tenantCategoriesByMarketplaceID map[string]port.CreatedCategory, tenantCategoriesBySlug map[string]port.CreatedCategory, categorySlugByMarketplaceID map[string]string, marketplaceCategoryID string) (*string, *string, error) {
 	if category, ok := tenantCategoriesByMarketplaceID[marketplaceCategoryID]; ok {
-		return sql.NullString{String: category.ID, Valid: true}, sql.NullString{String: category.Name, Valid: true}, nil
+		id := category.ID
+		name := category.Name
+		return &id, &name, nil
 	}
 
 	categorySlug := categorySlugByMarketplaceID[marketplaceCategoryID]
 	if categorySlug != "" {
 		if category, ok := tenantCategoriesBySlug[categorySlug]; ok {
-			return sql.NullString{String: category.ID, Valid: true}, sql.NullString{String: category.Name, Valid: true}, nil
+			id := category.ID
+			name := category.Name
+			return &id, &name, nil
 		}
 	}
 
@@ -534,14 +548,14 @@ func (r *ApplyTemplatePostgresRepository) ResolveTenantCategory(ctx context.Cont
 		LIMIT 1
 	`, tenantID.String(), categorySlug).Scan(&categoryID, &categoryName)
 	if err != nil && err != sql.ErrNoRows {
-		return sql.NullString{}, sql.NullString{}, fmt.Errorf("failed to query tenant category: %w", err)
+		return nil, nil, fmt.Errorf("failed to query tenant category: %w", err)
 	}
 
-	return categoryID, categoryName, nil
+	return nullStringToPtr(categoryID), nullStringToPtr(categoryName), nil
 }
 
 // EnsureTenantProduct busca o inserta producto
-func (r *ApplyTemplatePostgresRepository) EnsureTenantProduct(ctx context.Context, exec database.Executor, tenantID uuid.UUID, candidate port.GlobalProductCandidate, categoryID sql.NullString, categoryName sql.NullString, brandID string, brandName string) (string, string, string, bool, error) {
+func (r *ApplyTemplatePostgresRepository) EnsureTenantProduct(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, candidate port.GlobalProductCandidate, categoryID *string, categoryName *string, brandID string, brandName string) (string, string, string, bool, error) {
 	var existingID string
 	err := exec.QueryRowContext(ctx, `
 		SELECT id FROM products
@@ -563,7 +577,9 @@ func (r *ApplyTemplatePostgresRepository) EnsureTenantProduct(ctx context.Contex
 			id, tenant_id, name, description, sku, category_id, category_name,
 			brand_id, brand_name, status, created_at, updated_at
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'active', $10, $10)
-	`, productID, tenantID.String(), candidate.Name, candidate.Description.String, productSKU, categoryID, categoryName, nullableUUID(brandID), sql.NullString{String: brandName, Valid: brandName != ""}, now)
+	`, productID, tenantID.String(), candidate.Name, derefStr(candidate.Description), productSKU,
+		toNullString(categoryID), toNullString(categoryName),
+		nullableUUID(brandID), sql.NullString{String: brandName, Valid: brandName != ""}, now)
 	if err != nil {
 		return "", "", "", false, fmt.Errorf("failed to insert product: %w", err)
 	}
@@ -572,7 +588,7 @@ func (r *ApplyTemplatePostgresRepository) EnsureTenantProduct(ctx context.Contex
 }
 
 // EnsureDefaultVariant inserta variante default
-func (r *ApplyTemplatePostgresRepository) EnsureDefaultVariant(ctx context.Context, exec database.Executor, tenantID uuid.UUID, productID string, productName string, productSKU string) (int, error) {
+func (r *ApplyTemplatePostgresRepository) EnsureDefaultVariant(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, productID string, productName string, productSKU string) (int, error) {
 	var existingID string
 	err := exec.QueryRowContext(ctx, `
 		SELECT id FROM product_variants
@@ -607,7 +623,7 @@ func (r *ApplyTemplatePostgresRepository) EnsureDefaultVariant(ctx context.Conte
 }
 
 // GlobalProductsHasColumn verifica si global_products tiene una columna (esquema public)
-func (r *ApplyTemplatePostgresRepository) GlobalProductsHasColumn(ctx context.Context, exec database.Executor, columnName string) bool {
+func (r *ApplyTemplatePostgresRepository) GlobalProductsHasColumn(ctx context.Context, exec sharedport.Executor, columnName string) bool {
 	var exists bool
 	err := exec.QueryRowContext(ctx, `
 		SELECT EXISTS(
@@ -625,7 +641,7 @@ func (r *ApplyTemplatePostgresRepository) GlobalProductsHasColumn(ctx context.Co
 }
 
 // GlobalProductsHasMarketplaceCategoryID atajo para marketplace_category_id
-func (r *ApplyTemplatePostgresRepository) GlobalProductsHasMarketplaceCategoryID(ctx context.Context, exec database.Executor) bool {
+func (r *ApplyTemplatePostgresRepository) GlobalProductsHasMarketplaceCategoryID(ctx context.Context, exec sharedport.Executor) bool {
 	return r.GlobalProductsHasColumn(ctx, exec, "marketplace_category_id")
 }
 
@@ -644,11 +660,11 @@ func buildSlug(value string) string {
 }
 
 func pickProductSKU(candidate port.GlobalProductCandidate) string {
-	if candidate.EAN.Valid && candidate.EAN.String != "" {
-		return candidate.EAN.String
+	if candidate.EAN != nil && *candidate.EAN != "" {
+		return *candidate.EAN
 	}
-	if candidate.SkuGlobal.Valid && candidate.SkuGlobal.String != "" {
-		return candidate.SkuGlobal.String
+	if candidate.SkuGlobal != nil && *candidate.SkuGlobal != "" {
+		return *candidate.SkuGlobal
 	}
 	return "PRD-" + uuid.New().String()[:8]
 }
@@ -660,6 +676,28 @@ func nullableUUID(value string) sql.NullString {
 	return sql.NullString{String: value, Valid: true}
 }
 
+func nullStringToPtr(ns sql.NullString) *string {
+	if !ns.Valid {
+		return nil
+	}
+	s := ns.String
+	return &s
+}
+
+func toNullString(s *string) sql.NullString {
+	if s == nil {
+		return sql.NullString{Valid: false}
+	}
+	return sql.NullString{String: *s, Valid: true}
+}
+
+func derefStr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
 // LoadFullTemplateData loads all JSONB fields from business_type_templates
 func (r *ApplyTemplatePostgresRepository) LoadFullTemplateData(ctx context.Context, templateID string) (*port.FullTemplateData, error) {
 	if _, err := uuid.Parse(templateID); err != nil {
@@ -668,7 +706,7 @@ func (r *ApplyTemplatePostgresRepository) LoadFullTemplateData(ctx context.Conte
 
 	var categoriesRaw, brandsRaw, productsRaw, attributesRaw []byte
 	err := r.db.QueryRowContext(ctx, `
-		SELECT 
+		SELECT
 			COALESCE(categories, '[]'::jsonb),
 			COALESCE(brands, '[]'::jsonb),
 			COALESCE(products, '[]'::jsonb),
@@ -713,7 +751,7 @@ func (r *ApplyTemplatePostgresRepository) LoadFullTemplateData(ctx context.Conte
 }
 
 // CreateTenantBrandsFromTemplate creates all brands listed in the template
-func (r *ApplyTemplatePostgresRepository) CreateTenantBrandsFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, brands []port.TemplateBrand) (int, []string, error) {
+func (r *ApplyTemplatePostgresRepository) CreateTenantBrandsFromTemplate(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, brands []port.TemplateBrand) (int, []string, error) {
 	if len(brands) == 0 {
 		return 0, nil, nil
 	}
@@ -747,7 +785,7 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantBrandsFromTemplate(ctx con
 }
 
 // CreateTenantProductsFromTemplate creates all curated products from the template
-func (r *ApplyTemplatePostgresRepository) CreateTenantProductsFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, products []port.TemplateProduct, createdCategories []port.CreatedCategory, createdBrands []string) (int, int, []string, error) {
+func (r *ApplyTemplatePostgresRepository) CreateTenantProductsFromTemplate(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, products []port.TemplateProduct, createdCategories []port.CreatedCategory, createdBrands []string) (int, int, []string, error) {
 	if len(products) == 0 {
 		return 0, 0, nil, nil
 	}
@@ -829,7 +867,7 @@ func (r *ApplyTemplatePostgresRepository) CreateTenantProductsFromTemplate(ctx c
 }
 
 // CreateTenantAttributesFromTemplate creates attributes and links them to categories
-func (r *ApplyTemplatePostgresRepository) CreateTenantAttributesFromTemplate(ctx context.Context, exec database.Executor, tenantID uuid.UUID, attributes []port.TemplateAttribute, createdCategories []port.CreatedCategory) (int, int, error) {
+func (r *ApplyTemplatePostgresRepository) CreateTenantAttributesFromTemplate(ctx context.Context, exec sharedport.Executor, tenantID uuid.UUID, attributes []port.TemplateAttribute, createdCategories []port.CreatedCategory) (int, int, error) {
 	if len(attributes) == 0 {
 		return 0, 0, nil
 	}

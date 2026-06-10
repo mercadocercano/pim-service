@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	"saas-mt-pim-service/src/product/global_catalog/domain/port"
 	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
-	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -65,7 +65,7 @@ func (r *PostgresGlobalProductRepository) Save(globalProduct *entity.GlobalProdu
 		ean := globalProduct.EAN().Value()
 		eanValue = &ean
 	}
-	
+
 	row := r.db.QueryRow(query,
 		globalProduct.ID(),
 		eanValue,
@@ -583,7 +583,7 @@ func (r *PostgresGlobalProductRepository) SearchByCriteria(ctx context.Context, 
 			   business_type, tags, metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
 		FROM global_products
 	`
-	
+
 	query, params, err := r.converter.ToSelectSQL(baseQuery, crit)
 	if err != nil {
 		return nil, fmt.Errorf("invalid criteria: %w", err)
@@ -594,14 +594,14 @@ func (r *PostgresGlobalProductRepository) SearchByCriteria(ctx context.Context, 
 		return nil, fmt.Errorf("error querying global products by criteria: %w", err)
 	}
 	defer rows.Close()
-	
+
 	return r.scanGlobalProducts(rows)
 }
 
 // CountByCriteria cuenta productos usando criterios
 func (r *PostgresGlobalProductRepository) CountByCriteria(ctx context.Context, crit cr.Criteria) (int, error) {
 	baseCountQuery := "SELECT COUNT(*) FROM global_products"
-	
+
 	query, params, err := r.converter.ToCountSQL(baseCountQuery, crit)
 	if err != nil {
 		return 0, fmt.Errorf("invalid criteria: %w", err)
@@ -612,7 +612,7 @@ func (r *PostgresGlobalProductRepository) CountByCriteria(ctx context.Context, c
 	if err != nil {
 		return 0, fmt.Errorf("error counting global products by criteria: %w", err)
 	}
-	
+
 	return count, nil
 }
 
@@ -968,8 +968,8 @@ func (r *PostgresGlobalProductRepository) FindByIDs(ctx context.Context, ids []s
 // Solo retorna productos que tienen image_url.
 func (r *PostgresGlobalProductRepository) FindByNameAndBrand(ctx context.Context, name, brand string) (*entity.GlobalProduct, error) {
 	queries := []struct {
-		nameFilter  string
-		useBrand    bool
+		nameFilter string
+		useBrand   bool
 	}{
 		{`LOWER(name) = LOWER($1)`, true},
 		{`LOWER(name) ILIKE LOWER(SPLIT_PART($1, ' ', 1) || ' ' || SPLIT_PART($1, ' ', 2) || '%')`, true},
@@ -1017,4 +1017,14 @@ func (r *PostgresGlobalProductRepository) FindByNameAndBrand(ctx context.Context
 	}
 
 	return nil, nil
+}
+
+// CountTenantLinks retorna cuántos tenants tienen una referencia al producto global
+func (r *PostgresGlobalProductRepository) CountTenantLinks(ctx context.Context, productID string) (int, error) {
+	var count int
+	err := r.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM tenant_global_product_links WHERE global_product_id = $1`,
+		productID,
+	).Scan(&count)
+	return count, err
 }

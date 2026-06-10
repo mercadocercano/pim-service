@@ -8,28 +8,28 @@ import (
 
 // BrandCandidate represents a potential brand detected from product names.
 type BrandCandidate struct {
-	Name       string  `json:"name"`
-	Score      float64 `json:"score"`
-	Count      int     `json:"count"`
-	TotalProducts int  `json:"total_products"`
-	Confidence string  `json:"confidence"`
+	Name          string  `json:"name"`
+	Score         float64 `json:"score"`
+	Count         int     `json:"count"`
+	TotalProducts int     `json:"total_products"`
+	Confidence    string  `json:"confidence"`
 }
 
 // BrandDeductionService infers brand candidates from product names
 // using frequency-weighted token analysis.
 type BrandDeductionService struct {
-	stopWords      map[string]bool
-	unitPatterns   map[string]bool
+	stopWords       map[string]bool
+	unitPatterns    map[string]bool
 	minFrequencyPct float64
-	minScore       float64
+	minScore        float64
 }
 
 func NewBrandDeductionService() *BrandDeductionService {
 	return &BrandDeductionService{
-		stopWords:      buildStopWords(),
-		unitPatterns:   buildUnitPatterns(),
+		stopWords:       buildStopWords(),
+		unitPatterns:    buildUnitPatterns(),
 		minFrequencyPct: 0.05,
-		minScore:       1.5,
+		minScore:        1.5,
 	}
 }
 

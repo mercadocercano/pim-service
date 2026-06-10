@@ -18,7 +18,7 @@ type CategoryAttributeCriteriaBuilder struct {
 func NewCategoryAttributeCriteriaBuilder() *CategoryAttributeCriteriaBuilder {
 	return &CategoryAttributeCriteriaBuilder{
 		CriteriaBuilder: cr.NewCriteriaBuilder(),
-		helper:         cr.NewEntityCriteriaHelper(),
+		helper:          cr.NewEntityCriteriaHelper(),
 	}
 }
 

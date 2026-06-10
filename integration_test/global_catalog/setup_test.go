@@ -23,10 +23,10 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 
+	gcUsecase "saas-mt-pim-service/src/product/global_catalog/application/usecase"
 	gcController "saas-mt-pim-service/src/product/global_catalog/infrastructure/controller"
 	gcCriteria "saas-mt-pim-service/src/product/global_catalog/infrastructure/criteria"
 	gcPersistence "saas-mt-pim-service/src/product/global_catalog/infrastructure/persistence"
-	gcUsecase "saas-mt-pim-service/src/product/global_catalog/application/usecase"
 )
 
 // testServer agrupa el servidor HTTP y la DB para los tests de integración.
@@ -85,21 +85,21 @@ func newTestServer(t *testing.T) *testServer {
 	repo := gcPersistence.NewPostgresGlobalProductRepository(db)
 
 	deps := gcController.GlobalCatalogControllerDeps{
-		CreateGlobalProduct:          gcUsecase.NewCreateGlobalProduct(repo),
-		SearchByEAN:                  gcUsecase.NewSearchByEAN(repo),
-		ListGlobalProducts:           gcUsecase.NewListGlobalProducts(repo),
-		ListGlobalProductsByCriteria: gcUsecase.NewListGlobalProductsByCriteriaUseCase(repo),
-		GetGlobalProductByID:         gcUsecase.NewGetGlobalProductByID(repo),
-		UpdateGlobalProductByID:      gcUsecase.NewUpdateGlobalProductByID(repo),
-		DeleteGlobalProduct:          gcUsecase.NewDeleteGlobalProduct(repo, db),
-		VerifyGlobalProduct:          gcUsecase.NewVerifyGlobalProduct(repo),
-		UnverifyGlobalProduct:        gcUsecase.NewUnverifyGlobalProduct(repo),
-		BulkImportGlobalProducts:     gcUsecase.NewBulkImportGlobalProducts(repo),
-		GetBusinessTypeFacets:        gcUsecase.NewGetBusinessTypeFacets(repo),
+		CreateGlobalProduct:           gcUsecase.NewCreateGlobalProduct(repo),
+		SearchByEAN:                   gcUsecase.NewSearchByEAN(repo),
+		ListGlobalProducts:            gcUsecase.NewListGlobalProducts(repo),
+		ListGlobalProductsByCriteria:  gcUsecase.NewListGlobalProductsByCriteriaUseCase(repo),
+		GetGlobalProductByID:          gcUsecase.NewGetGlobalProductByID(repo),
+		UpdateGlobalProductByID:       gcUsecase.NewUpdateGlobalProductByID(repo),
+		DeleteGlobalProduct:           gcUsecase.NewDeleteGlobalProduct(repo, db),
+		VerifyGlobalProduct:           gcUsecase.NewVerifyGlobalProduct(repo),
+		UnverifyGlobalProduct:         gcUsecase.NewUnverifyGlobalProduct(repo),
+		BulkImportGlobalProducts:      gcUsecase.NewBulkImportGlobalProducts(repo),
+		GetBusinessTypeFacets:         gcUsecase.NewGetBusinessTypeFacets(repo),
 		ListProductsNeedingEnrichment: gcUsecase.NewListProductsNeedingEnrichment(repo),
-		GetGlobalProductsByIDs:       gcUsecase.NewGetGlobalProductsByIDs(repo),
-		GetDistinctBusinessTypes:     gcUsecase.NewGetDistinctBusinessTypes(repo),
-		CriteriaBuilder:              gcCriteria.NewGlobalProductCriteriaBuilder(),
+		GetGlobalProductsByIDs:        gcUsecase.NewGetGlobalProductsByIDs(repo),
+		GetDistinctBusinessTypes:      gcUsecase.NewGetDistinctBusinessTypes(repo),
+		CriteriaBuilder:               gcCriteria.NewGlobalProductCriteriaBuilder(),
 	}
 
 	handler := gcController.NewGlobalCatalogControllerWithDeps(deps)

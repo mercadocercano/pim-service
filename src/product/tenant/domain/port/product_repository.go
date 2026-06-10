@@ -3,8 +3,8 @@ package port
 import (
 	"context"
 
-	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/product/tenant/domain/entity"
 
 	"github.com/google/uuid"
 )
@@ -37,7 +37,7 @@ type ProductRepository interface {
 	VariantExistsBySKU(ctx context.Context, sku, tenantID string) (bool, error)
 	VariantExistsByNameExcludingID(ctx context.Context, name string, productID uuid.UUID, tenantID string, excludeID uuid.UUID) (bool, error)
 	VariantExistsBySKUExcludingID(ctx context.Context, sku, tenantID string, excludeID uuid.UUID) (bool, error)
-	
+
 	// Búsqueda de variantes
 	FindBySKUs(ctx context.Context, tenantID string, skus []string) ([]*entity.ProductVariant, error)
 	FindVariantsEnrichedBySKUs(ctx context.Context, tenantID string, skus []string) ([]VariantEnrichedRow, error)

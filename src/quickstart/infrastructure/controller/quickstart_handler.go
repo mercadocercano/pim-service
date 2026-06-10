@@ -2,11 +2,11 @@ package controller
 
 import (
 	"context"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-	"saas-mt-pim-service/src/quickstart/application/usecase"
 	backfillUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
-	"github.com/gin-gonic/gin"
+	"saas-mt-pim-service/src/quickstart/application/usecase"
 )
 
 // QuickstartHandler maneja las peticiones HTTP para el módulo quickstart
@@ -61,10 +61,10 @@ func (h *QuickstartHandler) RegisterRoutes(router *gin.RouterGroup) {
 		quickstart.GET("/products/:businessType", h.GetProductsByBusinessType)
 		quickstart.GET("/brands/:businessType", h.GetBrandsByBusinessType)
 		quickstart.POST("/setup", h.SetupTenant)
-		
+
 		// HITO 2: Nuevos endpoints para templates
 		quickstart.GET("/templates", h.ListTemplates)
-		quickstart.POST("/apply", h.ApplyTemplate) // Body: {"template_id": "xxx"}
+		quickstart.POST("/apply", h.ApplyTemplate)                   // Body: {"template_id": "xxx"}
 		quickstart.POST("/templates/:id/apply", h.ApplyTemplateByID) // Path param: /templates/xxx/apply
 	}
 }

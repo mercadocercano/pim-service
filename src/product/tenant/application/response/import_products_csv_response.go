@@ -7,10 +7,10 @@ import (
 
 // ImportProductsCSVResponse respuesta de la importación de productos desde CSV
 type ImportProductsCSVResponse struct {
-	Success bool                    `json:"success"`
-	Summary ImportSummary           `json:"summary"`
-	Products []ProductResponse      `json:"imported_products,omitempty"`
-	Errors  []port.ImportError     `json:"errors,omitempty"`
+	Success          bool                      `json:"success"`
+	Summary          ImportSummary             `json:"summary"`
+	Products         []ProductResponse         `json:"imported_products,omitempty"`
+	Errors           []port.ImportError        `json:"errors,omitempty"`
 	ProcessingErrors []ProcessingErrorResponse `json:"processing_errors,omitempty"`
 }
 
@@ -59,7 +59,7 @@ func NewImportProductsCSVResponse(
 		}
 		products = append(products, productResp)
 	}
-	
+
 	// Mapear errores de procesamiento
 	procErrors := make([]ProcessingErrorResponse, 0, len(processingErrors))
 	for _, err := range processingErrors {
@@ -74,7 +74,7 @@ func NewImportProductsCSVResponse(
 		}
 		procErrors = append(procErrors, procError)
 	}
-	
+
 	return &ImportProductsCSVResponse{
 		Success: result.IsSuccess() && len(processingErrors) == 0,
 		Summary: ImportSummary{

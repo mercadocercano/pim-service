@@ -3,8 +3,8 @@ package port
 import (
 	"context"
 
-	"saas-mt-pim-service/src/brand/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/brand/domain/entity"
 )
 
 // BrandRepository define el contrato para acceder a los datos de marcas

@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"saas-mt-pim-service/src/quickstart/domain/port"
-	"saas-mt-pim-service/src/shared/infrastructure/database"
+	sharedport "saas-mt-pim-service/src/shared/domain/port"
 )
 
 // ApplyTemplateRequest es la petición para aplicar un template
@@ -275,7 +275,7 @@ func templateCategoriesSlugs(categories []port.TemplateCategory) []string {
 
 func (uc *ApplyTemplateUseCase) createTenantProductFromGlobalProducts(
 	ctx context.Context,
-	exec database.Executor,
+	exec sharedport.Executor,
 	tenantID uuid.UUID,
 	marketplaceCategoryIDs []string,
 	categorySlugs []string,

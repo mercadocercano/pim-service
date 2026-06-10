@@ -3,8 +3,8 @@ package controller
 import (
 	"net/http"
 
-	cr "github.com/mercadocercano/criteria"
 	"github.com/gin-gonic/gin"
+	cr "github.com/mercadocercano/criteria"
 
 	"saas-mt-pim-service/src/businesstype/application/usecase"
 	"saas-mt-pim-service/src/businesstype/domain/port"

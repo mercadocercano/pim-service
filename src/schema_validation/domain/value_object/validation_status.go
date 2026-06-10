@@ -6,13 +6,13 @@ type ValidationStatus string
 const (
 	// ValidationStatusValid indica que el valor es correcto y válido
 	ValidationStatusValid ValidationStatus = "valid"
-	
+
 	// ValidationStatusWarning indica que el valor es aceptable pero con advertencias
 	ValidationStatusWarning ValidationStatus = "warning"
-	
+
 	// ValidationStatusError indica que el valor es inválido y requiere corrección
 	ValidationStatusError ValidationStatus = "error"
-	
+
 	// ValidationStatusInfo indica información adicional, como columna no mapeada
 	ValidationStatusInfo ValidationStatus = "info"
 )

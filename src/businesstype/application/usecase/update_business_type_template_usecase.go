@@ -23,18 +23,18 @@ func NewUpdateBusinessTypeTemplateUseCase(templateRepo port.BusinessTypeTemplate
 
 // UpdateTemplateRequest representa la request para actualizar un template
 type UpdateTemplateRequest struct {
-	ID          string                           `json:"id"`
-	Name        string                           `json:"name"`
-	Description string                           `json:"description"`
-	Version     string                           `json:"version"`
-	Region      string                           `json:"region"`
-	Categories  []entity.CategoryTemplate        `json:"categories"`
-	Attributes  []entity.AttributeTemplate       `json:"attributes"`
-	Products    []entity.ProductTemplate         `json:"products"`
-	Brands      []entity.BrandTemplate            `json:"brands"`
-	IsActive    bool                             `json:"is_active"`
-	IsDefault   bool                             `json:"is_default"`
-	Metadata    map[string]interface{}           `json:"metadata"`
+	ID          string                     `json:"id"`
+	Name        string                     `json:"name"`
+	Description string                     `json:"description"`
+	Version     string                     `json:"version"`
+	Region      string                     `json:"region"`
+	Categories  []entity.CategoryTemplate  `json:"categories"`
+	Attributes  []entity.AttributeTemplate `json:"attributes"`
+	Products    []entity.ProductTemplate   `json:"products"`
+	Brands      []entity.BrandTemplate     `json:"brands"`
+	IsActive    bool                       `json:"is_active"`
+	IsDefault   bool                       `json:"is_default"`
+	Metadata    map[string]interface{}     `json:"metadata"`
 }
 
 // Execute ejecuta el caso de uso para actualizar un template

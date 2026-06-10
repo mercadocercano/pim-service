@@ -3,7 +3,7 @@
 Servicio de Product Information Management del ecosistema SaaS multi-tenant.
 Gestiona productos, categorías, atributos, marcas, catálogo global y sistema de quickstart.
 
-**Puerto**: 8090 | **Stack**: Go + Gin + PostgreSQL + MongoDB | **Arquitectura**: Hexagonal modular
+**Puerto**: 8090 | **Stack**: Go + Gin + PostgreSQL | **Arquitectura**: Hexagonal modular
 
 Hablame siempre en español.
 
@@ -47,6 +47,6 @@ generateComponentByStep --step_type="dto" --entity_name="product_variant"
 ## Notas críticas
 
 - Puerto **8090**, NO 8080
-- MongoDB requerido para catálogo global
-- Migraciones evolutivas, nunca destructivas
-- IDs temporales del AI Gateway se mapean a UUIDs en `apply_catalog_usecase.py`
+- Solo PostgreSQL — MongoDB fue removido completamente
+- Migraciones evolutivas, nunca destructivas (tests de integración dependen de `migrations/`)
+- pim-service está en el workspace `go.work` del monorepo (go 1.25.0)

@@ -200,7 +200,7 @@ func (r *QuickstartHistoryPostgresRepository) MarkAsCompleted(ctx context.Contex
 	}
 
 	fmt.Printf("📊 DEBUG Repository: Filas afectadas: %d\n", rowsAffected)
-	
+
 	if rowsAffected == 0 {
 		fmt.Printf("⚠️  WARNING Repository: No se encontró el wizard con ID: %s\n", id)
 		return errors.New("wizard no encontrado")

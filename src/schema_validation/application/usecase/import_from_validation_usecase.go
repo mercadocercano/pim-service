@@ -11,9 +11,9 @@ import (
 
 // ImportFromValidationRequest is the request for importing products from a cached validation
 type ImportFromValidationRequest struct {
-	ValidationID     string            `json:"validation_id" binding:"required"`
-	ColumnMappings   map[string]string `json:"column_mappings"`
-	Options          ImportOptions     `json:"options"`
+	ValidationID   string            `json:"validation_id" binding:"required"`
+	ColumnMappings map[string]string `json:"column_mappings"`
+	Options        ImportOptions     `json:"options"`
 }
 
 type ImportOptions struct {
@@ -24,13 +24,13 @@ type ImportOptions struct {
 }
 
 type ImportFromValidationResponse struct {
-	ImportedCount     int                       `json:"imported_count"`
-	SkippedCount      int                       `json:"skipped_count"`
-	ErrorCount        int                       `json:"error_count"`
-	Errors            []ImportRowError          `json:"errors,omitempty"`
-	CreatedCategories []string                  `json:"created_categories,omitempty"`
-	CreatedBrands     []string                  `json:"created_brands,omitempty"`
-	BrandCandidates   []service.BrandCandidate  `json:"brand_candidates,omitempty"`
+	ImportedCount     int                      `json:"imported_count"`
+	SkippedCount      int                      `json:"skipped_count"`
+	ErrorCount        int                      `json:"error_count"`
+	Errors            []ImportRowError         `json:"errors,omitempty"`
+	CreatedCategories []string                 `json:"created_categories,omitempty"`
+	CreatedBrands     []string                 `json:"created_brands,omitempty"`
+	BrandCandidates   []service.BrandCandidate `json:"brand_candidates,omitempty"`
 }
 
 type ImportRowError struct {
@@ -39,10 +39,10 @@ type ImportRowError struct {
 }
 
 type ImportFromValidationUseCase struct {
-	schemaCache          SchemaValidationCache
-	brandDeductionSvc    *service.BrandDeductionService
-	categoryNamesGetter  func(ctx context.Context, tenantID string) ([]string, error)
-	brandNamesGetter     func(ctx context.Context, tenantID string) ([]string, error)
+	schemaCache         SchemaValidationCache
+	brandDeductionSvc   *service.BrandDeductionService
+	categoryNamesGetter func(ctx context.Context, tenantID string) ([]string, error)
+	brandNamesGetter    func(ctx context.Context, tenantID string) ([]string, error)
 }
 
 func NewImportFromValidationUseCase(

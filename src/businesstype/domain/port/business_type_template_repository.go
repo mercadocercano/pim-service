@@ -2,8 +2,8 @@ package port
 
 import (
 	"context"
-	"saas-mt-pim-service/src/businesstype/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/businesstype/domain/entity"
 )
 
 // BusinessTypeTemplateRepository define los métodos para persistir BusinessTypeTemplate

@@ -2,8 +2,8 @@ package entity
 
 import (
 	"fmt"
-	"time"
 	"github.com/google/uuid"
+	"time"
 )
 
 // Scrapingjob representa la entidad scraping_job
@@ -24,7 +24,7 @@ func NewScrapingjob(tenantID, name string) (*Scrapingjob, error) {
 	if name == "" {
 		return nil, fmt.Errorf("name es requerido")
 	}
-	
+
 	now := time.Now()
 	return &Scrapingjob{
 		ID:        uuid.New().String(),

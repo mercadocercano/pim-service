@@ -10,12 +10,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	cr "github.com/mercadocercano/criteria"
 	globalEntity "saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	globalVO "saas-mt-pim-service/src/product/global_catalog/domain/value_object"
 	"saas-mt-pim-service/src/product/quickstart/application/usecase"
 	tenantEntity "saas-mt-pim-service/src/product/tenant/domain/entity"
 	tenantPort "saas-mt-pim-service/src/product/tenant/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // --- Mocks ---
@@ -30,37 +30,85 @@ func (m *mockGlobalProductRepo) FindByID(id string) (*globalEntity.GlobalProduct
 }
 
 // Stub all other methods (not used by this use case)
-func (m *mockGlobalProductRepo) Save(_ *globalEntity.GlobalProduct) (*globalEntity.GlobalProduct, error)   { return nil, nil }
-func (m *mockGlobalProductRepo) Update(_ *globalEntity.GlobalProduct) (*globalEntity.GlobalProduct, error) { return nil, nil }
-func (m *mockGlobalProductRepo) Delete(_ string) error                                                     { return nil }
-func (m *mockGlobalProductRepo) FindByEAN(_ string) (*globalEntity.GlobalProduct, error)                   { return nil, nil }
-func (m *mockGlobalProductRepo) FindActiveByEAN(_ string) (*globalEntity.GlobalProduct, error)             { return nil, nil }
-func (m *mockGlobalProductRepo) FindByBusinessType(_ string, _ int) ([]*globalEntity.GlobalProduct, error) { return nil, nil }
-func (m *mockGlobalProductRepo) FindBySource(_ string, _ int) ([]*globalEntity.GlobalProduct, error)       { return nil, nil }
-func (m *mockGlobalProductRepo) FindByQualityScoreRange(_, _, _ int) ([]*globalEntity.GlobalProduct, error) { return nil, nil }
-func (m *mockGlobalProductRepo) SearchByName(_ string, _ int) ([]*globalEntity.GlobalProduct, error)       { return nil, nil }
-func (m *mockGlobalProductRepo) SearchByBrand(_ string, _ int) ([]*globalEntity.GlobalProduct, error)      { return nil, nil }
-func (m *mockGlobalProductRepo) SearchByCategory(_ string, _ int) ([]*globalEntity.GlobalProduct, error)   { return nil, nil }
-func (m *mockGlobalProductRepo) SearchByTags(_ []string, _ int) ([]*globalEntity.GlobalProduct, error)     { return nil, nil }
-func (m *mockGlobalProductRepo) FindAll(_, _ int) ([]*globalEntity.GlobalProduct, error)                   { return nil, nil }
-func (m *mockGlobalProductRepo) FindActive(_, _ int) ([]*globalEntity.GlobalProduct, error)                { return nil, nil }
-func (m *mockGlobalProductRepo) FindVerified(_, _ int) ([]*globalEntity.GlobalProduct, error)              { return nil, nil }
-func (m *mockGlobalProductRepo) FindArgentineProducts(_, _ int) ([]*globalEntity.GlobalProduct, error)     { return nil, nil }
-func (m *mockGlobalProductRepo) FindHighQualityProducts(_, _ int) ([]*globalEntity.GlobalProduct, error)   { return nil, nil }
-func (m *mockGlobalProductRepo) FindNeedingUpdate(_ int, _ int) ([]*globalEntity.GlobalProduct, error)     { return nil, nil }
-func (m *mockGlobalProductRepo) FindNeedingEnrichment(_ *string, _, _ int) ([]*globalEntity.GlobalProduct, error) { return nil, nil }
-func (m *mockGlobalProductRepo) CountNeedingEnrichment(_ *string) (int, error)                             { return 0, nil }
-func (m *mockGlobalProductRepo) FindDistinctBrandsByBusinessType(_ string) ([]string, error)               { return nil, nil }
-func (m *mockGlobalProductRepo) FindDistinctCategoriesByBusinessType(_ string) ([]string, error)           { return nil, nil }
-func (m *mockGlobalProductRepo) CountTotal() (int, error)                                                  { return 0, nil }
-func (m *mockGlobalProductRepo) CountBySource(_ string) (int, error)                                       { return 0, nil }
-func (m *mockGlobalProductRepo) CountByQualityScore(_ int) (int, error)                                    { return 0, nil }
-func (m *mockGlobalProductRepo) CountArgentineProducts() (int, error)                                      { return 0, nil }
-func (m *mockGlobalProductRepo) SearchByCriteria(_ context.Context, _ cr.Criteria) ([]*globalEntity.GlobalProduct, error) { return nil, nil }
-func (m *mockGlobalProductRepo) CountByCriteria(_ context.Context, _ cr.Criteria) (int, error)             { return 0, nil }
-func (m *mockGlobalProductRepo) FindByIDs(_ context.Context, _ []string) ([]*globalEntity.GlobalProduct, error) { return nil, nil }
-func (m *mockGlobalProductRepo) FindByNameAndBrand(_ context.Context, _, _ string) (*globalEntity.GlobalProduct, error) { return nil, nil }
-func (m *mockGlobalProductRepo) FindDistinctBusinessTypes() ([]string, error)                                            { return nil, nil }
+func (m *mockGlobalProductRepo) Save(_ *globalEntity.GlobalProduct) (*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) Update(_ *globalEntity.GlobalProduct) (*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) Delete(_ string) error { return nil }
+func (m *mockGlobalProductRepo) FindByEAN(_ string) (*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindActiveByEAN(_ string) (*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindByBusinessType(_ string, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindBySource(_ string, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindByQualityScoreRange(_, _, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) SearchByName(_ string, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) SearchByBrand(_ string, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) SearchByCategory(_ string, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) SearchByTags(_ []string, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindAll(_, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindActive(_, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindVerified(_, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindArgentineProducts(_, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindHighQualityProducts(_, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindNeedingUpdate(_ int, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindNeedingEnrichment(_ *string, _, _ int) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) CountNeedingEnrichment(_ *string) (int, error) { return 0, nil }
+func (m *mockGlobalProductRepo) FindDistinctBrandsByBusinessType(_ string) ([]string, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindDistinctCategoriesByBusinessType(_ string) ([]string, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) CountTotal() (int, error)               { return 0, nil }
+func (m *mockGlobalProductRepo) CountBySource(_ string) (int, error)    { return 0, nil }
+func (m *mockGlobalProductRepo) CountByQualityScore(_ int) (int, error) { return 0, nil }
+func (m *mockGlobalProductRepo) CountArgentineProducts() (int, error)   { return 0, nil }
+func (m *mockGlobalProductRepo) SearchByCriteria(_ context.Context, _ cr.Criteria) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) CountByCriteria(_ context.Context, _ cr.Criteria) (int, error) {
+	return 0, nil
+}
+func (m *mockGlobalProductRepo) FindByIDs(_ context.Context, _ []string) ([]*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindByNameAndBrand(_ context.Context, _, _ string) (*globalEntity.GlobalProduct, error) {
+	return nil, nil
+}
+func (m *mockGlobalProductRepo) FindDistinctBusinessTypes() ([]string, error) { return nil, nil }
 
 type mockTenantProductRepo struct {
 	saved *tenantEntity.Product
@@ -73,31 +121,73 @@ func (m *mockTenantProductRepo) Save(_ context.Context, p *tenantEntity.Product)
 }
 
 // Stub other methods — ProductRepository interface
-func (m *mockTenantProductRepo) FindByID(_ context.Context, _ uuid.UUID, _ string) (*tenantEntity.Product, error)     { return nil, nil }
-func (m *mockTenantProductRepo) FindByIDWithVariants(_ context.Context, _ uuid.UUID, _ string) (*tenantEntity.Product, error) { return nil, nil }
-func (m *mockTenantProductRepo) FindBySKU(_ context.Context, _, _ string) (*tenantEntity.Product, error)              { return nil, nil }
-func (m *mockTenantProductRepo) Update(_ context.Context, _ *tenantEntity.Product) error                              { return nil }
-func (m *mockTenantProductRepo) Delete(_ context.Context, _ uuid.UUID, _ string) error                                { return nil }
-func (m *mockTenantProductRepo) SaveVariant(_ context.Context, _ uuid.UUID, _ *tenantEntity.ProductVariant) error     { return nil }
-func (m *mockTenantProductRepo) UpdateVariant(_ context.Context, _ *tenantEntity.ProductVariant) error                { return nil }
-func (m *mockTenantProductRepo) DeleteVariant(_ context.Context, _ uuid.UUID) error                                   { return nil }
-func (m *mockTenantProductRepo) LoadVariantsForProduct(_ context.Context, _ uuid.UUID) ([]*tenantEntity.ProductVariant, error) { return nil, nil }
-func (m *mockTenantProductRepo) ExistsByID(_ context.Context, _ uuid.UUID, _ string) (bool, error)                    { return false, nil }
-func (m *mockTenantProductRepo) ExistsBySKU(_ context.Context, _, _ string) (bool, error)                             { return false, nil }
-func (m *mockTenantProductRepo) ExistsByName(_ context.Context, _, _ string) (bool, error)                            { return false, nil }
-func (m *mockTenantProductRepo) ExistsByNameExcludingID(_ context.Context, _, _ string, _ uuid.UUID) (bool, error)    { return false, nil }
-func (m *mockTenantProductRepo) ExistsBySKUExcludingID(_ context.Context, _, _ string, _ uuid.UUID) (bool, error)     { return false, nil }
-func (m *mockTenantProductRepo) VariantExistsByName(_ context.Context, _ string, _ uuid.UUID, _ string) (bool, error) { return false, nil }
-func (m *mockTenantProductRepo) VariantExistsBySKU(_ context.Context, _, _ string) (bool, error)                      { return false, nil }
-func (m *mockTenantProductRepo) VariantExistsByNameExcludingID(_ context.Context, _ string, _ uuid.UUID, _ string, _ uuid.UUID) (bool, error) { return false, nil }
-func (m *mockTenantProductRepo) VariantExistsBySKUExcludingID(_ context.Context, _, _ string, _ uuid.UUID) (bool, error) { return false, nil }
-func (m *mockTenantProductRepo) FindBySKUs(_ context.Context, _ string, _ []string) ([]*tenantEntity.ProductVariant, error) { return nil, nil }
-func (m *mockTenantProductRepo) FindVariantsEnrichedBySKUs(_ context.Context, _ string, _ []string) ([]tenantPort.VariantEnrichedRow, error) { return nil, nil }
-func (m *mockTenantProductRepo) FindByProduct(_ context.Context, _ string, _ uuid.UUID) ([]*tenantEntity.ProductVariant, error) { return nil, nil }
-func (m *mockTenantProductRepo) GetBySKU(_ context.Context, _ string, _ uuid.UUID) (*tenantEntity.ProductVariant, error) { return nil, nil }
-func (m *mockTenantProductRepo) FindDistinctTenantIDs(_ context.Context) ([]string, error)                               { return nil, nil }
-func (m *mockTenantProductRepo) FindWithoutImage(_ context.Context, _ string) ([]*tenantEntity.Product, error)           { return nil, nil }
-func (m *mockTenantProductRepo) UpdateImageURL(_ context.Context, _, _, _ string) error                                  { return nil }
+func (m *mockTenantProductRepo) FindByID(_ context.Context, _ uuid.UUID, _ string) (*tenantEntity.Product, error) {
+	return nil, nil
+}
+func (m *mockTenantProductRepo) FindByIDWithVariants(_ context.Context, _ uuid.UUID, _ string) (*tenantEntity.Product, error) {
+	return nil, nil
+}
+func (m *mockTenantProductRepo) FindBySKU(_ context.Context, _, _ string) (*tenantEntity.Product, error) {
+	return nil, nil
+}
+func (m *mockTenantProductRepo) Update(_ context.Context, _ *tenantEntity.Product) error { return nil }
+func (m *mockTenantProductRepo) Delete(_ context.Context, _ uuid.UUID, _ string) error   { return nil }
+func (m *mockTenantProductRepo) SaveVariant(_ context.Context, _ uuid.UUID, _ *tenantEntity.ProductVariant) error {
+	return nil
+}
+func (m *mockTenantProductRepo) UpdateVariant(_ context.Context, _ *tenantEntity.ProductVariant) error {
+	return nil
+}
+func (m *mockTenantProductRepo) DeleteVariant(_ context.Context, _ uuid.UUID) error { return nil }
+func (m *mockTenantProductRepo) LoadVariantsForProduct(_ context.Context, _ uuid.UUID) ([]*tenantEntity.ProductVariant, error) {
+	return nil, nil
+}
+func (m *mockTenantProductRepo) ExistsByID(_ context.Context, _ uuid.UUID, _ string) (bool, error) {
+	return false, nil
+}
+func (m *mockTenantProductRepo) ExistsBySKU(_ context.Context, _, _ string) (bool, error) {
+	return false, nil
+}
+func (m *mockTenantProductRepo) ExistsByName(_ context.Context, _, _ string) (bool, error) {
+	return false, nil
+}
+func (m *mockTenantProductRepo) ExistsByNameExcludingID(_ context.Context, _, _ string, _ uuid.UUID) (bool, error) {
+	return false, nil
+}
+func (m *mockTenantProductRepo) ExistsBySKUExcludingID(_ context.Context, _, _ string, _ uuid.UUID) (bool, error) {
+	return false, nil
+}
+func (m *mockTenantProductRepo) VariantExistsByName(_ context.Context, _ string, _ uuid.UUID, _ string) (bool, error) {
+	return false, nil
+}
+func (m *mockTenantProductRepo) VariantExistsBySKU(_ context.Context, _, _ string) (bool, error) {
+	return false, nil
+}
+func (m *mockTenantProductRepo) VariantExistsByNameExcludingID(_ context.Context, _ string, _ uuid.UUID, _ string, _ uuid.UUID) (bool, error) {
+	return false, nil
+}
+func (m *mockTenantProductRepo) VariantExistsBySKUExcludingID(_ context.Context, _, _ string, _ uuid.UUID) (bool, error) {
+	return false, nil
+}
+func (m *mockTenantProductRepo) FindBySKUs(_ context.Context, _ string, _ []string) ([]*tenantEntity.ProductVariant, error) {
+	return nil, nil
+}
+func (m *mockTenantProductRepo) FindVariantsEnrichedBySKUs(_ context.Context, _ string, _ []string) ([]tenantPort.VariantEnrichedRow, error) {
+	return nil, nil
+}
+func (m *mockTenantProductRepo) FindByProduct(_ context.Context, _ string, _ uuid.UUID) ([]*tenantEntity.ProductVariant, error) {
+	return nil, nil
+}
+func (m *mockTenantProductRepo) GetBySKU(_ context.Context, _ string, _ uuid.UUID) (*tenantEntity.ProductVariant, error) {
+	return nil, nil
+}
+func (m *mockTenantProductRepo) FindDistinctTenantIDs(_ context.Context) ([]string, error) {
+	return nil, nil
+}
+func (m *mockTenantProductRepo) FindWithoutImage(_ context.Context, _ string) ([]*tenantEntity.Product, error) {
+	return nil, nil
+}
+func (m *mockTenantProductRepo) UpdateImageURL(_ context.Context, _, _, _ string) error { return nil }
 
 // --- Helpers ---
 

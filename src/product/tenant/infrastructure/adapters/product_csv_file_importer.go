@@ -18,10 +18,10 @@ import (
 // ProductCSVFileImporter implementa la importación de productos desde CSV
 type ProductCSVFileImporter struct {
 	*adapters.BaseCSVFileImporter[entity.Product]
-	
+
 	// categoryService para validar categorías
 	categoryService CategoryValidator
-	
+
 	// brandService para validar marcas
 	brandService BrandValidator
 }
@@ -40,7 +40,7 @@ type BrandValidator interface {
 func NewProductCSVFileImporter(categoryService CategoryValidator, brandService BrandValidator) *ProductCSVFileImporter {
 	requiredColumns := []string{"name", "sku", "price"}
 	base := adapters.NewBaseCSVFileImporter[entity.Product](',', true, requiredColumns)
-	
+
 	return &ProductCSVFileImporter{
 		BaseCSVFileImporter: base,
 		categoryService:     categoryService,
@@ -56,18 +56,18 @@ func (p *ProductCSVFileImporter) Import(ctx context.Context, reader io.Reader, t
 // ParseRow implementa la interfaz RowParser para productos
 func (p *ProductCSVFileImporter) ParseRow(row []string, headers []string, rowData map[string]string, tenantID string) (*entity.Product, []string) {
 	errors := []string{}
-	
+
 	// Validar campos requeridos
 	name := rowData["name"]
 	if name == "" {
 		errors = append(errors, "nombre es requerido")
 	}
-	
+
 	sku := rowData["sku"]
 	if sku == "" {
 		errors = append(errors, "SKU es requerido")
 	}
-	
+
 	// Validar y parsear precio
 	var price float64
 	if priceStr := rowData["price"]; priceStr != "" {
@@ -82,18 +82,18 @@ func (p *ProductCSVFileImporter) ParseRow(row []string, headers []string, rowDat
 	} else {
 		errors = append(errors, "precio es requerido")
 	}
-	
+
 	// Si hay errores hasta aquí, retornar
 	if len(errors) > 0 {
 		return nil, errors
 	}
-	
+
 	// Preparar descripción
 	var description *string
 	if desc := rowData["description"]; desc != "" {
 		description = &desc
 	}
-	
+
 	// Preparar SKU
 	var productSKU *value_object.ProductSKU
 	if sku != "" {
@@ -104,7 +104,7 @@ func (p *ProductCSVFileImporter) ParseRow(row []string, headers []string, rowDat
 			productSKU = skuObj
 		}
 	}
-	
+
 	// Preparar categoría si existe
 	var categoryRef *value_object.CategoryReference
 	if categoryID := rowData["category_id"]; categoryID != "" {
@@ -120,7 +120,7 @@ func (p *ProductCSVFileImporter) ParseRow(row []string, headers []string, rowDat
 			categoryRef, _ = value_object.NewCategoryReference(categoryID, categoryName)
 		}
 	}
-	
+
 	// Preparar marca si existe
 	var brandRef *value_object.BrandReference
 	if brandID := rowData["brand_id"]; brandID != "" {
@@ -136,7 +136,7 @@ func (p *ProductCSVFileImporter) ParseRow(row []string, headers []string, rowDat
 			brandRef, _ = value_object.NewBrandReference(brandID, brandName)
 		}
 	}
-	
+
 	// Crear el producto usando el constructor
 	product, err := entity.NewProduct(
 		tenantID,
@@ -150,7 +150,7 @@ func (p *ProductCSVFileImporter) ParseRow(row []string, headers []string, rowDat
 		errors = append(errors, fmt.Sprintf("Error al crear producto: %v", err))
 		return nil, errors
 	}
-	
+
 	// Aplicar price y stock a la variante default que ya creó NewProduct()
 	if defaultVariant := product.GetDefaultVariant(); defaultVariant != nil {
 		if price > 0 {
@@ -168,11 +168,11 @@ func (p *ProductCSVFileImporter) ParseRow(row []string, headers []string, rowDat
 			}
 		}
 	}
-	
+
 	if len(errors) > 0 {
 		return nil, errors
 	}
-	
+
 	return product, nil
 }
 
@@ -190,9 +190,9 @@ func (p *ProductCSVFileImporter) parseAttributes(rowData map[string]string) map[
 		"brand_id":      true,
 		"brand_name":    true,
 	}
-	
+
 	attributes := make(map[string]interface{})
-	
+
 	// Cualquier columna que no sea conocida se considera un atributo
 	for key, value := range rowData {
 		lowerKey := strings.ToLower(strings.TrimSpace(key))
@@ -200,6 +200,6 @@ func (p *ProductCSVFileImporter) parseAttributes(rowData map[string]string) map[
 			attributes[key] = value
 		}
 	}
-	
+
 	return attributes
 }

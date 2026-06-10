@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/category/domain/port"
-	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 )

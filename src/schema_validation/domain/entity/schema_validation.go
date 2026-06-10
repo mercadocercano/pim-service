@@ -10,31 +10,31 @@ import (
 type SchemaValidation struct {
 	// ID es el identificador único de la validación
 	ID uuid.UUID `json:"id"`
-	
+
 	// TenantID es el ID del tenant
 	TenantID string `json:"tenant_id"`
-	
+
 	// FileName es el nombre del archivo validado
 	FileName string `json:"file_name"`
-	
+
 	// IsValid indica si el schema es válido
 	IsValid bool `json:"is_valid"`
-	
+
 	// CanImport indica si se puede importar con advertencias
 	CanImport bool `json:"can_import"`
-	
+
 	// Columns contiene la validación de cada columna
 	Columns map[string]*ColumnValidation `json:"columns"`
-	
+
 	// TablePreview contiene la vista previa de la tabla
 	TablePreview *TablePreview `json:"table_preview"`
-	
+
 	// Summary contiene el resumen de la validación
 	Summary *ValidationSummary `json:"summary"`
-	
+
 	// Recommendations son las recomendaciones generadas
 	Recommendations []string `json:"recommendations"`
-	
+
 	// SuggestedMappings son los mapeos sugeridos automáticamente
 	SuggestedMappings map[string]string `json:"suggested_mappings"`
 
@@ -49,10 +49,10 @@ type SchemaValidation struct {
 
 	// DeducedCategories maps row index → deduced category name (only when no category column mapped)
 	DeducedCategories map[int]string `json:"deduced_categories,omitempty"`
-	
+
 	// CreatedAt es la fecha de creación
 	CreatedAt time.Time `json:"created_at"`
-	
+
 	// ExpiresAt es la fecha de expiración (para cache)
 	ExpiresAt time.Time `json:"expires_at"`
 }
@@ -61,7 +61,7 @@ type SchemaValidation struct {
 type TablePreview struct {
 	// Headers son los encabezados con su información
 	Headers []HeaderInfo `json:"headers"`
-	
+
 	// Rows son las filas de preview
 	Rows []RowPreview `json:"rows"`
 }
@@ -76,8 +76,8 @@ type HeaderInfo struct {
 
 // RowPreview representa una fila de preview
 type RowPreview struct {
-	RowNumber int               `json:"row_number"`
-	Cells     []CellValidation  `json:"cells"`
+	RowNumber int              `json:"row_number"`
+	Cells     []CellValidation `json:"cells"`
 	RowStatus string           `json:"row_status"`
 }
 
@@ -135,7 +135,7 @@ func (sv *SchemaValidation) CalculateSummary() {
 	summary := &ValidationSummary{
 		TotalColumns: len(sv.Columns),
 	}
-	
+
 	// Contar columnas mapeadas y requeridas
 	for _, col := range sv.Columns {
 		if col.MappedTo != "" {
@@ -145,15 +145,15 @@ func (sv *SchemaValidation) CalculateSummary() {
 			summary.RequiredColumns++
 		}
 	}
-	
+
 	// Analizar filas si hay preview
 	if sv.TablePreview != nil && len(sv.TablePreview.Rows) > 0 {
 		summary.TotalRows = len(sv.TablePreview.Rows)
-		
+
 		for _, row := range sv.TablePreview.Rows {
 			hasError := false
 			hasWarning := false
-			
+
 			for _, cell := range row.Cells {
 				switch cell.Status {
 				case "error":
@@ -162,7 +162,7 @@ func (sv *SchemaValidation) CalculateSummary() {
 					hasWarning = true
 				}
 			}
-			
+
 			if hasError {
 				summary.RowsWithErrors++
 			} else if hasWarning {
@@ -171,15 +171,15 @@ func (sv *SchemaValidation) CalculateSummary() {
 				summary.ValidRows++
 			}
 		}
-		
+
 		// Calcular tasa de éxito estimada
 		if summary.TotalRows > 0 {
 			summary.EstimatedSuccessRate = float64(summary.ValidRows) / float64(summary.TotalRows) * 100
 		}
 	}
-	
+
 	sv.Summary = summary
-	
+
 	// Actualizar IsValid y CanImport
 	sv.IsValid = summary.RowsWithErrors == 0
 	sv.CanImport = summary.EstimatedSuccessRate >= 50 // Permitir importación si al menos 50% es válido

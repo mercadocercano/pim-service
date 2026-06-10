@@ -109,7 +109,7 @@ func TestCSVAnalyzerService_SuggestMapping_KnownColumns(t *testing.T) {
 	analyzer := service.NewCSVAnalyzerService()
 
 	tests := []struct {
-		columnName     string
+		columnName      string
 		expectedMapping string
 	}{
 		{"nombre", "name"},

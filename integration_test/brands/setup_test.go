@@ -18,8 +18,8 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 
-	brandRepository "saas-mt-pim-service/src/brand/infrastructure/persistence/repository"
 	brandController "saas-mt-pim-service/src/brand/infrastructure/controller"
+	brandRepository "saas-mt-pim-service/src/brand/infrastructure/persistence/repository"
 )
 
 // testServer agrupa el servidor HTTP y la DB para los tests de integración.

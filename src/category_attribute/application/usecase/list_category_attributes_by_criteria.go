@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/category_attribute/domain/entity"
 	"saas-mt-pim-service/src/category_attribute/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // ListCategoryAttributesByCriteriaUseCase maneja el listado de atributos de categoría con filtros y paginación

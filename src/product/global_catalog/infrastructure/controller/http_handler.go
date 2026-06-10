@@ -16,21 +16,21 @@ import (
 
 // GlobalCatalogController maneja las requests HTTP para el catálogo global
 type GlobalCatalogController struct {
-	createGlobalProduct              *usecase.CreateGlobalProduct
-	searchByEAN                      *usecase.SearchByEAN
-	listGlobalProducts               *usecase.ListGlobalProducts
-	listGlobalProductsByCriteria     *usecase.ListGlobalProductsByCriteriaUseCase
-	getGlobalProductByID             *usecase.GetGlobalProductByID
-	updateGlobalProductByID          *usecase.UpdateGlobalProductByID
-	deleteGlobalProduct              *usecase.DeleteGlobalProduct
-	verifyGlobalProduct              *usecase.VerifyGlobalProduct
-	unverifyGlobalProduct            *usecase.UnverifyGlobalProduct
-	bulkImportGlobalProducts         *usecase.BulkImportGlobalProducts
-	getBusinessTypeFacets            *usecase.GetBusinessTypeFacets
-	listProductsNeedingEnrichment    *usecase.ListProductsNeedingEnrichment
-	getGlobalProductsByIDs           *usecase.GetGlobalProductsByIDs
-	getDistinctBusinessTypes         *usecase.GetDistinctBusinessTypes
-	criteriaBuilder                  *criteria.GlobalProductCriteriaBuilder
+	createGlobalProduct           *usecase.CreateGlobalProduct
+	searchByEAN                   *usecase.SearchByEAN
+	listGlobalProducts            *usecase.ListGlobalProducts
+	listGlobalProductsByCriteria  *usecase.ListGlobalProductsByCriteriaUseCase
+	getGlobalProductByID          *usecase.GetGlobalProductByID
+	updateGlobalProductByID       *usecase.UpdateGlobalProductByID
+	deleteGlobalProduct           *usecase.DeleteGlobalProduct
+	verifyGlobalProduct           *usecase.VerifyGlobalProduct
+	unverifyGlobalProduct         *usecase.UnverifyGlobalProduct
+	bulkImportGlobalProducts      *usecase.BulkImportGlobalProducts
+	getBusinessTypeFacets         *usecase.GetBusinessTypeFacets
+	listProductsNeedingEnrichment *usecase.ListProductsNeedingEnrichment
+	getGlobalProductsByIDs        *usecase.GetGlobalProductsByIDs
+	getDistinctBusinessTypes      *usecase.GetDistinctBusinessTypes
+	criteriaBuilder               *criteria.GlobalProductCriteriaBuilder
 }
 
 // GlobalCatalogControllerDeps agrupa todas las dependencias del controlador
@@ -117,17 +117,17 @@ func (gc *GlobalCatalogController) RegisterRoutes(router *gin.RouterGroup) {
 	// Rutas privadas (para administración y scraping)
 	private := router.Group("/global-catalog")
 	{
-		private.POST("/products", gc.CreateProduct)                         // Crear producto (para scrapers)
+		private.POST("/products", gc.CreateProduct)                        // Crear producto (para scrapers)
 		private.POST("/products/bulk-import", gc.BulkImportProducts)       // Importación masiva
-		private.GET("/products", gc.ListProducts)                           // Listar productos con filtros
-		private.GET("/products/search", gc.SearchByEAN)                     // Búsqueda avanzada
-		private.GET("/products/:id", gc.GetProductByID)                     // Obtener producto por ID
-		private.GET("/enrichment-queue", gc.ListProductsNeedingEnrichment)  // Cola de scraping para webdata
-		private.GET("/by-ids", gc.GetProductsByIDs)                         // On-demand enrichment por IDs
-		private.PUT("/products/:id", gc.UpdateProductByID)                  // Actualizar producto por ID
-		private.DELETE("/products/:id", gc.DeleteProductByID)               // Eliminar producto por ID
-		private.PATCH("/products/:id/verify", gc.VerifyProduct)             // Verificar producto
-		private.PATCH("/products/:id/unverify", gc.UnverifyProduct)         // Desverificar producto
+		private.GET("/products", gc.ListProducts)                          // Listar productos con filtros
+		private.GET("/products/search", gc.SearchByEAN)                    // Búsqueda avanzada
+		private.GET("/products/:id", gc.GetProductByID)                    // Obtener producto por ID
+		private.GET("/enrichment-queue", gc.ListProductsNeedingEnrichment) // Cola de scraping para webdata
+		private.GET("/by-ids", gc.GetProductsByIDs)                        // On-demand enrichment por IDs
+		private.PUT("/products/:id", gc.UpdateProductByID)                 // Actualizar producto por ID
+		private.DELETE("/products/:id", gc.DeleteProductByID)              // Eliminar producto por ID
+		private.PATCH("/products/:id/verify", gc.VerifyProduct)            // Verificar producto
+		private.PATCH("/products/:id/unverify", gc.UnverifyProduct)        // Desverificar producto
 	}
 }
 

@@ -27,10 +27,10 @@ type AttributeModuleConfig struct {
 	DeleteMarketplaceAttributeUseCase          *usecase.DeleteMarketplaceAttributeUseCase
 
 	// Use Cases - Attribute Values
-	ListAttributeValuesUseCase   *usecase.ListAttributeValuesUseCase
-	CreateAttributeValueUseCase  *usecase.CreateAttributeValueUseCase
-	UpdateAttributeValueUseCase  *usecase.UpdateAttributeValueUseCase
-	DeleteAttributeValueUseCase  *usecase.DeleteAttributeValueUseCase
+	ListAttributeValuesUseCase  *usecase.ListAttributeValuesUseCase
+	CreateAttributeValueUseCase *usecase.CreateAttributeValueUseCase
+	UpdateAttributeValueUseCase *usecase.UpdateAttributeValueUseCase
+	DeleteAttributeValueUseCase *usecase.DeleteAttributeValueUseCase
 
 	// Use Cases - Tenant
 	CreateAttributeUseCase  *usecase.CreateAttributeUseCase

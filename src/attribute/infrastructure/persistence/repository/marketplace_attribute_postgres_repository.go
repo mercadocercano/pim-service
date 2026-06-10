@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	cr "github.com/mercadocercano/criteria"
 	"log"
 	"saas-mt-pim-service/src/attribute/domain/entity"
-	cr "github.com/mercadocercano/criteria"
 	"time"
 )
 

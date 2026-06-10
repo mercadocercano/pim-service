@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/category/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // ListCategoriesByCriteriaUseCase maneja el listado de categorías con filtros y paginación

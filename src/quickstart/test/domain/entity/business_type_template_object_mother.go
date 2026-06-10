@@ -68,14 +68,14 @@ func (om *BusinessTypeTemplateObjectMother) Default() *businessTypeEntity.Busine
 		Products: []businessTypeEntity.ProductTemplate{
 			{
 				ID:           "prod-1",
-				Name:        "Televisor LED 32\"",
-				Description: "Televisor LED de 32 pulgadas",
+				Name:         "Televisor LED 32\"",
+				Description:  "Televisor LED de 32 pulgadas",
 				CategoryID:   "cat-1",
 				CategoryName: "Electrónicos",
 				BrandID:      "brand-1",
 				BrandName:    "Samsung",
-				SKU:         "TV-SAM-32-001",
-				Price:       45000.0,
+				SKU:          "TV-SAM-32-001",
+				Price:        45000.0,
 				Attributes: map[string]interface{}{
 					"marca":    "Samsung",
 					"modelo":   "UN32T4300",
@@ -84,14 +84,14 @@ func (om *BusinessTypeTemplateObjectMother) Default() *businessTypeEntity.Busine
 			},
 			{
 				ID:           "prod-2",
-				Name:        "Silla de Oficina",
-				Description: "Silla ergonómica para oficina",
+				Name:         "Silla de Oficina",
+				Description:  "Silla ergonómica para oficina",
 				CategoryID:   "cat-2",
 				CategoryName: "Hogar",
 				BrandID:      "brand-2",
 				BrandName:    "Genérica",
-				SKU:         "SILLA-OFF-001",
-				Price:       25000.0,
+				SKU:          "SILLA-OFF-001",
+				Price:        25000.0,
 				Attributes: map[string]interface{}{
 					"material": "cuero sintético",
 					"color":    "negro",
@@ -169,14 +169,14 @@ func (om *BusinessTypeTemplateObjectMother) SimpleTemplate() *businessTypeEntity
 	template.Products = []businessTypeEntity.ProductTemplate{
 		{
 			ID:           "prod-test-1",
-			Name:        "Producto de Prueba",
-			Description: "Producto para testing",
+			Name:         "Producto de Prueba",
+			Description:  "Producto para testing",
 			CategoryID:   "cat-gen-1",
 			CategoryName: "General",
 			BrandID:      "brand-test-1",
 			BrandName:    "Test",
-			SKU:         "TEST-001",
-			Price:       100.0,
+			SKU:          "TEST-001",
+			Price:        100.0,
 			Attributes: map[string]interface{}{
 				"nombre": "Producto de Prueba",
 			},

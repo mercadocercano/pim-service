@@ -18,9 +18,9 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 
+	categoryUsecase "saas-mt-pim-service/src/category/application/usecase"
 	categoryController "saas-mt-pim-service/src/category/infrastructure/controller"
 	categoryPersistence "saas-mt-pim-service/src/category/infrastructure/persistence"
-	categoryUsecase "saas-mt-pim-service/src/category/application/usecase"
 )
 
 // testServer agrupa el servidor HTTP y la DB para los tests de integración.

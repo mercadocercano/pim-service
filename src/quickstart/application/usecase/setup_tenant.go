@@ -19,14 +19,14 @@ func NewSetupTenantUseCase() *SetupTenantUseCase {
 // Execute ejecuta el caso de uso
 func (uc *SetupTenantUseCase) Execute(ctx context.Context, tenantID string, setupData map[string]interface{}) (*entity.TenantQuickstartHistory, error) {
 	// Por ahora solo crea un registro de historia mock
-	
+
 	dataJSON, _ := json.Marshal(setupData)
-	
+
 	history := &entity.TenantQuickstartHistory{
-		ID:       "mock-history-id",
-		TenantID: tenantID,
+		ID:        "mock-history-id",
+		TenantID:  tenantID,
 		SetupData: dataJSON,
 	}
-	
+
 	return history, nil
 }

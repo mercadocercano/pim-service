@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
 	"saas-mt-pim-service/src/product/global_catalog/domain/exception"
@@ -17,14 +16,12 @@ type DeleteGlobalProductRequest struct {
 // DeleteGlobalProduct implementa el caso de uso de eliminar un producto global
 type DeleteGlobalProduct struct {
 	globalProductRepository port.GlobalProductRepository
-	db                      *sql.DB
 }
 
 // NewDeleteGlobalProduct crea una nueva instancia del caso de uso
-func NewDeleteGlobalProduct(globalProductRepository port.GlobalProductRepository, db *sql.DB) *DeleteGlobalProduct {
+func NewDeleteGlobalProduct(globalProductRepository port.GlobalProductRepository) *DeleteGlobalProduct {
 	return &DeleteGlobalProduct{
 		globalProductRepository: globalProductRepository,
-		db:                      db,
 	}
 }
 
@@ -42,7 +39,7 @@ func (uc *DeleteGlobalProduct) Execute(ctx context.Context, request DeleteGlobal
 		return exception.NewGlobalProductNotFoundByID(request.ID)
 	}
 
-	tenantCount, err := uc.countTenantLinks(ctx, request.ID)
+	tenantCount, err := uc.globalProductRepository.CountTenantLinks(ctx, request.ID)
 	if err != nil {
 		return exception.NewInternalError("Error al verificar uso del producto", err)
 	}
@@ -57,11 +54,4 @@ func (uc *DeleteGlobalProduct) Execute(ctx context.Context, request DeleteGlobal
 	}
 
 	return nil
-}
-
-func (uc *DeleteGlobalProduct) countTenantLinks(ctx context.Context, productID string) (int, error) {
-	query := `SELECT COUNT(*) FROM tenant_global_product_links WHERE global_product_id = $1`
-	var count int
-	err := uc.db.QueryRowContext(ctx, query, productID).Scan(&count)
-	return count, err
 }

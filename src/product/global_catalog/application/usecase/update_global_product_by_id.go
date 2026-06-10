@@ -277,7 +277,7 @@ func (uc *UpdateGlobalProductByID) Execute(ctx context.Context, request UpdateGl
 		CreatedAt:    updatedProduct.CreatedAt().Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:    updatedProduct.UpdatedAt().Format("2006-01-02T15:04:05Z07:00"),
 	}
-	
+
 	// Agregar EAN solo si existe
 	if updatedProduct.EAN() != nil {
 		eanValue := updatedProduct.EAN().Value()

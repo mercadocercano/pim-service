@@ -183,7 +183,7 @@ func (s *QuickstartWizardService) CompleteWizard(ctx context.Context, tenantID s
 
 	// Actualizar historial
 	history.UpdateSetupData(string(setupDataBytes))
-	
+
 	err = s.tenantSetupRepo.Update(ctx, history)
 	if err != nil {
 		return nil, fmt.Errorf("error actualizando historial final: %w", err)

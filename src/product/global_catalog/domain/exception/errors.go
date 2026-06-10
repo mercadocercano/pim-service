@@ -4,13 +4,13 @@ import "errors"
 
 // Errores de validación
 var (
-	ErrGlobalproductInvalidName = errors.New("nombre de global_product inválido")
+	ErrGlobalproductInvalidName  = errors.New("nombre de global_product inválido")
 	ErrGlobalproductNameRequired = errors.New("nombre de global_product es requerido")
 )
 
 // Errores de negocio
 var (
-	ErrGlobalproductNotFound = errors.New("global_product no encontrado")
+	ErrGlobalproductNotFound      = errors.New("global_product no encontrado")
 	ErrGlobalproductAlreadyExists = errors.New("global_product ya existe")
 )
 

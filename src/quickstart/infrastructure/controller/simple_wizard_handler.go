@@ -21,8 +21,8 @@ import (
 // usando solo los business types desde la BD, sin template ni tenant setup
 type SimpleWizardHandler struct {
 	listBusinessTypesUseCase *businessTypeUsecase.ListBusinessTypesUseCase
-	historyRepo             port.QuickstartHistoryRepository
-	db                      *sql.DB
+	historyRepo              port.QuickstartHistoryRepository
+	db                       *sql.DB
 }
 
 // NewSimpleWizardHandler crea un nuevo handler simplificado del wizard
@@ -34,7 +34,7 @@ func NewSimpleWizardHandler(
 	return &SimpleWizardHandler{
 		listBusinessTypesUseCase: listBusinessTypesUseCase,
 		db:                       db,
-		historyRepo:             historyRepo,
+		historyRepo:              historyRepo,
 	}
 }
 
@@ -79,7 +79,7 @@ func (h *SimpleWizardHandler) GetWizardStatus(c *gin.Context) {
 			SELECT COUNT(*) FROM tenant_quickstart_history 
 			WHERE tenant_id = $1 AND setup_completed = true
 		`, tenantID).Scan(&completedCount)
-		
+
 		if err == nil && completedCount > 0 {
 			// Ya completó el wizard anteriormente
 			c.JSON(http.StatusOK, gin.H{
@@ -87,15 +87,15 @@ func (h *SimpleWizardHandler) GetWizardStatus(c *gin.Context) {
 				"tenant_id":       tenantID,
 				"setup_data":      gin.H{},
 				"setup_completed": true,
-				"message":        "El wizard ya fue completado anteriormente",
+				"message":         "El wizard ya fue completado anteriormente",
 			})
 			return
 		}
-		
+
 		// No hay wizard activo ni completado
 		c.JSON(http.StatusOK, gin.H{
-			"wizard_id":       nil,
-			"tenant_id":       tenantID,
+			"wizard_id": nil,
+			"tenant_id": tenantID,
 			"setup_data": gin.H{
 				"step":            "not_started",
 				"completed_steps": []string{},
@@ -157,9 +157,9 @@ func (h *SimpleWizardHandler) StartWizard(c *gin.Context) {
 
 	if existingHistory != nil {
 		c.JSON(http.StatusConflict, gin.H{
-			"error": "Ya existe un wizard activo para este tenant",
+			"error":     "Ya existe un wizard activo para este tenant",
 			"wizard_id": existingHistory.ID,
-			"message": "Debe completar o cancelar el wizard actual antes de iniciar uno nuevo",
+			"message":   "Debe completar o cancelar el wizard actual antes de iniciar uno nuevo",
 		})
 		return
 	}
@@ -170,18 +170,18 @@ func (h *SimpleWizardHandler) StartWizard(c *gin.Context) {
 		SELECT COUNT(*) FROM tenant_quickstart_history 
 		WHERE tenant_id = $1 AND setup_completed = true
 	`, tenantID).Scan(&completedCount)
-	
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Error al verificar historial de wizards",
 		})
 		return
 	}
-	
+
 	if completedCount > 0 {
 		c.JSON(http.StatusForbidden, gin.H{
-			"error": "Este tenant ya ha completado el proceso de onboarding",
-			"message": "El wizard de configuración inicial solo puede ejecutarse una vez",
+			"error":      "Este tenant ya ha completado el proceso de onboarding",
+			"message":    "El wizard de configuración inicial solo puede ejecutarse una vez",
 			"suggestion": "Use las opciones de administración para modificar su configuración",
 		})
 		return
@@ -337,7 +337,7 @@ func (h *SimpleWizardHandler) GetTemplateData(c *gin.Context) {
 
 	// Datos de ejemplo basados en el tipo de negocio
 	templateData := h.getTemplateDataByBusinessType(businessTypeID)
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"template_data": templateData,
 	})
@@ -352,26 +352,26 @@ func (h *SimpleWizardHandler) getTemplateDataByBusinessType(businessTypeID strin
 		WHERE business_type_id = $1 AND is_default = true AND is_active = true
 		LIMIT 1
 	`
-	
+
 	var categoriesJSON, attributesJSON, productsJSON, brandsJSON []byte
 	err := h.db.QueryRow(query, businessTypeID).Scan(&categoriesJSON, &attributesJSON, &productsJSON, &brandsJSON)
-	
+
 	if err != nil {
 		// Si no hay datos, devolver datos de ejemplo
 		return h.getDefaultTemplateData(businessTypeID)
 	}
-	
+
 	// Parsear los JSONs
 	var categories []interface{}
 	var attributes []interface{}
 	var products []interface{}
 	var brands []interface{}
-	
+
 	json.Unmarshal(categoriesJSON, &categories)
 	json.Unmarshal(attributesJSON, &attributes)
 	json.Unmarshal(productsJSON, &products)
 	json.Unmarshal(brandsJSON, &brands)
-	
+
 	// Procesar categorías para agregar IDs si faltan
 	processedCategories := make([]gin.H, 0)
 	for i, cat := range categories {
@@ -383,7 +383,7 @@ func (h *SimpleWizardHandler) getTemplateDataByBusinessType(businessTypeID strin
 			processedCategories = append(processedCategories, catMap)
 		}
 	}
-	
+
 	// Procesar atributos
 	processedAttributes := make([]gin.H, 0)
 	for i, attr := range attributes {
@@ -394,7 +394,7 @@ func (h *SimpleWizardHandler) getTemplateDataByBusinessType(businessTypeID strin
 			processedAttributes = append(processedAttributes, attrMap)
 		}
 	}
-	
+
 	// Procesar marcas
 	processedBrands := make([]gin.H, 0)
 	for i, brand := range brands {
@@ -405,7 +405,7 @@ func (h *SimpleWizardHandler) getTemplateDataByBusinessType(businessTypeID strin
 			processedBrands = append(processedBrands, brandMap)
 		}
 	}
-	
+
 	// Procesar productos
 	processedProducts := make([]gin.H, 0)
 	for i, prod := range products {
@@ -416,7 +416,7 @@ func (h *SimpleWizardHandler) getTemplateDataByBusinessType(businessTypeID strin
 			processedProducts = append(processedProducts, prodMap)
 		}
 	}
-	
+
 	return gin.H{
 		"categories": processedCategories,
 		"attributes": processedAttributes,
@@ -489,7 +489,7 @@ func (h *SimpleWizardHandler) getDefaultTemplateData(businessTypeID string) gin.
 func (h *SimpleWizardHandler) GetTemplateSectionData(c *gin.Context) {
 	businessTypeID := c.Param("businessTypeId")
 	section := c.Param("section")
-	
+
 	if businessTypeID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "business type ID is required",
@@ -502,7 +502,7 @@ func (h *SimpleWizardHandler) GetTemplateSectionData(c *gin.Context) {
 	pageSize := c.DefaultQuery("page_size", "10")
 
 	var data interface{}
-	
+
 	switch section {
 	case "categories":
 		data = []gin.H{
@@ -678,21 +678,21 @@ func (h *SimpleWizardHandler) CompleteWizard(c *gin.Context) {
 
 	// Marcar wizard como completado después del commit exitoso
 	fmt.Printf("🔍 DEBUG: Intentando marcar wizard como completado. ID: %s, TenantID: %s\n", history.ID, tenantID)
-	
+
 	// Primero, intentar eliminar cualquier wizard completado anterior para este tenant
 	// Esto es necesario debido a la restricción UNIQUE (tenant_id, setup_completed)
 	_, deleteErr := h.db.Exec(`
 		DELETE FROM tenant_quickstart_history 
 		WHERE tenant_id = $1 AND setup_completed = true AND id != $2
 	`, tenantID, history.ID)
-	
+
 	if deleteErr != nil {
 		fmt.Printf("⚠️  WARNING: Error al limpiar wizards anteriores: %v\n", deleteErr)
 	}
-	
+
 	if err := h.historyRepo.MarkAsCompleted(c.Request.Context(), history.ID); err != nil {
 		fmt.Printf("❌ ERROR: No se pudo marcar wizard como completado: %v\n", err)
-		
+
 		// Si falla, intentar con una query directa
 		fmt.Printf("🔧 DEBUG: Intentando actualización directa...\n")
 		_, directErr := h.db.Exec(`
@@ -700,7 +700,7 @@ func (h *SimpleWizardHandler) CompleteWizard(c *gin.Context) {
 			SET setup_completed = true, updated_at = CURRENT_TIMESTAMP 
 			WHERE id = $1
 		`, history.ID)
-		
+
 		if directErr != nil {
 			fmt.Printf("❌ ERROR: Actualización directa también falló: %v\n", directErr)
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -714,12 +714,12 @@ func (h *SimpleWizardHandler) CompleteWizard(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success":       true,
-		"message":       "Wizard completado exitosamente. Los datos han sido importados.",
-		"tenant_id":     tenantID,
-		"wizard_id":     history.ID,
-		"completed_at":  time.Now().Format(time.RFC3339),
-		"summary":       summary,
+		"success":      true,
+		"message":      "Wizard completado exitosamente. Los datos han sido importados.",
+		"tenant_id":    tenantID,
+		"wizard_id":    history.ID,
+		"completed_at": time.Now().Format(time.RFC3339),
+		"summary":      summary,
 		"next_steps": gin.H{
 			"generate_variants": "Los productos están en estado inactivo. El siguiente paso es generar las variantes con sus precios.",
 			"review_products":   "Revisar y activar los productos después de configurar las variantes.",
@@ -732,7 +732,7 @@ func (h *SimpleWizardHandler) createCategory(tx *sql.Tx, tenantID string, catego
 	id := uuid.New().String()
 	name := ""
 	description := ""
-	
+
 	// Extraer campos del mapa
 	if n, ok := category["name"].(string); ok {
 		name = n
@@ -740,7 +740,7 @@ func (h *SimpleWizardHandler) createCategory(tx *sql.Tx, tenantID string, catego
 	if d, ok := category["description"].(string); ok {
 		description = d
 	}
-	
+
 	// Verificar si la categoría ya existe para este tenant
 	var existingID string
 	err := tx.QueryRow(`
@@ -748,18 +748,18 @@ func (h *SimpleWizardHandler) createCategory(tx *sql.Tx, tenantID string, catego
 		WHERE tenant_id = $1 AND name = $2 AND status = 'active'
 		LIMIT 1
 	`, tenantID, name).Scan(&existingID)
-	
+
 	if err == sql.ErrNoRows {
 		// No existe, crearla
 		query := `
 			INSERT INTO categories (id, tenant_id, name, description, status, created_at, updated_at)
 			VALUES ($1, $2, $3, $4, 'active', $5, $6)
 		`
-		
+
 		now := time.Now()
 		_, err = tx.Exec(query, id, tenantID, name, description, now, now)
 	}
-	
+
 	return err
 }
 
@@ -785,7 +785,7 @@ func (h *SimpleWizardHandler) createAttribute(tx *sql.Tx, tenantID string, attri
 	if r, ok := attribute["required"].(bool); ok {
 		required = r
 	}
-	
+
 	// Extraer opciones si existen
 	if opts, ok := attribute["options"].([]interface{}); ok {
 		for _, opt := range opts {
@@ -802,7 +802,7 @@ func (h *SimpleWizardHandler) createAttribute(tx *sql.Tx, tenantID string, attri
 		WHERE tenant_id = $1 AND name = $2 AND status = 'active'
 		LIMIT 1
 	`, tenantID, name).Scan(&existingID)
-	
+
 	if err == sql.ErrNoRows {
 		// No existe, crear nuevo atributo
 		query := `
@@ -811,12 +811,12 @@ func (h *SimpleWizardHandler) createAttribute(tx *sql.Tx, tenantID string, attri
 				status, created_at, updated_at
 			) VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', $8, $9)
 		`
-		
+
 		now := time.Now()
-		_, err = tx.Exec(query, id, tenantID, name, description, attrType, required, 
+		_, err = tx.Exec(query, id, tenantID, name, description, attrType, required,
 			pq.Array(options), now, now)
 	}
-	
+
 	return err
 }
 
@@ -896,23 +896,23 @@ func (h *SimpleWizardHandler) createProduct(tx *sql.Tx, tenantID string, product
 		WHERE tenant_id = $1 AND name = $2 AND status != 'deleted'
 		LIMIT 1
 	`, tenantID, name).Scan(&existingID)
-	
+
 	if err == sql.ErrNoRows {
 		// No existe, crear nuevo producto
 		// Generar SKU único
 		sku := "PRD-" + uuid.New().String()[:8]
-		
+
 		query := `
 			INSERT INTO products (
 				id, tenant_id, sku, name, category_id, brand_id, 
 				status, created_at, updated_at
 			) VALUES ($1, $2, $3, $4, $5, $6, 'inactive', $7, $8)
 		`
-		
+
 		now := time.Now()
 		_, err = tx.Exec(query, id, tenantID, sku, name, categoryID, brandID, now, now)
 	}
-	
+
 	return err
 }
 
@@ -927,7 +927,7 @@ func (h *SimpleWizardHandler) ResetQuickstart(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -950,10 +950,10 @@ func (h *SimpleWizardHandler) ResetQuickstart(c *gin.Context) {
 	defer tx.Rollback()
 
 	deletedCounts := gin.H{
-		"products_deleted":    0,
-		"brands_deleted":      0,
-		"categories_deleted":  0,
-		"attributes_deleted":  0,
+		"products_deleted":       0,
+		"brands_deleted":         0,
+		"categories_deleted":     0,
+		"attributes_deleted":     0,
 		"wizard_history_deleted": 0,
 	}
 

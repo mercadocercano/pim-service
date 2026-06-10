@@ -32,12 +32,12 @@ type ImportFromGlobalCatalogRequest struct {
 }
 
 type ImportFromGlobalCatalogResponse struct {
-	ProductID       string  `json:"product_id"`
-	GlobalProductID string  `json:"global_product_id"`
-	Name            string  `json:"name"`
-	Brand           *string `json:"brand,omitempty"`
-	Category        *string `json:"category,omitempty"`
-	ImageURL        *string `json:"image_url,omitempty"`
+	ProductID       string   `json:"product_id"`
+	GlobalProductID string   `json:"global_product_id"`
+	Name            string   `json:"name"`
+	Brand           *string  `json:"brand,omitempty"`
+	Category        *string  `json:"category,omitempty"`
+	ImageURL        *string  `json:"image_url,omitempty"`
 	Price           *float64 `json:"price,omitempty"`
 }
 

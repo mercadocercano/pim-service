@@ -20,11 +20,11 @@ import (
 
 // ImportProductsAsyncUseCase maneja importaciones asíncronas de productos
 type ImportProductsAsyncUseCase struct {
-	productRepo      port.ProductCriteriaRepository
-	fileImporter     sharedPort.FileImporter[entity.Product]
-	importJobRepo    sharedPort.ImportJobRepository
-	notificationSvc  sharedPort.NotificationService
-	fileStorage      FileStorageService
+	productRepo     port.ProductCriteriaRepository
+	fileImporter    sharedPort.FileImporter[entity.Product]
+	importJobRepo   sharedPort.ImportJobRepository
+	notificationSvc sharedPort.NotificationService
+	fileStorage     FileStorageService
 }
 
 // FileStorageService define operaciones de almacenamiento de archivos

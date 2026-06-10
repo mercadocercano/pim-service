@@ -68,19 +68,19 @@ func NewProductRequestFromRepository(
 	}
 }
 
-func (r *ProductRequest) ID() uuid.UUID            { return r.id }
-func (r *ProductRequest) IDString() string          { return r.id.String() }
-func (r *ProductRequest) TenantID() string          { return r.tenantID }
-func (r *ProductRequest) Name() string              { return r.name }
-func (r *ProductRequest) Brand() *string             { return r.brand }
-func (r *ProductRequest) Category() *string          { return r.category }
-func (r *ProductRequest) Description() *string       { return r.description }
-func (r *ProductRequest) BusinessType() *string      { return r.businessType }
-func (r *ProductRequest) Status() RequestStatus      { return r.status }
-func (r *ProductRequest) AdminNotes() *string        { return r.adminNotes }
+func (r *ProductRequest) ID() uuid.UUID               { return r.id }
+func (r *ProductRequest) IDString() string            { return r.id.String() }
+func (r *ProductRequest) TenantID() string            { return r.tenantID }
+func (r *ProductRequest) Name() string                { return r.name }
+func (r *ProductRequest) Brand() *string              { return r.brand }
+func (r *ProductRequest) Category() *string           { return r.category }
+func (r *ProductRequest) Description() *string        { return r.description }
+func (r *ProductRequest) BusinessType() *string       { return r.businessType }
+func (r *ProductRequest) Status() RequestStatus       { return r.status }
+func (r *ProductRequest) AdminNotes() *string         { return r.adminNotes }
 func (r *ProductRequest) GlobalProductID() *uuid.UUID { return r.globalProductID }
-func (r *ProductRequest) CreatedAt() time.Time       { return r.createdAt }
-func (r *ProductRequest) UpdatedAt() time.Time       { return r.updatedAt }
+func (r *ProductRequest) CreatedAt() time.Time        { return r.createdAt }
+func (r *ProductRequest) UpdatedAt() time.Time        { return r.updatedAt }
 
 func (r *ProductRequest) Approve(notes string) {
 	r.status = RequestStatusApproved

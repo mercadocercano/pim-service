@@ -46,7 +46,7 @@ func NewProductSource(source string, sourceURL *string, scrapedAt *time.Time, re
 
 	// Normalizar la fuente antes de validar (convertir a minúsculas y limpiar)
 	sourceNormalized := strings.ToLower(strings.TrimSpace(source))
-	
+
 	// Validar que la fuente esté en la lista de fuentes válidas
 	if !isValidSource(sourceNormalized) {
 		// Log para debugging - ver qué fuente está causando problemas
@@ -207,14 +207,14 @@ func isValidSource(source string) bool {
 	}
 
 	source = strings.ToLower(source)
-	
+
 	// Verificar primero en la lista predefinida
 	for _, validSource := range validSources {
 		if source == validSource {
 			return true
 		}
 	}
-	
+
 	// Si no está en la lista predefinida, aceptar si:
 	// 1. Empieza con "scraper_" (fuentes de scraping dinámicas)
 	// 2. Es "marketplace" (productos del marketplace)
@@ -224,7 +224,7 @@ func isValidSource(source string) bool {
 	if strings.HasPrefix(source, "scraper_") || source == "marketplace" || source == "manual" {
 		return true
 	}
-	
+
 	// Aceptar cualquier fuente que tenga al menos 1 carácter y solo contenga
 	// letras minúsculas, números, guiones bajos y guiones (fuentes normalizadas)
 	// Esto permite fuentes como "scraper-mi-tienda" o "scraper_tienda_123"
@@ -241,13 +241,13 @@ func isValidSource(source string) bool {
 			return true
 		}
 	}
-	
+
 	// Como último recurso, si la fuente tiene al menos 1 carácter y no contiene espacios,
 	// aceptarla (esto permite fuentes con otros caracteres válidos que puedan venir del scraping)
 	if len(source) >= 1 && !strings.Contains(source, " ") {
 		return true
 	}
-	
+
 	return false
 }
 

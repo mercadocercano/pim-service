@@ -4,13 +4,13 @@ import "errors"
 
 // Errores de validación
 var (
-	ErrAttributeInvalidName = errors.New("nombre de attribute inválido")
+	ErrAttributeInvalidName  = errors.New("nombre de attribute inválido")
 	ErrAttributeNameRequired = errors.New("nombre de attribute es requerido")
 )
 
 // Errores de negocio
 var (
-	ErrAttributeNotFound = errors.New("attribute no encontrado")
+	ErrAttributeNotFound      = errors.New("attribute no encontrado")
 	ErrAttributeAlreadyExists = errors.New("attribute ya existe")
 )
 

@@ -17,7 +17,7 @@ func NewGetBrandsByBusinessTypeUseCase() *GetBrandsByBusinessTypeUseCase {
 func (uc *GetBrandsByBusinessTypeUseCase) Execute(ctx context.Context, businessType string) (interface{}, error) {
 	// Mock data temporal
 	brands := []string{"Coca-Cola", "La Serenísima", "Bimbo", "Skip", "Arcor"}
-	
+
 	return map[string]interface{}{
 		"brands": brands,
 	}, nil

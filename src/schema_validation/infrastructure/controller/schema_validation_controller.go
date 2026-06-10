@@ -18,10 +18,10 @@ import (
 
 // SchemaValidationController maneja las peticiones HTTP para validación de schema
 type SchemaValidationController struct {
-	validateCSVSchemaUseCase     *usecase.ValidateCSVSchemaUseCase
-	validateJSONSchemaUseCase    *usecase.ValidateJSONSchemaUseCase
-	validateExcelSchemaUseCase   *usecase.ValidateExcelSchemaUseCase
-	importFromValidationUseCase  *usecase.ImportFromValidationUseCase
+	validateCSVSchemaUseCase    *usecase.ValidateCSVSchemaUseCase
+	validateJSONSchemaUseCase   *usecase.ValidateJSONSchemaUseCase
+	validateExcelSchemaUseCase  *usecase.ValidateExcelSchemaUseCase
+	importFromValidationUseCase *usecase.ImportFromValidationUseCase
 }
 
 // NewSchemaValidationController crea una nueva instancia del controller
@@ -32,10 +32,10 @@ func NewSchemaValidationController(
 	importFromValidationUseCase *usecase.ImportFromValidationUseCase,
 ) *SchemaValidationController {
 	return &SchemaValidationController{
-		validateCSVSchemaUseCase:     validateCSVSchemaUseCase,
-		validateJSONSchemaUseCase:    validateJSONSchemaUseCase,
-		validateExcelSchemaUseCase:   validateExcelSchemaUseCase,
-		importFromValidationUseCase:  importFromValidationUseCase,
+		validateCSVSchemaUseCase:    validateCSVSchemaUseCase,
+		validateJSONSchemaUseCase:   validateJSONSchemaUseCase,
+		validateExcelSchemaUseCase:  validateExcelSchemaUseCase,
+		importFromValidationUseCase: importFromValidationUseCase,
 	}
 }
 
@@ -74,7 +74,7 @@ func (c *SchemaValidationController) ValidateSchema(ctx *gin.Context) {
 	isCSV := strings.HasSuffix(filename, ".csv")
 	isJSON := strings.HasSuffix(filename, ".json")
 	isExcel := strings.HasSuffix(filename, ".xlsx") || strings.HasSuffix(filename, ".xls")
-	
+
 	if !isCSV && !isJSON && !isExcel {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Formato no soportado. Use CSV, Excel (.xlsx) o JSON."})
 		return
@@ -100,7 +100,7 @@ func (c *SchemaValidationController) ValidateSchema(ctx *gin.Context) {
 
 	// Ejecutar validación según tipo de archivo
 	var validation *entity.SchemaValidation
-	
+
 	if isExcel {
 		validation, err = c.validateExcelSchemaUseCase.Execute(
 			ctx.Request.Context(),
@@ -126,7 +126,7 @@ func (c *SchemaValidationController) ValidateSchema(ctx *gin.Context) {
 			maxRows,
 		)
 	}
-	
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar schema", "details": err.Error()})
 		return

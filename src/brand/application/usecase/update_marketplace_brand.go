@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/brand/application/request"
 	"saas-mt-pim-service/src/brand/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // UpdateMarketplaceBrandUseCase maneja la lógica de negocio para actualizar una marca marketplace

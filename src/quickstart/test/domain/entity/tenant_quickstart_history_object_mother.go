@@ -65,7 +65,7 @@ func (om *TenantQuickstartHistoryObjectMother) WithTemplateID(templateID string)
 func (om *TenantQuickstartHistoryObjectMother) Completed() *entity.TenantQuickstartHistory {
 	history := om.Default()
 	history.SetupCompleted = true
-	
+
 	setupData := map[string]interface{}{
 		"business_type_id": history.BusinessTypeID,
 		"step":             "completed",
@@ -77,14 +77,14 @@ func (om *TenantQuickstartHistoryObjectMother) Completed() *entity.TenantQuickst
 	}
 	setupDataJSON, _ := json.Marshal(setupData)
 	history.SetupData = json.RawMessage(setupDataJSON)
-	
+
 	return history
 }
 
 // WithStep crea un TenantQuickstartHistory en un step específico
 func (om *TenantQuickstartHistoryObjectMother) WithStep(step string, completedSteps []string) *entity.TenantQuickstartHistory {
 	history := om.Default()
-	
+
 	setupData := map[string]interface{}{
 		"business_type_id": history.BusinessTypeID,
 		"step":             step,
@@ -94,17 +94,17 @@ func (om *TenantQuickstartHistoryObjectMother) WithStep(step string, completedSt
 	}
 	setupDataJSON, _ := json.Marshal(setupData)
 	history.SetupData = json.RawMessage(setupDataJSON)
-	
+
 	return history
 }
 
 // WithSetupData crea un TenantQuickstartHistory con datos de setup específicos
 func (om *TenantQuickstartHistoryObjectMother) WithSetupData(setupData map[string]interface{}) *entity.TenantQuickstartHistory {
 	history := om.Default()
-	
+
 	setupDataJSON, _ := json.Marshal(setupData)
 	history.SetupData = json.RawMessage(setupDataJSON)
-	
+
 	return history
 }
 

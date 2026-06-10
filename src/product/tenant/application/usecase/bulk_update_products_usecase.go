@@ -20,10 +20,10 @@ type BulkUpdateProductsRequest struct {
 }
 
 type BulkUpdateProductsResponse struct {
-	Success         bool     `json:"success"`
-	UpdatedCount    int      `json:"updated_count"`
-	SkippedCount    int      `json:"skipped_count"`
-	Errors          []string `json:"errors,omitempty"`
+	Success      bool     `json:"success"`
+	UpdatedCount int      `json:"updated_count"`
+	SkippedCount int      `json:"skipped_count"`
+	Errors       []string `json:"errors,omitempty"`
 }
 
 type BulkUpdateProductsUseCase struct {

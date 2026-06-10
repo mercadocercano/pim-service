@@ -8,19 +8,19 @@ import (
 type CellValidation struct {
 	// Value es el valor original de la celda
 	Value string `json:"value"`
-	
+
 	// Status es el estado de validación de la celda
 	Status value_object.ValidationStatus `json:"status"`
-	
+
 	// Message es el mensaje de error o advertencia (opcional)
 	Message string `json:"message,omitempty"`
-	
+
 	// CorrectedValue es el valor corregido sugerido (opcional)
 	CorrectedValue string `json:"corrected_value,omitempty"`
-	
+
 	// ColumnIndex es el índice de la columna
 	ColumnIndex int `json:"column_index"`
-	
+
 	// RowIndex es el índice de la fila
 	RowIndex int `json:"row_index"`
 }

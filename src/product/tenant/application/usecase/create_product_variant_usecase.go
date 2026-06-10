@@ -56,7 +56,7 @@ func (uc *CreateProductVariantUseCase) Execute(
 		if err != nil {
 			return nil, fmt.Errorf("error creando SKU: %w", err)
 		}
-		
+
 		// VALIDACIÓN: Verificar que el SKU no exista en el tenant
 		if sku != nil {
 			existing, err := uc.productRepo.FindBySKUs(ctx, tenantID, []string{sku.Value()})

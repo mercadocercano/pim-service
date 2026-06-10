@@ -18,7 +18,6 @@ import (
 	productConfig "saas-mt-pim-service/src/product/tenant/infrastructure/config"
 	quickstartConfig "saas-mt-pim-service/src/quickstart/infrastructure/config"
 	sharedConfig "saas-mt-pim-service/src/shared/infrastructure/config"
-	"saas-mt-pim-service/src/shared/infrastructure/database"
 
 	// Brand imports
 	brandController "saas-mt-pim-service/src/brand/infrastructure/controller"
@@ -45,6 +44,7 @@ import (
 
 	// Internal S2S module
 	s2sController "saas-mt-pim-service/src/s2s/controller"
+	s2sPersistence "saas-mt-pim-service/src/s2s/infrastructure/persistence"
 	s2sUsecase "saas-mt-pim-service/src/s2s/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -141,24 +141,6 @@ func main() {
 	}
 	log.Println("Conexión a la base de datos establecida con éxito")
 
-	// MongoDB: conexión condicional (solo si MONGO_HOST está configurado)
-	if mongoHost := os.Getenv("MONGO_HOST"); mongoHost != "" {
-		log.Printf("Inicializando conexión MongoDB (%s)...", mongoHost)
-		mongoClient, err := database.NewMongoDBClient()
-		if err != nil {
-			log.Printf("⚠️ MongoDB no disponible: %v (continuando sin MongoDB)", err)
-		} else {
-			defer mongoClient.Close()
-			if err := mongoClient.HealthCheck(nil); err != nil {
-				log.Printf("⚠️ MongoDB health check falló: %v (continuando sin MongoDB)", err)
-			} else {
-				log.Println("✅ Conexión a MongoDB establecida")
-			}
-		}
-	} else {
-		log.Println("ℹ️ MONGO_HOST no configurado, MongoDB deshabilitado")
-	}
-
 	// API v1 grupo de rutas
 	v1 := router.Group("/api/v1")
 
@@ -242,7 +224,7 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) *productConfig.Prod
 
 	// Registrar rutas de Product Variants (standalone)
 	productCfg.ProductVariantController.RegisterRoutes(router)
-	
+
 	// Registrar rutas anidadas de variantes bajo productos (DESPUÉS de las rutas de productos)
 	productVariantCtrl := productCfg.ProductVariantController
 	router.POST("/products/:id/variants", productVariantCtrl.CreateProductVariant)
@@ -540,8 +522,9 @@ func setupMarketplaceProductsModule(router *gin.RouterGroup, db *sql.DB) {
 
 func setupInternalModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("Configurando módulo Internal (S2S)...")
-	refreshUC := s2sUsecase.NewRefreshTemplateProductsUseCase(db)
-	templateUC := s2sUsecase.NewGetTemplateStatusUseCase(db)
+	repo := s2sPersistence.NewPostgresTemplateRepository(db)
+	refreshUC := s2sUsecase.NewRefreshTemplateProductsUseCase(repo)
+	templateUC := s2sUsecase.NewGetTemplateStatusUseCase(repo)
 	handler := s2sController.NewInternalHandler(refreshUC, templateUC)
 	handler.RegisterRoutes(router)
 	log.Println("Módulo Internal configurado exitosamente")

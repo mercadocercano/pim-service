@@ -101,7 +101,7 @@ func (s *HTTPNotificationService) NotifyImportJobComplete(ctx context.Context, j
 	if job.EmailNotify != nil && *job.EmailNotify != "" {
 		subject := fmt.Sprintf("Import Job %s - %s", job.ID, job.Status)
 		body := s.buildEmailBody(job, notification)
-		
+
 		if err := s.SendEmail(ctx, *job.EmailNotify, subject, body); err != nil {
 			errors = append(errors, fmt.Errorf("email notification failed: %w", err))
 		}
@@ -137,8 +137,8 @@ Results:
 - Failed: %d
 - Duration: %s
 
-`, job.ID, status, job.FileName, job.Type, 
-		job.TotalRecords, job.SuccessCount, job.FailureCount, 
+`, job.ID, status, job.FileName, job.Type,
+		job.TotalRecords, job.SuccessCount, job.FailureCount,
 		notification.Duration)
 
 	if job.ErrorMessage != nil {

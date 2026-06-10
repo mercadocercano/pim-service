@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	cr "github.com/mercadocercano/criteria"
 	"log"
 	"saas-mt-pim-service/src/businesstype/domain/entity"
 	"saas-mt-pim-service/src/businesstype/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // BusinessTypePostgresRepository implementa el repositorio usando PostgreSQL

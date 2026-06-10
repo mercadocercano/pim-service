@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/businesstype/domain/entity"
 	"saas-mt-pim-service/src/businesstype/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // BusinessTypeTemplatePostgresRepository implementa el repositorio de BusinessTypeTemplate para PostgreSQL

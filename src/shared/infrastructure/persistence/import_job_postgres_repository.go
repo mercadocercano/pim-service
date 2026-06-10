@@ -207,7 +207,7 @@ func (r *ImportJobPostgresRepository) FindJobsNeedingNotification(ctx context.Co
 		LIMIT $4
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, 
+	rows, err := r.db.QueryContext(ctx, query,
 		entity.ImportJobStatusCompleted,
 		entity.ImportJobStatusFailed,
 		entity.ImportJobStatusCancelled,

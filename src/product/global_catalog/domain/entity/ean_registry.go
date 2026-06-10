@@ -2,8 +2,8 @@ package entity
 
 import (
 	"fmt"
-	"time"
 	"github.com/google/uuid"
+	"time"
 )
 
 // Eanregistry representa la entidad ean_registry
@@ -24,7 +24,7 @@ func NewEanregistry(tenantID, name string) (*Eanregistry, error) {
 	if name == "" {
 		return nil, fmt.Errorf("name es requerido")
 	}
-	
+
 	now := time.Now()
 	return &Eanregistry{
 		ID:        uuid.New().String(),

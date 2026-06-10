@@ -5,8 +5,8 @@ import (
 	"errors"
 	"sync"
 
-	"saas-mt-pim-service/src/brand/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/brand/domain/entity"
 )
 
 // Errores mock

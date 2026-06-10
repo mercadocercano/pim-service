@@ -4,7 +4,7 @@ import "errors"
 
 // Errores de validación
 var (
-	ErrMarketplaceSummaryInvalidName = errors.New("nombre de MarketplaceSummary inválido")
+	ErrMarketplaceSummaryInvalidName  = errors.New("nombre de MarketplaceSummary inválido")
 	ErrMarketplaceSummaryNameRequired = errors.New("nombre de MarketplaceSummary es requerido")
 )
 

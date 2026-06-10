@@ -2,8 +2,8 @@ package port
 
 import (
 	"context"
-	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
 )
 
 // GlobalProductRepository define los métodos para persistir GlobalProduct
@@ -63,4 +63,7 @@ type GlobalProductRepository interface {
 
 	// Búsqueda por múltiples IDs (on-demand enrichment)
 	FindByIDs(ctx context.Context, ids []string) ([]*entity.GlobalProduct, error)
+
+	// CountTenantLinks retorna cuántos tenants tienen una referencia al producto global
+	CountTenantLinks(ctx context.Context, productID string) (int, error)
 }

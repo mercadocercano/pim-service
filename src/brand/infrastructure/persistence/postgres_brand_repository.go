@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/brand/domain/entity"
 	"saas-mt-pim-service/src/brand/domain/exception"
 	"saas-mt-pim-service/src/brand/domain/value_object"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // PostgresBrandRepository implementa BrandCriteriaRepository usando PostgreSQL

@@ -24,8 +24,8 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 
 	attrUsecase "saas-mt-pim-service/src/attribute/application/usecase"
-	attrCriteria "saas-mt-pim-service/src/attribute/infrastructure/criteria"
 	attrController "saas-mt-pim-service/src/attribute/infrastructure/controller"
+	attrCriteria "saas-mt-pim-service/src/attribute/infrastructure/criteria"
 	attrRepo "saas-mt-pim-service/src/attribute/infrastructure/persistence/repository"
 )
 

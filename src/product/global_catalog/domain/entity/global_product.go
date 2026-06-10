@@ -151,9 +151,9 @@ func NewGlobalProductFromRepository(
 }
 
 // Getters
-func (gp *GlobalProduct) ID() uuid.UUID                            { return gp.id }
-func (gp *GlobalProduct) IDString() string                         { return gp.id.String() }
-func (gp *GlobalProduct) EAN() *value_object.EAN13                 { return gp.ean }
+func (gp *GlobalProduct) ID() uuid.UUID            { return gp.id }
+func (gp *GlobalProduct) IDString() string         { return gp.id.String() }
+func (gp *GlobalProduct) EAN() *value_object.EAN13 { return gp.ean }
 func (gp *GlobalProduct) EANString() string {
 	if gp.ean == nil {
 		return ""

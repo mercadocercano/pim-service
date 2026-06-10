@@ -1,11 +1,11 @@
 package mapper
 
 import (
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/brand/application/request"
 	"saas-mt-pim-service/src/brand/application/response"
 	"saas-mt-pim-service/src/brand/domain/entity"
 	"saas-mt-pim-service/src/brand/domain/value_object"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // BrandMapper maneja las conversiones entre entidades y DTOs

@@ -20,19 +20,19 @@ type ProductSchemaDefinition struct {
 
 // ColumnDefinition define las características de una columna
 type ColumnDefinition struct {
-	Name         string
-	Type         string
-	Required     bool
-	Validations  []string
+	Name        string
+	Type        string
+	Required    bool
+	Validations []string
 }
 
 // ValidateCSVSchemaUseCase valida el schema de un archivo CSV
 type ValidateCSVSchemaUseCase struct {
-	csvAnalyzer       *service.CSVAnalyzerService
-	categoryDeducer   *service.CategoryDeductionService
-	categoryRepo      outbound.CategoryRepository
-	schemaCache       SchemaValidationCache
-	productSchema     ProductSchemaDefinition
+	csvAnalyzer     *service.CSVAnalyzerService
+	categoryDeducer *service.CategoryDeductionService
+	categoryRepo    outbound.CategoryRepository
+	schemaCache     SchemaValidationCache
+	productSchema   ProductSchemaDefinition
 }
 
 // SchemaValidationCache define la interfaz para cache de validaciones
@@ -55,20 +55,20 @@ func NewValidateCSVSchemaUseCase(
 		schemaCache:     schemaCache,
 		productSchema: ProductSchemaDefinition{
 			RequiredColumns: map[string]ColumnDefinition{
-				"name": {Name: "name", Type: "string", Required: true},
-				"sku":  {Name: "sku", Type: "string", Required: true},
+				"name":  {Name: "name", Type: "string", Required: true},
+				"sku":   {Name: "sku", Type: "string", Required: true},
 				"price": {Name: "price", Type: "number", Required: true},
 			},
 			OptionalColumns: map[string]ColumnDefinition{
-				"description":    {Name: "description", Type: "string", Required: false},
-				"category_id":    {Name: "category_id", Type: "uuid", Required: false},
-				"category_name":  {Name: "category_name", Type: "string", Required: false},
-				"brand_id":       {Name: "brand_id", Type: "uuid", Required: false},
-				"brand_name":     {Name: "brand_name", Type: "string", Required: false},
-				"stock":          {Name: "stock", Type: "integer", Required: false},
-				"barcode":        {Name: "barcode", Type: "string", Required: false},
-				"weight":         {Name: "weight", Type: "number", Required: false},
-				"dimensions":     {Name: "dimensions", Type: "string", Required: false},
+				"description":   {Name: "description", Type: "string", Required: false},
+				"category_id":   {Name: "category_id", Type: "uuid", Required: false},
+				"category_name": {Name: "category_name", Type: "string", Required: false},
+				"brand_id":      {Name: "brand_id", Type: "uuid", Required: false},
+				"brand_name":    {Name: "brand_name", Type: "string", Required: false},
+				"stock":         {Name: "stock", Type: "integer", Required: false},
+				"barcode":       {Name: "barcode", Type: "string", Required: false},
+				"weight":        {Name: "weight", Type: "number", Required: false},
+				"dimensions":    {Name: "dimensions", Type: "string", Required: false},
 			},
 		},
 	}
@@ -76,20 +76,20 @@ func NewValidateCSVSchemaUseCase(
 
 // Execute ejecuta la validación del schema CSV
 func (uc *ValidateCSVSchemaUseCase) Execute(
-	ctx context.Context, 
-	reader io.Reader, 
+	ctx context.Context,
+	reader io.Reader,
 	tenantID string,
 	fileName string,
 	maxRows int,
 ) (*entity.SchemaValidation, error) {
-	
+
 	if maxRows <= 0 {
 		maxRows = 10 // Default
 	}
-	
+
 	// Crear nueva validación
 	validation := entity.NewSchemaValidation(tenantID, fileName)
-	
+
 	// Analizar CSV
 	analysis, err := uc.csvAnalyzer.AnalyzeCSV(reader, maxRows)
 	if err != nil {
@@ -107,7 +107,7 @@ func (uc *ValidateCSVSchemaUseCase) Execute(
 	default:
 		validation.DetectedDelimiter = ","
 	}
-	
+
 	// Validar columnas
 	uc.validateColumns(validation, analysis)
 
@@ -117,19 +117,19 @@ func (uc *ValidateCSVSchemaUseCase) Execute(
 	// Generar preview de tabla
 	preview := uc.generateTablePreview(analysis, validation)
 	validation.SetTablePreview(preview)
-	
+
 	// Generar recomendaciones
 	uc.generateRecommendations(validation)
-	
+
 	// Calcular resumen
 	validation.CalculateSummary()
-	
+
 	// Guardar en cache
 	if err := uc.schemaCache.Set(ctx, validation); err != nil {
 		// Log error pero no fallar
 		fmt.Printf("Error caching validation: %v\n", err)
 	}
-	
+
 	return validation, nil
 }
 
@@ -140,22 +140,22 @@ func (uc *ValidateCSVSchemaUseCase) validateColumns(
 ) {
 	// Mapear columnas encontradas
 	foundColumns := make(map[string]bool)
-	
+
 	// Validar cada columna del CSV
 	for i, csvColumn := range analysis.Headers {
 		columnValidation := entity.NewColumnValidation(csvColumn, i)
-		
+
 		// Detectar tipo de dato
 		detectedType := analysis.ColumnTypes[csvColumn]
 		columnValidation.SetDetectedType(string(detectedType))
-		
+
 		// Agregar valores de muestra
 		if samples, exists := analysis.ColumnSamples[csvColumn]; exists {
 			for _, sample := range samples {
 				columnValidation.AddSampleValue(sample)
 			}
 		}
-		
+
 		// Buscar mapeo automático: primero por nombre, luego por contenido
 		suggestedMapping := uc.csvAnalyzer.SuggestMapping(csvColumn)
 		if suggestedMapping == "" {
@@ -163,7 +163,7 @@ func (uc *ValidateCSVSchemaUseCase) validateColumns(
 				suggestedMapping = uc.csvAnalyzer.SuggestMappingByContent(samples, analysis.ColumnSamples)
 			}
 		}
-		
+
 		if suggestedMapping != "" {
 			// Verificar si es columna requerida u opcional
 			if colDef, isRequired := uc.productSchema.RequiredColumns[suggestedMapping]; isRequired {
@@ -171,7 +171,7 @@ func (uc *ValidateCSVSchemaUseCase) validateColumns(
 				columnValidation.SetExpectedType(colDef.Type)
 				columnValidation.MapTo(suggestedMapping)
 				foundColumns[suggestedMapping] = true
-				
+
 				// Validar tipo
 				expectedType := uc.csvAnalyzer.GetExpectedType(detectedType)
 				if expectedType != colDef.Type && colDef.Type != "string" {
@@ -187,17 +187,17 @@ func (uc *ValidateCSVSchemaUseCase) validateColumns(
 				foundColumns[suggestedMapping] = true
 				columnValidation.Status = value_object.ValidationStatusValid
 			}
-			
+
 			validation.AddSuggestedMapping(csvColumn, suggestedMapping)
 		} else {
 			// Columna no reconocida
 			columnValidation.AddIssue("Columna no reconocida en el schema")
 			columnValidation.Status = value_object.ValidationStatusInfo
 		}
-		
+
 		validation.AddColumn(columnValidation)
 	}
-	
+
 	// Verificar columnas requeridas faltantes
 	for reqColumn, colDef := range uc.productSchema.RequiredColumns {
 		if !foundColumns[reqColumn] {
@@ -207,7 +207,7 @@ func (uc *ValidateCSVSchemaUseCase) validateColumns(
 			missingCol.SetExpectedType(colDef.Type)
 			missingCol.Status = value_object.ValidationStatusError
 			missingCol.AddIssue("Columna requerida no encontrada en el CSV")
-			
+
 			validation.AddColumn(missingCol)
 			validation.AddRecommendation(fmt.Sprintf("Agregar columna requerida '%s'", reqColumn))
 		}
@@ -274,7 +274,7 @@ func (uc *ValidateCSVSchemaUseCase) generateTablePreview(
 		Headers: make([]entity.HeaderInfo, 0),
 		Rows:    make([]entity.RowPreview, 0),
 	}
-	
+
 	// Generar headers
 	for i, header := range analysis.Headers {
 		if col, exists := validation.Columns[header]; exists {
@@ -286,10 +286,10 @@ func (uc *ValidateCSVSchemaUseCase) generateTablePreview(
 			})
 		}
 	}
-	
+
 	// Aquí normalmente leeríamos más filas del CSV para el preview
 	// Por ahora, generamos un preview básico con los samples
-	
+
 	// Simular algunas filas de preview basadas en los samples
 	if len(analysis.ColumnSamples) > 0 {
 		// Crear hasta 5 filas de preview
@@ -299,18 +299,18 @@ func (uc *ValidateCSVSchemaUseCase) generateTablePreview(
 				RowNumber: rowNum + 1,
 				Cells:     make([]entity.CellValidation, 0),
 			}
-			
+
 			hasError := false
 			hasWarning := false
-			
+
 			// Para cada columna
 			for colIdx, header := range analysis.Headers {
 				cell := entity.NewCellValidation("", colIdx, rowNum)
-				
+
 				// Obtener valor del sample si existe
 				if samples, exists := analysis.ColumnSamples[header]; exists && len(samples) > rowNum {
 					cell.Value = samples[rowNum]
-					
+
 					// Validar celda
 					if col, exists := validation.Columns[header]; exists {
 						if col.MappedTo != "" && col.TypeExpected != "" {
@@ -322,10 +322,10 @@ func (uc *ValidateCSVSchemaUseCase) generateTablePreview(
 						}
 					}
 				}
-				
+
 				rowPreview.Cells = append(rowPreview.Cells, *cell)
 			}
-			
+
 			// Establecer estado de la fila
 			if hasError {
 				rowPreview.RowStatus = "error"
@@ -334,11 +334,11 @@ func (uc *ValidateCSVSchemaUseCase) generateTablePreview(
 			} else {
 				rowPreview.RowStatus = "valid"
 			}
-			
+
 			preview.Rows = append(preview.Rows, rowPreview)
 		}
 	}
-	
+
 	return preview
 }
 
@@ -350,7 +350,7 @@ func (uc *ValidateCSVSchemaUseCase) generateRecommendations(validation *entity.S
 			validation.AddRecommendation(fmt.Sprintf("Mapear columna '%s' a '%s'", csvCol, suggestion))
 		}
 	}
-	
+
 	// Recomendaciones de tipos de datos
 	for _, col := range validation.Columns {
 		if col.Status == value_object.ValidationStatusWarning && len(col.Issues) > 0 {
@@ -362,7 +362,7 @@ func (uc *ValidateCSVSchemaUseCase) generateRecommendations(validation *entity.S
 			}
 		}
 	}
-	
+
 	// Recomendaciones generales
 	missingOptional := []string{}
 	for optCol := range uc.productSchema.OptionalColumns {
@@ -377,7 +377,7 @@ func (uc *ValidateCSVSchemaUseCase) generateRecommendations(validation *entity.S
 			missingOptional = append(missingOptional, optCol)
 		}
 	}
-	
+
 	if len(missingOptional) > 0 {
 		validation.AddRecommendation(fmt.Sprintf("Considerar agregar columnas opcionales: %s", strings.Join(missingOptional, ", ")))
 	}
@@ -399,14 +399,14 @@ func (uc *ValidateCSVSchemaUseCase) ApplyMapping(
 	if err != nil {
 		return nil, fmt.Errorf("validation not found: %w", err)
 	}
-	
+
 	// Aplicar mapeos
 	validation.ApplyMappings(mappings)
-	
+
 	// Actualizar cache
 	if err := uc.schemaCache.Set(ctx, validation); err != nil {
 		return nil, fmt.Errorf("error updating cache: %w", err)
 	}
-	
+
 	return validation, nil
 }

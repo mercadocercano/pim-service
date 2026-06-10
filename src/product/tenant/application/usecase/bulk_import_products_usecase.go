@@ -26,15 +26,15 @@ type VariantImportData struct {
 
 // productWithVariantsImportRaw struct auxiliar para UnmarshalJSON (acepta name/product_name, category/category_name, brand/brand_name)
 type productWithVariantsImportRaw struct {
-	Name        string              `json:"name"`
-	ProductName string              `json:"product_name"`
-	Description string              `json:"description"`
-	Category    string              `json:"category"`
-	CategoryName string             `json:"category_name"`
-	Brand       string              `json:"brand"`
-	BrandName   string              `json:"brand_name"`
-	Variants    []VariantImportData `json:"variants"`
-	Active      bool                `json:"active"`
+	Name         string              `json:"name"`
+	ProductName  string              `json:"product_name"`
+	Description  string              `json:"description"`
+	Category     string              `json:"category"`
+	CategoryName string              `json:"category_name"`
+	Brand        string              `json:"brand"`
+	BrandName    string              `json:"brand_name"`
+	Variants     []VariantImportData `json:"variants"`
+	Active       bool                `json:"active"`
 }
 
 // ProductWithVariantsImport representa un producto con sus variantes (HITO 2.1)
@@ -74,10 +74,10 @@ func (p *ProductWithVariantsImport) UnmarshalJSON(data []byte) error {
 
 // BulkImportProductsRequest es la petición para importación bulk con variantes
 type BulkImportProductsRequest struct {
-	TenantID          string                       `json:"tenant_id"` // Se asigna desde header X-Tenant-ID en el controller
-	Products          []ProductWithVariantsImport `json:"products" binding:"required,min=1"`
-	CreateCategories  bool                         `json:"create_categories"` // Auto-crear categorías si no existen
-	CreateBrands      bool                         `json:"create_brands"`     // Auto-crear marcas si no existen
+	TenantID         string                      `json:"tenant_id"` // Se asigna desde header X-Tenant-ID en el controller
+	Products         []ProductWithVariantsImport `json:"products" binding:"required,min=1"`
+	CreateCategories bool                        `json:"create_categories"` // Auto-crear categorías si no existen
+	CreateBrands     bool                        `json:"create_brands"`     // Auto-crear marcas si no existen
 }
 
 // BulkImportProductsResponse es la respuesta de la importación bulk
@@ -85,7 +85,7 @@ type BulkImportProductsResponse struct {
 	Success           bool     `json:"success"`
 	TotalProducts     int      `json:"total_products"`
 	ProductsCreated   int      `json:"products_created"`
-	ProductsSkipped   int      `json:"products_skipped"`   // Ya existían (ej. creados por ApplyTemplate)
+	ProductsSkipped   int      `json:"products_skipped"` // Ya existían (ej. creados por ApplyTemplate)
 	ProductsFailed    int      `json:"products_failed"`
 	Errors            []string `json:"errors,omitempty"`
 	CreatedProductIDs []string `json:"created_product_ids,omitempty"`
@@ -343,4 +343,3 @@ func (uc *BulkImportProductsUseCase) createProductWithVariants(
 
 	return product.ID().String(), false, nil
 }
-

@@ -3,10 +3,10 @@ package usecase
 import (
 	"context"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/brand/application/mapper"
 	"saas-mt-pim-service/src/brand/application/response"
 	"saas-mt-pim-service/src/brand/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // ListBrandsByCriteriaUseCase maneja la obtención de marcas con filtros y paginación

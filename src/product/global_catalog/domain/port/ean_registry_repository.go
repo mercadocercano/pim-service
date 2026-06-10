@@ -2,8 +2,8 @@ package port
 
 import (
 	"context"
-	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
 )
 
 // EanregistryRepository define los métodos para persistir Eanregistry

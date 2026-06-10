@@ -3,8 +3,8 @@ package config
 import (
 	"database/sql"
 
-	businessTypeRepository "saas-mt-pim-service/src/businesstype/infrastructure/persistence/repository"
 	businessTypeUsecase "saas-mt-pim-service/src/businesstype/application/usecase"
+	businessTypeRepository "saas-mt-pim-service/src/businesstype/infrastructure/persistence/repository"
 	backfillUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
 	"saas-mt-pim-service/src/quickstart/application/usecase"
 	"saas-mt-pim-service/src/quickstart/infrastructure/controller"
@@ -29,7 +29,7 @@ type QuickstartModuleConfig struct {
 func NewQuickstartModuleConfig(db *sql.DB, backfillImages *backfillUseCase.BackfillTenantImagesUseCase) *QuickstartModuleConfig {
 	// Crear repositorio de business types
 	businessTypeRepo := businessTypeRepository.NewBusinessTypePostgresRepository(db)
-	
+
 	// Crear casos de uso simplificados (sin YamlDataLoader)
 	getBusinessTypesUseCase := usecase.NewGetBusinessTypesUseCase(businessTypeRepo)
 	getCategoriesRepo := quickstartRepository.NewGetCategoriesByBusinessTypePostgresRepository(db)
@@ -40,13 +40,13 @@ func NewQuickstartModuleConfig(db *sql.DB, backfillImages *backfillUseCase.Backf
 	getProductsByBusinessTypeUseCase := usecase.NewGetProductsByBusinessTypeUseCase(getProductsByBusinessTypeRepo)
 	getBrandsByBusinessTypeUseCase := usecase.NewGetBrandsByBusinessTypeUseCase()
 	setupTenantUseCase := usecase.NewSetupTenantUseCase()
-	
+
 	// HITO 2: Nuevos casos de uso para templates
 	applyTemplateRepo := quickstartRepository.NewApplyTemplatePostgresRepository(db)
 	listTemplatesRepo := quickstartRepository.NewListTemplatesPostgresRepository(db)
 	listTemplatesUseCase := usecase.NewListTemplatesUseCase(listTemplatesRepo)
 	applyTemplateUseCase := usecase.NewApplyTemplateUseCase(db, applyTemplateRepo)
-	
+
 	// Crear handler principal de quickstart
 	quickstartHandler := controller.NewQuickstartHandler(
 		getBusinessTypesUseCase,
@@ -60,7 +60,7 @@ func NewQuickstartModuleConfig(db *sql.DB, backfillImages *backfillUseCase.Backf
 		applyTemplateUseCase,
 		backfillImages,
 	)
-	
+
 	// Crear handler simplificado del wizard
 	listBusinessTypesUseCase := businessTypeUsecase.NewListBusinessTypesUseCase(businessTypeRepo)
 	historyRepo := quickstartRepository.NewQuickstartHistoryPostgresRepository(db)

@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	cr "github.com/mercadocercano/criteria"
 	"log"
 	"saas-mt-pim-service/src/overview/domain/entity"
 	"saas-mt-pim-service/src/overview/domain/exception"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // ProductStatsPostgresRepository implementa el repositorio usando PostgreSQL

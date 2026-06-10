@@ -15,15 +15,15 @@ import (
 
 // SchemaValidationConfig contiene la configuración del módulo
 type SchemaValidationConfig struct {
-	db                          *sql.DB
-	csvAnalyzer                 *service.CSVAnalyzerService
-	jsonAnalyzer                *service.JSONAnalyzerService
-	excelAnalyzer               *service.ExcelAnalyzerService
-	validationCache             *cache.MemoryValidationCache
-	validateCSVSchemaUseCase    *usecase.ValidateCSVSchemaUseCase
-	validateJSONSchemaUseCase   *usecase.ValidateJSONSchemaUseCase
-	validateExcelSchemaUseCase  *usecase.ValidateExcelSchemaUseCase
-	schemaValidationController  *controller.SchemaValidationController
+	db                         *sql.DB
+	csvAnalyzer                *service.CSVAnalyzerService
+	jsonAnalyzer               *service.JSONAnalyzerService
+	excelAnalyzer              *service.ExcelAnalyzerService
+	validationCache            *cache.MemoryValidationCache
+	validateCSVSchemaUseCase   *usecase.ValidateCSVSchemaUseCase
+	validateJSONSchemaUseCase  *usecase.ValidateJSONSchemaUseCase
+	validateExcelSchemaUseCase *usecase.ValidateExcelSchemaUseCase
+	schemaValidationController *controller.SchemaValidationController
 }
 
 // NewSchemaValidationConfig crea una nueva configuración del módulo
@@ -70,17 +70,17 @@ func NewSchemaValidationConfig(db *sql.DB) *SchemaValidationConfig {
 		validateExcelSchemaUseCase,
 		importFromValidationUseCase,
 	)
-	
+
 	return &SchemaValidationConfig{
-		db:                          db,
-		csvAnalyzer:                 csvAnalyzer,
-		jsonAnalyzer:                jsonAnalyzer,
-		excelAnalyzer:               excelAnalyzer,
-		validationCache:             validationCache,
-		validateCSVSchemaUseCase:    validateCSVSchemaUseCase,
-		validateJSONSchemaUseCase:   validateJSONSchemaUseCase,
-		validateExcelSchemaUseCase:  validateExcelSchemaUseCase,
-		schemaValidationController:  schemaValidationController,
+		db:                         db,
+		csvAnalyzer:                csvAnalyzer,
+		jsonAnalyzer:               jsonAnalyzer,
+		excelAnalyzer:              excelAnalyzer,
+		validationCache:            validationCache,
+		validateCSVSchemaUseCase:   validateCSVSchemaUseCase,
+		validateJSONSchemaUseCase:  validateJSONSchemaUseCase,
+		validateExcelSchemaUseCase: validateExcelSchemaUseCase,
+		schemaValidationController: schemaValidationController,
 	}
 }
 

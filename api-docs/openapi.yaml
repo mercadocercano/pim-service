@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Multi-Tenant PIM API
-  version: 2.3.0
+  version: 2.4.0
   description: |
     API para gestión de información de productos multi-tenant.
 
@@ -726,6 +726,152 @@ components:
           type: integer
           minimum: 0
           maximum: 100
+
+    MarketplaceCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Electrónica"
+        slug:
+          type: string
+          example: "electronica"
+        description:
+          type: string
+          nullable: true
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+        level:
+          type: integer
+          example: 1
+        is_active:
+          type: boolean
+          example: true
+        sort_order:
+          type: integer
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    MarketplaceCategoryListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarketplaceCategory'
+        total:
+          type: integer
+
+    WizardStatus:
+      type: object
+      properties:
+        wizard_id:
+          type: string
+          format: uuid
+          nullable: true
+        tenant_id:
+          type: string
+        business_type_id:
+          type: string
+          format: uuid
+          nullable: true
+        setup_data:
+          type: object
+          nullable: true
+          properties:
+            step:
+              type: string
+            completed_steps:
+              type: array
+              items:
+                type: string
+            current_step:
+              type: integer
+            business_type_id:
+              type: string
+        setup_completed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+        message:
+          type: string
+
+    WizardStartRequest:
+      type: object
+      required: [business_type_id]
+      properties:
+        business_type_id:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+
+    WizardStepRequest:
+      type: object
+      required: [step, data]
+      properties:
+        step:
+          type: integer
+          enum: [1, 2, 3]
+          example: 1
+        data:
+          type: object
+          additionalProperties: true
+
+    WizardCompleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        tenant_id:
+          type: string
+        wizard_id:
+          type: string
+          format: uuid
+        completed_at:
+          type: string
+          format: date-time
+        summary:
+          type: object
+          properties:
+            categories_created:
+              type: integer
+            attributes_created:
+              type: integer
+            brands_created:
+              type: integer
+            products_created:
+              type: integer
+
+    BackfillResult:
+      type: object
+      properties:
+        updated:
+          type: integer
+          example: 25
+        skipped:
+          type: integer
+          example: 5
+        errors:
+          type: integer
+          example: 0
 
 paths:
   # ==========================================
@@ -3111,6 +3257,480 @@ paths:
                 $ref: '#/components/schemas/GlobalProduct'
         '404':
           description: Producto no encontrado con ese EAN
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # MARKETPLACE CATEGORIES
+  # ==========================================
+  /marketplace/categories:
+    get:
+      summary: Listar categorías del marketplace
+      tags: [Marketplace Categories]
+      description: Retorna todas las categorías del marketplace con filtros opcionales.
+      parameters:
+        - name: is_active
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: parent_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de categorías
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceCategoryListResponse'
+        '500':
+          description: Error interno del servidor
+    post:
+      summary: Crear categoría del marketplace
+      tags: [Marketplace Categories]
+      security:
+        - BearerAuth: []
+        - userRole: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: "Electrónica"
+                slug:
+                  type: string
+                  example: "electronica"
+                description:
+                  type: string
+                parent_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                sort_order:
+                  type: integer
+      responses:
+        '201':
+          description: Categoría creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceCategory'
+        '400':
+          description: Datos inválidos
+        '409':
+          description: Ya existe una categoría con ese nombre o slug
+        '500':
+          description: Error interno del servidor
+
+  /marketplace/categories/tree:
+    get:
+      summary: Árbol jerárquico de categorías del marketplace
+      tags: [Marketplace Categories]
+      description: Retorna las categorías en estructura de árbol (raíces con children anidados).
+      responses:
+        '200':
+          description: Árbol de categorías
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MarketplaceCategory'
+        '500':
+          description: Error interno del servidor
+
+  /marketplace/categories/validate-hierarchy:
+    post:
+      summary: Validar jerarquía de categorías
+      tags: [Marketplace Categories]
+      description: Verifica que el árbol de categorías proporcionado sea válido (sin ciclos, profundidad correcta).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+      responses:
+        '200':
+          description: Resultado de la validación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Datos inválidos
+
+  /marketplace/categories/{id}:
+    get:
+      summary: Obtener categoría del marketplace por ID
+      tags: [Marketplace Categories]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Categoría encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceCategory'
+        '404':
+          description: Categoría no encontrada
+        '500':
+          description: Error interno del servidor
+    put:
+      summary: Actualizar categoría del marketplace
+      tags: [Marketplace Categories]
+      security:
+        - BearerAuth: []
+        - userRole: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                parent_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                is_active:
+                  type: boolean
+                sort_order:
+                  type: integer
+      responses:
+        '200':
+          description: Categoría actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceCategory'
+        '404':
+          description: Categoría no encontrada
+        '500':
+          description: Error interno del servidor
+    delete:
+      summary: Eliminar categoría del marketplace
+      tags: [Marketplace Categories]
+      security:
+        - BearerAuth: []
+        - userRole: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Categoría eliminada exitosamente
+        '404':
+          description: Categoría no encontrada
+        '409':
+          description: La categoría tiene subcategorías activas y no puede eliminarse
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # WIZARD ENDPOINTS
+  # ==========================================
+  /wizard/status:
+    get:
+      summary: Estado actual del wizard de onboarding
+      tags: [Wizard]
+      description: |
+        Retorna el estado actual del proceso de configuración rápida (wizard) para el tenant.
+        Requiere header `X-Tenant-ID`.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Estado del wizard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WizardStatus'
+        '400':
+          description: X-Tenant-ID header requerido
+        '500':
+          description: Error interno del servidor
+
+  /wizard/start:
+    post:
+      summary: Iniciar wizard de onboarding
+      tags: [Wizard]
+      description: |
+        Crea una nueva sesión de wizard para el tenant. Si ya existe una sesión activa,
+        la retorna sin crear una nueva.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WizardStartRequest'
+      responses:
+        '201':
+          description: Wizard iniciado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WizardStatus'
+        '200':
+          description: Wizard ya existente retornado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WizardStatus'
+        '400':
+          description: Datos inválidos o X-Tenant-ID faltante
+        '500':
+          description: Error interno del servidor
+
+  /wizard/step:
+    put:
+      summary: Actualizar paso del wizard
+      tags: [Wizard]
+      description: Avanza o actualiza el paso actual del wizard con los datos proporcionados.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WizardStepRequest'
+      responses:
+        '200':
+          description: Paso actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WizardStatus'
+        '400':
+          description: Datos inválidos
+        '404':
+          description: Wizard no encontrado para el tenant
+        '500':
+          description: Error interno del servidor
+
+  /wizard/template/{businessTypeId}:
+    get:
+      summary: Datos del template para un tipo de negocio
+      tags: [Wizard]
+      description: Retorna categorías, marcas, atributos y productos sugeridos para el tipo de negocio.
+      parameters:
+        - name: businessTypeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      responses:
+        '200':
+          description: Datos del template
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  business_type_id:
+                    type: string
+                    format: uuid
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                  brands:
+                    type: array
+                    items:
+                      type: object
+                  attributes:
+                    type: array
+                    items:
+                      type: object
+                  products:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          description: Tipo de negocio no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /wizard/template/{businessTypeId}/{section}:
+    get:
+      summary: Sección específica del template para un tipo de negocio
+      tags: [Wizard]
+      description: |
+        Retorna una sección específica del template (categories, brands, attributes, products).
+      parameters:
+        - name: businessTypeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: section
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [categories, brands, attributes, products]
+          example: "products"
+      responses:
+        '200':
+          description: Datos de la sección
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+        '400':
+          description: Sección inválida
+        '404':
+          description: Tipo de negocio no encontrado
+        '500':
+          description: Error interno del servidor
+
+  /wizard/complete:
+    post:
+      summary: Completar wizard de onboarding
+      tags: [Wizard]
+      description: |
+        Marca el wizard como completado y ejecuta la configuración del tenant
+        (crea categorías, marcas y productos según el template seleccionado).
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Wizard completado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WizardCompleteResponse'
+        '400':
+          description: X-Tenant-ID faltante o wizard en estado inválido
+        '404':
+          description: Wizard no encontrado para el tenant
+        '500':
+          description: Error interno del servidor
+
+  /wizard/reset:
+    delete:
+      summary: Resetear wizard (solo desarrollo/test)
+      tags: [Wizard]
+      description: |
+        **⚠️ TEMPORAL — solo para entornos de desarrollo y testing.**
+        Elimina el historial de wizard del tenant, permitiendo iniciar uno nuevo.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '204':
+          description: Wizard reseteado
+        '400':
+          description: X-Tenant-ID faltante
+        '404':
+          description: Wizard no encontrado
+        '500':
+          description: Error interno del servidor
+
+  # ==========================================
+  # QUICKSTART BACKFILL ENDPOINTS
+  # ==========================================
+  /quickstart/backfill-tenant-images:
+    post:
+      summary: Rellenar imágenes para un tenant
+      tags: [Quickstart]
+      description: |
+        Copia `image_url` desde `global_products` a los productos del tenant que no tienen imagen,
+        usando match por nombre y marca. Requiere header `X-Tenant-ID`.
+      security:
+        - BearerAuth: []
+        - tenantId: []
+      responses:
+        '200':
+          description: Backfill ejecutado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackfillResult'
+        '400':
+          description: X-Tenant-ID header requerido
+        '500':
+          description: Error interno del servidor
+
+  /quickstart/backfill-all-tenant-images:
+    post:
+      summary: Rellenar imágenes para todos los tenants
+      tags: [Quickstart]
+      description: |
+        Ejecuta el backfill de imágenes para todos los tenants que tienen productos registrados.
+        Operación administrativa — no requiere X-Tenant-ID.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Resultados por tenant
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/BackfillResult'
         '500':
           description: Error interno del servidor
 

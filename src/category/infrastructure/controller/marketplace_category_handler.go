@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"strings"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/category/application/request"
 	"saas-mt-pim-service/src/category/application/response"
 	"saas-mt-pim-service/src/category/application/usecase"
 	"saas-mt-pim-service/src/category/domain/port"
-	cr "github.com/mercadocercano/criteria"
 
 	"github.com/gin-gonic/gin"
 )
@@ -52,7 +52,7 @@ func (h *MarketplaceCategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
 		marketplace.PUT("/categories/:id", h.UpdateMarketplaceCategory)
 		marketplace.DELETE("/categories/:id", h.DeleteMarketplaceCategory)
 		marketplace.POST("/categories/validate-hierarchy", h.ValidateCategoryHierarchy)
-		
+
 		// RUTAS TEMPORALMENTE DESHABILITADAS - casos de uso eliminados
 		// marketplace.POST("/sync-changes", h.SyncMarketplaceChanges)
 		// marketplace.GET("/taxonomy", h.GetTenantTaxonomy)
@@ -150,19 +150,19 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 	// Ordenamiento
 	sortBy := c.DefaultQuery("sort_by", "sort_order")
 	sortDir := c.DefaultQuery("sort_dir", "ASC")
-	
+
 	// Validar dirección de ordenamiento
 	if sortDir != "ASC" && sortDir != "DESC" && sortDir != "asc" && sortDir != "desc" {
 		sortDir = "ASC"
 	}
-	
+
 	// Convertir a mayúsculas
 	if sortDir == "asc" {
 		sortDir = "ASC"
 	} else if sortDir == "desc" {
 		sortDir = "DESC"
 	}
-	
+
 	// Validar campos permitidos para ordenamiento
 	allowedSortFields := map[string]bool{
 		"name":       true,
@@ -172,11 +172,11 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 		"created_at": true,
 		"updated_at": true,
 	}
-	
+
 	if !allowedSortFields[sortBy] {
 		sortBy = "sort_order"
 	}
-	
+
 	orderDir := cr.OrderDesc
 	if sortDir == "ASC" {
 		orderDir = cr.OrderAsc
@@ -243,13 +243,13 @@ func (h *MarketplaceCategoryHandler) GetMarketplaceCategoriesTree(c *gin.Context
 	filters := cr.NewFilters(
 		cr.NewFilter("is_active", cr.OpEqual, true),
 	)
-	
+
 	// Solo podemos tener un orden, usar el más importante
 	order := cr.NewOrder("level", cr.OrderAsc)
-	
+
 	// Sin paginación (obtener todas)
 	pagination := cr.NewPagination(0, 0)
-	
+
 	criteria := cr.NewCriteria(filters, []cr.Order{order}, pagination)
 
 	categories, err := h.categoryRepository.FindByCriteria(c.Request.Context(), criteria)

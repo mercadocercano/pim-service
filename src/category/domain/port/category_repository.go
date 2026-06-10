@@ -3,8 +3,8 @@ package port
 import (
 	"context"
 
-	"saas-mt-pim-service/src/category/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/category/domain/entity"
 )
 
 // CategoryRepository define el contrato para acceder a los datos de categorías

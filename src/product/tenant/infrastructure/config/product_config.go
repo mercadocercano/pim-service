@@ -3,6 +3,8 @@ package config
 import (
 	"database/sql"
 
+	brandRepository "saas-mt-pim-service/src/brand/infrastructure/persistence"
+	categoryRepository "saas-mt-pim-service/src/category/infrastructure/persistence/repository"
 	globalCatalogPersistence "saas-mt-pim-service/src/product/global_catalog/infrastructure/persistence"
 	quickstartUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
 	quickstartCtrl "saas-mt-pim-service/src/product/quickstart/infrastructure/controller"
@@ -14,8 +16,6 @@ import (
 	"saas-mt-pim-service/src/product/tenant/infrastructure/controller"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/criteria"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/persistence"
-	brandRepository "saas-mt-pim-service/src/brand/infrastructure/persistence"
-	categoryRepository "saas-mt-pim-service/src/category/infrastructure/persistence/repository"
 	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
@@ -60,7 +60,7 @@ type ProductConfig struct {
 	ProductController        *controller.ProductController
 	ProductVariantController *controller.ProductVariantController
 	QuickstartController     *quickstartCtrl.QuickstartController
-	BulkImportController     *controller.BulkImportController  // HITO 2
+	BulkImportController     *controller.BulkImportController // HITO 2
 	BulkUpdateController     *controller.BulkUpdateController
 
 	// Criteria Builders

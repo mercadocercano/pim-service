@@ -13,17 +13,17 @@ import (
 
 // MarketplaceAttributeHandler maneja las peticiones HTTP para atributos marketplace
 type MarketplaceAttributeHandler struct {
-	createUseCase               *usecase.CreateMarketplaceAttributeUseCase
-	listUseCase                 *usecase.ListMarketplaceAttributesUseCase
-	listByCriteriaUseCase       *usecase.ListMarketplaceAttributesByCriteriaUseCase
-	getByIDUseCase              *usecase.GetMarketplaceAttributeByIDUseCase
-	updateUseCase               *usecase.UpdateMarketplaceAttributeUseCase
-	deleteUseCase               *usecase.DeleteMarketplaceAttributeUseCase
-	criteriaBuilder             *criteria.MarketplaceAttributeCriteriaBuilder
-	listValuesUseCase           *usecase.ListAttributeValuesUseCase
-	createValueUseCase          *usecase.CreateAttributeValueUseCase
-	updateValueUseCase          *usecase.UpdateAttributeValueUseCase
-	deleteValueUseCase          *usecase.DeleteAttributeValueUseCase
+	createUseCase         *usecase.CreateMarketplaceAttributeUseCase
+	listUseCase           *usecase.ListMarketplaceAttributesUseCase
+	listByCriteriaUseCase *usecase.ListMarketplaceAttributesByCriteriaUseCase
+	getByIDUseCase        *usecase.GetMarketplaceAttributeByIDUseCase
+	updateUseCase         *usecase.UpdateMarketplaceAttributeUseCase
+	deleteUseCase         *usecase.DeleteMarketplaceAttributeUseCase
+	criteriaBuilder       *criteria.MarketplaceAttributeCriteriaBuilder
+	listValuesUseCase     *usecase.ListAttributeValuesUseCase
+	createValueUseCase    *usecase.CreateAttributeValueUseCase
+	updateValueUseCase    *usecase.UpdateAttributeValueUseCase
+	deleteValueUseCase    *usecase.DeleteAttributeValueUseCase
 }
 
 // NewMarketplaceAttributeHandler crea una nueva instancia del manejador (solo atributos)

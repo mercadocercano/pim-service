@@ -3,8 +3,8 @@ package port
 import (
 	"context"
 
-	"saas-mt-pim-service/src/category/domain/entity"
 	cr "github.com/mercadocercano/criteria"
+	"saas-mt-pim-service/src/category/domain/entity"
 )
 
 // TenantCategoryMappingRepository define las operaciones de persistencia para mapeos de categorías tenant

@@ -2,8 +2,8 @@ package entity
 
 import (
 	"fmt"
-	"time"
 	"github.com/google/uuid"
+	"time"
 )
 
 // CategoryStats representa la entidad CategoryStats
@@ -24,7 +24,7 @@ func NewCategoryStats(tenantID, name string) (*CategoryStats, error) {
 	if name == "" {
 		return nil, fmt.Errorf("name es requerido")
 	}
-	
+
 	now := time.Now()
 	return &CategoryStats{
 		ID:        uuid.New().String(),

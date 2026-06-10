@@ -3,10 +3,10 @@ package usecase
 import (
 	"context"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/product/tenant/application/request"
 	"saas-mt-pim-service/src/product/tenant/application/response"
 	"saas-mt-pim-service/src/product/tenant/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // ValidateSKUsUseCase valida qué SKUs ya existen en el sistema
@@ -35,7 +35,7 @@ func (uc *ValidateSKUsUseCase) Execute(ctx context.Context, req *request.Validat
 		)
 		order := cr.NewOrder("created_at", cr.OrderDesc)
 		pagination := cr.NewPagination(1, 1) // Solo necesitamos saber si existe
-		
+
 		searchCriteria := cr.NewCriteria(filters, []cr.Order{order}, pagination)
 
 		// Buscar productos con ese SKU

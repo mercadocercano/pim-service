@@ -17,37 +17,37 @@ import (
 type DataType string
 
 const (
-	DataTypeString   DataType = "string"
-	DataTypeInteger  DataType = "integer"
-	DataTypeFloat    DataType = "float"
-	DataTypeBoolean  DataType = "boolean"
-	DataTypeDate     DataType = "date"
-	DataTypeUUID     DataType = "uuid"
-	DataTypeEmail    DataType = "email"
-	DataTypeURL      DataType = "url"
-	DataTypeUnknown  DataType = "unknown"
+	DataTypeString  DataType = "string"
+	DataTypeInteger DataType = "integer"
+	DataTypeFloat   DataType = "float"
+	DataTypeBoolean DataType = "boolean"
+	DataTypeDate    DataType = "date"
+	DataTypeUUID    DataType = "uuid"
+	DataTypeEmail   DataType = "email"
+	DataTypeURL     DataType = "url"
+	DataTypeUnknown DataType = "unknown"
 )
 
 // CSVAnalyzerService analiza archivos CSV y detecta tipos de datos
 type CSVAnalyzerService struct {
-	uuidRegex    *regexp.Regexp
-	emailRegex   *regexp.Regexp
-	urlRegex     *regexp.Regexp
-	dateRegex    *regexp.Regexp
-	priceRegex   *regexp.Regexp
-	skuRegex     *regexp.Regexp
+	uuidRegex  *regexp.Regexp
+	emailRegex *regexp.Regexp
+	urlRegex   *regexp.Regexp
+	dateRegex  *regexp.Regexp
+	priceRegex *regexp.Regexp
+	skuRegex   *regexp.Regexp
 
 	commonMappings map[string]string
 }
 
 func NewCSVAnalyzerService() *CSVAnalyzerService {
 	return &CSVAnalyzerService{
-		uuidRegex:  regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`),
-		emailRegex: regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
-		urlRegex:   regexp.MustCompile(`^https?://[^\s]+$`),
-		dateRegex:  regexp.MustCompile(`^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?`),
-		priceRegex: regexp.MustCompile(`^\$?\s*[\d.,]+$`),
-		skuRegex:   regexp.MustCompile(`^[A-Za-z0-9][-A-Za-z0-9_.]{1,18}[A-Za-z0-9]$`),
+		uuidRegex:      regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`),
+		emailRegex:     regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
+		urlRegex:       regexp.MustCompile(`^https?://[^\s]+$`),
+		dateRegex:      regexp.MustCompile(`^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?`),
+		priceRegex:     regexp.MustCompile(`^\$?\s*[\d.,]+$`),
+		skuRegex:       regexp.MustCompile(`^[A-Za-z0-9][-A-Za-z0-9_.]{1,18}[A-Za-z0-9]$`),
 		commonMappings: buildCommonMappings(),
 	}
 }
@@ -55,96 +55,96 @@ func NewCSVAnalyzerService() *CSVAnalyzerService {
 func buildCommonMappings() map[string]string {
 	return map[string]string{
 		// === Nombre / Producto ===
-		"producto":         "name",
-		"nombre producto":  "name",
-		"nombre_producto":  "name",
-		"nombre":           "name",
-		"articulo":         "name",
-		"detalle":          "name",
-		"item":             "name",
-		"product":          "name",
-		"product name":     "name",
-		"product_name":     "name",
-		"name":             "name",
-		"title":            "name",
+		"producto":        "name",
+		"nombre producto": "name",
+		"nombre_producto": "name",
+		"nombre":          "name",
+		"articulo":        "name",
+		"detalle":         "name",
+		"item":            "name",
+		"product":         "name",
+		"product name":    "name",
+		"product_name":    "name",
+		"name":            "name",
+		"title":           "name",
 
 		// === SKU / Código ===
-		"codigo":           "sku",
-		"codigo producto":  "sku",
-		"codigo_producto":  "sku",
-		"cod":              "sku",
-		"cod. barras":      "sku",
-		"cod barras":       "sku",
-		"codigo barras":    "sku",
-		"ean":              "sku",
-		"upc":              "sku",
-		"barcode":          "sku",
-		"code":             "sku",
-		"product code":     "sku",
-		"product_code":     "sku",
-		"sku":              "sku",
-		"variant sku":      "sku",
+		"codigo":          "sku",
+		"codigo producto": "sku",
+		"codigo_producto": "sku",
+		"cod":             "sku",
+		"cod. barras":     "sku",
+		"cod barras":      "sku",
+		"codigo barras":   "sku",
+		"ean":             "sku",
+		"upc":             "sku",
+		"barcode":         "sku",
+		"code":            "sku",
+		"product code":    "sku",
+		"product_code":    "sku",
+		"sku":             "sku",
+		"variant sku":     "sku",
 
 		// === Precio ===
-		"precio":           "price",
-		"precio unitario":  "price",
-		"precio_unitario":  "price",
-		"precio unit":      "price",
-		"precio_unit":      "price",
-		"p. venta":         "price",
-		"p.venta":          "price",
-		"p venta":          "price",
-		"precio venta":     "price",
-		"precio_venta":     "price",
-		"imp venta":        "price",
-		"imp_venta":        "price",
-		"importe":          "price",
-		"price":            "price",
-		"unit price":       "price",
-		"unit_price":       "price",
-		"regular price":    "price",
-		"variant price":    "price",
-		"sale price":       "price",
+		"precio":          "price",
+		"precio unitario": "price",
+		"precio_unitario": "price",
+		"precio unit":     "price",
+		"precio_unit":     "price",
+		"p. venta":        "price",
+		"p.venta":         "price",
+		"p venta":         "price",
+		"precio venta":    "price",
+		"precio_venta":    "price",
+		"imp venta":       "price",
+		"imp_venta":       "price",
+		"importe":         "price",
+		"price":           "price",
+		"unit price":      "price",
+		"unit_price":      "price",
+		"regular price":   "price",
+		"variant price":   "price",
+		"sale price":      "price",
 
 		// === Descripción ===
-		"descripcion":      "description",
-		"description":      "description",
+		"descripcion":       "description",
+		"description":       "description",
 		"short description": "description",
-		"body":             "description",
-		"body (html)":      "description",
+		"body":              "description",
+		"body (html)":       "description",
 
 		// === Categoría ===
-		"categoria":        "category_name",
-		"rubro":            "category_name",
-		"tipo":             "category_name",
-		"category":         "category_name",
-		"category name":    "category_name",
-		"category_name":    "category_name",
-		"categories":       "category_name",
-		"type":             "category_name",
+		"categoria":     "category_name",
+		"rubro":         "category_name",
+		"tipo":          "category_name",
+		"category":      "category_name",
+		"category name": "category_name",
+		"category_name": "category_name",
+		"categories":    "category_name",
+		"type":          "category_name",
 
 		// === Marca ===
-		"marca":            "brand_name",
-		"fabricante":       "brand_name",
-		"brand":            "brand_name",
-		"brand name":       "brand_name",
-		"brand_name":       "brand_name",
-		"vendor":           "brand_name",
-		"manufacturer":     "brand_name",
+		"marca":        "brand_name",
+		"fabricante":   "brand_name",
+		"brand":        "brand_name",
+		"brand name":   "brand_name",
+		"brand_name":   "brand_name",
+		"vendor":       "brand_name",
+		"manufacturer": "brand_name",
 
 		// === Stock ===
-		"inventario":       "stock",
-		"existencias":      "stock",
-		"cantidad":         "stock",
-		"stock":            "stock",
-		"stock actual":     "stock",
-		"stock_actual":     "stock",
-		"stock act":        "stock",
-		"stock_act":        "stock",
-		"exist":            "stock",
-		"inventory":        "stock",
-		"quantity":         "stock",
-		"qty":              "stock",
+		"inventario":            "stock",
+		"existencias":           "stock",
+		"cantidad":              "stock",
+		"stock":                 "stock",
+		"stock actual":          "stock",
+		"stock_actual":          "stock",
+		"stock act":             "stock",
+		"stock_act":             "stock",
+		"exist":                 "stock",
+		"inventory":             "stock",
+		"quantity":              "stock",
+		"qty":                   "stock",
 		"variant inventory qty": "stock",
 	}
 }
@@ -315,52 +315,52 @@ func (s *CSVAnalyzerService) AnalyzeCSV(reader io.Reader, maxRows int) (*CSVAnal
 // detectDataType detecta el tipo de dato de un valor
 func (s *CSVAnalyzerService) detectDataType(value string) DataType {
 	value = strings.TrimSpace(value)
-	
+
 	// Vacío
 	if value == "" {
 		return DataTypeUnknown
 	}
-	
+
 	// UUID
 	if s.uuidRegex.MatchString(value) {
 		return DataTypeUUID
 	}
-	
+
 	// Email
 	if s.emailRegex.MatchString(value) {
 		return DataTypeEmail
 	}
-	
+
 	// URL
 	if s.urlRegex.MatchString(value) {
 		return DataTypeURL
 	}
-	
+
 	// Boolean
 	lowerValue := strings.ToLower(value)
-	if lowerValue == "true" || lowerValue == "false" || 
-	   lowerValue == "yes" || lowerValue == "no" ||
-	   lowerValue == "1" || lowerValue == "0" {
+	if lowerValue == "true" || lowerValue == "false" ||
+		lowerValue == "yes" || lowerValue == "no" ||
+		lowerValue == "1" || lowerValue == "0" {
 		return DataTypeBoolean
 	}
-	
+
 	// Integer
 	if _, err := strconv.ParseInt(value, 10, 64); err == nil {
 		return DataTypeInteger
 	}
-	
+
 	// Float
 	if _, err := strconv.ParseFloat(value, 64); err == nil {
 		return DataTypeFloat
 	}
-	
+
 	// Date
 	if s.dateRegex.MatchString(value) {
 		if _, err := time.Parse("2006-01-02", value[:10]); err == nil {
 			return DataTypeDate
 		}
 	}
-	
+
 	// Default to string
 	return DataTypeString
 }
@@ -369,14 +369,14 @@ func (s *CSVAnalyzerService) detectDataType(value string) DataType {
 func (s *CSVAnalyzerService) getMostFrequentType(typeCounts map[DataType]int) DataType {
 	var mostFrequent DataType = DataTypeString
 	maxCount := 0
-	
+
 	for dataType, count := range typeCounts {
 		if dataType != DataTypeUnknown && count > maxCount {
 			mostFrequent = dataType
 			maxCount = count
 		}
 	}
-	
+
 	return mostFrequent
 }
 
@@ -580,38 +580,38 @@ func (s *CSVAnalyzerService) looksLikeName(samples []string) bool {
 // ValidateValue valida un valor según el tipo esperado
 func (s *CSVAnalyzerService) ValidateValue(value string, expectedType string) (bool, string) {
 	value = strings.TrimSpace(value)
-	
+
 	switch expectedType {
 	case "string":
 		if value == "" {
 			return false, "valor vacío"
 		}
 		return true, ""
-		
+
 	case "integer":
 		if _, err := strconv.ParseInt(value, 10, 64); err != nil {
 			return false, "no es un número entero válido"
 		}
 		return true, ""
-		
+
 	case "float", "number":
 		if _, err := strconv.ParseFloat(value, 64); err != nil {
 			return false, "no es un número válido"
 		}
 		return true, ""
-		
+
 	case "uuid":
 		if !s.uuidRegex.MatchString(value) {
 			return false, "no es un UUID válido"
 		}
 		return true, ""
-		
+
 	case "email":
 		if !s.emailRegex.MatchString(value) {
 			return false, "no es un email válido"
 		}
 		return true, ""
-		
+
 	case "boolean":
 		lowerValue := strings.ToLower(value)
 		validBools := []string{"true", "false", "yes", "no", "1", "0"}
@@ -621,7 +621,7 @@ func (s *CSVAnalyzerService) ValidateValue(value string, expectedType string) (b
 			}
 		}
 		return false, "no es un valor booleano válido"
-		
+
 	default:
 		return true, ""
 	}

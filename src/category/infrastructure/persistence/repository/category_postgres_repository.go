@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/category/domain/exception"
 	"saas-mt-pim-service/src/category/infrastructure/persistence/mapper"
 	"saas-mt-pim-service/src/category/infrastructure/persistence/model"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // CategoryPostgresRepository implementa el repositorio de categorías usando PostgreSQL

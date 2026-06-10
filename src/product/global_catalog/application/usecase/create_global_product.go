@@ -157,7 +157,7 @@ func (uc *CreateGlobalProduct) Execute(request CreateGlobalProductRequest) (*Cre
 		CreatedAt:    savedProduct.CreatedAt().Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:    savedProduct.UpdatedAt().Format("2006-01-02T15:04:05Z07:00"),
 	}
-	
+
 	// Agregar EAN solo si existe
 	if savedProduct.EAN() != nil {
 		eanValue := savedProduct.EAN().Value()

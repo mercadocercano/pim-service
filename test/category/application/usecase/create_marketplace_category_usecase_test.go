@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/category/application/request"
 	"saas-mt-pim-service/src/category/application/usecase"
 	"saas-mt-pim-service/src/category/domain/entity"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // MockMarketplaceCategoryRepository es un mock del repositorio

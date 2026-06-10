@@ -2,15 +2,15 @@ package response
 
 // MarketplaceProductResponse representa un producto visible en el marketplace (cross-tenant)
 type MarketplaceProductResponse struct {
-	ID           string                          `json:"id"`
-	TenantID     string                          `json:"tenant_id"`
-	Name         string                          `json:"name"`
-	Description  *string                         `json:"description"`
-	CategoryName *string                         `json:"category_name"`
-	BrandName    *string                         `json:"brand_name"`
-	ImageURL     *string                         `json:"image_url"`
-	StoreType    *MarketplaceStoreTypeInfo       `json:"store_type,omitempty"`
-	Variant      *MarketplaceProductVariantInfo   `json:"variant,omitempty"`
+	ID           string                         `json:"id"`
+	TenantID     string                         `json:"tenant_id"`
+	Name         string                         `json:"name"`
+	Description  *string                        `json:"description"`
+	CategoryName *string                        `json:"category_name"`
+	BrandName    *string                        `json:"brand_name"`
+	ImageURL     *string                        `json:"image_url"`
+	StoreType    *MarketplaceStoreTypeInfo      `json:"store_type,omitempty"`
+	Variant      *MarketplaceProductVariantInfo `json:"variant,omitempty"`
 }
 
 // MarketplaceStoreTypeInfo info del tipo de comercio

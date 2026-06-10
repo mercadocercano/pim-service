@@ -1,6 +1,0 @@
-name,sku,price,description,stock,category_id,category_name,brand_id,brand_name,color,size,material
-"Camiseta Básica Negra","TSH-BLK-001",29.99,"Camiseta de algodón 100% en color negro",50,"123e4567-e89b-12d3-a456-426614174000","Ropa","987e6543-e21b-12d3-a456-426614174000","Nike","Negro","M","Algodón"
-"Pantalón Jeans Azul","JNS-BLU-001",89.99,"Jeans clásico de corte recto",30,"123e4567-e89b-12d3-a456-426614174000","Ropa","456e7890-e21b-12d3-a456-426614174000","Levi's","Azul","32","Denim"
-"Zapatillas Running","SHO-RUN-001",129.99,"Zapatillas deportivas para running profesional",20,"234e5678-e89b-12d3-a456-426614174000","Calzado","987e6543-e21b-12d3-a456-426614174000","Nike","Blanco/Negro","42","Sintético"
-"Mochila Urbana","BAG-URB-001",59.99,"Mochila resistente para uso diario",15,"345e6789-e89b-12d3-a456-426614174000","Accesorios","789e0123-e21b-12d3-a456-426614174000","Samsonite","Gris","Única","Poliéster"
-"Gorra Deportiva","CAP-SPT-001",24.99,"Gorra ajustable con visera curva",100,"345e6789-e89b-12d3-a456-426614174000","Accesorios","987e6543-e21b-12d3-a456-426614174000","Nike","Rojo","Única","Algodón/Poliéster"

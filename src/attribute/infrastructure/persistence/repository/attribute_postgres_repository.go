@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	cr "github.com/mercadocercano/criteria"
 	"log"
 	"saas-mt-pim-service/src/attribute/domain/entity"
 	"saas-mt-pim-service/src/attribute/domain/exception"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // AttributePostgresRepository implementa el repositorio usando PostgreSQL

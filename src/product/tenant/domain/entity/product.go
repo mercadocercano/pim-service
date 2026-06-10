@@ -141,7 +141,7 @@ func (p *Product) IDString() string                                   { return p
 func (p *Product) TenantID() string                                   { return p.tenantID }
 func (p *Product) Name() string                                       { return p.name }
 func (p *Product) Description() *string                               { return p.description }
-func (p *Product) ImageURL() *string                                   { return p.imageURL }
+func (p *Product) ImageURL() *string                                  { return p.imageURL }
 func (p *Product) SKU() *value_object.ProductSKU                      { return p.sku }
 func (p *Product) CategoryReference() *value_object.CategoryReference { return p.categoryRef }
 func (p *Product) BrandReference() *value_object.BrandReference       { return p.brandRef }

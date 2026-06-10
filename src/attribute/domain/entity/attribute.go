@@ -2,8 +2,8 @@ package entity
 
 import (
 	"fmt"
-	"time"
 	"github.com/google/uuid"
+	"time"
 )
 
 // Attribute representa la entidad attribute
@@ -24,7 +24,7 @@ func NewAttribute(tenantID, name string) (*Attribute, error) {
 	if name == "" {
 		return nil, fmt.Errorf("name es requerido")
 	}
-	
+
 	now := time.Now()
 	return &Attribute{
 		ID:        uuid.New().String(),

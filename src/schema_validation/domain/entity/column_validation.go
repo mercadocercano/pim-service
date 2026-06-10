@@ -8,34 +8,34 @@ import (
 type ColumnValidation struct {
 	// Name es el nombre de la columna en el CSV
 	Name string `json:"name"`
-	
+
 	// Index es la posición de la columna
 	Index int `json:"index"`
-	
+
 	// Status es el estado general de la columna
 	Status value_object.ValidationStatus `json:"status"`
-	
+
 	// TypeExpected es el tipo de dato esperado
 	TypeExpected string `json:"type_expected"`
-	
+
 	// TypeDetected es el tipo de dato detectado
 	TypeDetected string `json:"type_detected"`
-	
+
 	// Required indica si la columna es obligatoria
 	Required bool `json:"required"`
-	
+
 	// MappedTo es el nombre del campo al que se mapea
 	MappedTo string `json:"mapped_to,omitempty"`
-	
+
 	// Statistics contiene estadísticas de la columna
 	Statistics ColumnStatistics `json:"statistics"`
-	
+
 	// Issues son los problemas encontrados
 	Issues []string `json:"issues"`
-	
+
 	// SampleValues son valores de ejemplo
 	SampleValues []string `json:"sample_values"`
-	
+
 	// InvalidExamples son ejemplos de valores inválidos
 	InvalidExamples []InvalidExample `json:"invalid_examples,omitempty"`
 }
@@ -60,11 +60,11 @@ type InvalidExample struct {
 // NewColumnValidation crea una nueva validación de columna
 func NewColumnValidation(name string, index int) *ColumnValidation {
 	return &ColumnValidation{
-		Name:         name,
-		Index:        index,
-		Status:       value_object.ValidationStatusInfo,
-		Issues:       make([]string, 0),
-		SampleValues: make([]string, 0),
+		Name:            name,
+		Index:           index,
+		Status:          value_object.ValidationStatusInfo,
+		Issues:          make([]string, 0),
+		SampleValues:    make([]string, 0),
 		InvalidExamples: make([]InvalidExample, 0),
 	}
 }

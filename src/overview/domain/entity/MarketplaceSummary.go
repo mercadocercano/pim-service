@@ -2,8 +2,8 @@ package entity
 
 import (
 	"fmt"
-	"time"
 	"github.com/google/uuid"
+	"time"
 )
 
 // MarketplaceSummary representa la entidad MarketplaceSummary
@@ -24,7 +24,7 @@ func NewMarketplaceSummary(tenantID, name string) (*MarketplaceSummary, error) {
 	if name == "" {
 		return nil, fmt.Errorf("name es requerido")
 	}
-	
+
 	now := time.Now()
 	return &MarketplaceSummary{
 		ID:        uuid.New().String(),

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/url"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/product/tenant/application/mapper"
 	"saas-mt-pim-service/src/product/tenant/application/response"
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	"saas-mt-pim-service/src/product/tenant/domain/port"
-	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 )

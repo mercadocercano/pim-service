@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	"saas-mt-pim-service/src/product/tenant/domain/port"
 	"saas-mt-pim-service/src/product/tenant/domain/value_object"
-	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"

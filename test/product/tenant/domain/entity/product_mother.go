@@ -170,4 +170,4 @@ func (p ProductMother) ElectronicsProduct() (*entity.Product, error) {
 // Create retorna una nueva instancia de ProductMother
 func Create() ProductMother {
 	return ProductMother{}
-} 
+}

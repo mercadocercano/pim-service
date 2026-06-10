@@ -3,10 +3,10 @@ package usecase
 import (
 	"context"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/product/tenant/application/mapper"
 	"saas-mt-pim-service/src/product/tenant/application/response"
 	"saas-mt-pim-service/src/product/tenant/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // ListProductsByCriteriaUseCase maneja la búsqueda de productos con criterios

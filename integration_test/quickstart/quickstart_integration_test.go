@@ -39,16 +39,16 @@ type listBusinessTypesResponse struct {
 }
 
 type templateResponse struct {
-	ID             string      `json:"id"`
-	BusinessTypeID string      `json:"business_type_id"`
-	Name           string      `json:"name"`
-	Description    string      `json:"description"`
-	Version        string      `json:"version"`
-	Region         string      `json:"region"`
-	IsActive       bool        `json:"is_active"`
-	IsDefault      bool        `json:"is_default"`
-	CreatedAt      string      `json:"created_at"`
-	UpdatedAt      string      `json:"updated_at"`
+	ID             string `json:"id"`
+	BusinessTypeID string `json:"business_type_id"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	Version        string `json:"version"`
+	Region         string `json:"region"`
+	IsActive       bool   `json:"is_active"`
+	IsDefault      bool   `json:"is_default"`
+	CreatedAt      string `json:"created_at"`
+	UpdatedAt      string `json:"updated_at"`
 }
 
 type templateWrapperResponse struct {
@@ -61,10 +61,10 @@ type listTemplatesResponse struct {
 }
 
 type templateAnalyticsResponse struct {
-	TemplateID     string   `json:"template_id"`
-	TenantsUsed    int      `json:"tenants_used"`
-	LastActivated  *string  `json:"last_activated"`
-	CompletionRate float64  `json:"completion_rate"`
+	TemplateID     string  `json:"template_id"`
+	TenantsUsed    int     `json:"tenants_used"`
+	LastActivated  *string `json:"last_activated"`
+	CompletionRate float64 `json:"completion_rate"`
 }
 
 // --- Helpers ---

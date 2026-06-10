@@ -40,8 +40,8 @@ type ImportFromBusinessTypeRequest struct {
 }
 
 type ImportFromBusinessTypeResponse struct {
-	TenantID         string                  `json:"tenant_id"`
-	BusinessTypeID   string                  `json:"business_type_id"`
+	TenantID         string                   `json:"tenant_id"`
+	BusinessTypeID   string                   `json:"business_type_id"`
 	ImportedProducts []ImportedProductSummary `json:"imported_products"`
 	FailedImports    []FailedImportSummary    `json:"failed_imports"`
 	Summary          ImportSummary            `json:"summary"`

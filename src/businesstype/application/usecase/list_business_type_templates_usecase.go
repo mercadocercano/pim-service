@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	cr "github.com/mercadocercano/criteria"
 	"saas-mt-pim-service/src/businesstype/domain/entity"
 	"saas-mt-pim-service/src/businesstype/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // ListBusinessTypeTemplatesUseCase maneja la listado de templates con criterios

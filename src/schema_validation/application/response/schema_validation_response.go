@@ -7,35 +7,35 @@ import (
 
 // SchemaValidationResponse representa la respuesta de validación de schema
 type SchemaValidationResponse struct {
-	ID                string                            `json:"id"`
-	IsValid           bool                              `json:"is_valid"`
-	CanImport         bool                              `json:"can_import"`
-	Columns           map[string]ColumnValidationDTO    `json:"columns"`
-	TablePreview      *TablePreviewDTO                  `json:"table_preview"`
-	Summary           *ValidationSummaryDTO             `json:"summary"`
-	Recommendations   []string                          `json:"recommendations"`
-	SuggestedMappings map[string]string                 `json:"suggested_mappings"`
-	SourceFormat      string                            `json:"source_format,omitempty"`
-	SheetName         string                            `json:"sheet_name,omitempty"`
-	DetectedDelimiter string                            `json:"detected_delimiter,omitempty"`
-	DeducedCategories map[int]string                    `json:"deduced_categories,omitempty"`
-	CreatedAt         time.Time                         `json:"created_at"`
-	ExpiresAt         time.Time                         `json:"expires_at"`
+	ID                string                         `json:"id"`
+	IsValid           bool                           `json:"is_valid"`
+	CanImport         bool                           `json:"can_import"`
+	Columns           map[string]ColumnValidationDTO `json:"columns"`
+	TablePreview      *TablePreviewDTO               `json:"table_preview"`
+	Summary           *ValidationSummaryDTO          `json:"summary"`
+	Recommendations   []string                       `json:"recommendations"`
+	SuggestedMappings map[string]string              `json:"suggested_mappings"`
+	SourceFormat      string                         `json:"source_format,omitempty"`
+	SheetName         string                         `json:"sheet_name,omitempty"`
+	DetectedDelimiter string                         `json:"detected_delimiter,omitempty"`
+	DeducedCategories map[int]string                 `json:"deduced_categories,omitempty"`
+	CreatedAt         time.Time                      `json:"created_at"`
+	ExpiresAt         time.Time                      `json:"expires_at"`
 }
 
 // ColumnValidationDTO representa la validación de una columna
 type ColumnValidationDTO struct {
-	Name            string                `json:"name"`
-	Index           int                   `json:"index"`
-	Status          string                `json:"status"`
-	TypeExpected    string                `json:"type_expected"`
-	TypeDetected    string                `json:"type_detected"`
-	Required        bool                  `json:"required"`
-	MappedTo        string                `json:"mapped_to,omitempty"`
-	Statistics      ColumnStatisticsDTO   `json:"statistics"`
-	Issues          []string              `json:"issues"`
-	SampleValues    []string              `json:"sample_values"`
-	InvalidExamples []InvalidExampleDTO   `json:"invalid_examples,omitempty"`
+	Name            string              `json:"name"`
+	Index           int                 `json:"index"`
+	Status          string              `json:"status"`
+	TypeExpected    string              `json:"type_expected"`
+	TypeDetected    string              `json:"type_detected"`
+	Required        bool                `json:"required"`
+	MappedTo        string              `json:"mapped_to,omitempty"`
+	Statistics      ColumnStatisticsDTO `json:"statistics"`
+	Issues          []string            `json:"issues"`
+	SampleValues    []string            `json:"sample_values"`
+	InvalidExamples []InvalidExampleDTO `json:"invalid_examples,omitempty"`
 }
 
 // ColumnStatisticsDTO contiene estadísticas de una columna
@@ -57,8 +57,8 @@ type InvalidExampleDTO struct {
 
 // TablePreviewDTO representa la vista previa de la tabla
 type TablePreviewDTO struct {
-	Headers []HeaderInfoDTO  `json:"headers"`
-	Rows    []RowPreviewDTO  `json:"rows"`
+	Headers []HeaderInfoDTO `json:"headers"`
+	Rows    []RowPreviewDTO `json:"rows"`
 }
 
 // HeaderInfoDTO contiene información de un encabezado
@@ -71,9 +71,9 @@ type HeaderInfoDTO struct {
 
 // RowPreviewDTO representa una fila de preview
 type RowPreviewDTO struct {
-	RowNumber int                  `json:"row_number"`
-	Cells     []CellValidationDTO  `json:"cells"`
-	RowStatus string               `json:"row_status"`
+	RowNumber int                 `json:"row_number"`
+	Cells     []CellValidationDTO `json:"cells"`
+	RowStatus string              `json:"row_status"`
 }
 
 // CellValidationDTO representa la validación de una celda
@@ -113,7 +113,7 @@ func NewSchemaValidationResponse(validation *entity.SchemaValidation) *SchemaVal
 		CreatedAt:         validation.CreatedAt,
 		ExpiresAt:         validation.ExpiresAt,
 	}
-	
+
 	// Mapear columnas
 	for name, col := range validation.Columns {
 		response.Columns[name] = ColumnValidationDTO{
@@ -135,7 +135,7 @@ func NewSchemaValidationResponse(validation *entity.SchemaValidation) *SchemaVal
 			Issues:       col.Issues,
 			SampleValues: col.SampleValues,
 		}
-		
+
 		// Mapear ejemplos inválidos
 		if len(col.InvalidExamples) > 0 {
 			invalidExamples := make([]InvalidExampleDTO, len(col.InvalidExamples))
@@ -152,14 +152,14 @@ func NewSchemaValidationResponse(validation *entity.SchemaValidation) *SchemaVal
 			response.Columns[name] = colDTO
 		}
 	}
-	
+
 	// Mapear preview
 	if validation.TablePreview != nil {
 		response.TablePreview = &TablePreviewDTO{
 			Headers: make([]HeaderInfoDTO, len(validation.TablePreview.Headers)),
 			Rows:    make([]RowPreviewDTO, len(validation.TablePreview.Rows)),
 		}
-		
+
 		// Headers
 		for i, h := range validation.TablePreview.Headers {
 			response.TablePreview.Headers[i] = HeaderInfoDTO{
@@ -169,7 +169,7 @@ func NewSchemaValidationResponse(validation *entity.SchemaValidation) *SchemaVal
 				MappedTo: h.MappedTo,
 			}
 		}
-		
+
 		// Rows
 		for i, r := range validation.TablePreview.Rows {
 			cells := make([]CellValidationDTO, len(r.Cells))
@@ -182,7 +182,7 @@ func NewSchemaValidationResponse(validation *entity.SchemaValidation) *SchemaVal
 					ColumnIndex:    c.ColumnIndex,
 				}
 			}
-			
+
 			response.TablePreview.Rows[i] = RowPreviewDTO{
 				RowNumber: r.RowNumber,
 				Cells:     cells,
@@ -190,7 +190,7 @@ func NewSchemaValidationResponse(validation *entity.SchemaValidation) *SchemaVal
 			}
 		}
 	}
-	
+
 	// Mapear resumen
 	if validation.Summary != nil {
 		response.Summary = &ValidationSummaryDTO{
@@ -204,6 +204,6 @@ func NewSchemaValidationResponse(validation *entity.SchemaValidation) *SchemaVal
 			RequiredColumns:      validation.Summary.RequiredColumns,
 		}
 	}
-	
+
 	return response
 }

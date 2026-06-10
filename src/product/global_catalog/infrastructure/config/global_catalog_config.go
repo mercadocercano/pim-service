@@ -11,29 +11,29 @@ import (
 
 // GlobalCatalogConfig contiene la configuración del módulo global catalog
 type GlobalCatalogConfig struct {
-	DB                                      *sql.DB
-	GlobalCatalogController                 *controller.GlobalCatalogController
-	ProductRequestController                *controller.ProductRequestController
-	globalProductRepository                 *persistence.PostgresGlobalProductRepository
-	productRequestRepository                *persistence.PostgresProductRequestRepository
-	createGlobalProductUseCase              *usecase.CreateGlobalProduct
-	searchByEANUseCase                      *usecase.SearchByEAN
-	listGlobalProductsUseCase               *usecase.ListGlobalProducts
-	listGlobalProductsByCriteriaUseCase     *usecase.ListGlobalProductsByCriteriaUseCase
-	getGlobalProductByIDUseCase             *usecase.GetGlobalProductByID
-	updateGlobalProductByIDUseCase          *usecase.UpdateGlobalProductByID
-	deleteGlobalProductUseCase              *usecase.DeleteGlobalProduct
-	verifyGlobalProductUseCase              *usecase.VerifyGlobalProduct
-	unverifyGlobalProductUseCase            *usecase.UnverifyGlobalProduct
-	bulkImportGlobalProductsUseCase         *usecase.BulkImportGlobalProducts
-	getBusinessTypeFacetsUseCase            *usecase.GetBusinessTypeFacets
-	listProductsNeedingEnrichmentUseCase    *usecase.ListProductsNeedingEnrichment
-	getGlobalProductsByIDsUseCase           *usecase.GetGlobalProductsByIDs
-	getDistinctBusinessTypesUseCase         *usecase.GetDistinctBusinessTypes
-	createProductRequestUseCase             *usecase.CreateProductRequestUseCase
-	listProductRequestsUseCase              *usecase.ListProductRequestsUseCase
-	resolveProductRequestUseCase            *usecase.ResolveProductRequestUseCase
-	criteriaBuilder                         *criteria.GlobalProductCriteriaBuilder
+	DB                                   *sql.DB
+	GlobalCatalogController              *controller.GlobalCatalogController
+	ProductRequestController             *controller.ProductRequestController
+	globalProductRepository              *persistence.PostgresGlobalProductRepository
+	productRequestRepository             *persistence.PostgresProductRequestRepository
+	createGlobalProductUseCase           *usecase.CreateGlobalProduct
+	searchByEANUseCase                   *usecase.SearchByEAN
+	listGlobalProductsUseCase            *usecase.ListGlobalProducts
+	listGlobalProductsByCriteriaUseCase  *usecase.ListGlobalProductsByCriteriaUseCase
+	getGlobalProductByIDUseCase          *usecase.GetGlobalProductByID
+	updateGlobalProductByIDUseCase       *usecase.UpdateGlobalProductByID
+	deleteGlobalProductUseCase           *usecase.DeleteGlobalProduct
+	verifyGlobalProductUseCase           *usecase.VerifyGlobalProduct
+	unverifyGlobalProductUseCase         *usecase.UnverifyGlobalProduct
+	bulkImportGlobalProductsUseCase      *usecase.BulkImportGlobalProducts
+	getBusinessTypeFacetsUseCase         *usecase.GetBusinessTypeFacets
+	listProductsNeedingEnrichmentUseCase *usecase.ListProductsNeedingEnrichment
+	getGlobalProductsByIDsUseCase        *usecase.GetGlobalProductsByIDs
+	getDistinctBusinessTypesUseCase      *usecase.GetDistinctBusinessTypes
+	createProductRequestUseCase          *usecase.CreateProductRequestUseCase
+	listProductRequestsUseCase           *usecase.ListProductRequestsUseCase
+	resolveProductRequestUseCase         *usecase.ResolveProductRequestUseCase
+	criteriaBuilder                      *criteria.GlobalProductCriteriaBuilder
 }
 
 // NewGlobalCatalogConfig crea una nueva configuración del módulo
@@ -64,7 +64,7 @@ func (c *GlobalCatalogConfig) initializeUseCases() {
 	c.listGlobalProductsByCriteriaUseCase = usecase.NewListGlobalProductsByCriteriaUseCase(c.globalProductRepository)
 	c.getGlobalProductByIDUseCase = usecase.NewGetGlobalProductByID(c.globalProductRepository)
 	c.updateGlobalProductByIDUseCase = usecase.NewUpdateGlobalProductByID(c.globalProductRepository)
-	c.deleteGlobalProductUseCase = usecase.NewDeleteGlobalProduct(c.globalProductRepository, c.DB)
+	c.deleteGlobalProductUseCase = usecase.NewDeleteGlobalProduct(c.globalProductRepository)
 	c.verifyGlobalProductUseCase = usecase.NewVerifyGlobalProduct(c.globalProductRepository)
 	c.unverifyGlobalProductUseCase = usecase.NewUnverifyGlobalProduct(c.globalProductRepository)
 	c.bulkImportGlobalProductsUseCase = usecase.NewBulkImportGlobalProducts(c.globalProductRepository)

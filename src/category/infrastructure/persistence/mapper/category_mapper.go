@@ -2,7 +2,7 @@ package mapper
 
 import (
 	"strings"
-	
+
 	"saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/category/infrastructure/persistence/model"
 )

@@ -12,11 +12,11 @@ import (
 	"saas-mt-pim-service/src/overview/application/response"
 
 	// Importar las interfaces de repositorios
+	cr "github.com/mercadocercano/criteria"
 	attributePort "saas-mt-pim-service/src/attribute/domain/port"
 	brandPort "saas-mt-pim-service/src/brand/domain/port"
 	categoryPort "saas-mt-pim-service/src/category/domain/port"
 	globalProductPort "saas-mt-pim-service/src/product/global_catalog/domain/port"
-	cr "github.com/mercadocercano/criteria"
 )
 
 // GetMarketplaceOverviewUseCase implementa el caso de uso para obtener overview del marketplace
@@ -415,13 +415,13 @@ func (uc *GetMarketplaceOverviewUseCase) getCurationStats(
 	// Llamar al Catalog BFF para obtener stats de curación
 	catalogBFFURL := "http://catalog-bff-service:8085" // URL interna de Docker
 	dashboardURL := fmt.Sprintf("%s/api/v1/admin/dashboard/stats", catalogBFFURL)
-	
+
 	httpReq, err := http.NewRequestWithContext(ctx, "GET", dashboardURL, nil)
 	if err != nil {
 		// Retornar stats vacíos en caso de error
 		return stats, nil
 	}
-	
+
 	client := &http.Client{Timeout: 3 * time.Second}
 	resp, err := client.Do(httpReq)
 	if err != nil {
@@ -429,12 +429,12 @@ func (uc *GetMarketplaceOverviewUseCase) getCurationStats(
 		return stats, nil
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != http.StatusOK {
 		// Retornar stats vacíos si hubo error
 		return stats, nil
 	}
-	
+
 	var bffResponse struct {
 		Curation struct {
 			Pending       int `json:"pending"`
@@ -443,12 +443,12 @@ func (uc *GetMarketplaceOverviewUseCase) getCurationStats(
 			TotalScraped  int `json:"total_scraped"`
 		} `json:"curation"`
 	}
-	
+
 	if err := json.NewDecoder(resp.Body).Decode(&bffResponse); err != nil {
 		// Retornar stats vacíos si no se puede parsear
 		return stats, nil
 	}
-	
+
 	stats["pending"] = bffResponse.Curation.Pending
 	stats["approved_today"] = bffResponse.Curation.ApprovedToday
 	stats["rejected_today"] = bffResponse.Curation.RejectedToday

@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
+	cr "github.com/mercadocercano/criteria"
 	globalEntity "saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	globalVO "saas-mt-pim-service/src/product/global_catalog/domain/value_object"
+	"saas-mt-pim-service/src/product/quickstart/application/usecase"
 	tenantEntity "saas-mt-pim-service/src/product/tenant/domain/entity"
 	tenantPort "saas-mt-pim-service/src/product/tenant/domain/port"
 	tenantVO "saas-mt-pim-service/src/product/tenant/domain/value_object"
-	"saas-mt-pim-service/src/product/quickstart/application/usecase"
-	cr "github.com/mercadocercano/criteria"
 
 	"github.com/google/uuid"
 )
@@ -33,9 +33,9 @@ func (m *mockGlobalRepo) Save(gp *globalEntity.GlobalProduct) (*globalEntity.Glo
 func (m *mockGlobalRepo) Update(gp *globalEntity.GlobalProduct) (*globalEntity.GlobalProduct, error) {
 	return nil, nil
 }
-func (m *mockGlobalRepo) FindByID(id string) (*globalEntity.GlobalProduct, error)      { return nil, nil }
-func (m *mockGlobalRepo) Delete(id string) error                                       { return nil }
-func (m *mockGlobalRepo) FindByEAN(ean string) (*globalEntity.GlobalProduct, error)    { return nil, nil }
+func (m *mockGlobalRepo) FindByID(id string) (*globalEntity.GlobalProduct, error)   { return nil, nil }
+func (m *mockGlobalRepo) Delete(id string) error                                    { return nil }
+func (m *mockGlobalRepo) FindByEAN(ean string) (*globalEntity.GlobalProduct, error) { return nil, nil }
 func (m *mockGlobalRepo) FindActiveByEAN(ean string) (*globalEntity.GlobalProduct, error) {
 	return nil, nil
 }
@@ -88,11 +88,11 @@ func (m *mockGlobalRepo) FindDistinctBrandsByBusinessType(bt string) ([]string, 
 func (m *mockGlobalRepo) FindDistinctCategoriesByBusinessType(bt string) ([]string, error) {
 	return nil, nil
 }
-func (m *mockGlobalRepo) FindDistinctBusinessTypes() ([]string, error) { return nil, nil }
-func (m *mockGlobalRepo) CountTotal() (int, error)                     { return 0, nil }
-func (m *mockGlobalRepo) CountBySource(source string) (int, error)     { return 0, nil }
+func (m *mockGlobalRepo) FindDistinctBusinessTypes() ([]string, error)  { return nil, nil }
+func (m *mockGlobalRepo) CountTotal() (int, error)                      { return 0, nil }
+func (m *mockGlobalRepo) CountBySource(source string) (int, error)      { return 0, nil }
 func (m *mockGlobalRepo) CountByQualityScore(minScore int) (int, error) { return 0, nil }
-func (m *mockGlobalRepo) CountArgentineProducts() (int, error)         { return 0, nil }
+func (m *mockGlobalRepo) CountArgentineProducts() (int, error)          { return 0, nil }
 func (m *mockGlobalRepo) SearchByCriteria(ctx context.Context, crit cr.Criteria) ([]*globalEntity.GlobalProduct, error) {
 	return nil, nil
 }
