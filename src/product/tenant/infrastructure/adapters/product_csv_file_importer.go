@@ -9,15 +9,15 @@ import (
 
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	"saas-mt-pim-service/src/product/tenant/domain/value_object"
+	sharedadapters "github.com/mercadocercano/go-shared/infrastructure/adapters"
 	sharedport "github.com/mercadocercano/go-shared/domain/port"
-	"saas-mt-pim-service/src/shared/infrastructure/adapters"
 
 	"github.com/google/uuid"
 )
 
 // ProductCSVFileImporter implementa la importación de productos desde CSV
 type ProductCSVFileImporter struct {
-	*adapters.BaseCSVFileImporter[entity.Product]
+	*sharedadapters.BaseCSVFileImporter[entity.Product]
 
 	// categoryService para validar categorías
 	categoryService CategoryValidator
@@ -39,7 +39,7 @@ type BrandValidator interface {
 // NewProductCSVFileImporter crea un nuevo importador de productos CSV
 func NewProductCSVFileImporter(categoryService CategoryValidator, brandService BrandValidator) *ProductCSVFileImporter {
 	requiredColumns := []string{"name", "sku", "price"}
-	base := adapters.NewBaseCSVFileImporter[entity.Product](',', true, requiredColumns)
+	base := sharedadapters.NewBaseCSVFileImporter[entity.Product](',', true, requiredColumns)
 
 	return &ProductCSVFileImporter{
 		BaseCSVFileImporter: base,
