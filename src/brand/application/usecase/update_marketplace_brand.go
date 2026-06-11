@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/brand/application/request"
 	"saas-mt-pim-service/src/brand/domain/port"
 )

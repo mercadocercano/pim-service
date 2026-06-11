@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"saas-mt-pim-service/src/quickstart/domain/port"
-	sharedport "github.com/mercadocercano/go-shared/domain/port"
+	sharedport "github.com/hornosg/go-shared/domain/port"
 )
 
 // ApplyTemplateRequest es la petición para aplicar un template

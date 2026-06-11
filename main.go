@@ -18,7 +18,7 @@ import (
 	productConfig "saas-mt-pim-service/src/product/tenant/infrastructure/config"
 	quickstartConfig "saas-mt-pim-service/src/quickstart/infrastructure/config"
 	sharedConfig "saas-mt-pim-service/src/shared/infrastructure/config"
-	sharedmetrics "github.com/mercadocercano/go-shared/infrastructure/metrics"
+	sharedmetrics "github.com/hornosg/go-shared/infrastructure/metrics"
 
 	// Brand imports
 	brandController "saas-mt-pim-service/src/brand/infrastructure/controller"
@@ -50,7 +50,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq" // Driver de PostgreSQL
-	tenantmw "github.com/mercadocercano/middleware"
+	tenantmw "github.com/hornosg/go-shared/infrastructure/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

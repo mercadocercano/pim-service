@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	"log"
 	"saas-mt-pim-service/src/overview/domain/entity"
 	"saas-mt-pim-service/src/overview/domain/exception"

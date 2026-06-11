@@ -3,7 +3,7 @@ package criteria
 import (
 	"net/url"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 
 	"github.com/gin-gonic/gin"
 )

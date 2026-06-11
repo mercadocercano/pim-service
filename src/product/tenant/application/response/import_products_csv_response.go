@@ -2,7 +2,7 @@ package response
 
 import (
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
-	sharedport "github.com/mercadocercano/go-shared/domain/port"
+	sharedport "github.com/hornosg/go-shared/domain/port"
 )
 
 // ImportProductsCSVResponse respuesta de la importación de productos desde CSV

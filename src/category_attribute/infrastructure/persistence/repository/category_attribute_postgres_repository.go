@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/category_attribute/domain/entity"
 	"saas-mt-pim-service/src/category_attribute/domain/port"
 	"saas-mt-pim-service/src/category_attribute/infrastructure/persistence/mapper"

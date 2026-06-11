@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	businessTypeEntity "saas-mt-pim-service/src/businesstype/domain/entity"
 	"saas-mt-pim-service/src/quickstart/application/usecase"
 	quickstartEntity "saas-mt-pim-service/src/quickstart/domain/entity"

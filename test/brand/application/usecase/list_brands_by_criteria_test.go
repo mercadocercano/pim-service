@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/brand/application/mapper"
 	"saas-mt-pim-service/src/brand/application/usecase"
 	"saas-mt-pim-service/src/brand/domain/entity"

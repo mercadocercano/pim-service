@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	globalEntity "saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	globalVO "saas-mt-pim-service/src/product/global_catalog/domain/value_object"
 	"saas-mt-pim-service/src/product/quickstart/application/usecase"

@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
-	sharedport "github.com/mercadocercano/go-shared/domain/port"
+	sharedport "github.com/hornosg/go-shared/domain/port"
 )
 
 // TemplateCategory representa una categoría del template (desde JSON)

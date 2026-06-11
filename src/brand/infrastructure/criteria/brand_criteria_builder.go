@@ -1,7 +1,7 @@
 package criteria
 
 import (
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 
 	"github.com/gin-gonic/gin"
 )

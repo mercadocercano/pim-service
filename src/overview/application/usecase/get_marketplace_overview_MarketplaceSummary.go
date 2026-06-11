@@ -12,7 +12,7 @@ import (
 	"saas-mt-pim-service/src/overview/application/response"
 
 	// Importar las interfaces de repositorios
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	attributePort "saas-mt-pim-service/src/attribute/domain/port"
 	brandPort "saas-mt-pim-service/src/brand/domain/port"
 	categoryPort "saas-mt-pim-service/src/category/domain/port"

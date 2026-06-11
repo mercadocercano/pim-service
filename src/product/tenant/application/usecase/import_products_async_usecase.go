@@ -15,7 +15,7 @@ import (
 	tenantport "saas-mt-pim-service/src/product/tenant/domain/port"
 	sharedEntity "saas-mt-pim-service/src/shared/domain/entity"
 	localport "saas-mt-pim-service/src/shared/domain/port"
-	sharedport "github.com/mercadocercano/go-shared/domain/port"
+	sharedport "github.com/hornosg/go-shared/domain/port"
 )
 
 // ImportProductsAsyncUseCase maneja importaciones asíncronas de productos

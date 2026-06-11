@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/product/tenant/application/mapper"
 	"saas-mt-pim-service/src/product/tenant/application/response"
 	"saas-mt-pim-service/src/product/tenant/domain/entity"

@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/category/domain/entity"
 	"saas-mt-pim-service/src/category/domain/exception"
 	"saas-mt-pim-service/src/category/infrastructure/persistence/mapper"

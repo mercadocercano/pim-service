@@ -9,7 +9,7 @@ import (
 	"saas-mt-pim-service/src/product/tenant/application/response"
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	tenantport "saas-mt-pim-service/src/product/tenant/domain/port"
-	sharedport "github.com/mercadocercano/go-shared/domain/port"
+	sharedport "github.com/hornosg/go-shared/domain/port"
 )
 
 // ImportProductsFromCSVUseCase caso de uso para importar productos desde CSV

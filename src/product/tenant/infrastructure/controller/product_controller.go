@@ -13,7 +13,7 @@ import (
 	"saas-mt-pim-service/src/product/tenant/application/usecase"
 	tenantport "saas-mt-pim-service/src/product/tenant/domain/port"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/criteria"
-	sharedport "github.com/mercadocercano/go-shared/domain/port"
+	sharedport "github.com/hornosg/go-shared/domain/port"
 )
 
 // ProductController maneja las peticiones HTTP para productos

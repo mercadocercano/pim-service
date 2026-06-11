@@ -17,7 +17,7 @@ import (
 	"saas-mt-pim-service/src/product/tenant/infrastructure/criteria"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/persistence"
 	"saas-mt-pim-service/src/quickstart/domain/port"
-	sharedport "github.com/mercadocercano/go-shared/domain/port"
+	sharedport "github.com/hornosg/go-shared/domain/port"
 )
 
 // ProductConfig contiene todas las dependencias del módulo Product

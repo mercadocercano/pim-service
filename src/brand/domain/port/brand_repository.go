@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/brand/domain/entity"
 )
 

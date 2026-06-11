@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/category/application/request"
 	"saas-mt-pim-service/src/category/application/response"
 	"saas-mt-pim-service/src/category/application/usecase"

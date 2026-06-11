@@ -14,7 +14,7 @@ import (
 	categoryEntity "saas-mt-pim-service/src/category/domain/entity"
 	globalEntity "saas-mt-pim-service/src/product/global_catalog/domain/entity"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/overview/application/request"
 	"saas-mt-pim-service/src/overview/application/usecase"
 )

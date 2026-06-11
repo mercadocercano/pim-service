@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/category_attribute/domain/entity"
 )
 

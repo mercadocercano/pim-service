@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 
 	"saas-mt-pim-service/src/businesstype/application/usecase"
 	"saas-mt-pim-service/src/businesstype/domain/port"

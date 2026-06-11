@@ -9,8 +9,8 @@ import (
 
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	"saas-mt-pim-service/src/product/tenant/domain/value_object"
-	sharedadapters "github.com/mercadocercano/go-shared/infrastructure/adapters"
-	sharedport "github.com/mercadocercano/go-shared/domain/port"
+	sharedadapters "github.com/hornosg/go-shared/infrastructure/adapters"
+	sharedport "github.com/hornosg/go-shared/domain/port"
 
 	"github.com/google/uuid"
 )

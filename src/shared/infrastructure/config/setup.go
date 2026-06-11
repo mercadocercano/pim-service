@@ -4,8 +4,8 @@ import (
 	apimiddleware "saas-mt-pim-service/src/api/infrastructure/middleware"
 
 	"github.com/gin-gonic/gin"
-	sharedconfig "github.com/mercadocercano/go-shared/infrastructure/config"
-	sharedmiddleware "github.com/mercadocercano/go-shared/infrastructure/middleware"
+	sharedconfig "github.com/hornosg/go-shared/infrastructure/config"
+	sharedmiddleware "github.com/hornosg/go-shared/infrastructure/middleware"
 )
 
 // SharedConfig is an alias for go-shared's SharedConfig, extended with pim defaults.

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	cr "github.com/mercadocercano/criteria"
+	cr "github.com/hornosg/go-shared/criteria"
 	businessTypeEntity "saas-mt-pim-service/src/businesstype/domain/entity"
 	quickstartEntity "saas-mt-pim-service/src/quickstart/domain/entity"
 	"saas-mt-pim-service/src/quickstart/domain/service"

@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 
-	sharedport "github.com/mercadocercano/go-shared/domain/port"
+	sharedport "github.com/hornosg/go-shared/domain/port"
 )
 
 // Compile-time checks: both *sql.DB and *sql.Tx satisfy the shared Executor port.
