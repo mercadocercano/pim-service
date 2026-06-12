@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 	"strconv"
 	"strings"
@@ -136,10 +137,7 @@ func (gc *GlobalCatalogController) RegisterRoutes(router *gin.RouterGroup) {
 func (gc *GlobalCatalogController) CreateProduct(c *gin.Context) {
 	var request usecase.CreateGlobalProductRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "JSON inválido",
-			"details": err.Error(),
-		})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "JSON inválido", err.Error())
 		return
 	}
 
@@ -157,9 +155,7 @@ func (gc *GlobalCatalogController) CreateProduct(c *gin.Context) {
 func (gc *GlobalCatalogController) SearchByEAN(c *gin.Context) {
 	ean := c.Query("ean")
 	if ean == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Parámetro 'ean' es obligatorio",
-		})
+		httpresp.JSON(c, http.StatusBadRequest, "Parámetro 'ean' es obligatorio")
 		return
 	}
 
@@ -184,9 +180,7 @@ func (gc *GlobalCatalogController) SearchByEAN(c *gin.Context) {
 func (gc *GlobalCatalogController) SearchByEANPublic(c *gin.Context) {
 	ean := c.Query("ean")
 	if ean == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Parámetro 'ean' es obligatorio",
-		})
+		httpresp.JSON(c, http.StatusBadRequest, "Parámetro 'ean' es obligatorio")
 		return
 	}
 
@@ -209,9 +203,7 @@ func (gc *GlobalCatalogController) SearchByEANPublic(c *gin.Context) {
 func (gc *GlobalCatalogController) GetProductByEAN(c *gin.Context) {
 	ean := c.Param("ean")
 	if ean == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "EAN no especificado en la URL",
-		})
+		httpresp.JSON(c, http.StatusBadRequest, "EAN no especificado en la URL")
 		return
 	}
 
@@ -276,9 +268,7 @@ func (gc *GlobalCatalogController) ListProducts(c *gin.Context) {
 func (gc *GlobalCatalogController) GetProductsSuggestions(c *gin.Context) {
 	businessType := c.Query("business_type")
 	if businessType == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Parámetro 'business_type' es obligatorio",
-		})
+		httpresp.JSON(c, http.StatusBadRequest, "Parámetro 'business_type' es obligatorio")
 		return
 	}
 
@@ -310,9 +300,7 @@ func (gc *GlobalCatalogController) GetProductsSuggestions(c *gin.Context) {
 func (gc *GlobalCatalogController) GetBusinessTypeFacets(c *gin.Context) {
 	businessType := c.Query("business_type")
 	if businessType == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Parámetro 'business_type' es obligatorio",
-		})
+		httpresp.JSON(c, http.StatusBadRequest, "Parámetro 'business_type' es obligatorio")
 		return
 	}
 
@@ -335,23 +323,13 @@ func (gc *GlobalCatalogController) handleUseCaseError(c *gin.Context, err error)
 		}
 		c.JSON(http.StatusBadRequest, body)
 	case *exception.ConflictError:
-		c.JSON(http.StatusConflict, gin.H{
-			"error": e.Message,
-		})
+		httpresp.JSON(c, http.StatusConflict, e.Message)
 	case *exception.GlobalProductNotFoundError:
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": e.Error(),
-		})
+		httpresp.JSON(c, http.StatusNotFound, e.Error())
 	case *exception.InternalError:
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Error interno del servidor",
-			"details": e.Message,
-		})
+		httpresp.JSONWithDetails(c, http.StatusInternalServerError, "Error interno del servidor", e.Message)
 	default:
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Error interno del servidor",
-			"details": err.Error(),
-		})
+		httpresp.JSONWithDetails(c, http.StatusInternalServerError, "Error interno del servidor", err.Error())
 	}
 }
 
@@ -373,9 +351,7 @@ func (gc *GlobalCatalogController) HealthCheck(c *gin.Context) {
 func (gc *GlobalCatalogController) GetProductByID(c *gin.Context) {
 	productID := c.Param("id")
 	if productID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "ID del producto no especificado",
-		})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto no especificado")
 		return
 	}
 
@@ -402,18 +378,13 @@ func (gc *GlobalCatalogController) GetProductByID(c *gin.Context) {
 func (gc *GlobalCatalogController) UpdateProductByID(c *gin.Context) {
 	productID := c.Param("id")
 	if productID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "ID del producto no especificado",
-		})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto no especificado")
 		return
 	}
 
 	var request usecase.UpdateGlobalProductByIDRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "JSON inválido",
-			"details": err.Error(),
-		})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "JSON inválido", err.Error())
 		return
 	}
 
@@ -493,17 +464,13 @@ func (gc *GlobalCatalogController) ListProductsNeedingEnrichment(c *gin.Context)
 func (gc *GlobalCatalogController) GetProductsByIDs(c *gin.Context) {
 	idsParam := c.Query("ids")
 	if idsParam == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "parámetro 'ids' es obligatorio",
-		})
+		httpresp.JSON(c, http.StatusBadRequest, "parámetro 'ids' es obligatorio")
 		return
 	}
 
 	ids := splitAndTrim(idsParam)
 	if len(ids) > 100 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "se permiten máximo 100 IDs por request",
-		})
+		httpresp.JSON(c, http.StatusBadRequest, "se permiten máximo 100 IDs por request")
 		return
 	}
 
@@ -534,12 +501,12 @@ func splitAndTrim(s string) []string {
 func (gc *GlobalCatalogController) DeleteProductByID(c *gin.Context) {
 	productID := c.Param("id")
 	if productID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto no especificado"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto no especificado")
 		return
 	}
 
 	if gc.deleteGlobalProduct == nil {
-		c.JSON(http.StatusNotImplemented, gin.H{"error": "Endpoint no implementado"})
+		httpresp.JSON(c, http.StatusNotImplemented, "Endpoint no implementado")
 		return
 	}
 
@@ -557,12 +524,12 @@ func (gc *GlobalCatalogController) DeleteProductByID(c *gin.Context) {
 func (gc *GlobalCatalogController) VerifyProduct(c *gin.Context) {
 	productID := c.Param("id")
 	if productID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto no especificado"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto no especificado")
 		return
 	}
 
 	if gc.verifyGlobalProduct == nil {
-		c.JSON(http.StatusNotImplemented, gin.H{"error": "Endpoint no implementado"})
+		httpresp.JSON(c, http.StatusNotImplemented, "Endpoint no implementado")
 		return
 	}
 
@@ -580,12 +547,12 @@ func (gc *GlobalCatalogController) VerifyProduct(c *gin.Context) {
 func (gc *GlobalCatalogController) UnverifyProduct(c *gin.Context) {
 	productID := c.Param("id")
 	if productID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto no especificado"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto no especificado")
 		return
 	}
 
 	if gc.unverifyGlobalProduct == nil {
-		c.JSON(http.StatusNotImplemented, gin.H{"error": "Endpoint no implementado"})
+		httpresp.JSON(c, http.StatusNotImplemented, "Endpoint no implementado")
 		return
 	}
 
@@ -602,13 +569,13 @@ func (gc *GlobalCatalogController) UnverifyProduct(c *gin.Context) {
 // POST /api/v1/global-catalog/products/bulk-import
 func (gc *GlobalCatalogController) BulkImportProducts(c *gin.Context) {
 	if gc.bulkImportGlobalProducts == nil {
-		c.JSON(http.StatusNotImplemented, gin.H{"error": "Endpoint no implementado"})
+		httpresp.JSON(c, http.StatusNotImplemented, "Endpoint no implementado")
 		return
 	}
 
 	var req usecase.BulkImportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "JSON inválido", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "JSON inválido", err.Error())
 		return
 	}
 
@@ -626,7 +593,7 @@ func (gc *GlobalCatalogController) BulkImportProducts(c *gin.Context) {
 func (gc *GlobalCatalogController) GetDistinctBusinessTypes(c *gin.Context) {
 	types, err := gc.getDistinctBusinessTypes.Execute()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"business_types": types})

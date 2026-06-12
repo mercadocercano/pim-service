@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 	"strconv"
 	"strings"
@@ -65,23 +66,23 @@ func (h *MarketplaceCategoryHandler) CreateMarketplaceCategory(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden crear categorías marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden crear categorías marketplace")
 		return
 	}
 
 	var req request.CreateMarketplaceCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
 	category, err := h.createMarketplaceCategoryUseCase.Execute(c.Request.Context(), &req)
 	if err != nil {
 		if strings.Contains(err.Error(), "already exists") {
-			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusConflict, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -94,7 +95,7 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden ver categorías marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden ver categorías marketplace")
 		return
 	}
 
@@ -188,14 +189,14 @@ func (h *MarketplaceCategoryHandler) GetAllMarketplaceCategories(c *gin.Context)
 	// Usar FindByCriteria en lugar de GetTree
 	categories, err := h.categoryRepository.FindByCriteria(c.Request.Context(), criteria)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// Obtener conteo total para paginación
 	totalCount, err := h.categoryRepository.CountByCriteria(c.Request.Context(), criteria)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -254,7 +255,7 @@ func (h *MarketplaceCategoryHandler) GetMarketplaceCategoriesTree(c *gin.Context
 
 	categories, err := h.categoryRepository.FindByCriteria(c.Request.Context(), criteria)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener categorías: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error al obtener categorías: "+err.Error())
 		return
 	}
 
@@ -298,26 +299,26 @@ func (h *MarketplaceCategoryHandler) UpdateMarketplaceCategory(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden actualizar categorías marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden actualizar categorías marketplace")
 		return
 	}
 
 	// Obtener el ID de la categoría de la URL
 	categoryID := c.Param("id")
 	if categoryID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de categoría es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de categoría es requerido")
 		return
 	}
 
 	var req request.UpdateMarketplaceCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
 	category, err := h.updateMarketplaceCategoryUseCase.Execute(c.Request.Context(), categoryID, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -328,13 +329,13 @@ func (h *MarketplaceCategoryHandler) UpdateMarketplaceCategory(c *gin.Context) {
 func (h *MarketplaceCategoryHandler) GetMarketplaceCategoryByID(c *gin.Context) {
 	categoryID := c.Param("id")
 	if categoryID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de categoría es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de categoría es requerido")
 		return
 	}
 
 	category, err := h.categoryRepository.GetByID(c.Request.Context(), categoryID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Categoría no encontrada"})
+		httpresp.JSON(c, http.StatusNotFound, "Categoría no encontrada")
 		return
 	}
 
@@ -364,28 +365,28 @@ func (h *MarketplaceCategoryHandler) GetMarketplaceCategoryByID(c *gin.Context) 
 func (h *MarketplaceCategoryHandler) DeleteMarketplaceCategory(c *gin.Context) {
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden eliminar categorías marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden eliminar categorías marketplace")
 		return
 	}
 
 	categoryID := c.Param("id")
 	if categoryID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de categoría es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de categoría es requerido")
 		return
 	}
 
 	children, err := h.categoryRepository.GetByParentID(c.Request.Context(), &categoryID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al verificar subcategorías: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error al verificar subcategorías: "+err.Error())
 		return
 	}
 	if len(children) > 0 {
-		c.JSON(http.StatusConflict, gin.H{"error": "No se puede eliminar: la categoría tiene subcategorías"})
+		httpresp.JSON(c, http.StatusConflict, "No se puede eliminar: la categoría tiene subcategorías")
 		return
 	}
 
 	if err := h.categoryRepository.Delete(c.Request.Context(), categoryID); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Categoría no encontrada"})
+		httpresp.JSON(c, http.StatusNotFound, "Categoría no encontrada")
 		return
 	}
 
@@ -399,7 +400,7 @@ func (h *MarketplaceCategoryHandler) GetTenantTaxonomy(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -422,7 +423,7 @@ func (h *MarketplaceCategoryHandler) GetTenantTaxonomy(c *gin.Context) {
 
 	taxonomy, err := h.getTenantTaxonomyUseCase.Execute(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -435,19 +436,19 @@ func (h *MarketplaceCategoryHandler) ValidateCategoryHierarchy(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden validar jerarquías"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden validar jerarquías")
 		return
 	}
 
 	var req request.ValidateCategoryHierarchyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
 	validation, err := h.validateCategoryHierarchyUseCase.Execute(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -461,19 +462,19 @@ func (h *MarketplaceCategoryHandler) SyncMarketplaceChanges(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden sincronizar cambios"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden sincronizar cambios")
 		return
 	}
 
 	var req request.SyncMarketplaceChangesRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: " + err.Error())
 		return
 	}
 
 	result, err := h.syncMarketplaceChangesUseCase.Execute(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

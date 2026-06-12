@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	cr "github.com/hornosg/go-shared/criteria"
@@ -56,23 +57,23 @@ func (h *AttributeHandler) Create(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
 	var req request.CreateAttributeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
 	attribute, err := h.createUseCase.Execute(c.Request.Context(), tenantID, req.Name)
 	if err != nil {
 		if err == usecase.ErrInvalidAttributeName || err == usecase.ErrAttributeExists {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -84,13 +85,13 @@ func (h *AttributeHandler) List(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
 	attributes, err := h.listUseCase.Execute(c.Request.Context(), tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -102,7 +103,7 @@ func (h *AttributeHandler) GetByID(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -111,10 +112,10 @@ func (h *AttributeHandler) GetByID(c *gin.Context) {
 	attribute, err := h.getByIDUseCase.Execute(c.Request.Context(), id, tenantID)
 	if err != nil {
 		if err == usecase.ErrAttributeNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -126,7 +127,7 @@ func (h *AttributeHandler) Update(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -134,21 +135,21 @@ func (h *AttributeHandler) Update(c *gin.Context) {
 
 	var req request.UpdateAttributeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
 	attribute, err := h.updateUseCase.Execute(c.Request.Context(), id, tenantID, req.Name)
 	if err != nil {
 		if err == usecase.ErrAttributeNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
 		if err == usecase.ErrInvalidAttributeName || err == usecase.ErrAttributeExists {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -160,7 +161,7 @@ func (h *AttributeHandler) Delete(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -169,10 +170,10 @@ func (h *AttributeHandler) Delete(c *gin.Context) {
 	err := h.deleteUseCase.Execute(c.Request.Context(), id, tenantID)
 	if err != nil {
 		if err == usecase.ErrAttributeNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

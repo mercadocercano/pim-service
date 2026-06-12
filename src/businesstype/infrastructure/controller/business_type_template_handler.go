@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -69,18 +70,18 @@ func (h *BusinessTypeTemplateHandler) RegisterRoutes(router *gin.RouterGroup) {
 func (h *BusinessTypeTemplateHandler) CreateTemplate(c *gin.Context) {
 	var req usecase.CreateTemplateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Invalid request body: "+err.Error())
 		return
 	}
 
 	if req.BusinessTypeID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "business_type_id es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "business_type_id es requerido")
 		return
 	}
 
 	template, err := h.createUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -93,7 +94,7 @@ func (h *BusinessTypeTemplateHandler) ListTemplates(c *gin.Context) {
 
 	result, err := h.listUseCase.Execute(c.Request.Context(), validCriteria)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -106,7 +107,7 @@ func (h *BusinessTypeTemplateHandler) GetTemplate(c *gin.Context) {
 
 	template, err := h.getUseCase.Execute(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -119,7 +120,7 @@ func (h *BusinessTypeTemplateHandler) UpdateTemplate(c *gin.Context) {
 
 	var req usecase.UpdateTemplateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Invalid request body: "+err.Error())
 		return
 	}
 
@@ -127,7 +128,7 @@ func (h *BusinessTypeTemplateHandler) UpdateTemplate(c *gin.Context) {
 
 	template, err := h.updateUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -140,7 +141,7 @@ func (h *BusinessTypeTemplateHandler) DeleteTemplate(c *gin.Context) {
 
 	err := h.deleteUseCase.Execute(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -150,7 +151,7 @@ func (h *BusinessTypeTemplateHandler) DeleteTemplate(c *gin.Context) {
 // GetTemplateAnalytics retorna las analíticas de uso de un template
 func (h *BusinessTypeTemplateHandler) GetTemplateAnalytics(c *gin.Context) {
 	if h.analyticsUseCase == nil {
-		c.JSON(http.StatusNotImplemented, gin.H{"error": "analytics no configurado"})
+		httpresp.JSON(c, http.StatusNotImplemented, "analytics no configurado")
 		return
 	}
 
@@ -158,10 +159,10 @@ func (h *BusinessTypeTemplateHandler) GetTemplateAnalytics(c *gin.Context) {
 	analytics, err := h.analyticsUseCase.Execute(c.Request.Context(), id)
 	if err != nil {
 		if err.Error() == "template no encontrado" {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -171,7 +172,7 @@ func (h *BusinessTypeTemplateHandler) GetTemplateAnalytics(c *gin.Context) {
 // DuplicateTemplate duplica un template existente
 func (h *BusinessTypeTemplateHandler) DuplicateTemplate(c *gin.Context) {
 	if h.duplicateUseCase == nil {
-		c.JSON(http.StatusNotImplemented, gin.H{"error": "duplicate no configurado"})
+		httpresp.JSON(c, http.StatusNotImplemented, "duplicate no configurado")
 		return
 	}
 
@@ -191,10 +192,10 @@ func (h *BusinessTypeTemplateHandler) DuplicateTemplate(c *gin.Context) {
 	template, err := h.duplicateUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
 		if err.Error() == "template no encontrado" {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"log"
 	"net/http"
 
@@ -38,7 +39,7 @@ func (h *InternalHandler) deprecatedRefreshTemplateProducts(c *gin.Context) {
 func (h *InternalHandler) RefreshTemplateProducts(c *gin.Context) {
 	result, err := h.refreshUC.Execute(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

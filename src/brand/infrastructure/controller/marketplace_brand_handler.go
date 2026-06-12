@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 	"strconv"
 
@@ -48,7 +49,7 @@ func (h *MarketplaceBrandHandler) GetAllMarketplaceBrands(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden ver marcas marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden ver marcas marketplace")
 		return
 	}
 
@@ -103,14 +104,14 @@ func (h *MarketplaceBrandHandler) GetAllMarketplaceBrands(c *gin.Context) {
 	// Usar el repository para obtener datos
 	brands, err := h.repository.SearchByCriteria(c.Request.Context(), builtCriteria)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// Contar total
 	total, err := h.repository.CountByCriteria(c.Request.Context(), builtCriteria)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -146,7 +147,7 @@ func (h *MarketplaceBrandHandler) CreateMarketplaceBrand(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden crear marcas marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden crear marcas marketplace")
 		return
 	}
 
@@ -161,20 +162,20 @@ func (h *MarketplaceBrandHandler) CreateMarketplaceBrand(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&createData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
 	// Validar que el nombre no esté vacío
 	if createData.Name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "El nombre de la marca es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "El nombre de la marca es requerido")
 		return
 	}
 
 	// Crear la entidad Marketplacebrand usando el constructor
 	brand, err := entity.NewMarketplacebrand(createData.Name)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error al crear la marca: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error al crear la marca: "+err.Error())
 		return
 	}
 
@@ -205,10 +206,10 @@ func (h *MarketplaceBrandHandler) CreateMarketplaceBrand(c *gin.Context) {
 	if err := h.repository.Create(c.Request.Context(), brand); err != nil {
 		// Verificar si es un error de duplicado
 		if err.Error() == "marca ya existe" || err.Error() == "duplicate key" {
-			c.JSON(http.StatusConflict, gin.H{"error": "Una marca con ese nombre ya existe"})
+			httpresp.JSON(c, http.StatusConflict, "Una marca con ese nombre ya existe")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear la marca: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error al crear la marca: "+err.Error())
 		return
 	}
 
@@ -222,26 +223,26 @@ func (h *MarketplaceBrandHandler) GetMarketplaceBrandByID(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden ver marcas marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden ver marcas marketplace")
 		return
 	}
 
 	// Obtener ID de la marca
 	brandID := c.Param("id")
 	if brandID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de marca es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de marca es requerido")
 		return
 	}
 
 	// Buscar la marca por ID
 	brand, err := h.repository.FindByID(c.Request.Context(), brandID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error buscando la marca: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error buscando la marca: "+err.Error())
 		return
 	}
 
 	if brand == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Marca no encontrada"})
+		httpresp.JSON(c, http.StatusNotFound, "Marca no encontrada")
 		return
 	}
 
@@ -256,14 +257,14 @@ func (h *MarketplaceBrandHandler) UpdateMarketplaceBrand(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden actualizar marcas marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden actualizar marcas marketplace")
 		return
 	}
 
 	// Obtener ID de la marca
 	brandID := c.Param("id")
 	if brandID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de marca es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de marca es requerido")
 		return
 	}
 
@@ -281,7 +282,7 @@ func (h *MarketplaceBrandHandler) UpdateMarketplaceBrand(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
@@ -301,14 +302,14 @@ func (h *MarketplaceBrandHandler) UpdateMarketplaceBrand(c *gin.Context) {
 
 	// Ejecutar el use case
 	if err := h.updateUseCase.Execute(c.Request.Context(), updateRequest); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error actualizando la marca: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error actualizando la marca: "+err.Error())
 		return
 	}
 
 	// Obtener la marca actualizada para devolverla
 	updatedBrand, err := h.repository.FindByID(c.Request.Context(), brandID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error obteniendo marca actualizada: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error obteniendo marca actualizada: "+err.Error())
 		return
 	}
 
@@ -322,13 +323,13 @@ func (h *MarketplaceBrandHandler) DeleteMarketplaceBrand(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden eliminar marcas marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden eliminar marcas marketplace")
 		return
 	}
 
 	_ = c.Param("id") // TODO: usar id cuando se implemente
 	// TODO: Implementar eliminación
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Eliminar marca marketplace - pendiente implementación completa"})
+	httpresp.JSON(c, http.StatusNotImplemented, "Eliminar marca marketplace - pendiente implementación completa")
 }
 
 // VerifyMarketplaceBrand maneja la solicitud para verificar una marca marketplace
@@ -336,13 +337,13 @@ func (h *MarketplaceBrandHandler) VerifyMarketplaceBrand(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden verificar marcas marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden verificar marcas marketplace")
 		return
 	}
 
 	_ = c.Param("id") // TODO: usar id cuando se implemente
 	// TODO: Implementar verificación
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Verificar marca marketplace - pendiente implementación completa"})
+	httpresp.JSON(c, http.StatusNotImplemented, "Verificar marca marketplace - pendiente implementación completa")
 }
 
 // UnverifyMarketplaceBrand maneja la solicitud para desverificar una marca marketplace
@@ -350,11 +351,11 @@ func (h *MarketplaceBrandHandler) UnverifyMarketplaceBrand(c *gin.Context) {
 	// Validar que el usuario tenga permisos de administrador
 	userRole := c.GetHeader("X-User-Role")
 	if userRole != "marketplace_admin" && userRole != "super_admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden desverificar marcas marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden desverificar marcas marketplace")
 		return
 	}
 
 	_ = c.Param("id") // TODO: usar id cuando se implemente
 	// TODO: Implementar desverificación
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Desverificar marca marketplace - pendiente implementación completa"})
+	httpresp.JSON(c, http.StatusNotImplemented, "Desverificar marca marketplace - pendiente implementación completa")
 }

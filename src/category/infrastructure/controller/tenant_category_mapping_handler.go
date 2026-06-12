@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	"saas-mt-pim-service/src/category/application/request"
@@ -38,25 +39,25 @@ func (h *TenantCategoryMappingHandler) MapTenantCategory(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
 	var req request.MapTenantCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
 	// Verificar si el caso de uso está implementado
 	if h.mapTenantCategoryUseCase == nil {
-		c.JSON(http.StatusNotImplemented, gin.H{"error": "Funcionalidad no implementada aún"})
+		httpresp.JSON(c, http.StatusNotImplemented, "Funcionalidad no implementada aún")
 		return
 	}
 
 	mapping, err := h.mapTenantCategoryUseCase.Execute(c.Request.Context(), &req, tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -68,19 +69,19 @@ func (h *TenantCategoryMappingHandler) UpdateTenantCategoryMapping(c *gin.Contex
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
 	mappingID := c.Param("mapping_id")
 	if mappingID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "mapping_id es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "mapping_id es obligatorio")
 		return
 	}
 
 	var req request.MapTenantCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
@@ -104,17 +105,17 @@ func (h *TenantCategoryMappingHandler) DeleteTenantCategoryMapping(c *gin.Contex
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
 	mappingID := c.Param("mapping_id")
 	if mappingID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "mapping_id es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "mapping_id es obligatorio")
 		return
 	}
 
 	// TODO: Implementar caso de uso de eliminación
 	// Por ahora retornamos un error indicando que no está implementado
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Eliminación de mapeos no implementada aún"})
+	httpresp.JSON(c, http.StatusNotImplemented, "Eliminación de mapeos no implementada aún")
 }

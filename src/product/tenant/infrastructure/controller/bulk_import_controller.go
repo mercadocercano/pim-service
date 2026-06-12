@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -38,13 +39,13 @@ func (ctrl *BulkImportController) BulkImportProducts(c *gin.Context) {
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	var req usecase.BulkImportProductsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
@@ -54,7 +55,7 @@ func (ctrl *BulkImportController) BulkImportProducts(c *gin.Context) {
 	// Ejecutar importación
 	response, err := ctrl.bulkImportProductsUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

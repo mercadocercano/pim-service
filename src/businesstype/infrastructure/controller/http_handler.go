@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -60,18 +61,18 @@ func (h *BusinessTypeHandler) RegisterRoutes(router *gin.RouterGroup) {
 func (h *BusinessTypeHandler) CreateBusinessType(c *gin.Context) {
 	var req usecase.CreateBusinessTypeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Datos inválidos: "+err.Error())
 		return
 	}
 
 	if !isAdmin(c) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden crear business types"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden crear business types")
 		return
 	}
 
 	businessType, err := h.createUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Error creando business type: " + err.Error()})
+		httpresp.JSON(c, http.StatusConflict, "Error creando business type: "+err.Error())
 		return
 	}
 
@@ -107,7 +108,7 @@ func (h *BusinessTypeHandler) ListBusinessTypes(c *gin.Context) {
 
 	businessTypes, err := h.repository.SearchByCriteria(c.Request.Context(), searchCriteria)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listando business types: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error listando business types: "+err.Error())
 		return
 	}
 
@@ -130,17 +131,17 @@ func (h *BusinessTypeHandler) ListBusinessTypes(c *gin.Context) {
 func (h *BusinessTypeHandler) GetBusinessType(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID es requerido")
 		return
 	}
 
 	businessType, err := h.getUseCase.Execute(c.Request.Context(), id)
 	if err != nil {
 		if err.Error() == "business type no encontrado" {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error obteniendo business type: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error obteniendo business type: "+err.Error())
 		return
 	}
 
@@ -151,28 +152,28 @@ func (h *BusinessTypeHandler) GetBusinessType(c *gin.Context) {
 func (h *BusinessTypeHandler) UpdateBusinessType(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID es requerido")
 		return
 	}
 
 	if !isAdmin(c) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden actualizar business types"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden actualizar business types")
 		return
 	}
 
 	var req usecase.UpdateBusinessTypeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Datos inválidos: "+err.Error())
 		return
 	}
 
 	businessType, err := h.updateUseCase.Execute(c.Request.Context(), id, req)
 	if err != nil {
 		if err.Error() == "business type no encontrado" {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error actualizando business type: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error actualizando business type: "+err.Error())
 		return
 	}
 
@@ -183,21 +184,21 @@ func (h *BusinessTypeHandler) UpdateBusinessType(c *gin.Context) {
 func (h *BusinessTypeHandler) DeleteBusinessType(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID es requerido")
 		return
 	}
 
 	if !isAdmin(c) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden eliminar business types"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden eliminar business types")
 		return
 	}
 
 	if err := h.deleteUseCase.Execute(c.Request.Context(), id); err != nil {
 		if err.Error() == "business type no encontrado" {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error eliminando business type: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error eliminando business type: "+err.Error())
 		return
 	}
 
@@ -208,17 +209,17 @@ func (h *BusinessTypeHandler) DeleteBusinessType(c *gin.Context) {
 func (h *BusinessTypeHandler) ActivateBusinessType(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID es requerido")
 		return
 	}
 
 	bt, err := h.activateUseCase.Execute(c.Request.Context(), id)
 	if err != nil {
 		if err.Error() == "business type no encontrado" {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error activando business type: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error activando business type: "+err.Error())
 		return
 	}
 
@@ -229,17 +230,17 @@ func (h *BusinessTypeHandler) ActivateBusinessType(c *gin.Context) {
 func (h *BusinessTypeHandler) DeactivateBusinessType(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID es requerido")
 		return
 	}
 
 	bt, err := h.deactivateUseCase.Execute(c.Request.Context(), id)
 	if err != nil {
 		if err.Error() == "business type no encontrado" {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error desactivando business type: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error desactivando business type: "+err.Error())
 		return
 	}
 

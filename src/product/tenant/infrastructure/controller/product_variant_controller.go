@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -46,21 +47,21 @@ func NewProductVariantController(
 func (ctrl *ProductVariantController) CreateProductVariant(c *gin.Context) {
 	var req request.CreateProductVariantRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	variant, err := ctrl.createProductVariantUseCase.Execute(c.Request.Context(), &req, tenantID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -85,34 +86,34 @@ func (ctrl *ProductVariantController) GetProductVariant(c *gin.Context) {
 	variantIDStr := c.Param("variant_id")
 
 	if productIDStr == "" || variantIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto y de la variante son requeridos"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto y de la variante son requeridos")
 		return
 	}
 
 	// Validar que los IDs sean UUIDs válidos
 	productID, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto debe ser un UUID válido")
 		return
 	}
 
 	variantID, err := uuid.Parse(variantIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de la variante debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de la variante debe ser un UUID válido")
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	variant, err := ctrl.getProductVariantByIDUseCase.Execute(c.Request.Context(), productID, variantID, tenantID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -139,40 +140,40 @@ func (ctrl *ProductVariantController) UpdateProductVariant(c *gin.Context) {
 	variantIDStr := c.Param("variant_id")
 
 	if productIDStr == "" || variantIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto y de la variante son requeridos"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto y de la variante son requeridos")
 		return
 	}
 
 	// Validar que los IDs sean UUIDs válidos
 	productID, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto debe ser un UUID válido")
 		return
 	}
 
 	variantID, err := uuid.Parse(variantIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de la variante debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de la variante debe ser un UUID válido")
 		return
 	}
 
 	var req request.UpdateProductVariantRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	variant, err := ctrl.updateProductVariantUseCase.Execute(c.Request.Context(), productID, variantID, &req, tenantID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -197,33 +198,33 @@ func (ctrl *ProductVariantController) DeleteProductVariant(c *gin.Context) {
 	variantIDStr := c.Param("variant_id")
 
 	if productIDStr == "" || variantIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto y de la variante son requeridos"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto y de la variante son requeridos")
 		return
 	}
 
 	// Validar que los IDs sean UUIDs válidos
 	productID, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto debe ser un UUID válido")
 		return
 	}
 
 	variantID, err := uuid.Parse(variantIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de la variante debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de la variante debe ser un UUID válido")
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	if err := ctrl.deleteProductVariantUseCase.Execute(c.Request.Context(), productID, variantID, tenantID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -251,21 +252,21 @@ func (ctrl *ProductVariantController) DeleteProductVariant(c *gin.Context) {
 func (ctrl *ProductVariantController) ListProductVariants(c *gin.Context) {
 	productIDStr := c.Param("id") // Usar :id para consistencia con /products/:id
 	if productIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto es requerido")
 		return
 	}
 
 	// Validar que el ID del producto sea un UUID válido
 	_, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto debe ser un UUID válido")
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
@@ -277,7 +278,7 @@ func (ctrl *ProductVariantController) ListProductVariants(c *gin.Context) {
 	// Ejecutar caso de uso
 	variants, err := ctrl.listProductVariantsByCriteriaUseCase.Execute(c.Request.Context(), queryParams, tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -306,14 +307,14 @@ func (ctrl *ProductVariantController) ListAllVariants(c *gin.Context) {
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	variants, err := ctrl.listProductVariantsByCriteriaUseCase.Execute(c.Request.Context(), c.Request.URL.Query(), tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -343,21 +344,21 @@ func (ctrl *ProductVariantController) RegisterRoutes(router *gin.RouterGroup) {
 func (ctrl *ProductVariantController) GetProductVariantByID(c *gin.Context) {
 	variantIDStr := c.Param("variant_id")
 	if variantIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de la variante es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de la variante es requerido")
 		return
 	}
 
 	// Validar que el ID sea un UUID válido
 	_, err := uuid.Parse(variantIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de la variante debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de la variante debe ser un UUID válido")
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
@@ -369,12 +370,12 @@ func (ctrl *ProductVariantController) GetProductVariantByID(c *gin.Context) {
 
 	variants, err := ctrl.listProductVariantsByCriteriaUseCase.Execute(c.Request.Context(), queryParams, tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	if len(variants.Variants) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Variante no encontrada"})
+		httpresp.JSON(c, http.StatusNotFound, "Variante no encontrada")
 		return
 	}
 
@@ -385,27 +386,27 @@ func (ctrl *ProductVariantController) GetProductVariantByID(c *gin.Context) {
 func (ctrl *ProductVariantController) UpdateProductVariantByID(c *gin.Context) {
 	variantIDStr := c.Param("variant_id")
 	if variantIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de la variante es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de la variante es requerido")
 		return
 	}
 
 	// Validar que el ID sea un UUID válido
 	variantID, err := uuid.Parse(variantIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de la variante debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de la variante debe ser un UUID válido")
 		return
 	}
 
 	var req request.UpdateProductVariantRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
@@ -413,20 +414,20 @@ func (ctrl *ProductVariantController) UpdateProductVariantByID(c *gin.Context) {
 	// Por simplicidad, vamos a requerir que se pase como query parameter
 	productIDStr := c.Query("product_id")
 	if productIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "product_id query parameter es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "product_id query parameter es requerido")
 		return
 	}
 
 	productID, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "product_id debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "product_id debe ser un UUID válido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	variant, err := ctrl.updateProductVariantUseCase.Execute(c.Request.Context(), productID, variantID, &req, tenantID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -437,40 +438,40 @@ func (ctrl *ProductVariantController) UpdateProductVariantByID(c *gin.Context) {
 func (ctrl *ProductVariantController) DeleteProductVariantByID(c *gin.Context) {
 	variantIDStr := c.Param("variant_id")
 	if variantIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de la variante es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de la variante es requerido")
 		return
 	}
 
 	// Validar que el ID sea un UUID válido
 	variantID, err := uuid.Parse(variantIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de la variante debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de la variante debe ser un UUID válido")
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Necesitamos obtener el product_id de la variante primero
 	productIDStr := c.Query("product_id")
 	if productIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "product_id query parameter es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "product_id query parameter es requerido")
 		return
 	}
 
 	productID, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "product_id debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "product_id debe ser un UUID válido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	if err := ctrl.deleteProductVariantUseCase.Execute(c.Request.Context(), productID, variantID, tenantID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -482,14 +483,14 @@ func (ctrl *ProductVariantController) DeleteProductVariantByID(c *gin.Context) {
 func (ctrl *ProductVariantController) GetVariantBySKU(c *gin.Context) {
 	sku := c.Param("sku")
 	if sku == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "SKU es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "SKU es requerido")
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
@@ -497,7 +498,7 @@ func (ctrl *ProductVariantController) GetVariantBySKU(c *gin.Context) {
 	variant, err := ctrl.getVariantBySKUUseCase.Execute(c.Request.Context(), sku, tenantID)
 	if err != nil {
 		// Si no se encuentra, retornar 404
-		c.JSON(http.StatusNotFound, gin.H{"error": "variant not found: " + sku})
+		httpresp.JSON(c, http.StatusNotFound, "variant not found: "+sku)
 		return
 	}
 
@@ -508,19 +509,19 @@ func (ctrl *ProductVariantController) GetVariantBySKU(c *gin.Context) {
 func (ctrl *ProductVariantController) GetVariantsBySKUs(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	var req usecase.GetVariantsBySKUsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	result, err := ctrl.getVariantsBySKUsUseCase.Execute(c.Request.Context(), &req, tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

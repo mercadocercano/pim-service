@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 	"strconv"
 
@@ -46,20 +47,20 @@ func (ctrl *ProductRequestController) RegisterRoutes(router *gin.RouterGroup) {
 func (ctrl *ProductRequestController) CreateRequest(c *gin.Context) {
 	var req usecase.CreateProductRequestRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos inválidos", err.Error())
 		return
 	}
 
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 	req.TenantID = tenantID
 
 	resp, err := ctrl.createProductRequest.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -83,7 +84,7 @@ func (ctrl *ProductRequestController) ListPending(c *gin.Context) {
 
 	resp, err := ctrl.listProductRequests.Execute(c.Request.Context(), limit, offset)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -94,7 +95,7 @@ func (ctrl *ProductRequestController) ListPending(c *gin.Context) {
 func (ctrl *ProductRequestController) GetMetrics(c *gin.Context) {
 	resp, err := ctrl.listProductRequests.Execute(c.Request.Context(), 0, 0)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -109,7 +110,7 @@ func (ctrl *ProductRequestController) GetMetrics(c *gin.Context) {
 func (ctrl *ProductRequestController) Resolve(c *gin.Context) {
 	var req usecase.ResolveProductRequestRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos inválidos", err.Error())
 		return
 	}
 
@@ -117,7 +118,7 @@ func (ctrl *ProductRequestController) Resolve(c *gin.Context) {
 
 	resp, err := ctrl.resolveProductRequest.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 

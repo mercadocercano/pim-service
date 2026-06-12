@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,20 +20,20 @@ func NewBulkUpdateController(bulkUpdateUseCase *usecase.BulkUpdateProductsUseCas
 func (ctrl *BulkUpdateController) BulkUpdateProducts(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header is required"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header is required")
 		return
 	}
 
 	var req usecase.BulkUpdateProductsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	req.TenantID = tenantID
 
 	result, err := ctrl.bulkUpdateUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 

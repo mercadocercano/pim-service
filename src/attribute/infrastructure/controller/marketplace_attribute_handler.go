@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	"saas-mt-pim-service/src/attribute/application/request"
@@ -88,13 +89,13 @@ func isAdminRole(role string) bool {
 // Create maneja la solicitud para crear un nuevo atributo marketplace
 func (h *MarketplaceAttributeHandler) Create(c *gin.Context) {
 	if !isAdminRole(c.GetHeader("X-User-Role")) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden crear atributos marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden crear atributos marketplace")
 		return
 	}
 
 	var req request.CreateMarketplaceAttributeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
@@ -116,10 +117,10 @@ func (h *MarketplaceAttributeHandler) Create(c *gin.Context) {
 	)
 	if err != nil {
 		if err == usecase.ErrInvalidAttributeName || err == usecase.ErrMarketplaceAttributeExists {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -129,14 +130,14 @@ func (h *MarketplaceAttributeHandler) Create(c *gin.Context) {
 // List maneja la solicitud para listar atributos marketplace
 func (h *MarketplaceAttributeHandler) List(c *gin.Context) {
 	if !isAdminRole(c.GetHeader("X-User-Role")) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden ver atributos marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden ver atributos marketplace")
 		return
 	}
 
 	searchCriteria := h.criteriaBuilder.BuildValidated(c)
 	result, err := h.listByCriteriaUseCase.Execute(c.Request.Context(), searchCriteria)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -146,17 +147,17 @@ func (h *MarketplaceAttributeHandler) List(c *gin.Context) {
 // GetByID maneja la solicitud para obtener un atributo marketplace por ID
 func (h *MarketplaceAttributeHandler) GetByID(c *gin.Context) {
 	if !isAdminRole(c.GetHeader("X-User-Role")) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden ver atributos marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden ver atributos marketplace")
 		return
 	}
 
 	attribute, err := h.getByIDUseCase.Execute(c.Request.Context(), c.Param("id"))
 	if err != nil {
 		if err == usecase.ErrMarketplaceAttributeNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -166,13 +167,13 @@ func (h *MarketplaceAttributeHandler) GetByID(c *gin.Context) {
 // Update maneja la solicitud para actualizar un atributo marketplace
 func (h *MarketplaceAttributeHandler) Update(c *gin.Context) {
 	if !isAdminRole(c.GetHeader("X-User-Role")) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden actualizar atributos marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden actualizar atributos marketplace")
 		return
 	}
 
 	var req request.UpdateMarketplaceAttributeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
@@ -195,14 +196,14 @@ func (h *MarketplaceAttributeHandler) Update(c *gin.Context) {
 	)
 	if err != nil {
 		if err == usecase.ErrMarketplaceAttributeNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
 		if err == usecase.ErrInvalidAttributeName || err == usecase.ErrMarketplaceAttributeExists {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -212,21 +213,21 @@ func (h *MarketplaceAttributeHandler) Update(c *gin.Context) {
 // Delete maneja la solicitud para eliminar un atributo marketplace
 func (h *MarketplaceAttributeHandler) Delete(c *gin.Context) {
 	if !isAdminRole(c.GetHeader("X-User-Role")) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden eliminar atributos marketplace"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden eliminar atributos marketplace")
 		return
 	}
 
 	err := h.deleteUseCase.Execute(c.Request.Context(), c.Param("id"))
 	if err != nil {
 		if err == usecase.ErrMarketplaceAttributeNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
 		if err == usecase.ErrAttributeInUse {
-			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusConflict, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -236,13 +237,13 @@ func (h *MarketplaceAttributeHandler) Delete(c *gin.Context) {
 // ListValues lista los valores de un atributo
 func (h *MarketplaceAttributeHandler) ListValues(c *gin.Context) {
 	if !isAdminRole(c.GetHeader("X-User-Role")) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden ver valores de atributos"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden ver valores de atributos")
 		return
 	}
 
 	values, err := h.listValuesUseCase.Execute(c.Request.Context(), c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -252,23 +253,23 @@ func (h *MarketplaceAttributeHandler) ListValues(c *gin.Context) {
 // CreateValue crea un nuevo valor para un atributo
 func (h *MarketplaceAttributeHandler) CreateValue(c *gin.Context) {
 	if !isAdminRole(c.GetHeader("X-User-Role")) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden crear valores de atributos"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden crear valores de atributos")
 		return
 	}
 
 	var req request.CreateAttributeValueRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
 	v, err := h.createValueUseCase.Execute(c.Request.Context(), c.Param("id"), req.Value, req.SortOrder)
 	if err != nil {
 		if err == usecase.ErrMarketplaceAttributeNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -278,23 +279,23 @@ func (h *MarketplaceAttributeHandler) CreateValue(c *gin.Context) {
 // UpdateValue actualiza un valor existente de un atributo
 func (h *MarketplaceAttributeHandler) UpdateValue(c *gin.Context) {
 	if !isAdminRole(c.GetHeader("X-User-Role")) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden actualizar valores de atributos"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden actualizar valores de atributos")
 		return
 	}
 
 	var req request.UpdateAttributeValueRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el formato de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el formato de la petición: "+err.Error())
 		return
 	}
 
 	v, err := h.updateValueUseCase.Execute(c.Request.Context(), c.Param("id"), c.Param("vid"), req.Value, req.SortOrder)
 	if err != nil {
 		if err == usecase.ErrAttributeValueNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -304,17 +305,17 @@ func (h *MarketplaceAttributeHandler) UpdateValue(c *gin.Context) {
 // DeleteValue elimina un valor de un atributo
 func (h *MarketplaceAttributeHandler) DeleteValue(c *gin.Context) {
 	if !isAdminRole(c.GetHeader("X-User-Role")) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Solo administradores pueden eliminar valores de atributos"})
+		httpresp.JSON(c, http.StatusForbidden, "Solo administradores pueden eliminar valores de atributos")
 		return
 	}
 
 	err := h.deleteValueUseCase.Execute(c.Request.Context(), c.Param("id"), c.Param("vid"))
 	if err != nil {
 		if err == usecase.ErrAttributeValueNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

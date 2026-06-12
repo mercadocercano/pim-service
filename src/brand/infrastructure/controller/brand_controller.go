@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	"saas-mt-pim-service/src/brand/application/request"
@@ -55,13 +56,13 @@ func NewBrandController(
 func (ctrl *BrandController) CreateBrand(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	var req request.CreateBrandRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -88,13 +89,13 @@ func (ctrl *BrandController) CreateBrand(c *gin.Context) {
 func (ctrl *BrandController) GetBrand(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	brandID := c.Param("id")
 	if brandID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de marca es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de marca es requerido")
 		return
 	}
 
@@ -125,19 +126,19 @@ func (ctrl *BrandController) GetBrand(c *gin.Context) {
 func (ctrl *BrandController) UpdateBrand(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	brandID := c.Param("id")
 	if brandID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de marca es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de marca es requerido")
 		return
 	}
 
 	var req request.UpdateBrandRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -163,13 +164,13 @@ func (ctrl *BrandController) UpdateBrand(c *gin.Context) {
 func (ctrl *BrandController) DeleteBrand(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	brandID := c.Param("id")
 	if brandID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de marca es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de marca es requerido")
 		return
 	}
 
@@ -206,7 +207,7 @@ func (ctrl *BrandController) DeleteBrand(c *gin.Context) {
 func (ctrl *BrandController) ListBrands(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
@@ -227,17 +228,17 @@ func (ctrl *BrandController) ListBrands(c *gin.Context) {
 func (ctrl *BrandController) handleError(c *gin.Context, err error) {
 	switch err.Error() {
 	case "marca no encontrada":
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 	case "ya existe una marca con ese nombre":
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusConflict, err.Error())
 	case "el nombre de la marca es obligatorio":
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 	case "el tenant ID es obligatorio":
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 	case "no se puede eliminar la marca":
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusConflict, err.Error())
 	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error interno del servidor"})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error interno del servidor")
 	}
 }
 

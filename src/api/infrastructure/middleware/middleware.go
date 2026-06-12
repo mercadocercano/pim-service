@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 	"strings"
 
@@ -13,7 +14,7 @@ func MarketplaceAuthMiddleware() gin.HandlerFunc {
 		// Validar que el header X-User-Role esté presente
 		userRole := c.GetHeader("X-User-Role")
 		if userRole == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Header X-User-Role es obligatorio"})
+			httpresp.JSON(c, http.StatusUnauthorized, "Header X-User-Role es obligatorio")
 			c.Abort()
 			return
 		}
@@ -27,7 +28,7 @@ func MarketplaceAuthMiddleware() gin.HandlerFunc {
 		}
 
 		if !validRoles[userRole] {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Rol de usuario no válido"})
+			httpresp.JSON(c, http.StatusForbidden, "Rol de usuario no válido")
 			c.Abort()
 			return
 		}
@@ -45,14 +46,14 @@ func TenantValidationMiddleware() gin.HandlerFunc {
 		if strings.Contains(c.Request.URL.Path, "/tenant/") {
 			tenantID := c.GetHeader("X-Tenant-ID")
 			if tenantID == "" {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Header X-Tenant-ID es obligatorio para operaciones de tenant"})
+				httpresp.JSON(c, http.StatusBadRequest, "Header X-Tenant-ID es obligatorio para operaciones de tenant")
 				c.Abort()
 				return
 			}
 
 			// Validar formato UUID básico (36 caracteres con guiones)
 			if len(tenantID) != 36 || !isValidUUIDFormat(tenantID) {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Formato de X-Tenant-ID no válido"})
+				httpresp.JSON(c, http.StatusBadRequest, "Formato de X-Tenant-ID no válido")
 				c.Abort()
 				return
 			}
@@ -70,7 +71,7 @@ func AdminOnlyMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userRole := c.GetHeader("X-User-Role")
 		if userRole != "super_admin" && userRole != "marketplace_admin" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Acceso restringido a administradores"})
+			httpresp.JSON(c, http.StatusForbidden, "Acceso restringido a administradores")
 			c.Abort()
 			return
 		}
@@ -85,7 +86,7 @@ func RequestValidationMiddleware() gin.HandlerFunc {
 		if c.Request.Method == "POST" || c.Request.Method == "PUT" || c.Request.Method == "PATCH" {
 			contentType := c.GetHeader("Content-Type")
 			if !strings.Contains(contentType, "application/json") {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Content-Type debe ser application/json"})
+				httpresp.JSON(c, http.StatusBadRequest, "Content-Type debe ser application/json")
 				c.Abort()
 				return
 			}

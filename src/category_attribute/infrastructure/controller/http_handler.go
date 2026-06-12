@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	"saas-mt-pim-service/src/category_attribute/application/request"
@@ -76,7 +77,7 @@ func (h *CategoryAttributeHandler) ListWithCriteria(c *gin.Context) {
 	}
 
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el tenant_id es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el tenant_id es obligatorio")
 		return
 	}
 
@@ -91,7 +92,7 @@ func (h *CategoryAttributeHandler) ListWithCriteria(c *gin.Context) {
 	// Ejecutar el caso de uso
 	result, err := h.listCategoryAttributesByCriteriaUseCase.Execute(c.Request.Context(), criteria)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -128,7 +129,7 @@ func (h *CategoryAttributeHandler) List(c *gin.Context) {
 	}
 
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el tenant_id es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el tenant_id es obligatorio")
 		return
 	}
 
@@ -136,7 +137,7 @@ func (h *CategoryAttributeHandler) List(c *gin.Context) {
 
 	categoryAttributes, err := h.getUseCase.Execute(c.Request.Context(), tenantID, categoryID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -159,7 +160,7 @@ func (h *CategoryAttributeHandler) ListDetailed(c *gin.Context) {
 
 	if tenantID == "" {
 		log.Println("❌ ListDetailed: tenant_id faltante")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el tenant_id es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el tenant_id es obligatorio")
 		return
 	}
 
@@ -168,7 +169,7 @@ func (h *CategoryAttributeHandler) ListDetailed(c *gin.Context) {
 
 	if categoryID == "" {
 		log.Println("❌ ListDetailed: category_id faltante")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el category_id es obligatorio para obtener atributos detallados"})
+		httpresp.JSON(c, http.StatusBadRequest, "el category_id es obligatorio para obtener atributos detallados")
 		return
 	}
 
@@ -176,7 +177,7 @@ func (h *CategoryAttributeHandler) ListDetailed(c *gin.Context) {
 	detailedAttributes, err := h.getDetailedUseCase.Execute(c.Request.Context(), tenantID, categoryID)
 	if err != nil {
 		log.Printf("❌ ListDetailed: Error en caso de uso: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -193,13 +194,13 @@ func (h *CategoryAttributeHandler) Create(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
 	var req request.CreateCategoryAttributeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -211,7 +212,7 @@ func (h *CategoryAttributeHandler) Create(c *gin.Context) {
 		req.AllowedValues,
 	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -224,7 +225,7 @@ func (h *CategoryAttributeHandler) Update(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -232,17 +233,17 @@ func (h *CategoryAttributeHandler) Update(c *gin.Context) {
 
 	var req request.UpdateCategoryAttributeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err := h.updateUseCase.Execute(c.Request.Context(), id, tenantID, req.AllowedValues)
 	if err != nil {
 		if err.Error() == "atributo de categoría no encontrado" {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -255,7 +256,7 @@ func (h *CategoryAttributeHandler) Delete(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -264,10 +265,10 @@ func (h *CategoryAttributeHandler) Delete(c *gin.Context) {
 	err := h.deleteUseCase.Execute(c.Request.Context(), id, tenantID)
 	if err != nil {
 		if err.Error() == "atributo de categoría no encontrado" {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(c, http.StatusNotFound, err.Error())
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

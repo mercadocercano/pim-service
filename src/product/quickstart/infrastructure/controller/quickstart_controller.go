@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -49,14 +50,14 @@ func NewQuickstartController(
 func (ctrl *QuickstartController) CreateProductFromTemplate(c *gin.Context) {
 	var req usecase.CreateFromTemplateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	// Obtener tenant ID del header y agregarlo al request
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 	req.TenantID = tenantID
@@ -64,7 +65,7 @@ func (ctrl *QuickstartController) CreateProductFromTemplate(c *gin.Context) {
 	// Ejecutar caso de uso
 	response, err := ctrl.createFromTemplateUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -86,14 +87,14 @@ func (ctrl *QuickstartController) CreateProductFromTemplate(c *gin.Context) {
 func (ctrl *QuickstartController) ImportProductsFromBusinessType(c *gin.Context) {
 	var req usecase.ImportFromBusinessTypeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	// Obtener tenant ID del header y agregarlo al request
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 	req.TenantID = tenantID
@@ -101,7 +102,7 @@ func (ctrl *QuickstartController) ImportProductsFromBusinessType(c *gin.Context)
 	// Ejecutar caso de uso
 	response, err := ctrl.importFromBusinessTypeUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -123,20 +124,20 @@ func (ctrl *QuickstartController) ImportProductsFromBusinessType(c *gin.Context)
 func (ctrl *QuickstartController) ImportFromGlobalCatalog(c *gin.Context) {
 	var req usecase.ImportFromGlobalCatalogRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 	req.TenantID = tenantID
 
 	response, err := ctrl.importFromGlobalCatalogUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -156,7 +157,7 @@ func (ctrl *QuickstartController) GetQuickstartProgress(c *gin.Context) {
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
@@ -168,7 +169,7 @@ func (ctrl *QuickstartController) GetQuickstartProgress(c *gin.Context) {
 	// Ejecutar caso de uso
 	response, err := ctrl.getQuickstartProgressUseCase.Execute(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -188,13 +189,13 @@ func (ctrl *QuickstartController) GetQuickstartProgress(c *gin.Context) {
 func (ctrl *QuickstartController) BackfillTenantImages(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	result, err := ctrl.backfillUseCase.Execute(c.Request.Context(), tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -213,7 +214,7 @@ func (ctrl *QuickstartController) BackfillTenantImages(c *gin.Context) {
 func (ctrl *QuickstartController) BackfillAllTenantImages(c *gin.Context) {
 	results, err := ctrl.backfillUseCase.ExecuteAll(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

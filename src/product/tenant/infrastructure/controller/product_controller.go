@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 	"strings"
 	"time"
@@ -8,12 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
+	sharedport "github.com/hornosg/go-shared/domain/port"
 	"saas-mt-pim-service/src/product/tenant/application/request"
 	"saas-mt-pim-service/src/product/tenant/application/response"
 	"saas-mt-pim-service/src/product/tenant/application/usecase"
 	tenantport "saas-mt-pim-service/src/product/tenant/domain/port"
 	"saas-mt-pim-service/src/product/tenant/infrastructure/criteria"
-	sharedport "github.com/hornosg/go-shared/domain/port"
 )
 
 // ProductController maneja las peticiones HTTP para productos
@@ -75,21 +76,21 @@ func NewProductController(
 func (ctrl *ProductController) CreateProduct(c *gin.Context) {
 	var req request.CreateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	product, err := ctrl.createProductUseCase.Execute(c.Request.Context(), &req, tenantID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -111,28 +112,28 @@ func (ctrl *ProductController) CreateProduct(c *gin.Context) {
 func (ctrl *ProductController) GetProduct(c *gin.Context) {
 	productIDStr := c.Param("id")
 	if productIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto es requerido")
 		return
 	}
 
 	// Validar que el ID sea un UUID válido
 	productID, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto debe ser un UUID válido")
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	product, err := ctrl.getProductByIDUseCase.Execute(c.Request.Context(), productID, tenantID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -156,34 +157,34 @@ func (ctrl *ProductController) GetProduct(c *gin.Context) {
 func (ctrl *ProductController) UpdateProduct(c *gin.Context) {
 	productIDStr := c.Param("id")
 	if productIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto es requerido")
 		return
 	}
 
 	// Validar que el ID sea un UUID válido
 	productID, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto debe ser un UUID válido")
 		return
 	}
 
 	var req request.UpdateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	product, err := ctrl.updateProductUseCase.Execute(c.Request.Context(), productID, &req, tenantID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -205,27 +206,27 @@ func (ctrl *ProductController) UpdateProduct(c *gin.Context) {
 func (ctrl *ProductController) DeleteProduct(c *gin.Context) {
 	productIDStr := c.Param("id")
 	if productIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto es requerido")
 		return
 	}
 
 	// Validar que el ID sea un UUID válido
 	productID, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto debe ser un UUID válido")
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Ejecutar caso de uso
 	if err := ctrl.deleteProductUseCase.Execute(c.Request.Context(), productID, tenantID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -263,7 +264,7 @@ func (ctrl *ProductController) ListProducts(c *gin.Context) {
 	// Obtener el tenantID del header y agregarlo a los query parameters
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
@@ -278,7 +279,7 @@ func (ctrl *ProductController) ListProducts(c *gin.Context) {
 	// Ejecutar el caso de uso
 	result, err := ctrl.listProductsByCriteriaUseCase.Execute(c.Request.Context(), criteria)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -301,33 +302,33 @@ func (ctrl *ProductController) ListProducts(c *gin.Context) {
 func (ctrl *ProductController) UpdateProductStatus(c *gin.Context) {
 	productIDStr := c.Param("id")
 	if productIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto es requerido")
 		return
 	}
 
 	// Validar que el ID sea un UUID válido
 	productID, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto debe ser un UUID válido")
 		return
 	}
 
 	var statusReq map[string]string
 	if err := c.ShouldBindJSON(&statusReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	newStatus, exists := statusReq["status"]
 	if !exists || newStatus == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "El campo 'status' es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "El campo 'status' es requerido")
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
@@ -341,7 +342,7 @@ func (ctrl *ProductController) UpdateProductStatus(c *gin.Context) {
 	// Ejecutar caso de uso
 	response, err := ctrl.updateProductStatusUseCase.Execute(c.Request.Context(), request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -362,28 +363,28 @@ func (ctrl *ProductController) UpdateProductStatus(c *gin.Context) {
 func (ctrl *ProductController) GetAvailableStatusTransitions(c *gin.Context) {
 	productIDStr := c.Param("id")
 	if productIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto es requerido")
 		return
 	}
 
 	// Validar que el ID sea un UUID válido
 	productID, err := uuid.Parse(productIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del producto debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del producto debe ser un UUID válido")
 		return
 	}
 
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Obtener transiciones disponibles
 	transitions, err := ctrl.updateProductStatusUseCase.GetAvailableTransitions(c.Request.Context(), productID, tenantID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -410,21 +411,21 @@ func (ctrl *ProductController) ImportProductsCSV(c *gin.Context) {
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Obtener archivo del form
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No se pudo obtener el archivo", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "No se pudo obtener el archivo", err.Error())
 		return
 	}
 	defer file.Close()
 
 	// Validar extensión del archivo
 	if !strings.HasSuffix(strings.ToLower(header.Filename), ".csv") {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "El archivo debe ser CSV"})
+		httpresp.JSON(c, http.StatusBadRequest, "El archivo debe ser CSV")
 		return
 	}
 
@@ -442,7 +443,7 @@ func (ctrl *ProductController) ImportProductsCSV(c *gin.Context) {
 	// Ejecutar caso de uso
 	result, err := ctrl.importProductsFromCSVUseCase.Execute(c.Request.Context(), file, tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al procesar archivo", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusInternalServerError, "Error al procesar archivo", err.Error())
 		return
 	}
 
@@ -474,36 +475,36 @@ func (ctrl *ProductController) ValidateSKUs(c *gin.Context) {
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Parsear request
 	var req request.ValidateSKUsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	// Ejecutar caso de uso
 	result, err := ctrl.validateSKUsUseCase.Execute(c.Request.Context(), &req, tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar SKUs", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusInternalServerError, "Error al validar SKUs", err.Error())
 		return
 	}
 
 	duration := time.Since(startTime).Seconds()
 	ctrl.metrics.Record(sharedport.MetricEvent{
-		Name:  tenantport.MetricSKUValidation,
-		Kind:  sharedport.MetricKindHistogram,
-		Unit:  sharedport.MetricUnitSeconds,
-		Value: duration,
+		Name:   tenantport.MetricSKUValidation,
+		Kind:   sharedport.MetricKindHistogram,
+		Unit:   sharedport.MetricUnitSeconds,
+		Value:  duration,
 		Labels: map[string]string{"tenant_id": tenantID},
 	})
 	ctrl.metrics.Record(sharedport.MetricEvent{
-		Name:  tenantport.MetricSKUBatchSize,
-		Kind:  sharedport.MetricKindHistogram,
-		Value: float64(len(req.SKUs)),
+		Name:   tenantport.MetricSKUBatchSize,
+		Kind:   sharedport.MetricKindHistogram,
+		Value:  float64(len(req.SKUs)),
 		Labels: map[string]string{"tenant_id": tenantID},
 	})
 
@@ -526,13 +527,13 @@ func (ctrl *ProductController) ValidateSKUs(c *gin.Context) {
 // @Security BearerAuth
 func (ctrl *ProductController) ImportProductsCSVAsync(c *gin.Context) {
 	if ctrl.importProductsAsyncUseCase == nil {
-		c.JSON(http.StatusNotImplemented, gin.H{"error": "async import not available"})
+		httpresp.JSON(c, http.StatusNotImplemented, "async import not available")
 		return
 	}
 	// Obtener tenant ID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
@@ -545,14 +546,14 @@ func (ctrl *ProductController) ImportProductsCSVAsync(c *gin.Context) {
 	// Obtener archivo del form
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No se pudo obtener el archivo", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "No se pudo obtener el archivo", err.Error())
 		return
 	}
 	defer file.Close()
 
 	// Validar extensión del archivo
 	if !strings.HasSuffix(strings.ToLower(header.Filename), ".csv") {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "El archivo debe ser CSV"})
+		httpresp.JSON(c, http.StatusBadRequest, "El archivo debe ser CSV")
 		return
 	}
 
@@ -581,7 +582,7 @@ func (ctrl *ProductController) ImportProductsCSVAsync(c *gin.Context) {
 	// Ejecutar caso de uso
 	result, err := ctrl.importProductsAsyncUseCase.StartImport(c.Request.Context(), req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al iniciar importación", "details": err.Error()})
+		httpresp.JSONWithDetails(c, http.StatusInternalServerError, "Error al iniciar importación", err.Error())
 		return
 	}
 
@@ -602,19 +603,19 @@ func (ctrl *ProductController) ImportProductsCSVAsync(c *gin.Context) {
 func (ctrl *ProductController) GetImportJobStatus(c *gin.Context) {
 	jobIDStr := c.Param("id")
 	if jobIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del trabajo es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del trabajo es requerido")
 		return
 	}
 
 	jobID, err := uuid.Parse(jobIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del trabajo debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del trabajo debe ser un UUID válido")
 		return
 	}
 
 	job, err := ctrl.importProductsAsyncUseCase.GetImportJobStatus(c.Request.Context(), jobID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Trabajo no encontrado"})
+		httpresp.JSON(c, http.StatusNotFound, "Trabajo no encontrado")
 		return
 	}
 
@@ -636,18 +637,18 @@ func (ctrl *ProductController) GetImportJobStatus(c *gin.Context) {
 func (ctrl *ProductController) CancelImportJob(c *gin.Context) {
 	jobIDStr := c.Param("id")
 	if jobIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del trabajo es requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del trabajo es requerido")
 		return
 	}
 
 	jobID, err := uuid.Parse(jobIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID del trabajo debe ser un UUID válido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID del trabajo debe ser un UUID válido")
 		return
 	}
 
 	if err := ctrl.importProductsAsyncUseCase.CancelImportJob(c.Request.Context(), jobID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 

@@ -3,6 +3,7 @@ package controller
 import (
 	"bytes"
 	"fmt"
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"io"
 	"net/http"
 
@@ -69,14 +70,14 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
 	// Leer el cuerpo de la petición y depurar
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error leyendo el cuerpo de la petición: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error leyendo el cuerpo de la petición: "+err.Error())
 		return
 	}
 
@@ -88,7 +89,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 
 	var req request.CreateCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error en el binding JSON: " + err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, "Error en el binding JSON: "+err.Error())
 		return
 	}
 
@@ -97,7 +98,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 
 	category, err := h.createUseCase.Execute(c.Request.Context(), tenantID, req.Name, req.Description, req.ParentID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -109,7 +110,7 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -117,7 +118,7 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 
 	var req request.UpdateCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -129,11 +130,11 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 
 	category, err := h.updateUseCase.Execute(c.Request.Context(), id, tenantID, req.Name, req.Description, parentIDPtr)
 	if err == usecase.ErrCategoryNotFound {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -145,7 +146,7 @@ func (h *CategoryHandler) Move(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -153,7 +154,7 @@ func (h *CategoryHandler) Move(c *gin.Context) {
 
 	var req request.MoveCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -165,15 +166,15 @@ func (h *CategoryHandler) Move(c *gin.Context) {
 
 	category, err := h.moveCategoryUseCase.Execute(c.Request.Context(), id, tenantID, parentIDPtr)
 	if err == usecase.ErrCategoryNotFound {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 	if err == usecase.ErrInvalidMove {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -185,7 +186,7 @@ func (h *CategoryHandler) Activate(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -193,11 +194,11 @@ func (h *CategoryHandler) Activate(c *gin.Context) {
 
 	category, err := h.changeCategoryStatus.Activate(c.Request.Context(), id, tenantID)
 	if err == usecase.ErrCategoryNotFound {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -209,7 +210,7 @@ func (h *CategoryHandler) Deactivate(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -217,11 +218,11 @@ func (h *CategoryHandler) Deactivate(c *gin.Context) {
 
 	category, err := h.changeCategoryStatus.Deactivate(c.Request.Context(), id, tenantID)
 	if err == usecase.ErrCategoryNotFound {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -233,13 +234,13 @@ func (h *CategoryHandler) List(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
 	categories, err := h.getCategoriesUseCase.Execute(c.Request.Context(), tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -257,7 +258,7 @@ func (h *CategoryHandler) ListTree(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -266,7 +267,7 @@ func (h *CategoryHandler) ListTree(c *gin.Context) {
 
 	categories, err := h.getCategoriesUseCase.Execute(c.Request.Context(), tenantID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -287,7 +288,7 @@ func (h *CategoryHandler) ListTree(c *gin.Context) {
 				return
 			}
 		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "categoría no encontrada"})
+		httpresp.JSON(c, http.StatusNotFound, "categoría no encontrada")
 		return
 	}
 
@@ -312,7 +313,7 @@ func (h *CategoryHandler) GetByID(c *gin.Context) {
 	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -320,11 +321,11 @@ func (h *CategoryHandler) GetByID(c *gin.Context) {
 
 	category, err := h.getCategoryByIDUseCase.Execute(c.Request.Context(), id, tenantID)
 	if err == usecase.ErrCategoryNotFound {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusNotFound, err.Error())
 		return
 	}
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -336,7 +337,7 @@ func (h *CategoryHandler) ListWithCriteria(c *gin.Context) {
 	// Obtener el tenantID del header y agregarlo a los query parameters
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "el header X-Tenant-ID es obligatorio"})
+		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
@@ -351,7 +352,7 @@ func (h *CategoryHandler) ListWithCriteria(c *gin.Context) {
 	// Ejecutar el caso de uso
 	result, err := h.listCategoriesByCriteriaUseCase.Execute(c.Request.Context(), criteria)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

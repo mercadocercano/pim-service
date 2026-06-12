@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"io"
 	"net/http"
 	"strings"
@@ -57,14 +58,14 @@ func (c *SchemaValidationController) ValidateSchema(ctx *gin.Context) {
 	// Obtener tenant ID
 	tenantID := ctx.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(ctx, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	// Obtener archivo
 	file, header, err := ctx.Request.FormFile("file")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "No se pudo obtener el archivo", "details": err.Error()})
+		httpresp.JSONWithDetails(ctx, http.StatusBadRequest, "No se pudo obtener el archivo", err.Error())
 		return
 	}
 	defer file.Close()
@@ -76,7 +77,7 @@ func (c *SchemaValidationController) ValidateSchema(ctx *gin.Context) {
 	isExcel := strings.HasSuffix(filename, ".xlsx") || strings.HasSuffix(filename, ".xls")
 
 	if !isCSV && !isJSON && !isExcel {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Formato no soportado. Use CSV, Excel (.xlsx) o JSON."})
+		httpresp.JSON(ctx, http.StatusBadRequest, "Formato no soportado. Use CSV, Excel (.xlsx) o JSON.")
 		return
 	}
 
@@ -91,7 +92,7 @@ func (c *SchemaValidationController) ValidateSchema(ctx *gin.Context) {
 	// Leer archivo en buffer para poder analizarlo múltiples veces
 	buf := new(bytes.Buffer)
 	if _, err := io.Copy(buf, file); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al leer archivo", "details": err.Error()})
+		httpresp.JSONWithDetails(ctx, http.StatusInternalServerError, "Error al leer archivo", err.Error())
 		return
 	}
 
@@ -128,7 +129,7 @@ func (c *SchemaValidationController) ValidateSchema(ctx *gin.Context) {
 	}
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al validar schema", "details": err.Error()})
+		httpresp.JSONWithDetails(ctx, http.StatusInternalServerError, "Error al validar schema", err.Error())
 		return
 	}
 
@@ -154,7 +155,7 @@ func (c *SchemaValidationController) ValidateSchema(ctx *gin.Context) {
 func (c *SchemaValidationController) ApplyMapping(ctx *gin.Context) {
 	var req request.ApplyMappingRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(ctx, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
@@ -166,9 +167,9 @@ func (c *SchemaValidationController) ApplyMapping(ctx *gin.Context) {
 	)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "Validación no encontrada o expirada"})
+			httpresp.JSON(ctx, http.StatusNotFound, "Validación no encontrada o expirada")
 		} else {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al aplicar mapeos", "details": err.Error()})
+			httpresp.JSONWithDetails(ctx, http.StatusInternalServerError, "Error al aplicar mapeos", err.Error())
 		}
 		return
 	}
@@ -203,7 +204,7 @@ func (c *SchemaValidationController) GetCSVTemplate(ctx *gin.Context) {
 	writer := csv.NewWriter(ctx.Writer)
 	for _, record := range records {
 		if err := writer.Write(record); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error al generar CSV"})
+			httpresp.JSON(ctx, http.StatusInternalServerError, "Error al generar CSV")
 			return
 		}
 	}
@@ -275,22 +276,22 @@ func (c *SchemaValidationController) GetJSONTemplate(ctx *gin.Context) {
 func (c *SchemaValidationController) ImportFromValidation(ctx *gin.Context) {
 	tenantID := ctx.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header es requerido"})
+		httpresp.JSON(ctx, http.StatusBadRequest, "X-Tenant-ID header es requerido")
 		return
 	}
 
 	var req usecase.ImportFromValidationRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Datos de entrada inválidos", "details": err.Error()})
+		httpresp.JSONWithDetails(ctx, http.StatusBadRequest, "Datos de entrada inválidos", err.Error())
 		return
 	}
 
 	result, products, err := c.importFromValidationUseCase.Execute(ctx.Request.Context(), req, tenantID)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "expired") {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			httpresp.JSON(ctx, http.StatusNotFound, err.Error())
 		} else {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			httpresp.JSON(ctx, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}

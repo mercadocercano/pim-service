@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"log"
 	"net/http"
 	backfillUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
@@ -73,7 +74,7 @@ func (h *QuickstartHandler) RegisterRoutes(router *gin.RouterGroup) {
 func (h *QuickstartHandler) GetBusinessTypes(c *gin.Context) {
 	businessTypes, err := h.getBusinessTypesUseCase.Execute(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, businessTypes)
@@ -84,7 +85,7 @@ func (h *QuickstartHandler) GetCategoriesByBusinessType(c *gin.Context) {
 	businessType := c.Param("businessType")
 	categories, err := h.getCategoriesByBusinessTypeUseCase.Execute(c.Request.Context(), businessType)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, categories)
@@ -95,7 +96,7 @@ func (h *QuickstartHandler) GetAttributesByBusinessType(c *gin.Context) {
 	businessType := c.Param("businessType")
 	attributes, err := h.getAttributesByBusinessTypeUseCase.Execute(c.Request.Context(), businessType)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, attributes)
@@ -106,7 +107,7 @@ func (h *QuickstartHandler) GetVariantsByBusinessType(c *gin.Context) {
 	businessType := c.Param("businessType")
 	variants, err := h.getVariantsByBusinessTypeUseCase.Execute(c.Request.Context(), businessType)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, variants)
@@ -117,7 +118,7 @@ func (h *QuickstartHandler) GetProductsByBusinessType(c *gin.Context) {
 	businessType := c.Param("businessType")
 	products, err := h.getProductsByBusinessTypeUseCase.Execute(c.Request.Context(), businessType)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, products)
@@ -128,7 +129,7 @@ func (h *QuickstartHandler) GetBrandsByBusinessType(c *gin.Context) {
 	businessType := c.Param("businessType")
 	brands, err := h.getBrandsByBusinessTypeUseCase.Execute(c.Request.Context(), businessType)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, brands)
@@ -138,19 +139,19 @@ func (h *QuickstartHandler) GetBrandsByBusinessType(c *gin.Context) {
 func (h *QuickstartHandler) SetupTenant(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header is required"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header is required")
 		return
 	}
 
 	var setupData map[string]interface{}
 	if err := c.ShouldBindJSON(&setupData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	history, err := h.setupTenantUseCase.Execute(c.Request.Context(), tenantID, setupData)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -161,7 +162,7 @@ func (h *QuickstartHandler) SetupTenant(c *gin.Context) {
 func (h *QuickstartHandler) ListTemplates(c *gin.Context) {
 	templates, err := h.listTemplatesUseCase.Execute(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, templates)
@@ -171,7 +172,7 @@ func (h *QuickstartHandler) ListTemplates(c *gin.Context) {
 func (h *QuickstartHandler) ApplyTemplate(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header is required"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header is required")
 		return
 	}
 
@@ -180,7 +181,7 @@ func (h *QuickstartHandler) ApplyTemplate(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -191,7 +192,7 @@ func (h *QuickstartHandler) ApplyTemplate(c *gin.Context) {
 
 	response, err := h.applyTemplateUseCase.Execute(c.Request.Context(), applyReq)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -204,13 +205,13 @@ func (h *QuickstartHandler) ApplyTemplate(c *gin.Context) {
 func (h *QuickstartHandler) ApplyTemplateByID(c *gin.Context) {
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "X-Tenant-ID header is required"})
+		httpresp.JSON(c, http.StatusBadRequest, "X-Tenant-ID header is required")
 		return
 	}
 
 	templateID := c.Param("id")
 	if templateID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "template_id is required in path"})
+		httpresp.JSON(c, http.StatusBadRequest, "template_id is required in path")
 		return
 	}
 
@@ -221,7 +222,7 @@ func (h *QuickstartHandler) ApplyTemplateByID(c *gin.Context) {
 
 	response, err := h.applyTemplateUseCase.Execute(c.Request.Context(), applyReq)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

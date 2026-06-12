@@ -1,6 +1,7 @@
 package controller
 
 import (
+	httpresp "github.com/hornosg/go-shared/infrastructure/response"
 	"net/http"
 	"strconv"
 
@@ -40,7 +41,7 @@ func (h *MarketplaceProductHandler) ListProducts(c *gin.Context) {
 
 	products, total, err := h.productRepo.FindAllProducts(c.Request.Context(), search, businessType, page, pageSize)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener productos: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error al obtener productos: "+err.Error())
 		return
 	}
 
@@ -57,17 +58,17 @@ func (h *MarketplaceProductHandler) ListProducts(c *gin.Context) {
 func (h *MarketplaceProductHandler) GetProduct(c *gin.Context) {
 	productID := c.Param("id")
 	if productID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de producto requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de producto requerido")
 		return
 	}
 
 	product, err := h.productRepo.FindProductByID(c.Request.Context(), productID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener producto: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error al obtener producto: "+err.Error())
 		return
 	}
 	if product == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Producto no encontrado"})
+		httpresp.JSON(c, http.StatusNotFound, "Producto no encontrado")
 		return
 	}
 
@@ -78,7 +79,7 @@ func (h *MarketplaceProductHandler) GetProduct(c *gin.Context) {
 func (h *MarketplaceProductHandler) ListProductsByStoreType(c *gin.Context) {
 	storeTypeCode := c.Param("code")
 	if storeTypeCode == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "código de tipo de comercio requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "código de tipo de comercio requerido")
 		return
 	}
 
@@ -86,7 +87,7 @@ func (h *MarketplaceProductHandler) ListProductsByStoreType(c *gin.Context) {
 
 	products, total, err := h.productRepo.FindProductsByStoreType(c.Request.Context(), storeTypeCode, page, pageSize)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener productos: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error al obtener productos: "+err.Error())
 		return
 	}
 
@@ -103,7 +104,7 @@ func (h *MarketplaceProductHandler) ListProductsByStoreType(c *gin.Context) {
 func (h *MarketplaceProductHandler) ListProductsByTenant(c *gin.Context) {
 	tenantID := c.Param("tenant_id")
 	if tenantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de tenant requerido"})
+		httpresp.JSON(c, http.StatusBadRequest, "ID de tenant requerido")
 		return
 	}
 
@@ -111,7 +112,7 @@ func (h *MarketplaceProductHandler) ListProductsByTenant(c *gin.Context) {
 
 	products, total, err := h.productRepo.FindProductsByTenantID(c.Request.Context(), tenantID, page, pageSize)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener productos: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error al obtener productos: "+err.Error())
 		return
 	}
 
@@ -128,7 +129,7 @@ func (h *MarketplaceProductHandler) ListProductsByTenant(c *gin.Context) {
 func (h *MarketplaceProductHandler) ListStoreTypes(c *gin.Context) {
 	storeTypes, err := h.productRepo.GetStoreTypesWithCounts(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener tipos de comercio: " + err.Error()})
+		httpresp.JSON(c, http.StatusInternalServerError, "Error al obtener tipos de comercio: "+err.Error())
 		return
 	}
 
