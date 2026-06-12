@@ -43,7 +43,11 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
 # ==============================================
 # Stage 3: Development stage (with Air hot reload)
 # ==============================================
-FROM mercado-cercano/go-dev:1.25 AS development
+FROM golang:1.25-alpine AS development
+
+RUN apk add --no-cache git ca-certificates tzdata curl && \
+    go install github.com/air-verse/air@v1.61.7 && \
+    addgroup -S appgroup && adduser -S appuser -G appgroup
 
 # Configure private Go modules
 ARG GITHUB_TOKEN
