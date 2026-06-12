@@ -44,6 +44,22 @@ generateComponentByStep --step_type="dto" --entity_name="product_variant"
 | Testing standards | `ai-tools/rules/testing-standards.md` |
 | Formato respuesta API | `ai-tools/rules/api-response-format.md` |
 
+## Memoria persistente (Engram)
+
+Tenés acceso a memoria persistente entre sesiones vía las herramientas MCP de Engram (`mem_save`, `mem_search`, `mem_context`, etc.). Proyecto: **`mercado-cercano`** (memoria compartida con iam-service y el resto del ecosistema).
+
+**Cuándo guardar** — sin esperar que te lo pidan:
+- Al resolver un bug no trivial: síntoma, causa raíz, fix aplicado.
+- Al tomar una decisión de diseño: qué se decidió y por qué.
+- Al descubrir un patrón o convención del proyecto que no está documentada.
+- Al completar una feature o refactor significativo: qué cambió y dónde.
+
+**Cuándo buscar** — antes de empezar cualquier tarea:
+- `mem_context` al inicio de sesión o tras una compaction para recuperar el estado anterior.
+- `mem_search` cuando el usuario menciona algo que puede tener historial ("el bug de autenticación", "la migración de la semana pasada").
+
+**Al cerrar sesión**: llamar `mem_session_summary` para dejar un resumen recuperable.
+
 ## Notas críticas
 
 - Puerto **8090**, NO 8080
