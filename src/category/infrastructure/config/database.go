@@ -1,11 +1,12 @@
 package config
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
 	"github.com/hornosg/go-shared/infrastructure/env"
-	_ "github.com/lib/pq"
+	goshpostgres "github.com/hornosg/go-shared/infrastructure/postgres"
 )
 
 // DatabaseConfig contiene la configuración de la base de datos
@@ -40,14 +41,19 @@ func (c *DatabaseConfig) GetDSN() string {
 
 // Connect establece la conexión con la base de datos
 func (c *DatabaseConfig) Connect() (*sql.DB, error) {
-	db, err := sql.Open("postgres", c.GetDSN())
+	db, err := goshpostgres.Connect(goshpostgres.Config{
+		Host:     c.Host,
+		Port:     c.Port,
+		User:     c.User,
+		Password: c.Password,
+		DBName:   c.DBName,
+		SSLMode:  c.SSLMode,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("error al conectar con la base de datos: %v", err)
 	}
 
-	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("error al hacer ping a la base de datos: %v", err)
-	}
+	goshpostgres.StartPoolMonitor(context.Background(), db, goshpostgres.MonitorOptions{Service: "pim-service", DBName: c.DBName})
 
 	return db, nil
 }
