@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	sharedmetrics "github.com/hornosg/go-shared/infrastructure/metrics"
 	apiConfig "saas-mt-pim-service/src/api/config"
 	brandConfig "saas-mt-pim-service/src/brand/infrastructure/config"
 	businesstypeUsecase "saas-mt-pim-service/src/businesstype/application/usecase"
@@ -18,7 +19,6 @@ import (
 	productConfig "saas-mt-pim-service/src/product/tenant/infrastructure/config"
 	quickstartConfig "saas-mt-pim-service/src/quickstart/infrastructure/config"
 	sharedConfig "saas-mt-pim-service/src/shared/infrastructure/config"
-	sharedmetrics "github.com/hornosg/go-shared/infrastructure/metrics"
 
 	// Brand imports
 	brandController "saas-mt-pim-service/src/brand/infrastructure/controller"
@@ -49,19 +49,11 @@ import (
 	s2sUsecase "saas-mt-pim-service/src/s2s/usecase"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq" // Driver de PostgreSQL
+	"github.com/hornosg/go-shared/infrastructure/env"
 	tenantmw "github.com/hornosg/go-shared/infrastructure/middleware"
+	_ "github.com/lib/pq" // Driver de PostgreSQL
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
-
-// getEnv obtiene una variable de entorno o devuelve un valor por defecto
-func getEnv(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	return value
-}
 
 func main() {
 	fmt.Println("🚀🚀🚀 INICIO ABSOLUTO DEL MAIN.GO 🚀🚀🚀")
@@ -118,11 +110,11 @@ func main() {
 	sharedConfig.SetupSharedMiddleware(router, sharedCfg)
 
 	// Obtener configuración de la base de datos de variables de entorno
-	dbHost := getEnv("DB_HOST", "localhost")
-	dbPort := getEnv("DB_PORT", "5432")
-	dbUser := getEnv("DB_USER", "postgres")
-	dbPassword := getEnv("DB_PASSWORD", "postgres")
-	dbName := getEnv("DB_NAME", "pim_db")
+	dbHost := env.Get("DB_HOST", "localhost")
+	dbPort := env.Get("DB_PORT", "5432")
+	dbUser := env.Get("DB_USER", "postgres")
+	dbPassword := env.Get("DB_PASSWORD", "postgres")
+	dbName := env.Get("DB_NAME", "pim_db")
 
 	// Crear string de conexión
 	connStr := "postgres://" + dbUser + ":" + dbPassword + "@" + dbHost + ":" + dbPort + "/" + dbName + "?sslmode=disable"
@@ -179,7 +171,7 @@ func main() {
 	// - Ubicaciones de Stock
 
 	// Iniciar el servidor
-	port := getEnv("PORT", "8080")
+	port := env.Get("PORT", "8080")
 	log.Printf("Servidor iniciando en http://localhost:%s", port)
 	router.Run(":" + port)
 }

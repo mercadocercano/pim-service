@@ -3,8 +3,8 @@ package config
 import (
 	"database/sql"
 	"fmt"
-	"os"
 
+	"github.com/hornosg/go-shared/infrastructure/env"
 	_ "github.com/lib/pq"
 )
 
@@ -21,12 +21,12 @@ type DatabaseConfig struct {
 // NewDatabaseConfig crea una nueva configuración de base de datos desde variables de entorno
 func NewDatabaseConfig() *DatabaseConfig {
 	return &DatabaseConfig{
-		Host:     getEnv("DB_HOST", "localhost"),
-		Port:     getEnv("DB_PORT", "5432"),
-		User:     getEnv("DB_USER", "postgres"),
-		Password: getEnv("DB_PASSWORD", "postgres"),
-		DBName:   getEnv("DB_NAME", "pim"),
-		SSLMode:  getEnv("DB_SSL_MODE", "disable"),
+		Host:     env.Get("DB_HOST", "localhost"),
+		Port:     env.Get("DB_PORT", "5432"),
+		User:     env.Get("DB_USER", "postgres"),
+		Password: env.Get("DB_PASSWORD", "postgres"),
+		DBName:   env.Get("DB_NAME", "pim"),
+		SSLMode:  env.Get("DB_SSL_MODE", "disable"),
 	}
 }
 
@@ -50,12 +50,4 @@ func (c *DatabaseConfig) Connect() (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-// getEnv obtiene una variable de entorno o retorna un valor por defecto
-func getEnv(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-	return defaultValue
 }
