@@ -51,7 +51,6 @@ func (s *AttributeServiceImpl) CreateFromTemplate(ctx context.Context, tenantID 
 
 	// Si ya existen atributos para este tenant, no crear duplicados
 	if count > 0 {
-		fmt.Printf("Ya existen %d atributos para el tenant %s, omitiendo creación\n", count, tenantID)
 		return nil
 	}
 
@@ -67,7 +66,6 @@ func (s *AttributeServiceImpl) CreateFromTemplate(ctx context.Context, tenantID 
 		if err != nil {
 			return fmt.Errorf("error creando atributo %s: %w", attribute.Name, err)
 		}
-		fmt.Printf("Atributo creado: %s para tenant %s\n", attribute.Name, tenantID)
 	}
 
 	return nil

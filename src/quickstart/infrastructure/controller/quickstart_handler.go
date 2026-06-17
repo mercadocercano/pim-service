@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	httpresp "github.com/hornosg/go-shared/infrastructure/response"
-	"log"
 	"net/http"
+	pimport "saas-mt-pim-service/src/pim/domain/port"
 	backfillUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
 	"saas-mt-pim-service/src/quickstart/application/usecase"
 )
@@ -22,6 +22,7 @@ type QuickstartHandler struct {
 	listTemplatesUseCase               *usecase.ListTemplatesUseCase
 	applyTemplateUseCase               *usecase.ApplyTemplateUseCase
 	backfillImagesUseCase              *backfillUseCase.BackfillTenantImagesUseCase
+	logger                             pimport.PIMEventLogger
 }
 
 // NewQuickstartHandler crea una nueva instancia del handler
@@ -36,6 +37,7 @@ func NewQuickstartHandler(
 	listTemplatesUseCase *usecase.ListTemplatesUseCase,
 	applyTemplateUseCase *usecase.ApplyTemplateUseCase,
 	backfillImagesUseCase *backfillUseCase.BackfillTenantImagesUseCase,
+	logger pimport.PIMEventLogger,
 ) *QuickstartHandler {
 	return &QuickstartHandler{
 		getBusinessTypesUseCase:            getBusinessTypesUseCase,
@@ -48,6 +50,7 @@ func NewQuickstartHandler(
 		listTemplatesUseCase:               listTemplatesUseCase,
 		applyTemplateUseCase:               applyTemplateUseCase,
 		backfillImagesUseCase:              backfillImagesUseCase,
+		logger:                             logger,
 	}
 }
 
@@ -239,10 +242,17 @@ func (h *QuickstartHandler) triggerBackfill(tenantID string) {
 	go func() {
 		result, err := h.backfillImagesUseCase.Execute(context.Background(), tenantID)
 		if err != nil {
-			log.Printf("[quickstart] backfill de imágenes falló para tenant %s: %v", tenantID, err)
+			h.logger.Log(pimport.PIMEvent{
+				Event:    "pim.backfill_tenant_error",
+				TenantID: tenantID,
+				Reason:   err.Error(),
+			})
 			return
 		}
-		log.Printf("[quickstart] backfill completado tenant=%s updated=%d skipped=%d errors=%d",
-			tenantID, result.Updated, result.Skipped, result.Errors)
+		h.logger.Log(pimport.PIMEvent{
+			Event:    "pim.backfill_completed",
+			TenantID: tenantID,
+			Count:    result.Updated,
+		})
 	}()
 }

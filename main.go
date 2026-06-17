@@ -16,6 +16,8 @@ import (
 	businesstypeRepository "saas-mt-pim-service/src/businesstype/infrastructure/persistence/repository"
 	categoryConfig "saas-mt-pim-service/src/category/infrastructure/config"
 	categoryAttributeConfig "saas-mt-pim-service/src/category_attribute/infrastructure/config"
+	pimlogging "saas-mt-pim-service/src/pim/infrastructure/logging"
+	pimport "saas-mt-pim-service/src/pim/domain/port"
 	globalCatalogConfig "saas-mt-pim-service/src/product/global_catalog/infrastructure/config"
 	backfillUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
 	productConfig "saas-mt-pim-service/src/product/tenant/infrastructure/config"
@@ -144,21 +146,17 @@ func main() {
 	apiCfg.Version = "1.0.0"
 	apiConfig.SetupAPIModule(router, v1, apiCfg)
 
+	// Logger canónico PIM — ADR-001. Un único adapter para toda la flota del servicio.
+	pimLogger := pimlogging.NewPIMLogger("pim-service")
+
 	// Configurar módulos
 	categoryConfig.SetupCategoryModule(v1, db)
 	categoryAttributeConfig.SetupCategoryAttributeModule(v1, db)
-	log.Println("Módulo CategoryAttribute configurado exitosamente")
-	log.Println("Rutas CategoryAttribute disponibles:")
-	log.Println("  GET    /api/v1/category-attributes (con filtros y paginación)")
-	log.Println("  GET    /api/v1/category-attributes/simple (listado simple)")
-	log.Println("  POST   /api/v1/category-attributes")
-	log.Println("  PUT    /api/v1/category-attributes/:id")
-	log.Println("  DELETE /api/v1/category-attributes/:id")
 	setupBrandModule(v1, db)
 	setupMarketplaceBrandModule(v1, db)
 	setupAttributeModule(v1, db)
-	productCfg := setupProductModule(v1, db)
-	setupQuickstartModule(v1, db, productCfg.BackfillTenantImagesUseCase)
+	productCfg := setupProductModuleWithLogger(v1, db, pimLogger)
+	setupQuickstartModule(v1, db, productCfg.BackfillTenantImagesUseCase, pimLogger)
 	setupBusinessTypeModule(v1, db)
 	setupBusinessTypeTemplateModule(v1, db)
 	setupGlobalCatalogModule(v1, db)
@@ -166,7 +164,7 @@ func main() {
 	setupMarketplaceProductsModule(v1, db)
 	setupSchemaValidationModule(v1, db)
 	overviewConfig.SetupOverviewModule(v1, db)
-	setupInternalModule(v1, db)
+	setupInternalModuleWithLogger(v1, db, pimLogger)
 
 	// Aquí se agregarían más módulos:
 	// - Ubicaciones de Stock
@@ -206,12 +204,17 @@ func setupBrandModule(router *gin.RouterGroup, db *sql.DB) {
 	log.Println("  DELETE /api/v1/brands/:id")
 }
 
-// setupProductModule configura el módulo Product
+// setupProductModule configura el módulo Product (sin logger canónico — compatibilidad).
 func setupProductModule(router *gin.RouterGroup, db *sql.DB) *productConfig.ProductConfig {
+	return setupProductModuleWithLogger(router, db, nil)
+}
+
+// setupProductModuleWithLogger configura el módulo Product con logger canónico ADR-001.
+func setupProductModuleWithLogger(router *gin.RouterGroup, db *sql.DB, logger pimport.PIMEventLogger) *productConfig.ProductConfig {
 	log.Println("Configurando módulo Product...")
 
 	// Crear configuración del módulo Product
-	productCfg := productConfig.NewProductConfig(db, sharedmetrics.NewPrometheusRecorder())
+	productCfg := productConfig.NewProductConfigWithLogger(db, sharedmetrics.NewPrometheusRecorder(), logger)
 
 	// Registrar rutas del Product
 	productCfg.ProductController.RegisterRoutes(router)
@@ -265,33 +268,10 @@ func setupProductModule(router *gin.RouterGroup, db *sql.DB) *productConfig.Prod
 }
 
 // setupQuickstartModule configura el módulo Quickstart
-func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB, backfillImages *backfillUseCase.BackfillTenantImagesUseCase) {
-	log.Println("Configurando módulo Quickstart...")
-
-	// Crear configuración del módulo Quickstart
-	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db, backfillImages)
-
-	// Obtener el handler principal de quickstart (incluye /templates)
-	quickstartHandler := quickstartCfg.GetQuickstartHandler()
-	quickstartHandler.RegisterRoutes(router)
-
-	// Obtener el handler simplificado del wizard
-	simpleWizardHandler := quickstartCfg.GetSimpleWizardHandler()
-
-	// Registrar rutas del wizard simplificado
-	simpleWizardHandler.RegisterRoutes(router)
-
-	log.Println("Módulo Quickstart configurado exitosamente")
-	log.Println("Rutas Quickstart disponibles:")
-	log.Println("  GET    /api/v1/quickstart/templates")
-	log.Println("  POST   /api/v1/quickstart/apply")
-	log.Println("Rutas Wizard disponibles:")
-	log.Println("  GET    /api/v1/wizard/status")
-	log.Println("  POST   /api/v1/wizard/start")
-	log.Println("  PUT    /api/v1/wizard/step")
-	log.Println("  GET    /api/v1/wizard/template/:businessTypeId")
-	log.Println("  GET    /api/v1/wizard/template/:businessTypeId/:section")
-	log.Println("  DELETE /api/v1/wizard/reset (⚠️ TEMPORAL - BORRAR DESPUÉS)")
+func setupQuickstartModule(router *gin.RouterGroup, db *sql.DB, backfillImages *backfillUseCase.BackfillTenantImagesUseCase, logger pimport.PIMEventLogger) {
+	quickstartCfg := quickstartConfig.NewQuickstartModuleConfig(db, backfillImages, logger)
+	quickstartCfg.GetQuickstartHandler().RegisterRoutes(router)
+	quickstartCfg.GetSimpleWizardHandler().RegisterRoutes(router)
 }
 
 // setupBusinessTypeModule configura el módulo BusinessType
@@ -515,14 +495,13 @@ func setupMarketplaceProductsModule(router *gin.RouterGroup, db *sql.DB) {
 }
 
 func setupInternalModule(router *gin.RouterGroup, db *sql.DB) {
-	log.Println("Configurando módulo Internal (S2S)...")
+	setupInternalModuleWithLogger(router, db, nil)
+}
+
+func setupInternalModuleWithLogger(router *gin.RouterGroup, db *sql.DB, logger pimport.PIMEventLogger) {
 	repo := s2sPersistence.NewPostgresTemplateRepository(db)
-	refreshUC := s2sUsecase.NewRefreshTemplateProductsUseCase(repo)
+	refreshUC := s2sUsecase.NewRefreshTemplateProductsUseCaseWithLogger(repo, logger)
 	templateUC := s2sUsecase.NewGetTemplateStatusUseCase(repo)
-	handler := s2sController.NewInternalHandler(refreshUC, templateUC)
+	handler := s2sController.NewInternalHandler(refreshUC, templateUC, logger)
 	handler.RegisterRoutes(router)
-	log.Println("Módulo Internal configurado exitosamente")
-	log.Println("  POST   /api/v1/internal/refresh-template-products [DEPRECATED]")
-	log.Println("  POST   /api/v1/s2s/refresh-template-products [API-Key via Kong]")
-	log.Println("  GET    /api/v1/s2s/business-types/:slug/template-status [API-Key via Kong]")
 }

@@ -82,11 +82,8 @@ func (uc *ValidateJSONSchemaUseCase) Execute(
 	// Calcular resumen
 	validation.CalculateSummary()
 
-	// Guardar en cache
-	if err := uc.schemaCache.Set(ctx, validation); err != nil {
-		// Log error pero no fallar
-		fmt.Printf("Error caching validation: %v\n", err)
-	}
+	// Guardar en cache — ignorar error (no crítico)
+	_ = uc.schemaCache.Set(ctx, validation)
 
 	return validation, nil
 }

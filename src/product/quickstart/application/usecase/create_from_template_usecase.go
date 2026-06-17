@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	tenantEntity "saas-mt-pim-service/src/product/tenant/domain/entity"
 	tenantPort "saas-mt-pim-service/src/product/tenant/domain/port"
@@ -81,7 +80,6 @@ func (uc *CreateFromTemplateUseCase) Execute(ctx context.Context, request Create
 
 	if request.ImportOptions != nil && request.ImportOptions.AutoActivate {
 		if err := product.ActivateWithValidation(); err != nil {
-			log.Printf("No se pudo auto-activar producto %s: %v", product.IDString(), err)
 			validationErrors = append(validationErrors, err.Error())
 			requiredActions = uc.getRequiredActionsForActivation(product)
 		} else {

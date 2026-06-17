@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	cr "github.com/hornosg/go-shared/criteria"
-	"log"
 	"saas-mt-pim-service/src/attribute/domain/entity"
 	"time"
 )
@@ -57,7 +56,6 @@ func (r *MarketplaceAttributePostgresRepository) Create(ctx context.Context, att
 	)
 
 	if err != nil {
-		log.Printf("Error creando marketplace attribute: %v", err)
 		return fmt.Errorf("error creating marketplace attribute: %v", err)
 	}
 
@@ -100,7 +98,6 @@ func (r *MarketplaceAttributePostgresRepository) Update(ctx context.Context, att
 	)
 
 	if err != nil {
-		log.Printf("Error actualizando marketplace attribute: %v", err)
 		return fmt.Errorf("error updating marketplace attribute: %v", err)
 	}
 
@@ -175,7 +172,6 @@ func (r *MarketplaceAttributePostgresRepository) Delete(ctx context.Context, id 
 
 	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
-		log.Printf("Error eliminando marketplace attribute: %v", err)
 		return fmt.Errorf("error deleting marketplace attribute: %v", err)
 	}
 
@@ -246,7 +242,6 @@ func (r *MarketplaceAttributePostgresRepository) scanMarketplaceAttribute(row *s
 	// Parsear validation_rules JSON
 	var validationRules map[string]interface{}
 	if err := json.Unmarshal([]byte(validationRulesJSON), &validationRules); err != nil {
-		log.Printf("Error parsing validation rules JSON: %v", err)
 		validationRules = make(map[string]interface{})
 	}
 
@@ -299,7 +294,6 @@ func (r *MarketplaceAttributePostgresRepository) scanMarketplaceAttributes(rows 
 		// Parsear validation_rules JSON
 		var validationRules map[string]interface{}
 		if err := json.Unmarshal([]byte(validationRulesJSON), &validationRules); err != nil {
-			log.Printf("Error parsing validation rules JSON: %v", err)
 			validationRules = make(map[string]interface{})
 		}
 

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	cr "github.com/hornosg/go-shared/criteria"
-	"log"
 	"saas-mt-pim-service/src/overview/domain/entity"
 	"saas-mt-pim-service/src/overview/domain/exception"
 )
@@ -44,7 +43,6 @@ func (r *MarketplaceSummaryPostgresRepository) Create(ctx context.Context, Marke
 	)
 
 	if err != nil {
-		log.Printf("Error creando MarketplaceSummary: %v", err)
 		return fmt.Errorf("%w: %v", exception.ErrMarketplaceSummaryCreateFailed, err)
 	}
 
@@ -70,7 +68,6 @@ func (r *MarketplaceSummaryPostgresRepository) Update(ctx context.Context, Marke
 	)
 
 	if err != nil {
-		log.Printf("Error actualizando MarketplaceSummary: %v", err)
 		return fmt.Errorf("%w: %v", exception.ErrMarketplaceSummaryUpdateFailed, err)
 	}
 
@@ -118,7 +115,6 @@ func (r *MarketplaceSummaryPostgresRepository) Delete(ctx context.Context, id st
 
 	result, err := r.db.ExecContext(ctx, query, id, tenantID)
 	if err != nil {
-		log.Printf("Error eliminando MarketplaceSummary: %v", err)
 		return fmt.Errorf("%w: %v", exception.ErrMarketplaceSummaryDeleteFailed, err)
 	}
 

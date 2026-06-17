@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 
+	pimport "saas-mt-pim-service/src/pim/domain/port"
 	"saas-mt-pim-service/src/product/tenant/domain/entity"
 	tenantport "saas-mt-pim-service/src/product/tenant/domain/port"
 	sharedEntity "saas-mt-pim-service/src/shared/domain/entity"
@@ -26,6 +27,7 @@ type ImportProductsAsyncUseCase struct {
 	notificationSvc localport.NotificationService
 	fileStorage     FileStorageService
 	metrics         sharedport.MetricsRecorder
+	logger          pimport.PIMEventLogger
 }
 
 // FileStorageService define operaciones de almacenamiento de archivos
@@ -51,6 +53,34 @@ func NewImportProductsAsyncUseCase(
 		notificationSvc: notificationSvc,
 		fileStorage:     fileStorage,
 		metrics:         metrics,
+	}
+}
+
+// NewImportProductsAsyncUseCaseWithLogger crea el use case con logger canónico inyectado.
+func NewImportProductsAsyncUseCaseWithLogger(
+	productRepo tenantport.ProductCriteriaRepository,
+	fileImporter sharedport.FileImporter[entity.Product],
+	importJobRepo localport.ImportJobRepository,
+	notificationSvc localport.NotificationService,
+	fileStorage FileStorageService,
+	metrics sharedport.MetricsRecorder,
+	logger pimport.PIMEventLogger,
+) *ImportProductsAsyncUseCase {
+	return &ImportProductsAsyncUseCase{
+		productRepo:     productRepo,
+		fileImporter:    fileImporter,
+		importJobRepo:   importJobRepo,
+		notificationSvc: notificationSvc,
+		fileStorage:     fileStorage,
+		metrics:         metrics,
+		logger:          logger,
+	}
+}
+
+// logEvent emite un evento canónico si hay logger inyectado (nil-safe).
+func (uc *ImportProductsAsyncUseCase) logEvent(e pimport.PIMEvent) {
+	if uc.logger != nil {
+		uc.logger.Log(e)
 	}
 }
 
@@ -196,7 +226,11 @@ func (uc *ImportProductsAsyncUseCase) processImportJob(ctx context.Context, jobI
 
 	resultURL, err := uc.fileStorage.StoreResults(ctx, jobID.String(), results)
 	if err != nil {
-		fmt.Printf("Error storing results: %v\n", err)
+		uc.logEvent(pimport.PIMEvent{
+			Event:  "pim.import_failed",
+			JobID:  jobID.String(),
+			Reason: fmt.Sprintf("storing results: %v", err),
+		})
 	}
 
 	job.UpdateProgress(job.TotalRecords, successCount, failureCount)
@@ -229,11 +263,33 @@ func (uc *ImportProductsAsyncUseCase) processImportJob(ctx context.Context, jobI
 
 	if job.NeedsNotification() {
 		if notifyErr := uc.notificationSvc.NotifyImportJobComplete(ctx, job); notifyErr != nil {
-			fmt.Printf("Error sending notification: %v\n", notifyErr)
+			uc.logEvent(pimport.PIMEvent{
+				Event:    "pim.import_failed",
+				TenantID: job.TenantID,
+				JobID:    jobID.String(),
+				Reason:   fmt.Sprintf("notification failed: %v", notifyErr),
+			})
 		} else {
 			job.MarkNotificationSent()
 			uc.importJobRepo.Update(ctx, job)
 		}
+	}
+
+	if failureCount == 0 {
+		uc.logEvent(pimport.PIMEvent{
+			Event:    "pim.import_from_global_catalog_completed",
+			TenantID: job.TenantID,
+			JobID:    jobID.String(),
+			Count:    successCount,
+		})
+	} else {
+		uc.logEvent(pimport.PIMEvent{
+			Event:    "pim.import_failed",
+			TenantID: job.TenantID,
+			JobID:    jobID.String(),
+			Count:    failureCount,
+			Reason:   fmt.Sprintf("%d/%d records failed", failureCount, job.TotalRecords),
+		})
 	}
 }
 

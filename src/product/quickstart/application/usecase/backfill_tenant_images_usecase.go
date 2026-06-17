@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"log"
 
 	globalPort "saas-mt-pim-service/src/product/global_catalog/domain/port"
+	pimport "saas-mt-pim-service/src/pim/domain/port"
 	tenantPort "saas-mt-pim-service/src/product/tenant/domain/port"
 )
 
@@ -21,6 +21,7 @@ type BackfillResult struct {
 type BackfillTenantImagesUseCase struct {
 	globalRepo globalPort.GlobalProductRepository
 	tenantRepo tenantPort.ProductRepository
+	logger     pimport.PIMEventLogger
 }
 
 // NewBackfillTenantImagesUseCase crea el use case con sus dependencias.
@@ -31,6 +32,26 @@ func NewBackfillTenantImagesUseCase(
 	return &BackfillTenantImagesUseCase{
 		globalRepo: globalRepo,
 		tenantRepo: tenantRepo,
+	}
+}
+
+// NewBackfillTenantImagesUseCaseWithLogger crea el use case con logger canónico inyectado.
+func NewBackfillTenantImagesUseCaseWithLogger(
+	globalRepo globalPort.GlobalProductRepository,
+	tenantRepo tenantPort.ProductRepository,
+	logger pimport.PIMEventLogger,
+) *BackfillTenantImagesUseCase {
+	return &BackfillTenantImagesUseCase{
+		globalRepo: globalRepo,
+		tenantRepo: tenantRepo,
+		logger:     logger,
+	}
+}
+
+// logEvent emite un evento canónico si hay logger inyectado (nil-safe).
+func (uc *BackfillTenantImagesUseCase) logEvent(e pimport.PIMEvent) {
+	if uc.logger != nil {
+		uc.logger.Log(e)
 	}
 }
 
@@ -55,7 +76,12 @@ func (uc *BackfillTenantImagesUseCase) Execute(ctx context.Context, tenantID str
 
 		globalProduct, err := uc.globalRepo.FindByNameAndBrand(ctx, product.Name(), brandName)
 		if err != nil {
-			log.Printf("[backfill] error buscando en global_products para product_id=%s: %v", product.IDString(), err)
+			uc.logEvent(pimport.PIMEvent{
+				Event:     "pim.backfill_product_error",
+				TenantID:  tenantID,
+				ProductID: product.IDString(),
+				Reason:    err.Error(),
+			})
 			result.Errors++
 			continue
 		}
@@ -66,14 +92,24 @@ func (uc *BackfillTenantImagesUseCase) Execute(ctx context.Context, tenantID str
 		}
 
 		if updateErr := uc.tenantRepo.UpdateImageURL(ctx, tenantID, product.IDString(), *globalProduct.ImageURL()); updateErr != nil {
-			log.Printf("[backfill] error actualizando image_url product_id=%s: %v", product.IDString(), updateErr)
+			uc.logEvent(pimport.PIMEvent{
+				Event:     "pim.backfill_product_error",
+				TenantID:  tenantID,
+				ProductID: product.IDString(),
+				Reason:    updateErr.Error(),
+			})
 			result.Errors++
 			continue
 		}
 
-		log.Printf("[backfill] imagen actualizada product_id=%s tenant=%s", product.IDString(), tenantID)
 		result.Updated++
 	}
+
+	uc.logEvent(pimport.PIMEvent{
+		Event:    "pim.backfill_completed",
+		TenantID: tenantID,
+		Count:    result.Updated,
+	})
 
 	return result, nil
 }
@@ -90,7 +126,11 @@ func (uc *BackfillTenantImagesUseCase) ExecuteAll(ctx context.Context) (map[stri
 	for _, tenantID := range tenantIDs {
 		result, err := uc.Execute(ctx, tenantID)
 		if err != nil {
-			log.Printf("[backfill] error procesando tenant %s: %v", tenantID, err)
+			uc.logEvent(pimport.PIMEvent{
+				Event:    "pim.backfill_tenant_error",
+				TenantID: tenantID,
+				Reason:   err.Error(),
+			})
 			results[tenantID] = &BackfillResult{Errors: 1}
 			continue
 		}

@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"log"
 
 	globalPort "saas-mt-pim-service/src/product/global_catalog/domain/port"
+	pimport "saas-mt-pim-service/src/pim/domain/port"
 	tenantEntity "saas-mt-pim-service/src/product/tenant/domain/entity"
 	tenantPort "saas-mt-pim-service/src/product/tenant/domain/port"
 )
@@ -14,6 +14,7 @@ import (
 type ImportFromGlobalCatalogUseCase struct {
 	tenantProductRepo tenantPort.ProductRepository
 	globalCatalogRepo globalPort.GlobalProductRepository
+	logger            pimport.PIMEventLogger
 }
 
 func NewImportFromGlobalCatalogUseCase(
@@ -23,6 +24,26 @@ func NewImportFromGlobalCatalogUseCase(
 	return &ImportFromGlobalCatalogUseCase{
 		tenantProductRepo: tenantProductRepo,
 		globalCatalogRepo: globalCatalogRepo,
+	}
+}
+
+// NewImportFromGlobalCatalogUseCaseWithLogger crea el use case con logger canónico inyectado.
+func NewImportFromGlobalCatalogUseCaseWithLogger(
+	tenantProductRepo tenantPort.ProductRepository,
+	globalCatalogRepo globalPort.GlobalProductRepository,
+	logger pimport.PIMEventLogger,
+) *ImportFromGlobalCatalogUseCase {
+	return &ImportFromGlobalCatalogUseCase{
+		tenantProductRepo: tenantProductRepo,
+		globalCatalogRepo: globalCatalogRepo,
+		logger:            logger,
+	}
+}
+
+// logEvent emite un evento canónico si hay logger inyectado (nil-safe).
+func (uc *ImportFromGlobalCatalogUseCase) logEvent(e pimport.PIMEvent) {
+	if uc.logger != nil {
+		uc.logger.Log(e)
 	}
 }
 
@@ -86,8 +107,11 @@ func (uc *ImportFromGlobalCatalogUseCase) Execute(
 		return nil, fmt.Errorf("error guardando producto: %w", err)
 	}
 
-	log.Printf("[catalog-import] imported global product %s → tenant product %s for tenant %s",
-		gp.IDString(), product.IDString(), request.TenantID)
+	uc.logEvent(pimport.PIMEvent{
+		Event:     "pim.import_from_global_catalog_completed",
+		TenantID:  request.TenantID,
+		ProductID: product.IDString(),
+	})
 
 	return &ImportFromGlobalCatalogResponse{
 		ProductID:       product.IDString(),

@@ -56,9 +56,8 @@ func (uc *ValidateExcelSchemaUseCase) Execute(
 	uc.csvUseCase.generateRecommendations(validation)
 	validation.CalculateSummary()
 
-	if err := uc.schemaCache.Set(ctx, validation); err != nil {
-		fmt.Printf("Error caching validation: %v\n", err)
-	}
+	// Guardar en cache — ignorar error (no crítico)
+	_ = uc.schemaCache.Set(ctx, validation)
 
 	return validation, nil
 }

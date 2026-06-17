@@ -13,10 +13,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"saas-mt-pim-service/src/pim/domain/port"
 	"saas-mt-pim-service/src/s2s/controller"
 	s2sport "saas-mt-pim-service/src/s2s/domain/port"
 	"saas-mt-pim-service/src/s2s/usecase"
 )
+
+// noopLogger implementa port.PIMEventLogger descartando todos los eventos.
+type noopLogger struct{}
+
+func (n *noopLogger) Log(_ port.PIMEvent) {}
 
 func init() {
 	gin.SetMode(gin.TestMode)
@@ -39,7 +45,7 @@ func (m *mockTemplateRepo) RefreshProductTemplates(ctx context.Context) (int64, 
 func setupRouter(repo s2sport.TemplateRepository) *gin.Engine {
 	refreshUC := usecase.NewRefreshTemplateProductsUseCase(repo)
 	templateUC := usecase.NewGetTemplateStatusUseCase(repo)
-	h := controller.NewInternalHandler(refreshUC, templateUC)
+	h := controller.NewInternalHandler(refreshUC, templateUC, &noopLogger{})
 
 	r := gin.New()
 	v1 := r.Group("/api/v1")

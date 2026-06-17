@@ -33,7 +33,6 @@ func (s *CategoryAttributeServiceImpl) CreateFromTemplate(ctx context.Context, t
 
 	// Si ya existen relaciones para este tenant, no crear duplicados
 	if count > 0 {
-		fmt.Printf("Ya existen %d relaciones categoría-atributo para el tenant %s, omitiendo creación\n", count, tenantID)
 		return nil
 	}
 
@@ -100,12 +99,10 @@ func (s *CategoryAttributeServiceImpl) CreateFromTemplate(ctx context.Context, t
 						return fmt.Errorf("error creando relación categoría-atributo %s-%s: %w", categoryName, attributeName, err)
 					}
 					relationsCreated++
-					fmt.Printf("Relación creada: %s -> %s para tenant %s\n", categoryName, attributeName, tenantID)
 				}
 			}
 		}
 	}
 
-	fmt.Printf("Se crearon %d relaciones categoría-atributo para el tenant %s\n", relationsCreated, tenantID)
 	return nil
 }

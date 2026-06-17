@@ -5,6 +5,7 @@ import (
 
 	brandRepository "saas-mt-pim-service/src/brand/infrastructure/persistence"
 	categoryRepository "saas-mt-pim-service/src/category/infrastructure/persistence/repository"
+	pimport "saas-mt-pim-service/src/pim/domain/port"
 	globalCatalogPersistence "saas-mt-pim-service/src/product/global_catalog/infrastructure/persistence"
 	quickstartUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
 	quickstartCtrl "saas-mt-pim-service/src/product/quickstart/infrastructure/controller"
@@ -70,6 +71,16 @@ type ProductConfig struct {
 
 // NewProductConfig crea y configura todas las dependencias del módulo Product
 func NewProductConfig(db *sql.DB, metricsRecorder sharedport.MetricsRecorder) *ProductConfig {
+	return newProductConfigWithLogger(db, metricsRecorder, nil)
+}
+
+// NewProductConfigWithLogger crea la config inyectando un logger canónico (ADR-001).
+func NewProductConfigWithLogger(db *sql.DB, metricsRecorder sharedport.MetricsRecorder, logger pimport.PIMEventLogger) *ProductConfig {
+	return newProductConfigWithLogger(db, metricsRecorder, logger)
+}
+
+// newProductConfigWithLogger es la implementación interna compartida.
+func newProductConfigWithLogger(db *sql.DB, metricsRecorder sharedport.MetricsRecorder, logger pimport.PIMEventLogger) *ProductConfig {
 	// Repositorios
 	productRepo := persistence.NewPostgresProductRepository(db)
 
@@ -174,10 +185,10 @@ func NewProductConfig(db *sql.DB, metricsRecorder sharedport.MetricsRecorder) *P
 	// Use Cases - Quickstart
 	createFromTemplateUseCase := quickstartUseCase.NewCreateFromTemplateUseCase(productRepo)
 	globalCatalogRepo := globalCatalogPersistence.NewPostgresGlobalProductRepository(db)
-	importFromBusinessTypeUseCase := quickstartUseCase.NewImportFromBusinessTypeUseCase(productRepo, globalCatalogRepo)
-	importFromGlobalCatalogUseCase := quickstartUseCase.NewImportFromGlobalCatalogUseCase(productRepo, globalCatalogRepo)
+	importFromBusinessTypeUseCase := quickstartUseCase.NewImportFromBusinessTypeUseCaseWithLogger(productRepo, globalCatalogRepo, logger)
+	importFromGlobalCatalogUseCase := quickstartUseCase.NewImportFromGlobalCatalogUseCaseWithLogger(productRepo, globalCatalogRepo, logger)
 	getQuickstartProgressUseCase := quickstartUseCase.NewGetQuickstartProgressUseCase(productRepo)
-	backfillTenantImagesUseCase := quickstartUseCase.NewBackfillTenantImagesUseCase(globalCatalogRepo, productRepo)
+	backfillTenantImagesUseCase := quickstartUseCase.NewBackfillTenantImagesUseCaseWithLogger(globalCatalogRepo, productRepo, logger)
 
 	// Servicios - Quickstart
 	quickstartProductService := quickstartService.NewQuickstartProductService(createFromTemplateUseCase)

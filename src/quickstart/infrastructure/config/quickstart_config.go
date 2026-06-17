@@ -5,6 +5,7 @@ import (
 
 	businessTypeUsecase "saas-mt-pim-service/src/businesstype/application/usecase"
 	businessTypeRepository "saas-mt-pim-service/src/businesstype/infrastructure/persistence/repository"
+	pimport "saas-mt-pim-service/src/pim/domain/port"
 	backfillUseCase "saas-mt-pim-service/src/product/quickstart/application/usecase"
 	"saas-mt-pim-service/src/quickstart/application/usecase"
 	"saas-mt-pim-service/src/quickstart/infrastructure/controller"
@@ -26,7 +27,7 @@ type QuickstartModuleConfig struct {
 }
 
 // NewQuickstartModuleConfig crea una nueva configuración del módulo quickstart
-func NewQuickstartModuleConfig(db *sql.DB, backfillImages *backfillUseCase.BackfillTenantImagesUseCase) *QuickstartModuleConfig {
+func NewQuickstartModuleConfig(db *sql.DB, backfillImages *backfillUseCase.BackfillTenantImagesUseCase, logger pimport.PIMEventLogger) *QuickstartModuleConfig {
 	// Crear repositorio de business types
 	businessTypeRepo := businessTypeRepository.NewBusinessTypePostgresRepository(db)
 
@@ -59,6 +60,7 @@ func NewQuickstartModuleConfig(db *sql.DB, backfillImages *backfillUseCase.Backf
 		listTemplatesUseCase,
 		applyTemplateUseCase,
 		backfillImages,
+		logger,
 	)
 
 	// Crear handler simplificado del wizard

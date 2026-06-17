@@ -12,6 +12,7 @@ import (
 	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
+
 // QuickstartHistoryPostgresRepository implementa el repositorio usando PostgreSQL
 type QuickstartHistoryPostgresRepository struct {
 	db *sql.DB
@@ -185,28 +186,21 @@ func (r *QuickstartHistoryPostgresRepository) MarkAsCompleted(ctx context.Contex
 		WHERE id = $1
 	`
 
-	fmt.Printf("🔍 DEBUG Repository: Ejecutando UPDATE para wizard ID: %s\n", id)
 	now := time.Now()
 	result, err := r.db.ExecContext(ctx, query, id, now)
 	if err != nil {
-		fmt.Printf("❌ ERROR Repository: Error en UPDATE: %v\n", err)
 		return fmt.Errorf("error al marcar wizard como completado: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		fmt.Printf("❌ ERROR Repository: Error al verificar filas: %v\n", err)
 		return fmt.Errorf("error al verificar filas afectadas: %w", err)
 	}
 
-	fmt.Printf("📊 DEBUG Repository: Filas afectadas: %d\n", rowsAffected)
-
 	if rowsAffected == 0 {
-		fmt.Printf("⚠️  WARNING Repository: No se encontró el wizard con ID: %s\n", id)
 		return errors.New("wizard no encontrado")
 	}
 
-	fmt.Printf("✅ DEBUG Repository: Wizard %s marcado como completado exitosamente\n", id)
 	return nil
 }
 

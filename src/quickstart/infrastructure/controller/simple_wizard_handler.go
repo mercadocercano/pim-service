@@ -3,7 +3,6 @@ package controller
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -616,8 +615,6 @@ func (h *SimpleWizardHandler) CompleteWizard(c *gin.Context) {
 				if catMap, ok := cat.(map[string]interface{}); ok {
 					if err := h.createCategory(tx, tenantID, catMap); err == nil {
 						summary["categories_created"] = summary["categories_created"].(int) + 1
-					} else {
-						fmt.Printf("Error creating category: %v\n", err)
 					}
 				}
 			}
@@ -629,9 +626,6 @@ func (h *SimpleWizardHandler) CompleteWizard(c *gin.Context) {
 				if attrMap, ok := attr.(map[string]interface{}); ok {
 					if err := h.createAttribute(tx, tenantID, attrMap); err == nil {
 						summary["attributes_created"] = summary["attributes_created"].(int) + 1
-						fmt.Printf("✅ Attribute created: %s\n", attrMap["name"])
-					} else {
-						fmt.Printf("❌ Error creating attribute: %v\n", err)
 					}
 				}
 			}
@@ -646,8 +640,6 @@ func (h *SimpleWizardHandler) CompleteWizard(c *gin.Context) {
 				if brandMap, ok := brand.(map[string]interface{}); ok {
 					if err := h.createBrand(tx, tenantID, brandMap); err == nil {
 						summary["brands_created"] = summary["brands_created"].(int) + 1
-					} else {
-						fmt.Printf("Error creating brand: %v\n", err)
 					}
 				}
 			}
@@ -659,9 +651,6 @@ func (h *SimpleWizardHandler) CompleteWizard(c *gin.Context) {
 				if prodMap, ok := prod.(map[string]interface{}); ok {
 					if err := h.createProduct(tx, tenantID, prodMap); err == nil {
 						summary["products_created"] = summary["products_created"].(int) + 1
-						fmt.Printf("✅ Product created: %s\n", prodMap["name"])
-					} else {
-						fmt.Printf("❌ Error creating product: %v\n", err)
 					}
 				}
 			}
@@ -676,41 +665,27 @@ func (h *SimpleWizardHandler) CompleteWizard(c *gin.Context) {
 		return
 	}
 
-	// Marcar wizard como completado después del commit exitoso
-	fmt.Printf("🔍 DEBUG: Intentando marcar wizard como completado. ID: %s, TenantID: %s\n", history.ID, tenantID)
-
-	// Primero, intentar eliminar cualquier wizard completado anterior para este tenant
-	// Esto es necesario debido a la restricción UNIQUE (tenant_id, setup_completed)
-	_, deleteErr := h.db.Exec(`
-		DELETE FROM tenant_quickstart_history 
+	// Marcar wizard como completado después del commit exitoso.
+	// Limpiar primero wizards completados anteriores del tenant (restricción UNIQUE).
+	h.db.Exec(`
+		DELETE FROM tenant_quickstart_history
 		WHERE tenant_id = $1 AND setup_completed = true AND id != $2
 	`, tenantID, history.ID)
 
-	if deleteErr != nil {
-		fmt.Printf("⚠️  WARNING: Error al limpiar wizards anteriores: %v\n", deleteErr)
-	}
-
 	if err := h.historyRepo.MarkAsCompleted(c.Request.Context(), history.ID); err != nil {
-		fmt.Printf("❌ ERROR: No se pudo marcar wizard como completado: %v\n", err)
-
-		// Si falla, intentar con una query directa
-		fmt.Printf("🔧 DEBUG: Intentando actualización directa...\n")
+		// Fallback: query directa si el repo falla
 		_, directErr := h.db.Exec(`
-			UPDATE tenant_quickstart_history 
-			SET setup_completed = true, updated_at = CURRENT_TIMESTAMP 
+			UPDATE tenant_quickstart_history
+			SET setup_completed = true, updated_at = CURRENT_TIMESTAMP
 			WHERE id = $1
 		`, history.ID)
 
 		if directErr != nil {
-			fmt.Printf("❌ ERROR: Actualización directa también falló: %v\n", directErr)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Error al marcar wizard como completado: " + err.Error(),
 			})
 			return
 		}
-		fmt.Printf("✅ DEBUG: Wizard marcado como completado con query directa\n")
-	} else {
-		fmt.Printf("✅ DEBUG: Wizard marcado como completado exitosamente\n")
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -936,9 +911,6 @@ func (h *SimpleWizardHandler) ResetQuickstart(c *gin.Context) {
 		return
 	}
 
-	fmt.Printf("⚠️  WARNING: Reset quickstart solicitado para tenant: %s\n", tenantID)
-	fmt.Printf("⚠️  Esta operación eliminará TODOS los datos del wizard y productos/categorías/marcas/atributos\n")
-
 	// Iniciar transacción para operaciones atómicas
 	tx, err := h.db.Begin()
 	if err != nil {
@@ -967,7 +939,6 @@ func (h *SimpleWizardHandler) ResetQuickstart(c *gin.Context) {
 	}
 	if count, _ := result.RowsAffected(); count > 0 {
 		deletedCounts["products_deleted"] = count
-		fmt.Printf("🗑️ Deleted %d products for tenant %s\n", count, tenantID)
 	}
 
 	// 2. Borrar marcas del tenant
@@ -980,7 +951,6 @@ func (h *SimpleWizardHandler) ResetQuickstart(c *gin.Context) {
 	}
 	if count, _ := result.RowsAffected(); count > 0 {
 		deletedCounts["brands_deleted"] = count
-		fmt.Printf("🗑️ Deleted %d brands for tenant %s\n", count, tenantID)
 	}
 
 	// 3. Borrar categorías del tenant
@@ -993,7 +963,6 @@ func (h *SimpleWizardHandler) ResetQuickstart(c *gin.Context) {
 	}
 	if count, _ := result.RowsAffected(); count > 0 {
 		deletedCounts["categories_deleted"] = count
-		fmt.Printf("🗑️ Deleted %d categories for tenant %s\n", count, tenantID)
 	}
 
 	// 4. Borrar atributos del tenant
@@ -1006,7 +975,6 @@ func (h *SimpleWizardHandler) ResetQuickstart(c *gin.Context) {
 	}
 	if count, _ := result.RowsAffected(); count > 0 {
 		deletedCounts["attributes_deleted"] = count
-		fmt.Printf("🗑️ Deleted %d attributes for tenant %s\n", count, tenantID)
 	}
 
 	// 5. Borrar historial del wizard
@@ -1019,7 +987,6 @@ func (h *SimpleWizardHandler) ResetQuickstart(c *gin.Context) {
 	}
 	if count, _ := result.RowsAffected(); count > 0 {
 		deletedCounts["wizard_history_deleted"] = count
-		fmt.Printf("🗑️ Deleted %d wizard history records for tenant %s\n", count, tenantID)
 	}
 
 	// Commit de la transacción
@@ -1029,8 +996,6 @@ func (h *SimpleWizardHandler) ResetQuickstart(c *gin.Context) {
 		})
 		return
 	}
-
-	fmt.Printf("🧹 RESET COMPLETO para tenant %s\n", tenantID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success":   true,

@@ -9,8 +9,6 @@ import (
 	"saas-mt-pim-service/src/category_attribute/application/usecase"
 	categoryAttributeCriteria "saas-mt-pim-service/src/category_attribute/infrastructure/criteria"
 
-	"log"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -47,8 +45,6 @@ func NewCategoryAttributeHandler(
 
 // RegisterRoutes registra las rutas del API para atributos de categoría
 func (h *CategoryAttributeHandler) RegisterRoutes(router *gin.RouterGroup) {
-	log.Println("🔧 CategoryAttributeHandler: Registrando rutas...")
-
 	categoryAttributes := router.Group("/category-attributes")
 	{
 		categoryAttributes.GET("", h.ListWithCriteria)
@@ -58,14 +54,6 @@ func (h *CategoryAttributeHandler) RegisterRoutes(router *gin.RouterGroup) {
 		categoryAttributes.PUT("/:id", h.Update)
 		categoryAttributes.DELETE("/:id", h.Delete)
 	}
-
-	log.Println("✅ CategoryAttributeHandler: Rutas registradas exitosamente")
-	log.Println("   - GET /category-attributes (con criterios)")
-	log.Println("   - GET /category-attributes/simple")
-	log.Println("   - GET /category-attributes/detailed")
-	log.Println("   - POST /category-attributes")
-	log.Println("   - PUT /category-attributes/:id")
-	log.Println("   - DELETE /category-attributes/:id")
 }
 
 // ListWithCriteria maneja la solicitud para listar atributos de categoría con filtros y paginación
@@ -148,40 +136,28 @@ func (h *CategoryAttributeHandler) List(c *gin.Context) {
 
 // ListDetailed maneja la solicitud para obtener atributos detallados de categoría con JOIN
 func (h *CategoryAttributeHandler) ListDetailed(c *gin.Context) {
-	log.Println("🔍 ListDetailed: Endpoint llamado")
-
-	// Obtener el tenantID del header o query param
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
 		tenantID = c.Query("tenant_id")
 	}
 
-	log.Printf("🔍 ListDetailed: tenantID = %s", tenantID)
-
 	if tenantID == "" {
-		log.Println("❌ ListDetailed: tenant_id faltante")
 		httpresp.JSON(c, http.StatusBadRequest, "el tenant_id es obligatorio")
 		return
 	}
 
 	categoryID := c.Query("category_id")
-	log.Printf("🔍 ListDetailed: categoryID = %s", categoryID)
 
 	if categoryID == "" {
-		log.Println("❌ ListDetailed: category_id faltante")
 		httpresp.JSON(c, http.StatusBadRequest, "el category_id es obligatorio para obtener atributos detallados")
 		return
 	}
 
-	log.Println("🔍 ListDetailed: Llamando al caso de uso...")
 	detailedAttributes, err := h.getDetailedUseCase.Execute(c.Request.Context(), tenantID, categoryID)
 	if err != nil {
-		log.Printf("❌ ListDetailed: Error en caso de uso: %v", err)
 		httpresp.JSON(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	log.Printf("✅ ListDetailed: Encontrados %d atributos detallados", len(detailedAttributes))
 
 	c.JSON(http.StatusOK, gin.H{
 		"items": response.FromDetailedEntityList(detailedAttributes),

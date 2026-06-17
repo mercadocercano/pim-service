@@ -7,16 +7,18 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"saas-mt-pim-service/src/pim/domain/port"
 	"saas-mt-pim-service/src/s2s/usecase"
 )
 
 type InternalHandler struct {
 	refreshUC  *usecase.RefreshTemplateProductsUseCase
 	templateUC *usecase.GetTemplateStatusUseCase
+	logger     port.PIMEventLogger
 }
 
-func NewInternalHandler(refreshUC *usecase.RefreshTemplateProductsUseCase, templateUC *usecase.GetTemplateStatusUseCase) *InternalHandler {
-	return &InternalHandler{refreshUC: refreshUC, templateUC: templateUC}
+func NewInternalHandler(refreshUC *usecase.RefreshTemplateProductsUseCase, templateUC *usecase.GetTemplateStatusUseCase, logger port.PIMEventLogger) *InternalHandler {
+	return &InternalHandler{refreshUC: refreshUC, templateUC: templateUC, logger: logger}
 }
 
 func (h *InternalHandler) RegisterRoutes(router *gin.RouterGroup) {
@@ -57,7 +59,11 @@ func (h *InternalHandler) GetTemplateStatus(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": gin.H{"code": "NOT_FOUND", "message": "business type not found"}})
 			return
 		}
-		log.Printf("[template-status] error slug=%s: %v", slug, err)
+		h.logger.Log(port.PIMEvent{
+			Event:  "pim.template_status_error",
+			Reason: err.Error(),
+			SKU:    slug,
+		})
 		c.JSON(http.StatusInternalServerError, gin.H{"error": gin.H{"code": "INTERNAL_ERROR", "message": "internal server error"}})
 		return
 	}

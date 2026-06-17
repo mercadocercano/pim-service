@@ -9,6 +9,7 @@ import (
 	"saas-mt-pim-service/src/quickstart/domain/port"
 )
 
+
 // CategoryServiceImpl implementa CategoryService para crear categorías desde el quickstart
 type CategoryServiceImpl struct {
 	db *sql.DB
@@ -47,7 +48,6 @@ func (s *CategoryServiceImpl) CreateFromTemplate(ctx context.Context, tenantID s
 
 	// Si ya existen categorías para este tenant, no crear duplicados
 	if count > 0 {
-		fmt.Printf("Ya existen %d categorías para el tenant %s, omitiendo creación\n", count, tenantID)
 		return nil
 	}
 
@@ -63,7 +63,6 @@ func (s *CategoryServiceImpl) CreateFromTemplate(ctx context.Context, tenantID s
 		if err != nil {
 			return fmt.Errorf("error creando categoría %s: %w", category.Name, err)
 		}
-		fmt.Printf("Categoría creada: %s para tenant %s\n", category.Name, tenantID)
 	}
 
 	return nil

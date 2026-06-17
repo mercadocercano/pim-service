@@ -1,10 +1,7 @@
 package controller
 
 import (
-	"bytes"
-	"fmt"
 	httpresp "github.com/hornosg/go-shared/infrastructure/response"
-	"io"
 	"net/http"
 
 	"saas-mt-pim-service/src/category/application/request"
@@ -67,34 +64,17 @@ func (h *CategoryHandler) RegisterRoutes(router *gin.RouterGroup) {
 
 // Create maneja la solicitud para crear una nueva categoría
 func (h *CategoryHandler) Create(c *gin.Context) {
-	// Obtener el tenantID del header
 	tenantID := c.GetHeader("X-Tenant-ID")
 	if tenantID == "" {
 		httpresp.JSON(c, http.StatusBadRequest, "el header X-Tenant-ID es obligatorio")
 		return
 	}
 
-	// Leer el cuerpo de la petición y depurar
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		httpresp.JSON(c, http.StatusBadRequest, "Error leyendo el cuerpo de la petición: "+err.Error())
-		return
-	}
-
-	// Restaurar el cuerpo para que pueda ser leído de nuevo durante el binding
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
-
-	// Imprimir el cuerpo para depuración
-	fmt.Printf("Cuerpo recibido: %s\n", string(body))
-
 	var req request.CreateCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		httpresp.JSON(c, http.StatusBadRequest, "Error en el binding JSON: "+err.Error())
 		return
 	}
-
-	fmt.Printf("Después del binding: name=%s, description=%s, parentID=%v\n",
-		req.Name, req.Description, req.ParentID)
 
 	category, err := h.createUseCase.Execute(c.Request.Context(), tenantID, req.Name, req.Description, req.ParentID)
 	if err != nil {

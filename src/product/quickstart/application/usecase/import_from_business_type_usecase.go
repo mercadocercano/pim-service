@@ -4,10 +4,10 @@ import (
 	"context"
 	"crypto/sha1"
 	"fmt"
-	"log"
 
 	globalEntity "saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	globalPort "saas-mt-pim-service/src/product/global_catalog/domain/port"
+	pimport "saas-mt-pim-service/src/pim/domain/port"
 	tenantEntity "saas-mt-pim-service/src/product/tenant/domain/entity"
 	tenantPort "saas-mt-pim-service/src/product/tenant/domain/port"
 	"saas-mt-pim-service/src/product/tenant/domain/value_object"
@@ -18,6 +18,7 @@ import (
 type ImportFromBusinessTypeUseCase struct {
 	tenantProductRepo tenantPort.ProductRepository
 	globalCatalogRepo globalPort.GlobalProductRepository
+	logger            pimport.PIMEventLogger
 }
 
 func NewImportFromBusinessTypeUseCase(
@@ -27,6 +28,26 @@ func NewImportFromBusinessTypeUseCase(
 	return &ImportFromBusinessTypeUseCase{
 		tenantProductRepo: tenantProductRepo,
 		globalCatalogRepo: globalCatalogRepo,
+	}
+}
+
+// NewImportFromBusinessTypeUseCaseWithLogger crea el use case con logger canónico inyectado.
+func NewImportFromBusinessTypeUseCaseWithLogger(
+	tenantProductRepo tenantPort.ProductRepository,
+	globalCatalogRepo globalPort.GlobalProductRepository,
+	logger pimport.PIMEventLogger,
+) *ImportFromBusinessTypeUseCase {
+	return &ImportFromBusinessTypeUseCase{
+		tenantProductRepo: tenantProductRepo,
+		globalCatalogRepo: globalCatalogRepo,
+		logger:            logger,
+	}
+}
+
+// logEvent emite un evento canónico si hay logger inyectado (nil-safe).
+func (uc *ImportFromBusinessTypeUseCase) logEvent(e pimport.PIMEvent) {
+	if uc.logger != nil {
+		uc.logger.Log(e)
 	}
 }
 
@@ -144,15 +165,30 @@ func (uc *ImportFromBusinessTypeUseCase) Execute(
 			Status:       request.InitialStatus,
 			CategoryName: categoryName,
 		})
-
-		log.Printf("[quickstart] imported global product %s → tenant product %s for tenant %s",
-			gpID, product.IDString(), request.TenantID)
 	}
 
 	totalAttempted := len(imported) + len(failed)
 	successRate := 0
 	if totalAttempted > 0 {
 		successRate = (len(imported) * 100) / totalAttempted
+	}
+
+	// Emitir un único evento de dominio con el resultado de la operación batch.
+	if totalAttempted > 0 {
+		if len(failed) == 0 {
+			uc.logEvent(pimport.PIMEvent{
+				Event:    "pim.import_from_business_type_completed",
+				TenantID: request.TenantID,
+				Count:    len(imported),
+			})
+		} else {
+			uc.logEvent(pimport.PIMEvent{
+				Event:    "pim.import_failed",
+				TenantID: request.TenantID,
+				Count:    len(failed),
+				Reason:   fmt.Sprintf("partial failure: %d/%d products failed", len(failed), totalAttempted),
+			})
+		}
 	}
 
 	return &ImportFromBusinessTypeResponse{

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	cr "github.com/hornosg/go-shared/criteria"
-	"log"
 	"saas-mt-pim-service/src/businesstype/domain/entity"
 	"saas-mt-pim-service/src/businesstype/domain/port"
 )
@@ -56,7 +55,6 @@ func (r *BusinessTypePostgresRepository) Create(ctx context.Context, businessTyp
 	)
 
 	if err != nil {
-		log.Printf("Error creando business type: %v", err)
 		return fmt.Errorf("error creando business type: %w", err)
 	}
 
@@ -96,7 +94,6 @@ func (r *BusinessTypePostgresRepository) Update(ctx context.Context, businessTyp
 	)
 
 	if err != nil {
-		log.Printf("Error actualizando business type: %v", err)
 		return fmt.Errorf("error actualizando business type: %w", err)
 	}
 
@@ -177,7 +174,6 @@ func (r *BusinessTypePostgresRepository) Delete(ctx context.Context, id string) 
 
 	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
-		log.Printf("Error eliminando business type: %v", err)
 		return fmt.Errorf("error eliminando business type: %w", err)
 	}
 
@@ -254,7 +250,6 @@ func (r *BusinessTypePostgresRepository) scanBusinessType(row *sql.Row) (*entity
 	// Deserializar metadata
 	if len(metadataJSON) > 0 {
 		if err := json.Unmarshal(metadataJSON, &businessType.Metadata); err != nil {
-			log.Printf("Error deserializando metadata: %v", err)
 			businessType.Metadata = make(map[string]interface{})
 		}
 	} else {
@@ -293,7 +288,6 @@ func (r *BusinessTypePostgresRepository) scanBusinessTypes(rows *sql.Rows) ([]*e
 		// Deserializar metadata
 		if len(metadataJSON) > 0 {
 			if err := json.Unmarshal(metadataJSON, &businessType.Metadata); err != nil {
-				log.Printf("Error deserializando metadata: %v", err)
 				businessType.Metadata = make(map[string]interface{})
 			}
 		} else {

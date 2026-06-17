@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	cr "github.com/hornosg/go-shared/criteria"
-	"log"
 	"saas-mt-pim-service/src/overview/domain/entity"
 	"saas-mt-pim-service/src/overview/domain/exception"
 )
@@ -44,7 +43,6 @@ func (r *CategoryStatsPostgresRepository) Create(ctx context.Context, CategorySt
 	)
 
 	if err != nil {
-		log.Printf("Error creando CategoryStats: %v", err)
 		return fmt.Errorf("%w: %v", exception.ErrCategoryStatsCreateFailed, err)
 	}
 
@@ -70,7 +68,6 @@ func (r *CategoryStatsPostgresRepository) Update(ctx context.Context, CategorySt
 	)
 
 	if err != nil {
-		log.Printf("Error actualizando CategoryStats: %v", err)
 		return fmt.Errorf("%w: %v", exception.ErrCategoryStatsUpdateFailed, err)
 	}
 
@@ -118,7 +115,6 @@ func (r *CategoryStatsPostgresRepository) Delete(ctx context.Context, id string,
 
 	result, err := r.db.ExecContext(ctx, query, id, tenantID)
 	if err != nil {
-		log.Printf("Error eliminando CategoryStats: %v", err)
 		return fmt.Errorf("%w: %v", exception.ErrCategoryStatsDeleteFailed, err)
 	}
 

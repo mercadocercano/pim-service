@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/lib/pq"
 	"saas-mt-pim-service/src/quickstart/domain/port"
@@ -104,7 +103,6 @@ func (r *GetProductsByBusinessTypePostgresRepository) resolveGlobalProducts(ctx 
 		return nil, fmt.Errorf("resolveGlobalProducts rows %q: %w", slug, err)
 	}
 
-	log.Printf("[quickstart-source] business_type=%s source=computed products=%d", slug, len(products))
 	return products, nil
 }
 
@@ -135,6 +133,5 @@ func (r *GetProductsByBusinessTypePostgresRepository) fetchEditorialProducts(ctx
 		return nil, fmt.Errorf("fetchEditorialProducts parse json %q: %w", slug, err)
 	}
 
-	log.Printf("[quickstart-source] business_type=%s source=editorial products=%d", slug, len(products))
 	return products, nil
 }

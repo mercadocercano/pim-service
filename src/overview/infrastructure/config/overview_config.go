@@ -2,7 +2,6 @@ package config
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/gin-gonic/gin"
 
@@ -54,14 +53,7 @@ func (c *OverviewConfig) GetController() *controller.OverviewHandler {
 
 // SetupOverviewModule configura el módulo overview
 func SetupOverviewModule(router *gin.RouterGroup, db *sql.DB) {
-	log.Println("Configurando módulo Overview...")
-
 	config := NewOverviewConfig(db)
 	controller := config.GetController()
 	controller.RegisterRoutes(router)
-
-	log.Println("Módulo Overview configurado exitosamente")
-	log.Println("Rutas Overview disponibles:")
-	log.Println("  GET    /api/v1/marketplace/overview")
-	log.Println("  GET    /api/v1/marketplace/overview/sections")
 }
