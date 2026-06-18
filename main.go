@@ -52,6 +52,10 @@ import (
 	s2sPersistence "saas-mt-pim-service/src/s2s/infrastructure/persistence"
 	s2sUsecase "saas-mt-pim-service/src/s2s/usecase"
 
+	// Global Catalog — reclassify use case (E24/ADR-005)
+	reclassifyUsecase "saas-mt-pim-service/src/product/global_catalog/application/usecase"
+	reclassifyPersistence "saas-mt-pim-service/src/product/global_catalog/infrastructure/persistence"
+
 	"github.com/gin-gonic/gin"
 	"github.com/hornosg/go-shared/infrastructure/env"
 	tenantmw "github.com/hornosg/go-shared/infrastructure/middleware"
@@ -499,9 +503,15 @@ func setupInternalModule(router *gin.RouterGroup, db *sql.DB) {
 }
 
 func setupInternalModuleWithLogger(router *gin.RouterGroup, db *sql.DB, logger pimport.PIMEventLogger) {
+	// S2S template use cases (ya existentes)
 	repo := s2sPersistence.NewPostgresTemplateRepository(db)
 	refreshUC := s2sUsecase.NewRefreshTemplateProductsUseCaseWithLogger(repo, logger)
 	templateUC := s2sUsecase.NewGetTemplateStatusUseCase(repo)
-	handler := s2sController.NewInternalHandler(refreshUC, templateUC, logger)
+
+	// E24/ADR-005: use case de re-clasificación de business_type
+	reclassifyRepo := reclassifyPersistence.NewPostgresReclassifyRepository(db)
+	reclassifyUC := reclassifyUsecase.NewReclassifyBusinessTypesUseCase(reclassifyRepo, logger)
+
+	handler := s2sController.NewInternalHandlerWithReclassify(refreshUC, templateUC, reclassifyUC, logger)
 	handler.RegisterRoutes(router)
 }
