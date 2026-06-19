@@ -5,9 +5,10 @@ go 1.25.0
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/gin-gonic/gin v1.10.0
-	github.com/hornosg/go-shared v0.11.0
+	github.com/hornosg/go-shared v0.12.0
 	github.com/lib/pq v1.10.9
 	github.com/prometheus/client_golang v1.22.0
+	github.com/redis/go-redis/v9 v9.20.1
 	github.com/testcontainers/testcontainers-go v0.42.0
 	github.com/xuri/excelize/v2 v2.9.0
 )
@@ -53,7 +54,6 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	github.com/redis/go-redis/v9 v9.20.1 // indirect
 	github.com/richardlehane/mscfb v1.0.6 // indirect
 	github.com/richardlehane/msoleps v1.0.6 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.3 // indirect

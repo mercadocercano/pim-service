@@ -1,6 +1,6 @@
 ---
 adr: ADR-007
-status: proposed
+status: accepted
 skills:
   implement:
     - dev/hexagonal-go
@@ -13,10 +13,16 @@ skills:
 
 # ADR-007: Normalización de `category_slug` en global_products y regeneración del surtido de templates
 
-**Estado**: Propuesto
-**Fecha**: 2026-06-18
-**Deciders**: @architect (diseño), owner (decisión: regenerar desde global_products + backfill como operación S2S)
-**Épica**: (a definir) — Saneamiento de surtido de templates del Quickstart
+**Estado**: Aceptado
+**Fecha**: 2026-06-18 (sign-off Fase 1a: 2026-06-19)
+**Deciders**: @architect (diseño + sign-off), owner (decisión: regenerar desde global_products + backfill como operación S2S)
+**Épica**: E31 — Saneamiento de surtido de templates del Quickstart
+
+> **Sign-off @dev-architect (2026-06-19) — acotado a Fase 1a:** GO al resolver `domain/category` en go-shared
+> (gemelo de `domain/businesstype`, ADR-005). Código completo, tests verdes, contrato público estable.
+> Releaseado en **go-shared v0.12.0** (MINOR, aditivo) y consumido por pim-service. Las fases siguientes
+> (backfill S2S, switch del read-path del quickstart, regeneración de templates) quedan dentro del scope
+> aprobado de E31 y se ejecutan bajo esa épica.
 **Ceremony level**: L3 (catálogo global, no money/auth/PII; sin sub-gate L4)
 **Relación**: gemelo estructural de [ADR-005](ADR-005-reclasificacion-business-type-s2s.md) sobre el eje
 `category_slug` en lugar de `business_type`; reusa su maquinaria (S2S + snapshot + audit).
