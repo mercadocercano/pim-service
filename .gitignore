@@ -59,3 +59,6 @@ tmp/
 # Engram
 .engram/engram.db
 .engram/*.db-*
+
+# Auditorías internas (infra de prod, no publicar)
+docs/audits/
