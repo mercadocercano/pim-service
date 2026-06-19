@@ -6,6 +6,7 @@ import (
 
 	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/brand/application/request"
+	"saas-mt-pim-service/src/brand/domain/entity"
 	"saas-mt-pim-service/src/brand/domain/port"
 )
 
@@ -52,6 +53,15 @@ func (uc *UpdateMarketplaceBrandUseCase) Execute(ctx context.Context, req *reque
 		req.QualityScore,
 		req.IsActive,
 	)
+
+	// Actualizar identidad visual (valida hex/typography; "" = fallback)
+	if err := existingBrand.SetVisualIdentity(entity.VisualIdentityParams{
+		BackgroundColor: req.BackgroundColor,
+		TextColor:       req.TextColor,
+		Typography:      req.Typography,
+	}); err != nil {
+		return fmt.Errorf("identidad visual inválida: %w", err)
+	}
 
 	// Persistir los cambios
 	if err := uc.repository.Update(ctx, existingBrand); err != nil {

@@ -159,6 +159,10 @@ func (h *MarketplaceBrandHandler) CreateMarketplaceBrand(c *gin.Context) {
 		Website      string   `json:"website" binding:"omitempty,url"`
 		Aliases      []string `json:"aliases"`
 		CategoryTags []string `json:"category_tags"`
+
+		BackgroundColor string `json:"background_color"`
+		TextColor       string `json:"text_color"`
+		Typography      string `json:"typography"`
 	}
 
 	if err := c.ShouldBindJSON(&createData); err != nil {
@@ -200,6 +204,16 @@ func (h *MarketplaceBrandHandler) CreateMarketplaceBrand(c *gin.Context) {
 	}
 	if len(createData.CategoryTags) > 0 {
 		brand.CategoryTags = createData.CategoryTags
+	}
+
+	// Identidad visual (valida hex/typography; "" = fallback del design system)
+	if err := brand.SetVisualIdentity(entity.VisualIdentityParams{
+		BackgroundColor: createData.BackgroundColor,
+		TextColor:       createData.TextColor,
+		Typography:      createData.Typography,
+	}); err != nil {
+		httpresp.JSON(c, http.StatusBadRequest, "Error en identidad visual: "+err.Error())
+		return
 	}
 
 	// Guardar en el repositorio
@@ -279,6 +293,10 @@ func (h *MarketplaceBrandHandler) UpdateMarketplaceBrand(c *gin.Context) {
 		Sources      []string `json:"sources"`
 		QualityScore float64  `json:"quality_score"`
 		IsActive     bool     `json:"is_active"`
+
+		BackgroundColor string `json:"background_color"`
+		TextColor       string `json:"text_color"`
+		Typography      string `json:"typography"`
 	}
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
@@ -298,6 +316,10 @@ func (h *MarketplaceBrandHandler) UpdateMarketplaceBrand(c *gin.Context) {
 		Sources:      updateData.Sources,
 		QualityScore: updateData.QualityScore,
 		IsActive:     updateData.IsActive,
+
+		BackgroundColor: updateData.BackgroundColor,
+		TextColor:       updateData.TextColor,
+		Typography:      updateData.Typography,
 	}
 
 	// Ejecutar el use case

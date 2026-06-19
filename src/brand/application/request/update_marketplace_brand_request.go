@@ -12,4 +12,9 @@ type UpdateMarketplaceBrandRequest struct {
 	Sources      []string `json:"sources"`
 	QualityScore float64  `json:"quality_score"`
 	IsActive     bool     `json:"is_active"`
+
+	// Identidad visual de la marca. String vacío = usar fallback del design system.
+	BackgroundColor string `json:"background_color"`
+	TextColor       string `json:"text_color"`
+	Typography      string `json:"typography"`
 }
