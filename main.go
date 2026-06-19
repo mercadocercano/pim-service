@@ -512,6 +512,12 @@ func setupInternalModuleWithLogger(router *gin.RouterGroup, db *sql.DB, logger p
 	reclassifyRepo := reclassifyPersistence.NewPostgresReclassifyRepository(db)
 	reclassifyUC := reclassifyUsecase.NewReclassifyBusinessTypesUseCase(reclassifyRepo, logger)
 
-	handler := s2sController.NewInternalHandlerWithReclassify(refreshUC, templateUC, reclassifyUC, logger)
+	// ADR-007: use case de normalización de category_slug (backfill S2S)
+	normalizeRepo := reclassifyPersistence.NewPostgresNormalizeCategoryRepository(db)
+	normalizeUC := reclassifyUsecase.NewNormalizeCategorySlugsUseCase(normalizeRepo, logger)
+
+	handler := s2sController.
+		NewInternalHandlerWithReclassify(refreshUC, templateUC, reclassifyUC, logger).
+		WithNormalizeCategoryUseCase(normalizeUC)
 	handler.RegisterRoutes(router)
 }

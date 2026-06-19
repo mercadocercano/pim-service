@@ -1,0 +1,3 @@
+# Salidas de auditoría (efímeras, pueden contener datos de prod)
+out/
+prod_pim_seed.sql

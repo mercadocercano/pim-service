@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hornosg/go-shared/domain/category"
+
 	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/product/global_catalog/domain/entity"
 	"saas-mt-pim-service/src/product/global_catalog/domain/port"
@@ -21,6 +23,21 @@ import (
 type PostgresGlobalProductRepository struct {
 	db        *sql.DB
 	converter *cr.SQLCriteriaConverter
+}
+
+// resolveCategorySlug computa el slug de categoría NORMALIZADO para persistir (ADR-007 §3).
+// Usa el resolver determinístico de go-shared (DB-free) sobre la category raw; los overrides
+// curados se aplican en el backfill S2S (Fase 1b), no en el hot path de escritura. Nunca
+// devuelve vacío: si no resuelve (category nil/empty), cae en el catch-all "sin-clasificar".
+func resolveCategorySlug(rawCategory *string) string {
+	raw := ""
+	if rawCategory != nil {
+		raw = *rawCategory
+	}
+	if slug, ok := category.ResolveCategorySlug(raw); ok {
+		return slug
+	}
+	return category.Unclassified
 }
 
 // NewPostgresGlobalProductRepository crea una nueva instancia del repositorio
@@ -37,8 +54,8 @@ func (r *PostgresGlobalProductRepository) Save(globalProduct *entity.GlobalProdu
 		INSERT INTO global_products (
 			id, ean, name, description, brand, category, price, image_url, image_urls,
 			source, source_url, source_reliability, quality_score, is_verified, is_active,
-			business_type, tags, metadata, created_at, updated_at, gtin
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+			business_type, tags, metadata, created_at, updated_at, gtin, category_slug
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
 		RETURNING id, ean, name, description, brand, category, price, image_url, image_urls,
 				  source, source_url, source_reliability, quality_score, is_verified, is_active,
 				  business_type, tags, metadata, created_at, updated_at, scraped_at, last_scraped_at, gtin
@@ -88,6 +105,7 @@ func (r *PostgresGlobalProductRepository) Save(globalProduct *entity.GlobalProdu
 		globalProduct.CreatedAt(),
 		globalProduct.UpdatedAt(),
 		nil, // gtin: entity no expone getter aún
+		resolveCategorySlug(globalProduct.Category()),
 	)
 
 	return r.scanGlobalProduct(row)
@@ -101,7 +119,7 @@ func (r *PostgresGlobalProductRepository) Update(globalProduct *entity.GlobalPro
 			image_url = $7, image_urls = $8, source = $9, source_url = $10,
 			source_reliability = $11, quality_score = $12, is_verified = $13,
 			is_active = $14, business_type = $15, tags = $16, metadata = $17,
-			updated_at = $18, gtin = COALESCE($19, gtin)
+			updated_at = $18, gtin = COALESCE($19, gtin), category_slug = $20
 		WHERE id = $1
 		RETURNING id, ean, name, description, brand, category, price, image_url, image_urls,
 				  source, source_url, source_reliability, quality_score, is_verified, is_active,
@@ -143,6 +161,7 @@ func (r *PostgresGlobalProductRepository) Update(globalProduct *entity.GlobalPro
 		string(metadataJSON),
 		time.Now(),
 		nil, // gtin: entity no expone getter aún
+		resolveCategorySlug(globalProduct.Category()),
 	)
 
 	return r.scanGlobalProduct(row)
@@ -824,12 +843,14 @@ func (r *PostgresGlobalProductRepository) FindDistinctBrandsByBusinessType(busin
 	return brands, rows.Err()
 }
 
-// FindNeedingEnrichment devuelve productos con datos incompletos (quality_score < 70
-// o campos price/image_url/brand nulos). Usado por webdata-service para la cola de scraping.
+// FindNeedingEnrichment devuelve productos con datos incompletos (quality_score < 70,
+// campos price/image_url/brand nulos, o image_url que NO apunta al CDN de Spaces —
+// p.ej. placeholders externos de wikimedia). Usado por webdata-service para la cola de scraping.
 func (r *PostgresGlobalProductRepository) FindNeedingEnrichment(businessType *string, limit, offset int) ([]*entity.GlobalProduct, error) {
 	baseWhere := `
 		WHERE is_active = true
-		  AND (quality_score < 70 OR price IS NULL OR image_url IS NULL OR brand IS NULL)`
+		  AND (quality_score < 70 OR price IS NULL OR image_url IS NULL OR brand IS NULL
+		       OR image_url NOT ILIKE '%digitaloceanspaces.com%')`
 
 	var query string
 	var args []interface{}
@@ -871,7 +892,8 @@ func (r *PostgresGlobalProductRepository) FindNeedingEnrichment(businessType *st
 func (r *PostgresGlobalProductRepository) CountNeedingEnrichment(businessType *string) (int, error) {
 	baseWhere := `
 		WHERE is_active = true
-		  AND (quality_score < 70 OR price IS NULL OR image_url IS NULL OR brand IS NULL)`
+		  AND (quality_score < 70 OR price IS NULL OR image_url IS NULL OR brand IS NULL
+		       OR image_url NOT ILIKE '%digitaloceanspaces.com%')`
 
 	var query string
 	var args []interface{}

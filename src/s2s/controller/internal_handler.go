@@ -15,10 +15,18 @@ import (
 )
 
 type InternalHandler struct {
-	refreshUC      *usecase.RefreshTemplateProductsUseCase
-	templateUC     *usecase.GetTemplateStatusUseCase
-	reclassifyUC   *globalcataloguc.ReclassifyBusinessTypesUseCase
-	logger         port.PIMEventLogger
+	refreshUC    *usecase.RefreshTemplateProductsUseCase
+	templateUC   *usecase.GetTemplateStatusUseCase
+	reclassifyUC *globalcataloguc.ReclassifyBusinessTypesUseCase
+	normalizeUC  *globalcataloguc.NormalizeCategorySlugsUseCase
+	logger       port.PIMEventLogger
+}
+
+// WithNormalizeCategoryUseCase adjunta el use case de normalización de category_slug (ADR-007 §4).
+// Setter fluido para no romper las firmas de los constructores existentes.
+func (h *InternalHandler) WithNormalizeCategoryUseCase(uc *globalcataloguc.NormalizeCategorySlugsUseCase) *InternalHandler {
+	h.normalizeUC = uc
+	return h
 }
 
 func NewInternalHandler(
@@ -55,6 +63,7 @@ func (h *InternalHandler) RegisterRoutes(router *gin.RouterGroup) {
 	s2s.POST("/refresh-template-products", h.RefreshTemplateProducts)
 	s2s.GET("/business-types/:slug/template-status", h.GetTemplateStatus)
 	s2s.POST("/global-products/reclassify-business-types", h.ReclassifyBusinessTypes)
+	s2s.POST("/global-products/normalize-category-slugs", h.NormalizeCategorySlugs)
 }
 
 // deprecatedRefreshTemplateProducts mantiene compatibilidad con la ruta /internal legacy.
@@ -99,9 +108,9 @@ func (h *InternalHandler) GetTemplateStatus(c *gin.Context) {
 // reclassifyRequest es el body del endpoint POST /s2s/global-products/reclassify-business-types.
 // Contrato ADR-005 §2.
 type reclassifyRequest struct {
-	DryRun  *bool                   `json:"dry_run"`
-	Confirm bool                    `json:"confirm"`
-	Scope   reclassifyScopeRequest  `json:"scope"`
+	DryRun  *bool                  `json:"dry_run"`
+	Confirm bool                   `json:"confirm"`
+	Scope   reclassifyScopeRequest `json:"scope"`
 }
 
 type reclassifyScopeRequest struct {
@@ -122,7 +131,8 @@ type reclassifyScopeRequest struct {
 //   - Llama al use case y mapea errores (400, 422, 500).
 //
 // TEST-IDs: T-032 (body inválido→400), T-033 (dry_run sin operador→200), T-034 (422 max_rows),
-//           T-035 (dry_run válido→200), T-036 (apply exitoso→200), T-037 (apply sin operador→400).
+//
+//	T-035 (dry_run válido→200), T-036 (apply exitoso→200), T-037 (apply sin operador→400).
 func (h *InternalHandler) ReclassifyBusinessTypes(c *gin.Context) {
 	if h.reclassifyUC == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": gin.H{
@@ -199,6 +209,80 @@ func (h *InternalHandler) ReclassifyBusinessTypes(c *gin.Context) {
 			"code":    "INTERNAL_ERROR",
 			"message": "internal server error",
 		}})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": result})
+}
+
+// normalizeRequest es el body de POST /s2s/global-products/normalize-category-slugs (ADR-007 §4).
+type normalizeRequest struct {
+	DryRun  *bool                 `json:"dry_run"`
+	Confirm bool                  `json:"confirm"`
+	Scope   normalizeScopeRequest `json:"scope"`
+}
+
+type normalizeScopeRequest struct {
+	SourcePrefix string `json:"source_prefix"`
+	MaxRows      int    `json:"max_rows"`
+}
+
+// NormalizeCategorySlugs maneja POST /api/v1/s2s/global-products/normalize-category-slugs.
+// Mismo contrato de seguridad que ReclassifyBusinessTypes: dry_run default true; un apply real
+// (dry_run=false AND confirm=true) exige X-Operator-Id, rechazado temprano si falta.
+func (h *InternalHandler) NormalizeCategorySlugs(c *gin.Context) {
+	if h.normalizeUC == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": gin.H{
+			"code":    "USE_CASE_NOT_CONFIGURED",
+			"message": "normalize category slugs use case not configured",
+		}})
+		return
+	}
+
+	var req normalizeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": gin.H{"code": "INVALID_BODY", "message": err.Error()}})
+		return
+	}
+
+	dryRun := true
+	if req.DryRun != nil {
+		dryRun = *req.DryRun
+	}
+
+	operatorID := strings.TrimSpace(c.GetHeader("X-Operator-Id"))
+	if isApply := !dryRun && req.Confirm; isApply && operatorID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": gin.H{
+			"code":    "MISSING_OPERATOR_ID",
+			"message": "X-Operator-Id header is required for an apply (dry_run=false, confirm=true)",
+		}})
+		return
+	}
+
+	maxRows := req.Scope.MaxRows
+	if maxRows <= 0 {
+		maxRows = globalcatalogvo.NormalizeCategoryMaxRowsCap
+	}
+
+	scope, err := globalcatalogvo.NewNormalizeCategoryScope(req.Scope.SourcePrefix, maxRows)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": gin.H{"code": "SCOPE_INVALID", "message": err.Error()}})
+		return
+	}
+
+	result, err := h.normalizeUC.Execute(c.Request.Context(), globalcataloguc.NormalizeRequest{
+		DryRun:     dryRun,
+		Confirm:    req.Confirm,
+		Scope:      scope,
+		OperatorID: operatorID,
+	})
+	if err != nil {
+		var normErr *globalcataloguc.NormalizeError
+		if errors.As(err, &normErr) {
+			c.JSON(normErr.HTTPStatus, gin.H{"error": gin.H{"code": normErr.Code, "message": normErr.Message}})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": gin.H{"code": "INTERNAL_ERROR", "message": "internal server error"}})
 		return
 	}
 
