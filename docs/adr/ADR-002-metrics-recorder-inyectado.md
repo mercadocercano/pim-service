@@ -1,3 +1,14 @@
+---
+adr: ADR-002
+status: accepted
+skills:
+  implement:
+    - dev/hexagonal-go
+    - dev/prometheus
+  verify:
+    - dev/go-hex-audit
+    - dev/code-reviewer
+---
 # ADR-002: MetricsRecorder como Dependencia Inyectada
 
 **Estado**: Aceptado  

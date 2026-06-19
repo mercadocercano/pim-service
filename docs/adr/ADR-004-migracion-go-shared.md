@@ -1,3 +1,14 @@
+---
+adr: ADR-004
+status: accepted
+skills:
+  implement:
+    - dev/hexagonal-go
+    - go-shared-migrate
+  verify:
+    - dev/go-hex-audit
+    - dev/code-reviewer
+---
 # ADR-004: Extracción de Código Compartido a go-shared
 
 **Estado**: Aceptado  

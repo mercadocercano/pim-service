@@ -1,3 +1,13 @@
+---
+adr: ADR-003
+status: accepted
+skills:
+  implement:
+    - dev/hexagonal-go
+  verify:
+    - dev/code-reviewer
+    - dev/postgres-data-modeling
+---
 # ADR-003: Eliminación de MongoDB — PostgreSQL-only
 
 **Estado**: Aceptado  
