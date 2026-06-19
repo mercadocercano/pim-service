@@ -572,12 +572,16 @@ func (r *ApplyTemplatePostgresRepository) EnsureTenantProduct(ctx context.Contex
 	productID := uuid.New().String()
 	productSKU := pickProductSKU(candidate)
 	now := time.Now()
+	// La imagen del catálogo global ya viene resuelta en candidate.ImageURL
+	// (FindGlobalProduct). Insertarla acá evita depender del backfill async
+	// posterior y deja el flujo legacy alineado con CreateTenantProductsFromTemplate.
+	imageURL := sql.NullString{String: candidate.ImageURL, Valid: candidate.ImageURL != ""}
 	_, err = exec.ExecContext(ctx, `
 		INSERT INTO products (
-			id, tenant_id, name, description, sku, category_id, category_name,
+			id, tenant_id, name, description, image_url, sku, category_id, category_name,
 			brand_id, brand_name, status, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'active', $10, $10)
-	`, productID, tenantID.String(), candidate.Name, derefStr(candidate.Description), productSKU,
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'active', $11, $11)
+	`, productID, tenantID.String(), candidate.Name, derefStr(candidate.Description), imageURL, productSKU,
 		toNullString(categoryID), toNullString(categoryName),
 		nullableUUID(brandID), sql.NullString{String: brandName, Valid: brandName != ""}, now)
 	if err != nil {
