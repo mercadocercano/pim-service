@@ -23,6 +23,7 @@ import (
 	productConfig "saas-mt-pim-service/src/product/tenant/infrastructure/config"
 	quickstartConfig "saas-mt-pim-service/src/quickstart/infrastructure/config"
 	sharedConfig "saas-mt-pim-service/src/shared/infrastructure/config"
+	ratelimitsetup "saas-mt-pim-service/src/shared/infrastructure/ratelimit"
 
 	// Brand imports
 	brandController "saas-mt-pim-service/src/brand/infrastructure/controller"
@@ -237,9 +238,10 @@ func setupProductModuleWithLogger(router *gin.RouterGroup, db *sql.DB, logger pi
 	// Registrar rutas del Quickstart
 	productCfg.QuickstartController.RegisterRoutes(router)
 
-	// HITO 2: Registrar rutas de importación bulk
+	// HITO 2: Registrar rutas de importación bulk (con rate limiting por plan, ADR-003,
+	// observe-only por default; corre después del TenantValidation global).
 	if productCfg.BulkImportController != nil {
-		productCfg.BulkImportController.RegisterRoutes(router)
+		productCfg.BulkImportController.RegisterRoutes(router, ratelimitsetup.NewBulkImportMiddleware())
 		log.Println("  POST   /api/v1/products/import (HITO 2)")
 	}
 

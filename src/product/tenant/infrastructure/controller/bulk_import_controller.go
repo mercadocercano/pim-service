@@ -68,10 +68,13 @@ func (ctrl *BulkImportController) BulkImportProducts(c *gin.Context) {
 	c.JSON(statusCode, response)
 }
 
-// RegisterRoutes registra las rutas del controller
-func (ctrl *BulkImportController) RegisterRoutes(router *gin.RouterGroup) {
+// RegisterRoutes registra las rutas del controller. importMiddlewares se aplican SOLO a
+// la ruta de import (ej. rate limiting por plan, ADR-003) — variádico para mantener
+// compatibilidad con los callers existentes.
+func (ctrl *BulkImportController) RegisterRoutes(router *gin.RouterGroup, importMiddlewares ...gin.HandlerFunc) {
 	products := router.Group("/products")
 	{
-		products.POST("/import", ctrl.BulkImportProducts)
+		handlers := append(append([]gin.HandlerFunc{}, importMiddlewares...), ctrl.BulkImportProducts)
+		products.POST("/import", handlers...)
 	}
 }
