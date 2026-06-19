@@ -180,43 +180,43 @@ func (uc *ReclassifyBusinessTypesUseCase) classifyCandidates(
 
 		newType := assignment.BusinessTypeCode
 
-		// Caso: ya tiene rubro específico (no nil, no "almacen") → skip ya_especifico.
-		// Invariante: nunca se toca un producto ya en rubro específico.
-		if c.BusinessType != nil && *c.BusinessType != "" && *c.BusinessType != "almacen" {
-			skips = append(skips, value_object.ReclassifySkip{ID: c.ID, Name: c.Name, Kind: value_object.SkipYaEspecifico})
-			summary.Skips.YaEspecifico++
+		// Política de corrección segura §8: única implementación, compartida con el
+		// camino del re-sync (UpdateGlobalProductByID). No se duplica el criterio acá.
+		apply, toType, kind := value_object.ResolveSafeBusinessTypeTransition(c.BusinessType, newType)
+		if !apply {
+			switch kind {
+			case value_object.TransitionSkipYaEspecifico:
+				// Invariante: nunca se toca un producto ya en rubro específico.
+				skips = append(skips, value_object.ReclassifySkip{ID: c.ID, Name: c.Name, Kind: value_object.SkipYaEspecifico})
+				summary.Skips.YaEspecifico++
+			case value_object.TransitionSkipYaCorrecto:
+				skips = append(skips, value_object.ReclassifySkip{ID: c.ID, Name: c.Name, Kind: value_object.SkipYaCorrecto})
+				summary.Skips.YaCorrecto++
+			default:
+				// sin_candidate: candidate vacío. No ocurre acá (resolved==true ⇒ candidate no vacío),
+				// pero se contabiliza como no_resuelve por completitud.
+				skips = append(skips, value_object.ReclassifySkip{ID: c.ID, Name: c.Name, Kind: value_object.SkipNoResuelve})
+				summary.Skips.NoResuelve++
+			}
 			continue
-		}
-
-		// Caso: resolver resuelve el mismo rubro que ya tiene → skip ya_correcto.
-		if c.BusinessType != nil && *c.BusinessType == newType {
-			skips = append(skips, value_object.ReclassifySkip{ID: c.ID, Name: c.Name, Kind: value_object.SkipYaCorrecto})
-			summary.Skips.YaCorrecto++
-			continue
-		}
-
-		// Caso: update (nil/almacen → rubro específico).
-		kind := "relleno"
-		if c.BusinessType != nil && *c.BusinessType == "almacen" {
-			kind = "correccion"
 		}
 
 		updates = append(updates, value_object.ReclassifyUpdate{
 			ID:       c.ID,
 			Name:     c.Name,
 			FromType: c.BusinessType,
-			ToType:   newType,
+			ToType:   toType,
 			Kind:     kind,
 		})
 
 		// Acumular en summary por rubro.
-		rubroCount := summary.UpdatesPorRubro[newType]
-		if kind == "relleno" {
+		rubroCount := summary.UpdatesPorRubro[toType]
+		if kind == value_object.TransitionRelleno {
 			rubroCount.Relleno++
 		} else {
 			rubroCount.Correccion++
 		}
-		summary.UpdatesPorRubro[newType] = rubroCount
+		summary.UpdatesPorRubro[toType] = rubroCount
 	}
 
 	summary.Candidatos = len(updates)

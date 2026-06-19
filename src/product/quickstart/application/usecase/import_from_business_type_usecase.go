@@ -103,6 +103,11 @@ func (uc *ImportFromBusinessTypeUseCase) Execute(
 		request.InitialStatus = "active"
 	}
 
+	// Import en bloque desde el catálogo global: trae hasta 500 productos del rubro
+	// SIN filtrar por quality_score. Es una vía DISTINTA y deliberada al template curado
+	// de quickstart/apply (business_type_product_templates, quality_score>=75): apply = set
+	// curado representativo; este import = carga masiva del catálogo. Decisión owner E23
+	// (2026-06-17): se mantienen como caminos separados a propósito.
 	globals, err := uc.globalCatalogRepo.FindByBusinessType(request.BusinessTypeID, 500)
 	if err != nil {
 		return nil, fmt.Errorf("buscando productos del catálogo global: %w", err)

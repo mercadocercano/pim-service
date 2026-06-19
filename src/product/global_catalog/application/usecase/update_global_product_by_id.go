@@ -204,9 +204,15 @@ func (uc *UpdateGlobalProductByID) Execute(ctx context.Context, request UpdateGl
 		existingProduct = newProduct
 	}
 
-	// Actualizar business type si se proporciona
+	// Actualizar business type si se proporciona (E25 / ADR-006).
+	// El business_type recibido es un CANDIDATE, no autoritativo: lo manda el re-sync
+	// de webdata (y cualquier otro cliente del update). Se aplica la invariante de
+	// corrección segura §8 en vez de pisar a ciegas — solo rellena vacío o corrige
+	// almacen→específico; nunca degrada un rubro ya curado.
 	if request.BusinessType != nil {
-		existingProduct.SetBusinessType(*request.BusinessType)
+		if apply, newType, _ := value_object.ResolveSafeBusinessTypeTransition(existingProduct.BusinessType(), *request.BusinessType); apply {
+			existingProduct.SetBusinessType(newType)
+		}
 	}
 
 	// Actualizar tags si se proporcionan
