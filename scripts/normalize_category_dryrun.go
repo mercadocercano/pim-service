@@ -20,7 +20,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/hornosg/go-shared/domain/category"
+	"github.com/mercadocercano/go-shared-mc/domain/category"
 	uc "saas-mt-pim-service/src/product/global_catalog/application/usecase"
 	persistence "saas-mt-pim-service/src/product/global_catalog/infrastructure/persistence"
 	vo "saas-mt-pim-service/src/product/global_catalog/domain/value_object"
@@ -97,6 +97,22 @@ func main() {
 	fmt.Printf("\n=== COBERTURA A NIVEL CATEGORIA DECLARADA (lo que llena los templates) ===\n")
 	fmt.Printf("categorias declaradas con >=1 producto: %d / %d (%.1f%%)\n",
 		declaredWithProducts, len(declared), pct(declaredWithProducts, len(declared)))
+
+	if os.Getenv("FULL") != "" {
+		fmt.Printf("\n=== CATEGORIAS DECLARADAS VACIAS (destinos a llenar) ===\n")
+		empties := []string{}
+		for d := range declared {
+			if s.TopSlugs[d] == 0 {
+				empties = append(empties, d)
+			}
+		}
+		sort.Strings(empties)
+		for _, e := range empties {
+			fmt.Printf("  %s\n", e)
+		}
+		fmt.Printf("\n=== TODOS los slugs NO declarados (worklist completo, por productos) ===\n")
+		printTop(undeclared, len(undeclared))
+	}
 
 	fmt.Printf("\n-- top 40 slugs NO declarados (worklist de overrides, por productos) --\n")
 	printTop(undeclared, 40)

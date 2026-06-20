@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hornosg/go-shared/domain/category"
+	"github.com/mercadocercano/go-shared-mc/domain/category"
 
 	cr "github.com/hornosg/go-shared/criteria"
 	"saas-mt-pim-service/src/product/global_catalog/domain/entity"

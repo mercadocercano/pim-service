@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hornosg/go-shared/domain/businesstype"
+	"github.com/mercadocercano/go-shared-mc/domain/businesstype"
 	"saas-mt-pim-service/src/pim/domain/port"
 	domainport "saas-mt-pim-service/src/product/global_catalog/domain/port"
 	"saas-mt-pim-service/src/product/global_catalog/domain/value_object"
