@@ -2,6 +2,7 @@ package config
 
 import (
 	"database/sql"
+	"os"
 
 	businessTypeUsecase "saas-mt-pim-service/src/businesstype/application/usecase"
 	businessTypeRepository "saas-mt-pim-service/src/businesstype/infrastructure/persistence/repository"
@@ -45,7 +46,9 @@ func NewQuickstartModuleConfig(db *sql.DB, backfillImages *backfillUseCase.Backf
 	// HITO 2: Nuevos casos de uso para templates
 	applyTemplateRepo := quickstartRepository.NewApplyTemplatePostgresRepository(db)
 	listTemplatesRepo := quickstartRepository.NewListTemplatesPostgresRepository(db)
-	listTemplatesUseCase := usecase.NewListTemplatesUseCase(listTemplatesRepo)
+	// ADR-007 Fase 2: read-path computado del surtido (default off → editorial).
+	useComputedTemplates := os.Getenv("QUICKSTART_TEMPLATES_COMPUTED") == "true"
+	listTemplatesUseCase := usecase.NewListTemplatesUseCase(listTemplatesRepo, useComputedTemplates)
 	applyTemplateUseCase := usecase.NewApplyTemplateUseCase(db, applyTemplateRepo)
 
 	// Crear handler principal de quickstart

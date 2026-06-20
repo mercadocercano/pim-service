@@ -26,10 +26,18 @@ func (m *MockListTemplatesRepository) LoadTemplatesFromBusinessTypeTemplates(ctx
 	return args.Get(0).([]port.ListTemplate), args.Error(1)
 }
 
+func (m *MockListTemplatesRepository) LoadTemplatesComputed(ctx context.Context) ([]port.ListTemplate, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]port.ListTemplate), args.Error(1)
+}
+
 func TestListTemplatesUseCase_Execute_Success(t *testing.T) {
 	// Arrange
 	mockRepo := new(MockListTemplatesRepository)
-	uc := usecase.NewListTemplatesUseCase(mockRepo)
+	uc := usecase.NewListTemplatesUseCase(mockRepo, false)
 
 	templates := []port.ListTemplate{
 		{
@@ -69,7 +77,7 @@ func TestListTemplatesUseCase_Execute_Success(t *testing.T) {
 func TestListTemplatesUseCase_Execute_EmptyResult(t *testing.T) {
 	// Arrange
 	mockRepo := new(MockListTemplatesRepository)
-	uc := usecase.NewListTemplatesUseCase(mockRepo)
+	uc := usecase.NewListTemplatesUseCase(mockRepo, false)
 
 	mockRepo.On("LoadTemplatesFromBusinessTypeTemplates", mock.Anything).Return([]port.ListTemplate{}, nil)
 
@@ -87,7 +95,7 @@ func TestListTemplatesUseCase_Execute_EmptyResult(t *testing.T) {
 func TestListTemplatesUseCase_Execute_RepositoryError_ShouldFail(t *testing.T) {
 	// Arrange
 	mockRepo := new(MockListTemplatesRepository)
-	uc := usecase.NewListTemplatesUseCase(mockRepo)
+	uc := usecase.NewListTemplatesUseCase(mockRepo, false)
 
 	mockRepo.On("LoadTemplatesFromBusinessTypeTemplates", mock.Anything).Return(nil, errors.New("database error"))
 
@@ -104,7 +112,7 @@ func TestListTemplatesUseCase_Execute_RepositoryError_ShouldFail(t *testing.T) {
 func TestListTemplatesUseCase_Execute_MapsAllFields(t *testing.T) {
 	// Arrange
 	mockRepo := new(MockListTemplatesRepository)
-	uc := usecase.NewListTemplatesUseCase(mockRepo)
+	uc := usecase.NewListTemplatesUseCase(mockRepo, false)
 
 	templates := []port.ListTemplate{
 		{

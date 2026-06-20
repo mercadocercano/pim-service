@@ -43,7 +43,7 @@ ranked_products AS (
     ) AS rn
   FROM template_categories tc
   JOIN global_products gp
-    ON gp.category = tc.category_slug
+    ON gp.category_slug = tc.category_slug
    AND (
      gp.business_type = tc.business_type_code
      OR tc.business_type_code = ANY(

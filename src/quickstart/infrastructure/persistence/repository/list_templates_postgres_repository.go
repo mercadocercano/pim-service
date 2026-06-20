@@ -99,6 +99,115 @@ func (r *ListTemplatesPostgresRepository) LoadTemplatesFromBusinessTypeTemplates
 	return templates, nil
 }
 
+// LoadTemplatesComputed carga templates usando el surtido COMPUTADO desde
+// global_products (business_type_product_templates.priority_brands +
+// suggested_products). Mantiene la taxonomía (categories) y la metadata
+// (name/description/icon/slug) del editorial. El refresh solo computa los
+// templates is_default → para los que no tienen surtido computado, cae a las
+// marcas y el conteo de productos editoriales por-template.
+func (r *ListTemplatesPostgresRepository) LoadTemplatesComputed(ctx context.Context) ([]port.ListTemplate, error) {
+	query := `
+		SELECT btt.id, btt.name, btt.description, btt.categories, btt.brands, btt.is_default, btt.region,
+		       COALESCE(bt.code, '') as slug, COALESCE(bt.icon, '') as icon,
+		       COALESCE(jsonb_array_length(btt.categories), 0) as total_categories,
+		       COALESCE(jsonb_array_length(btt.products), 0) as editorial_products,
+		       btpt.priority_brands,
+		       COALESCE(jsonb_array_length(btpt.suggested_products), 0) as computed_products
+		FROM business_type_templates btt
+		LEFT JOIN business_types bt ON bt.id = btt.business_type_id
+		LEFT JOIN business_type_product_templates btpt ON btpt.business_type_template_id = btt.id
+		WHERE btt.is_active = true
+		  AND btt.region IN ('AR', 'GLOBAL')
+		  AND COALESCE(jsonb_array_length(btt.categories), 0) >= 1
+		ORDER BY btt.is_default DESC,
+		         CASE WHEN btt.region = 'AR' THEN 0 ELSE 1 END,
+		         btt.name
+		LIMIT 50
+	`
+
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("error querying computed templates: %w", err)
+	}
+	defer rows.Close()
+
+	templates := make([]port.ListTemplate, 0)
+	for rows.Next() {
+		var id, name, description, slug, icon sql.NullString
+		var categoriesRaw, editorialBrandsRaw, priorityBrandsRaw []byte
+		var isDefault sql.NullBool
+		var region sql.NullString
+		var totalCategories, editorialProducts, computedProducts int
+		if err := rows.Scan(&id, &name, &description, &categoriesRaw, &editorialBrandsRaw, &isDefault, &region, &slug, &icon, &totalCategories, &editorialProducts, &priorityBrandsRaw, &computedProducts); err != nil {
+			return nil, fmt.Errorf("error scanning computed template: %w", err)
+		}
+		if !id.Valid || id.String == "" {
+			continue
+		}
+
+		categories, err := parseTemplateCategoryNames(categoriesRaw)
+		if err != nil {
+			return nil, err
+		}
+
+		// Fallback por-template: si no hay surtido computado para este template,
+		// usar marcas y conteo editoriales.
+		var brands []port.ListTemplateBrand
+		totalProducts := editorialProducts
+		if computedProducts > 0 {
+			brands = parsePriorityBrands(priorityBrandsRaw)
+			totalProducts = computedProducts
+		} else {
+			brands = parseTemplateBrands(editorialBrandsRaw)
+		}
+
+		templateSlug := id.String
+		if slug.Valid && slug.String != "" {
+			templateSlug = slug.String
+		}
+
+		templates = append(templates, port.ListTemplate{
+			ID:              id.String,
+			Name:            name.String,
+			Slug:            templateSlug,
+			Description:     description.String,
+			Icon:            icon.String,
+			Categories:      categories,
+			Brands:          brands,
+			TotalCategories: totalCategories,
+			TotalProducts:   totalProducts,
+			IsActive:        true,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating computed templates: %w", err)
+	}
+
+	return templates, nil
+}
+
+// parsePriorityBrands convierte priority_brands (array JSON de strings, ordenado
+// por frecuencia descendente) en ListTemplateBrand. Sin logo: el computado solo
+// tiene el nombre de la marca (follow-up: enriquecer con logos desde brands).
+func parsePriorityBrands(raw []byte) []port.ListTemplateBrand {
+	if len(raw) == 0 {
+		return nil
+	}
+	var names []string
+	if err := json.Unmarshal(raw, &names); err != nil {
+		return nil
+	}
+	brands := make([]port.ListTemplateBrand, 0, len(names))
+	for _, n := range names {
+		if n == "" {
+			continue
+		}
+		brands = append(brands, port.ListTemplateBrand{Name: n})
+	}
+	return brands
+}
+
 type templateBrandPayload struct {
 	Name    string `json:"name"`
 	LogoURL string `json:"logo_url"`

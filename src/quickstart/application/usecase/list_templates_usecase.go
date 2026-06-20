@@ -33,13 +33,17 @@ type ListTemplatesResponse struct {
 
 // ListTemplatesUseCase obtiene la lista de templates disponibles
 type ListTemplatesUseCase struct {
-	repo port.ListTemplatesRepository
+	repo        port.ListTemplatesRepository
+	useComputed bool
 }
 
-// NewListTemplatesUseCase crea una nueva instancia del caso de uso
-func NewListTemplatesUseCase(repo port.ListTemplatesRepository) *ListTemplatesUseCase {
+// NewListTemplatesUseCase crea una nueva instancia del caso de uso.
+// useComputed activa el read-path COMPUTADO (surtido derivado de global_products,
+// ADR-007 Fase 2). Con fallback automático al editorial ante error.
+func NewListTemplatesUseCase(repo port.ListTemplatesRepository, useComputed bool) *ListTemplatesUseCase {
 	return &ListTemplatesUseCase{
-		repo: repo,
+		repo:        repo,
+		useComputed: useComputed,
 	}
 }
 
@@ -47,7 +51,7 @@ func NewListTemplatesUseCase(repo port.ListTemplatesRepository) *ListTemplatesUs
 // Si la DB está vacía (seeds no ejecutados), retorna lista vacía y el frontend
 // muestra su propio fallback estático.
 func (uc *ListTemplatesUseCase) Execute(ctx context.Context) (*ListTemplatesResponse, error) {
-	templates, err := uc.repo.LoadTemplatesFromBusinessTypeTemplates(ctx)
+	templates, err := uc.loadTemplates(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -77,4 +81,17 @@ func (uc *ListTemplatesUseCase) Execute(ctx context.Context) (*ListTemplatesResp
 		Templates: result,
 		Total:     len(result),
 	}, nil
+}
+
+// loadTemplates elige el read-path: computado (ADR-007 Fase 2) cuando el flag
+// está activo, con fallback al editorial si el computado falla; editorial por
+// defecto.
+func (uc *ListTemplatesUseCase) loadTemplates(ctx context.Context) ([]port.ListTemplate, error) {
+	if uc.useComputed {
+		if templates, err := uc.repo.LoadTemplatesComputed(ctx); err == nil {
+			return templates, nil
+		}
+		// Fallback: si el computado falla, servir editorial en vez de romper el onboarding.
+	}
+	return uc.repo.LoadTemplatesFromBusinessTypeTemplates(ctx)
 }
