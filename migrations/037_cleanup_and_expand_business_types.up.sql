@@ -43,6 +43,3 @@ UPDATE business_types SET sort_order = 180 WHERE code = 'veterinaria';
 UPDATE business_types SET sort_order = 190 WHERE code = 'electrodomesticos';
 
 -- Track migration
-INSERT INTO schema_migrations (filename, applied_at)
-VALUES ('20260425000002_cleanup_and_expand_business_types.sql', NOW())
-ON CONFLICT (filename) DO NOTHING;

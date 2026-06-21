@@ -6,7 +6,3 @@ ALTER TABLE global_products
 CREATE INDEX IF NOT EXISTS idx_global_products_also_sold_in
   ON global_products USING GIN (also_sold_in);
 
--- Registrar en schema_migrations (tabla tiene columna 'filename' no 'version')
-INSERT INTO schema_migrations (filename, applied_at)
-VALUES ('20260425000004_add_also_sold_in_to_global_products.sql', NOW())
-ON CONFLICT (filename) DO NOTHING;

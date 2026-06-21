@@ -1,21 +1,14 @@
 #!/bin/bash
+# ⚠️ OBSOLETO / RETIRADO (ADR-001).
+#
+# Las migraciones de pim-service ahora corren IN-APP vía sharedmigrate.RunMigrations
+# (golang-migrate) en main.go, con tabla de control schema_migrations(version, dirty)
+# y baseline en prod. El antiguo Job pim-migrate y la stage 'migrate' del Dockerfile
+# fueron eliminados.
+#
+# Este script ya NO aplica migraciones (re-corría todos los .sql sin tracking, y tras
+# el rename a .up/.down podía ejecutar DROPs por accidente). Se deja solo como marcador.
 
-# Las variables de entorno ya deberían estar disponibles en el contenedor Docker
-# Directorio de migraciones
-MIGRATIONS_DIR="/migrations"
-
-echo "Migrando base de datos $POSTGRES_DB en $POSTGRES_HOST:$POSTGRES_PORT como usuario $POSTGRES_USER"
-
-# Ejecutar migraciones
-for migration in $(ls $MIGRATIONS_DIR/*.sql | grep -v "seed_" | sort); do
-    echo "Ejecutando migración: $migration"
-    PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d $POSTGRES_DB -f $migration
-done
-
-# Ejecutar seeds después de todas las migraciones
-for seed in $(ls $MIGRATIONS_DIR/seed_*.sql | sort); do
-    echo "Ejecutando seed: $seed"
-    PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d $POSTGRES_DB -f $seed
-done
-
-echo "Migraciones y seeds completados" 
+echo "migrate.sh está RETIRADO. Las migraciones corren in-app (ADR-001, golang-migrate)."
+echo "Para una migración manual de emergencia, usar el binario del servicio o psql directo."
+exit 1

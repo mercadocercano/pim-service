@@ -82,15 +82,10 @@ EXPOSE 8080
 CMD sh -c 'if [ -n "$GITHUB_TOKEN" ]; then git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"; fi && air -c .air.toml'
 
 # ==============================================
-# Stage 3b: Migrate stage (para Job de migraciones)
+# (Stage migrate ELIMINADA — ADR-001) Las migraciones ahora corren in-app vía
+# sharedmigrate.RunMigrations en main.go (golang-migrate, fail-fast al arrancar).
+# El antiguo Job pim-migrate / scripts/migrate.sh queda obsoleto y retirado.
 # ==============================================
-FROM alpine:3.18 AS migrate
-RUN apk add --no-cache postgresql-client bash
-WORKDIR /app
-COPY migrations /migrations
-COPY scripts/migrate.sh /migrate.sh
-RUN chmod +x /migrate.sh
-ENTRYPOINT ["/migrate.sh"]
 
 # ==============================================
 # Stage 4: Production stage (Distroless)

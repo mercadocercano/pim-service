@@ -7,6 +7,3 @@ VALUES
   (gen_random_uuid(), 'congelados', 'Congelados', 'Productos congelados y ultracongelados (helados, hamburguesas, vegetales, etc.)', 'ac_unit', '#0EA5E9', true, 18, NOW(), NOW())
 ON CONFLICT (code) DO NOTHING;
 
-INSERT INTO schema_migrations (filename, applied_at)
-VALUES ('20260617000001_add_congelados_business_type.sql', NOW())
-ON CONFLICT (filename) DO NOTHING;

@@ -8,6 +8,7 @@ import (
 	"os"
 
 	sharedmetrics "github.com/hornosg/go-shared/infrastructure/metrics"
+	sharedmigrate "github.com/hornosg/go-shared/migrate"
 	goshpostgres "github.com/hornosg/go-shared/infrastructure/postgres"
 	apiConfig "saas-mt-pim-service/src/api/config"
 	brandConfig "saas-mt-pim-service/src/brand/infrastructure/config"
@@ -141,6 +142,12 @@ func main() {
 	defer db.Close()
 	goshpostgres.StartPoolMonitor(context.Background(), db, goshpostgres.MonitorOptions{Service: "pim-service", DBName: dbName})
 	log.Println("Conexión a la base de datos establecida con éxito")
+
+	// Migraciones versionadas in-app (ADR-001) — fail-fast antes de servir tráfico.
+	// Reemplaza el migrador casero scripts/migrate.sh (Job pim-migrate).
+	if err := sharedmigrate.RunMigrations(db, MigrationsFS, dbName); err != nil {
+		log.Fatalf("Error running migrations: %v", err)
+	}
 
 	// API v1 grupo de rutas
 	v1 := router.Group("/api/v1")
