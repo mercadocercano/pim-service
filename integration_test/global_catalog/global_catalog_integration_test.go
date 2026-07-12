@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"testing"
 
@@ -496,4 +497,202 @@ func TestGlobalCatalog_List_Pagination(t *testing.T) {
 
 	assert.Len(t, result.Items, 2, "page_size=2 debe retornar 2 items")
 	assert.GreaterOrEqual(t, result.TotalCount, 4, "total_count debe ser al menos 4")
+}
+
+// --- Bulk verify + filtros de revisión ---
+
+type bulkVerifyResponse struct {
+	Mode        string                 `json:"mode"`
+	SnapshotRef *string                `json:"snapshot_ref"`
+	Summary     map[string]interface{} `json:"summary"`
+}
+
+func adminHeaderWithOperator(operatorID string) http.Header {
+	h := adminHeader()
+	h.Set("X-Operator-Id", operatorID)
+	return h
+}
+
+func setProductQualityAndImage(t *testing.T, srv *testServer, productID string, qualityScore int, imageURL *string) {
+	t.Helper()
+	var img interface{}
+	if imageURL != nil {
+		img = *imageURL
+	} else {
+		img = nil
+	}
+	_, err := srv.DB.ExecContext(context.Background(),
+		"UPDATE global_products SET quality_score = $1, image_url = $2 WHERE id = $3",
+		qualityScore, img, productID)
+	require.NoError(t, err)
+}
+
+// TestGlobalCatalog_BulkVerify_VerifyAndUnverify verifica la verificación y desverificación en lote.
+func TestGlobalCatalog_BulkVerify_VerifyAndUnverify(t *testing.T) {
+	srv := newTestServer(t)
+
+	id1 := createProductAndGetID(t, srv, "Producto Bulk Verify 1")
+	id2 := createProductAndGetID(t, srv, "Producto Bulk Verify 2")
+	id3 := createProductAndGetID(t, srv, "Producto Bulk Verify 3")
+
+	// Verificar 2 de los 3
+	verifyResp := doRequest(t, http.MethodPost,
+		baseURL(srv)+"/global-catalog/products/bulk-verify",
+		map[string]interface{}{
+			"ids":    []string{id1, id2},
+			"verify": true,
+		},
+		adminHeaderWithOperator("operator-bulk-1"))
+	if verifyResp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(verifyResp.Body)
+		verifyResp.Body.Close()
+		t.Fatalf("bulk verify retornó %d: %s", verifyResp.StatusCode, string(body))
+	}
+
+	var verifyResult bulkVerifyResponse
+	decodeJSON(t, verifyResp, &verifyResult)
+	assert.Equal(t, "verify", verifyResult.Mode)
+	assert.Equal(t, 2, int(verifyResult.Summary["processed"].(float64)))
+	assert.Equal(t, 0, int(verifyResult.Summary["failed"].(float64)))
+
+	// Listar solo verificados
+	listVerifiedResp := doRequest(t, http.MethodGet,
+		baseURL(srv)+"/global-catalog/products?is_verified=true",
+		nil, adminHeader())
+	require.Equal(t, http.StatusOK, listVerifiedResp.StatusCode)
+
+	var verifiedList listProductsResponse
+	decodeJSON(t, listVerifiedResp, &verifiedList)
+	verifiedIDs := make(map[string]bool)
+	for _, p := range verifiedList.Items {
+		verifiedIDs[p.ID] = true
+	}
+	assert.True(t, verifiedIDs[id1], "id1 debe estar verificado")
+	assert.True(t, verifiedIDs[id2], "id2 debe estar verificado")
+	assert.False(t, verifiedIDs[id3], "id3 no debe estar verificado")
+
+	// Desverificar los 2
+	unverifyResp := doRequest(t, http.MethodPost,
+		baseURL(srv)+"/global-catalog/products/bulk-verify",
+		map[string]interface{}{
+			"ids":    []string{id1, id2},
+			"verify": false,
+		},
+		adminHeaderWithOperator("operator-bulk-1"))
+	if unverifyResp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(unverifyResp.Body)
+		unverifyResp.Body.Close()
+		t.Fatalf("bulk unverify retornó %d: %s", unverifyResp.StatusCode, string(body))
+	}
+
+	var unverifyResult bulkVerifyResponse
+	decodeJSON(t, unverifyResp, &unverifyResult)
+	assert.Equal(t, "unverify", unverifyResult.Mode)
+	assert.Equal(t, 2, int(unverifyResult.Summary["processed"].(float64)))
+
+	// Verificar que id1 ahora está desverificado
+	getResp := doRequest(t, http.MethodGet,
+		fmt.Sprintf("%s/global-catalog/products/%s", baseURL(srv), id1),
+		nil, adminHeader())
+	require.Equal(t, http.StatusOK, getResp.StatusCode)
+
+	var afterUnverify getProductResponse
+	decodeJSON(t, getResp, &afterUnverify)
+	assert.False(t, afterUnverify.Product.IsVerified, "id1 debe quedar desverificado")
+}
+
+// TestGlobalCatalog_BulkVerify_MissingOperatorID verifica que el endpoint exige X-Operator-Id.
+func TestGlobalCatalog_BulkVerify_MissingOperatorID(t *testing.T) {
+	srv := newTestServer(t)
+
+	productID := createProductAndGetID(t, srv, "Producto Sin Operador")
+
+	resp := doRequest(t, http.MethodPost,
+		baseURL(srv)+"/global-catalog/products/bulk-verify",
+		map[string]interface{}{
+			"ids":    []string{productID},
+			"verify": true,
+		},
+		adminHeader())
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	var body map[string]interface{}
+	decodeJSON(t, resp, &body)
+	err, ok := body["error"].(map[string]interface{})
+	require.True(t, ok)
+	assert.Equal(t, "MISSING_OPERATOR_ID", err["code"])
+}
+
+// TestGlobalCatalog_List_QualityScoreAndImageFilters verifica filtros por quality_score y presencia de imagen.
+func TestGlobalCatalog_List_QualityScoreAndImageFilters(t *testing.T) {
+	srv := newTestServer(t)
+
+	idHigh := createProductAndGetID(t, srv, "Producto Calidad Alta")
+	idMedium := createProductAndGetID(t, srv, "Producto Calidad Media")
+	idLow := createProductAndGetID(t, srv, "Producto Calidad Baja")
+	idNoImage := createProductAndGetID(t, srv, "Producto Sin Imagen")
+
+	imageURL := "http://example.com/img.png"
+	setProductQualityAndImage(t, srv, idHigh, 85, &imageURL)
+	setProductQualityAndImage(t, srv, idMedium, 55, &imageURL)
+	setProductQualityAndImage(t, srv, idLow, 25, &imageURL)
+	setProductQualityAndImage(t, srv, idNoImage, 60, nil)
+
+	// Filtro quality_score >= 70
+	highResp := doRequest(t, http.MethodGet,
+		baseURL(srv)+"/global-catalog/products?min_quality=70&max_quality=100",
+		nil, adminHeader())
+	require.Equal(t, http.StatusOK, highResp.StatusCode)
+
+	var highList listProductsResponse
+	decodeJSON(t, highResp, &highList)
+	highIDs := make(map[string]bool)
+	for _, p := range highList.Items {
+		highIDs[p.ID] = true
+	}
+	assert.True(t, highIDs[idHigh], "calidad alta debe estar en el rango alto")
+	assert.False(t, highIDs[idMedium], "calidad media no debe estar en el rango alto")
+	assert.False(t, highIDs[idLow], "calidad baja no debe estar en el rango alto")
+
+	// Filtro sin imagen
+	noImageResp := doRequest(t, http.MethodGet,
+		baseURL(srv)+"/global-catalog/products?has_image=false",
+		nil, adminHeader())
+	require.Equal(t, http.StatusOK, noImageResp.StatusCode)
+
+	var noImageList listProductsResponse
+	decodeJSON(t, noImageResp, &noImageList)
+	noImageIDs := make(map[string]bool)
+	for _, p := range noImageList.Items {
+		noImageIDs[p.ID] = true
+	}
+	assert.True(t, noImageIDs[idNoImage], "producto sin imagen debe aparecer")
+	assert.False(t, noImageIDs[idHigh], "producto con imagen no debe aparecer")
+}
+
+// TestGlobalCatalog_List_MassVerifiedFilter verifica el filtro de productos mass-verificados.
+func TestGlobalCatalog_List_MassVerifiedFilter(t *testing.T) {
+	srv := newTestServer(t)
+
+	massVerifiedID := createProductAndGetID(t, srv, "Producto Mass Verified")
+	normalID := createProductAndGetID(t, srv, "Producto Normal")
+
+	_, err := srv.DB.ExecContext(context.Background(),
+		"UPDATE global_products SET mass_verified_at = NOW() WHERE id = $1",
+		massVerifiedID)
+	require.NoError(t, err)
+
+	resp := doRequest(t, http.MethodGet,
+		baseURL(srv)+"/global-catalog/products?mass_verified_only=true",
+		nil, adminHeader())
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	var result listProductsResponse
+	decodeJSON(t, resp, &result)
+	resultIDs := make(map[string]bool)
+	for _, p := range result.Items {
+		resultIDs[p.ID] = true
+	}
+	assert.True(t, resultIDs[massVerifiedID], "mass verified debe aparecer")
+	assert.False(t, resultIDs[normalID], "producto normal no debe aparecer")
 }

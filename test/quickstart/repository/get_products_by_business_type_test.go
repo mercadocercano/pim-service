@@ -2,7 +2,6 @@ package repository_test
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"testing"
 
@@ -15,8 +14,8 @@ import (
 )
 
 // TestGetProductsByBusinessType_ComputedAvailable_ReturnsComputedProducts
-// verifica que cuando business_type_product_templates tiene UUIDs, se devuelven
-// los productos resueltos desde global_products (fuente computed).
+// verifica que cuando business_type_product_template_details tiene product_ids,
+// se resuelven desde global_products (fuente computed).
 func TestGetProductsByBusinessType_ComputedAvailable_ReturnsComputedProducts(t *testing.T) {
 	// Arrange
 	db, mock, err := sqlmock.New()
@@ -25,12 +24,12 @@ func TestGetProductsByBusinessType_ComputedAvailable_ReturnsComputedProducts(t *
 
 	productID1 := "11111111-1111-1111-1111-111111111111"
 	productID2 := "22222222-2222-2222-2222-222222222222"
-	suggestedIDs, _ := json.Marshal([]string{productID1, productID2})
 
 	// Primer query: fetchComputedTemplateIDs retorna 2 UUIDs
-	computedRows := sqlmock.NewRows([]string{"suggested_products"}).
-		AddRow(suggestedIDs)
-	mock.ExpectQuery(`business_type_product_templates`).
+	computedRows := sqlmock.NewRows([]string{"product_id"}).
+		AddRow(productID1).
+		AddRow(productID2)
+	mock.ExpectQuery(`business_type_product_template_details`).
 		WithArgs("almacen").
 		WillReturnRows(computedRows)
 
@@ -39,6 +38,7 @@ func TestGetProductsByBusinessType_ComputedAvailable_ReturnsComputedProducts(t *
 		AddRow("Harina 000", "Arcor", "harinas", 0.9).
 		AddRow("Azúcar 1kg", "Ledesma", "azucar", 0.85)
 	mock.ExpectQuery(`global_products`).
+		WithArgs(sqlmock.AnyArg()).
 		WillReturnRows(globalRows)
 
 	repo := repository.NewGetProductsByBusinessTypePostgresRepository(db)
@@ -57,7 +57,7 @@ func TestGetProductsByBusinessType_ComputedAvailable_ReturnsComputedProducts(t *
 }
 
 // TestGetProductsByBusinessType_NoComputed_FallsBackToEditorial
-// verifica que cuando no hay registro en business_type_product_templates (ErrNoRows),
+// verifica que cuando no hay detalle computado (ErrNoRows),
 // se consulta el JSONB editorial y se devuelven esos productos.
 func TestGetProductsByBusinessType_NoComputed_FallsBackToEditorial(t *testing.T) {
 	// Arrange
@@ -65,10 +65,11 @@ func TestGetProductsByBusinessType_NoComputed_FallsBackToEditorial(t *testing.T)
 	require.NoError(t, err)
 	defer db.Close()
 
-	// Primer query: fetchComputedTemplateIDs retorna ErrNoRows
-	mock.ExpectQuery(`business_type_product_templates`).
+	// Primer query: fetchComputedTemplateIDs retorna 0 filas (sin detalle computado)
+	computedRows := sqlmock.NewRows([]string{"product_id"})
+	mock.ExpectQuery(`business_type_product_template_details`).
 		WithArgs("relojeria").
-		WillReturnError(sql.ErrNoRows)
+		WillReturnRows(computedRows)
 
 	// Segundo query: fetchEditorialProducts retorna JSONB editorial
 	editorialProducts := []port.TemplateProduct{
@@ -94,18 +95,17 @@ func TestGetProductsByBusinessType_NoComputed_FallsBackToEditorial(t *testing.T)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
-// TestGetProductsByBusinessType_EmptySuggestedProducts_FallsBackToEditorial
-// verifica que cuando suggested_products es un array vacío [], se usa el fallback editorial.
-func TestGetProductsByBusinessType_EmptySuggestedProducts_FallsBackToEditorial(t *testing.T) {
+// TestGetProductsByBusinessType_EmptyComputed_FallsBackToEditorial
+// verifica que cuando el detalle computado no retorna filas, se usa el fallback editorial.
+func TestGetProductsByBusinessType_EmptyComputed_FallsBackToEditorial(t *testing.T) {
 	// Arrange
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
 	defer db.Close()
 
-	// Primer query: fetchComputedTemplateIDs retorna array vacío
-	emptyArray, _ := json.Marshal([]string{})
-	computedRows := sqlmock.NewRows([]string{"suggested_products"}).AddRow(emptyArray)
-	mock.ExpectQuery(`business_type_product_templates`).
+	// Primer query: fetchComputedTemplateIDs retorna 0 filas
+	computedRows := sqlmock.NewRows([]string{"product_id"})
+	mock.ExpectQuery(`business_type_product_template_details`).
 		WithArgs("bazar").
 		WillReturnRows(computedRows)
 

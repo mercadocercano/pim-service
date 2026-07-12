@@ -31,6 +31,7 @@ type GlobalCatalogController struct {
 	listProductsNeedingEnrichment *usecase.ListProductsNeedingEnrichment
 	getGlobalProductsByIDs        *usecase.GetGlobalProductsByIDs
 	getDistinctBusinessTypes      *usecase.GetDistinctBusinessTypes
+	bulkVerifyGlobalProducts      *usecase.BulkVerifyGlobalProducts
 	criteriaBuilder               *criteria.GlobalProductCriteriaBuilder
 }
 
@@ -50,6 +51,7 @@ type GlobalCatalogControllerDeps struct {
 	ListProductsNeedingEnrichment *usecase.ListProductsNeedingEnrichment
 	GetGlobalProductsByIDs        *usecase.GetGlobalProductsByIDs
 	GetDistinctBusinessTypes      *usecase.GetDistinctBusinessTypes
+	BulkVerifyGlobalProducts      *usecase.BulkVerifyGlobalProducts
 	CriteriaBuilder               *criteria.GlobalProductCriteriaBuilder
 }
 
@@ -99,6 +101,7 @@ func NewGlobalCatalogControllerWithDeps(deps GlobalCatalogControllerDeps) *Globa
 		listProductsNeedingEnrichment: deps.ListProductsNeedingEnrichment,
 		getGlobalProductsByIDs:        deps.GetGlobalProductsByIDs,
 		getDistinctBusinessTypes:      deps.GetDistinctBusinessTypes,
+		bulkVerifyGlobalProducts:      deps.BulkVerifyGlobalProducts,
 		criteriaBuilder:               deps.CriteriaBuilder,
 	}
 }
@@ -129,6 +132,7 @@ func (gc *GlobalCatalogController) RegisterRoutes(router *gin.RouterGroup) {
 		private.DELETE("/products/:id", gc.DeleteProductByID)              // Eliminar producto por ID
 		private.PATCH("/products/:id/verify", gc.VerifyProduct)            // Verificar producto
 		private.PATCH("/products/:id/unverify", gc.UnverifyProduct)        // Desverificar producto
+		private.POST("/products/bulk-verify", gc.BulkVerifyProducts)       // Verificar/desverificar en lote
 	}
 }
 
@@ -586,6 +590,45 @@ func (gc *GlobalCatalogController) BulkImportProducts(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+// BulkVerifyProducts verifica o desverifica productos en lote.
+// POST /api/v1/global-catalog/products/bulk-verify
+func (gc *GlobalCatalogController) BulkVerifyProducts(c *gin.Context) {
+	if gc.bulkVerifyGlobalProducts == nil {
+		httpresp.JSON(c, http.StatusNotImplemented, "Endpoint no implementado")
+		return
+	}
+
+	var req usecase.BulkVerifyGlobalProductsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		httpresp.JSONWithDetails(c, http.StatusBadRequest, "JSON inválido", err.Error())
+		return
+	}
+
+	operatorID := strings.TrimSpace(c.GetHeader("X-Operator-Id"))
+	if operatorID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": gin.H{
+				"code":    "MISSING_OPERATOR_ID",
+				"message": "X-Operator-Id header is required for bulk verify",
+			},
+		})
+		return
+	}
+	req.OperatorID = operatorID
+
+	result, err := gc.bulkVerifyGlobalProducts.Execute(c.Request.Context(), req)
+	if err != nil {
+		gc.handleUseCaseError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"mode":         result.Mode,
+		"snapshot_ref": result.SnapshotRef,
+		"summary":      result.Summary,
+	})
 }
 
 // GetDistinctBusinessTypes devuelve todos los business types distintos del catálogo global.

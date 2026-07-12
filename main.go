@@ -171,7 +171,7 @@ func main() {
 	setupQuickstartModule(v1, db, productCfg.BackfillTenantImagesUseCase, pimLogger)
 	setupBusinessTypeModule(v1, db)
 	setupBusinessTypeTemplateModule(v1, db)
-	setupGlobalCatalogModule(v1, db)
+	setupGlobalCatalogModule(v1, db, pimLogger)
 	setupMarketplaceCategoriesModule(v1, db)
 	setupMarketplaceProductsModule(v1, db)
 	setupSchemaValidationModule(v1, db)
@@ -344,11 +344,11 @@ func setupBusinessTypeTemplateModule(router *gin.RouterGroup, db *sql.DB) {
 }
 
 // setupGlobalCatalogModule configura el módulo Global Catalog
-func setupGlobalCatalogModule(router *gin.RouterGroup, db *sql.DB) {
+func setupGlobalCatalogModule(router *gin.RouterGroup, db *sql.DB, logger pimport.PIMEventLogger) {
 	log.Println("Configurando módulo Global Catalog...")
 
 	// Crear configuración del módulo Global Catalog
-	globalCatalogCfg := globalCatalogConfig.NewGlobalCatalogConfig(db)
+	globalCatalogCfg := globalCatalogConfig.NewGlobalCatalogConfig(db, logger)
 
 	// Obtener el controller
 	globalCatalogController := globalCatalogCfg.GetGlobalCatalogController()

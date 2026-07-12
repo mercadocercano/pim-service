@@ -23,6 +23,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 
+	pimport "saas-mt-pim-service/src/pim/domain/port"
 	gcUsecase "saas-mt-pim-service/src/product/global_catalog/application/usecase"
 	gcController "saas-mt-pim-service/src/product/global_catalog/infrastructure/controller"
 	gcCriteria "saas-mt-pim-service/src/product/global_catalog/infrastructure/criteria"
@@ -83,6 +84,8 @@ func newTestServer(t *testing.T) *testServer {
 
 	apiV1 := router.Group("/api/v1")
 	repo := gcPersistence.NewPostgresGlobalProductRepository(db)
+	bulkVerifyRepo := gcPersistence.NewPostgresBulkVerifyRepository(db)
+	noopLog := testLogger{}
 
 	deps := gcController.GlobalCatalogControllerDeps{
 		CreateGlobalProduct:           gcUsecase.NewCreateGlobalProduct(repo),
@@ -91,7 +94,7 @@ func newTestServer(t *testing.T) *testServer {
 		ListGlobalProductsByCriteria:  gcUsecase.NewListGlobalProductsByCriteriaUseCase(repo),
 		GetGlobalProductByID:          gcUsecase.NewGetGlobalProductByID(repo),
 		UpdateGlobalProductByID:       gcUsecase.NewUpdateGlobalProductByID(repo),
-		DeleteGlobalProduct:           gcUsecase.NewDeleteGlobalProduct(repo, db),
+		DeleteGlobalProduct:           gcUsecase.NewDeleteGlobalProduct(repo),
 		VerifyGlobalProduct:           gcUsecase.NewVerifyGlobalProduct(repo),
 		UnverifyGlobalProduct:         gcUsecase.NewUnverifyGlobalProduct(repo),
 		BulkImportGlobalProducts:      gcUsecase.NewBulkImportGlobalProducts(repo),
@@ -99,6 +102,7 @@ func newTestServer(t *testing.T) *testServer {
 		ListProductsNeedingEnrichment: gcUsecase.NewListProductsNeedingEnrichment(repo),
 		GetGlobalProductsByIDs:        gcUsecase.NewGetGlobalProductsByIDs(repo),
 		GetDistinctBusinessTypes:      gcUsecase.NewGetDistinctBusinessTypes(repo),
+		BulkVerifyGlobalProducts:      gcUsecase.NewBulkVerifyGlobalProducts(repo, bulkVerifyRepo, noopLog),
 		CriteriaBuilder:               gcCriteria.NewGlobalProductCriteriaBuilder(),
 	}
 
@@ -110,6 +114,12 @@ func newTestServer(t *testing.T) *testServer {
 
 	return &testServer{Server: srv, DB: db}
 }
+
+// testLogger implementa pimport.PIMEventLogger sin efectos colaterales.
+type testLogger struct{}
+
+func (testLogger) Log(e pimport.PIMEvent) {}
+
 
 // enableExtensions habilita las extensiones de PostgreSQL y crea tablas de infraestructura.
 func enableExtensions(t *testing.T, db *sql.DB) {

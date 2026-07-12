@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 
+	"saas-mt-pim-service/src/pim/domain/port"
 	"saas-mt-pim-service/src/product/global_catalog/application/usecase"
 	"saas-mt-pim-service/src/product/global_catalog/infrastructure/controller"
 	"saas-mt-pim-service/src/product/global_catalog/infrastructure/criteria"
@@ -15,6 +16,7 @@ type GlobalCatalogConfig struct {
 	GlobalCatalogController              *controller.GlobalCatalogController
 	ProductRequestController             *controller.ProductRequestController
 	globalProductRepository              *persistence.PostgresGlobalProductRepository
+	bulkVerifyRepository                 *persistence.PostgresBulkVerifyRepository
 	productRequestRepository             *persistence.PostgresProductRequestRepository
 	createGlobalProductUseCase           *usecase.CreateGlobalProduct
 	searchByEANUseCase                   *usecase.SearchByEAN
@@ -30,16 +32,19 @@ type GlobalCatalogConfig struct {
 	listProductsNeedingEnrichmentUseCase *usecase.ListProductsNeedingEnrichment
 	getGlobalProductsByIDsUseCase        *usecase.GetGlobalProductsByIDs
 	getDistinctBusinessTypesUseCase      *usecase.GetDistinctBusinessTypes
+	bulkVerifyGlobalProductsUseCase      *usecase.BulkVerifyGlobalProducts
 	createProductRequestUseCase          *usecase.CreateProductRequestUseCase
 	listProductRequestsUseCase           *usecase.ListProductRequestsUseCase
 	resolveProductRequestUseCase         *usecase.ResolveProductRequestUseCase
 	criteriaBuilder                      *criteria.GlobalProductCriteriaBuilder
+	logger                               port.PIMEventLogger
 }
 
 // NewGlobalCatalogConfig crea una nueva configuración del módulo
-func NewGlobalCatalogConfig(db *sql.DB) *GlobalCatalogConfig {
+func NewGlobalCatalogConfig(db *sql.DB, logger port.PIMEventLogger) *GlobalCatalogConfig {
 	config := &GlobalCatalogConfig{
-		DB: db,
+		DB:     db,
+		logger: logger,
 	}
 
 	// Inicializar dependencias
@@ -53,6 +58,7 @@ func NewGlobalCatalogConfig(db *sql.DB) *GlobalCatalogConfig {
 // initializeRepositories inicializa los repositorios
 func (c *GlobalCatalogConfig) initializeRepositories() {
 	c.globalProductRepository = persistence.NewPostgresGlobalProductRepository(c.DB).(*persistence.PostgresGlobalProductRepository)
+	c.bulkVerifyRepository = persistence.NewPostgresBulkVerifyRepository(c.DB).(*persistence.PostgresBulkVerifyRepository)
 	c.productRequestRepository = persistence.NewPostgresProductRequestRepository(c.DB)
 }
 
@@ -72,6 +78,7 @@ func (c *GlobalCatalogConfig) initializeUseCases() {
 	c.listProductsNeedingEnrichmentUseCase = usecase.NewListProductsNeedingEnrichment(c.globalProductRepository)
 	c.getGlobalProductsByIDsUseCase = usecase.NewGetGlobalProductsByIDs(c.globalProductRepository)
 	c.getDistinctBusinessTypesUseCase = usecase.NewGetDistinctBusinessTypes(c.globalProductRepository)
+	c.bulkVerifyGlobalProductsUseCase = usecase.NewBulkVerifyGlobalProducts(c.globalProductRepository, c.bulkVerifyRepository, c.logger)
 	c.createProductRequestUseCase = usecase.NewCreateProductRequestUseCase(c.productRequestRepository)
 	c.listProductRequestsUseCase = usecase.NewListProductRequestsUseCase(c.productRequestRepository)
 	c.resolveProductRequestUseCase = usecase.NewResolveProductRequestUseCase(c.productRequestRepository)
@@ -95,6 +102,7 @@ func (c *GlobalCatalogConfig) initializeControllers() {
 		ListProductsNeedingEnrichment: c.listProductsNeedingEnrichmentUseCase,
 		GetGlobalProductsByIDs:        c.getGlobalProductsByIDsUseCase,
 		GetDistinctBusinessTypes:      c.getDistinctBusinessTypesUseCase,
+		BulkVerifyGlobalProducts:      c.bulkVerifyGlobalProductsUseCase,
 		CriteriaBuilder:               c.criteriaBuilder,
 	})
 	c.ProductRequestController = controller.NewProductRequestController(

@@ -98,8 +98,16 @@ func (b *GlobalProductCriteriaBuilder) FromContext(c *gin.Context) *GlobalProduc
 		}
 	}
 
-	if hasImage := c.Query("has_image"); hasImage == "true" {
-		b.builder.AddFilter("image_url", cr.OpIsNotNull, nil)
+	if hasImage := c.Query("has_image"); hasImage != "" && hasImage != "all" {
+		if hasImage == "true" {
+			b.builder.AddFilter("image_url", cr.OpIsNotNull, nil)
+		} else if hasImage == "false" {
+			b.builder.AddFilter("image_url", cr.OpIsNull, nil)
+		}
+	}
+
+	if massVerified := c.Query("mass_verified_only"); massVerified == "true" {
+		b.builder.AddFilter("mass_verified_at", cr.OpIsNotNull, nil)
 	}
 
 	if isActive := c.Query("is_active"); isActive != "" && isActive != "all" {
@@ -145,6 +153,7 @@ func (b *GlobalProductCriteriaBuilder) GetAllowedFields() []string {
 		"id", "ean", "name", "description", "brand", "category",
 		"price", "source", "quality_score", "is_verified", "is_active",
 		"business_type", "created_at", "updated_at", "image_url",
+		"mass_verified_at",
 	}
 }
 
